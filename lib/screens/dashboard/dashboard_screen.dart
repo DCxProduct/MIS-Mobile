@@ -581,9 +581,9 @@ class _FilterBar extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Filter',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context).text('filter'),
+                style: const TextStyle(
                   color: AppColors.mutedText,
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -719,6 +719,7 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
     final borderColor =
@@ -756,7 +757,7 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
 
                     Expanded(
                       child: Text(
-                        'Filters',
+                        l10n.text('filters'),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
@@ -795,7 +796,7 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _FilterGridSection(
-                        title: 'Year',
+                        title: l10n.text('year'),
                         items: _yearItems,
                         columns: 4,
                         selectedItems: _years,
@@ -805,7 +806,7 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
                       const SizedBox(height: 25),
 
                       _FilterGridSection(
-                        title: 'Status',
+                        title: l10n.text('status'),
                         items: _statusItems,
                         columns: 3,
                         selectedItems: _statuses,
@@ -815,7 +816,7 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
                       const SizedBox(height: 25),
 
                       Text(
-                        'Primary Agency',
+                        l10n.text('primaryAgency'),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 13,
@@ -854,8 +855,8 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
                               children: [
                                 Text(
                                   _showAllAgencies
-                                      ? 'View Less'
-                                      : 'View More',
+                                      ? l10n.text('viewLess')
+                                      : l10n.text('viewAll'),
                                   style: TextStyle(
                                     color: AppColors.accent(context),
                                     fontSize: 11,
@@ -879,7 +880,7 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
                       const SizedBox(height: 12),
 
                       _FilterGridSection(
-                        title: 'Progress Report',
+                        title: l10n.text('progressReport'),
                         items: _progressItems,
                         columns: 3,
                         selectedItems: _progressReports,
@@ -939,9 +940,9 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
                         ),
                       );
                     },
-                    child: const Text(
-                      'Apply Filters',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.text('applyFilters'),
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -1090,7 +1091,7 @@ class _FilterCheckItem extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              label,
+              _localizeLabel(context, label),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -1104,6 +1105,27 @@ class _FilterCheckItem extends StatelessWidget {
       ),
     );
   }
+}
+
+String _localizeLabel(BuildContext context, String text) {
+  final l10n = AppLocalizations.of(context);
+  return switch (text) {
+    'Solved' => l10n.text('solved'),
+    'In Progress' => l10n.text('inProgress'),
+    'Not Address' || 'Not Addressed' => l10n.text('notAddressed'),
+    'Both' => l10n.text('both'),
+    'Sent' => l10n.text('sent'),
+    'Draft' => l10n.text('draft'),
+    'Drafted' => l10n.text('drafted'),
+    'Submitted' => l10n.text('submitted'),
+    'Under Review' => l10n.text('underReview'),
+    'Scheduled' => l10n.text('scheduled'),
+    'Completed' => l10n.text('completed'),
+    'View All' => l10n.text('viewAll'),
+    'View Less' => l10n.text('viewLess'),
+    'View More' => l10n.text('viewAll'),
+    _ => text,
+  };
 }
 
 class _MetricGrid extends StatelessWidget {

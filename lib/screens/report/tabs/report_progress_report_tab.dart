@@ -9,72 +9,12 @@ class ReportProgressReportTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
-    return Column(
+    return const Column(
       children: [
-        SizedBox(
-          height: 36,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              _ReportFilterChip(label: l10n.text('year'), width: 88),
-              const SizedBox(width: 8),
-              _ReportFilterChip(label: l10n.text('semester'), width: 106),
-              const SizedBox(width: 8),
-              _ReportFilterChip(label: l10n.text('status'), width: 94),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        const _ProgressReportCard(title: 'Semester 2'),
-        const _ProgressReportCard(title: 'Semester 2'),
-        const _ProgressReportCard(title: 'Semester 2'),
+        _ProgressReportCard(title: 'Semester 2'),
+        _ProgressReportCard(title: 'Semester 2'),
+        _ProgressReportCard(title: 'Semester 2'),
       ],
-    );
-  }
-}
-
-class _ReportFilterChip extends StatelessWidget {
-  const _ReportFilterChip({required this.label, required this.width});
-
-  final String label;
-  final double width;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      width: width,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : const Color(0xFFE0E5EC),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: AppColors.mutedText,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Icon(
-            Icons.keyboard_arrow_down,
-            color: Theme.of(context).colorScheme.onSurface,
-            size: 17,
-          ),
-        ],
-      ),
     );
   }
 }

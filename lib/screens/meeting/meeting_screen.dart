@@ -200,9 +200,9 @@ class _FilterButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Filter',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context).text('filter'),
+              style: const TextStyle(
                 color: AppColors.mutedText,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
@@ -377,6 +377,8 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
   late Set<String> _agencies;
   late Set<String> _statuses;
   late TextEditingController _dateController;
+  DateTime? _selectedDateObj;
+  bool _showCalendar = false;
 
   bool _showAllGroups = false;
 
@@ -416,6 +418,9 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
     _agencies = {...widget.selectedAgencies};
     _statuses = {...widget.selectedStatuses};
     _dateController = TextEditingController(text: widget.selectedDate ?? '');
+    if (widget.selectedDate != null && widget.selectedDate!.isNotEmpty) {
+      _selectedDateObj = DateTime(2026, 8, 7);
+    }
   }
 
   @override
@@ -434,8 +439,46 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
     });
   }
 
+  String _dayName(int weekday) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[(weekday - 1) % 7];
+  }
+
+  String _daySuffix(int day) {
+    if (day >= 11 && day <= 13) return 'th';
+    switch (day % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  }
+
+  String _monthName(int month) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+    return months[(month - 1) % 12];
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
     final borderColor =
@@ -473,7 +516,7 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
 
                     Expanded(
                       child: Text(
-                        'Filters',
+                        l10n.text('filters'),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
@@ -513,7 +556,7 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
                     children: [
                       // Section 1: Working Group
                       Text(
-                        'Working Group',
+                        l10n.text('workingGroup'),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 13,
@@ -546,7 +589,9 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  _showAllGroups ? 'View Less' : 'View All',
+                                  _showAllGroups
+                                      ? l10n.text('viewLess')
+                                      : l10n.text('viewAll'),
                                   style: TextStyle(
                                     color: AppColors.accent(context),
                                     fontSize: 11,
@@ -571,7 +616,7 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
 
                       // Section 2: Government Agency
                       Text(
-                        'Government Agency',
+                        l10n.text('governmentAgency'),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 13,
@@ -589,7 +634,7 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
 
                       // Section 3: Meeting Status
                       Text(
-                        'Meeting Status',
+                        l10n.text('meetingStatus'),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 13,
@@ -607,7 +652,7 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
 
                       // Section 4: Meeting Date
                       Text(
-                        'Meeting Date',
+                        l10n.text('meetingDate'),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 13,
@@ -618,19 +663,10 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
                       TextField(
                         controller: _dateController,
                         readOnly: true,
-                        onTap: () async {
-                          final date = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime(2030),
-                          );
-                          if (date != null) {
-                            setState(() {
-                              _dateController.text =
-                                  '${date.day} ${_monthName(date.month)}, ${date.year}';
-                            });
-                          }
+                        onTap: () {
+                          setState(() {
+                            _showCalendar = !_showCalendar;
+                          });
                         },
                         style: const TextStyle(fontSize: 13),
                         decoration: InputDecoration(
@@ -670,6 +706,18 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
                           ),
                         ),
                       ),
+                      if (_showCalendar)
+                        _InlineCalendarPicker(
+                          initialDate: _selectedDateObj,
+                          onDateSelected: (date) {
+                            setState(() {
+                              _selectedDateObj = date;
+                              _dateController.text =
+                                  '${_dayName(date.weekday)} ${date.day}${_daySuffix(date.day)}, ${_monthName(date.month)} ${date.year}';
+                              _showCalendar = false;
+                            });
+                          },
+                        ),
                     ],
                   ),
                 ),
@@ -721,9 +769,9 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
                         ),
                       );
                     },
-                    child: const Text(
-                      'Apply Filters',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.text('applyFilters'),
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -737,23 +785,224 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
       ),
     );
   }
+}
 
-  String _monthName(int month) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December'
-    ];
-    return months[(month - 1) % 12];
+class _InlineCalendarPicker extends StatefulWidget {
+  const _InlineCalendarPicker({
+    required this.initialDate,
+    required this.onDateSelected,
+  });
+
+  final DateTime? initialDate;
+  final ValueChanged<DateTime> onDateSelected;
+
+  @override
+  State<_InlineCalendarPicker> createState() => _InlineCalendarPickerState();
+}
+
+class _InlineCalendarPickerState extends State<_InlineCalendarPicker> {
+  late DateTime _displayedMonth;
+  late DateTime _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.initialDate ?? DateTime(2026, 8, 7);
+    _displayedMonth = DateTime(_selectedDate.year, _selectedDate.month);
+  }
+
+  static const _monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ];
+
+  static const _weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+  void _previousMonth() {
+    setState(() {
+      _displayedMonth =
+          DateTime(_displayedMonth.year, _displayedMonth.month - 1);
+    });
+  }
+
+  void _nextMonth() {
+    setState(() {
+      _displayedMonth =
+          DateTime(_displayedMonth.year, _displayedMonth.month + 1);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final year = _displayedMonth.year;
+    final month = _displayedMonth.month;
+    final monthName = _monthNames[month - 1];
+
+    final firstDayOfMonth = DateTime(year, month, 1);
+    final daysInMonth = DateTime(year, month + 1, 0).day;
+    final startingWeekday = firstDayOfMonth.weekday % 7;
+
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : const Color(0xFFE2E7ED),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                '$monthName $year',
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(width: 2),
+              const Icon(
+                Icons.keyboard_arrow_right,
+                color: AppColors.primary,
+                size: 20,
+              ),
+              const Spacer(),
+              InkWell(
+                onTap: _previousMonth,
+                borderRadius: BorderRadius.circular(16),
+                child: const Padding(
+                  padding: EdgeInsets.all(6),
+                  child: Icon(Icons.keyboard_arrow_left, size: 20),
+                ),
+              ),
+              const SizedBox(width: 8),
+              InkWell(
+                onTap: _nextMonth,
+                borderRadius: BorderRadius.circular(16),
+                child: const Padding(
+                  padding: EdgeInsets.all(6),
+                  child: Icon(Icons.keyboard_arrow_right, size: 20),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: _weekDays.map((day) {
+              return Expanded(
+                child: Text(
+                  day,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: AppColors.mutedText,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: startingWeekday + daysInMonth,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              mainAxisSpacing: 6,
+              crossAxisSpacing: 6,
+            ),
+            itemBuilder: (context, index) {
+              if (index < startingWeekday) {
+                return const SizedBox.shrink();
+              }
+              final dayNumber = index - startingWeekday + 1;
+              final date = DateTime(year, month, dayNumber);
+              final isSelected = _selectedDate.year == date.year &&
+                  _selectedDate.month == date.month &&
+                  _selectedDate.day == date.day;
+
+              return InkWell(
+                onTap: () {
+                  setState(() {
+                    _selectedDate = date;
+                  });
+                },
+                borderRadius: BorderRadius.circular(6),
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.accent(context)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '$dayNumber',
+                    style: TextStyle(
+                      color: isSelected
+                          ? Colors.white
+                          : Theme.of(context).colorScheme.onSurface,
+                      fontSize: 13,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w400,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent(context),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                widget.onDateSelected(_selectedDate);
+              },
+              child: Text(
+                AppLocalizations.of(context).text('apply'),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -834,6 +1083,7 @@ class _MeetingSummaryFilterSheetState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
     final borderColor =
@@ -871,7 +1121,7 @@ class _MeetingSummaryFilterSheetState
 
                     Expanded(
                       child: Text(
-                        'Filters',
+                        l10n.text('filters'),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
@@ -911,7 +1161,7 @@ class _MeetingSummaryFilterSheetState
                     children: [
                       // Section 1: Status
                       Text(
-                        'Status',
+                        l10n.text('status'),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 13,
@@ -929,7 +1179,7 @@ class _MeetingSummaryFilterSheetState
 
                       // Section 2: Year
                       Text(
-                        'Year',
+                        l10n.text('year'),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 13,
@@ -947,7 +1197,7 @@ class _MeetingSummaryFilterSheetState
 
                       // Section 3: Number of Issues
                       Text(
-                        'Number of Issues',
+                        l10n.text('numberOfIssues'),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 13,
@@ -958,7 +1208,7 @@ class _MeetingSummaryFilterSheetState
                       _StatusCheckGrid(
                         statuses: _issueNumberItems,
                         selectedStatuses: _numberOfIssues,
-                        onChanged: (num) => _toggle(_numberOfIssues, num),
+                        onChanged: (value) => _toggle(_numberOfIssues, value),
                       ),
                     ],
                   ),
@@ -1010,9 +1260,9 @@ class _MeetingSummaryFilterSheetState
                         ),
                       );
                     },
-                    child: const Text(
-                      'Apply Filters',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.text('applyFilters'),
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -1070,6 +1320,8 @@ class _AgencyBadgeGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Wrap(
       spacing: 10,
       runSpacing: 10,
@@ -1078,51 +1330,57 @@ class _AgencyBadgeGrid extends StatelessWidget {
         final color = agency.$2;
         final selected = selectedAgencies.contains(name);
 
-        return InkWell(
-          onTap: () => onChanged(name),
-          borderRadius: BorderRadius.circular(6),
-          child: Container(
-            width: 92,
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-            decoration: BoxDecoration(
-              color: selected
-                  ? color.withValues(alpha: 0.12)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: selected ? color : const Color(0xFFE2E7ED),
-                width: selected ? 1.5 : 1,
-              ),
+        return Container(
+          width: 100,
+          height: 38,
+          decoration: BoxDecoration(
+            color: selected
+                ? color.withValues(alpha: 0.12)
+                : (isDark ? AppColors.darkCard : Colors.white),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: selected ? color : const Color(0xFFDCE2E9),
+              width: selected ? 1.5 : 1,
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _CheckTileBox(selected: selected),
-                const SizedBox(width: 5),
-                CircleAvatar(
-                  radius: 9,
-                  backgroundColor: color,
-                  child: Text(
-                    name.substring(0, 1),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 8,
-                      fontWeight: FontWeight.w700,
+          ),
+          child: InkWell(
+            onTap: () => onChanged(name),
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _CheckTileBox(selected: selected),
+                  const SizedBox(width: 5),
+                  CircleAvatar(
+                    radius: 9,
+                    backgroundColor: color,
+                    child: Text(
+                      name.substring(0, 1),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    name,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      name,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 11,
+                        fontWeight:
+                            selected ? FontWeight.w600 : FontWeight.w500,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -1186,7 +1444,7 @@ class _CheckTile extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              label,
+              _localizeLabel(context, label),
               style: const TextStyle(
                 color: AppColors.mutedText,
                 fontSize: 12,
@@ -1198,6 +1456,26 @@ class _CheckTile extends StatelessWidget {
       ),
     );
   }
+}
+
+String _localizeLabel(BuildContext context, String text) {
+  final l10n = AppLocalizations.of(context);
+  return switch (text) {
+    'Drafted' => l10n.text('drafted'),
+    'Submitted' => l10n.text('submitted'),
+    'Under Review' => l10n.text('underReview'),
+    'Scheduled' => l10n.text('scheduled'),
+    'Completed' => l10n.text('completed'),
+    'Solved' => l10n.text('solved'),
+    'In Progress' => l10n.text('inProgress'),
+    'Not Address' || 'Not Addressed' => l10n.text('notAddressed'),
+    'Both' => l10n.text('both'),
+    'Sent' => l10n.text('sent'),
+    'Draft' => l10n.text('draft'),
+    'View All' => l10n.text('viewAll'),
+    'View Less' => l10n.text('viewLess'),
+    _ => text,
+  };
 }
 
 class _CheckTileBox extends StatelessWidget {
