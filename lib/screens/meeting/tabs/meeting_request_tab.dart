@@ -9,39 +9,12 @@ class MeetingRequestTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
     return ColoredBox(
       color: Theme.of(context).brightness == Brightness.dark
           ? AppColors.darkBackground
           : const Color(0xFFF7F7F8),
       child: Column(
         children: [
-          SizedBox(
-            height: 36,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _MeetingFilterChip(
-                  label: l10n.text('workingGroup'),
-                  width: 142,
-                ),
-                const SizedBox(width: 8),
-                _MeetingFilterChip(
-                  label: l10n.text('governmentAgency'),
-                  width: 174,
-                ),
-                const SizedBox(width: 8),
-                _MeetingFilterChip(
-                  label: l10n.text('meetingStatus'),
-                  width: 136,
-                ),
-                const SizedBox(width: 8),
-                _MeetingFilterChip(label: l10n.text('meetingDate'), width: 128),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
           const _MeetingRequestCard(
             title: 'កិច្ចប្រជុំតាមដានវឌ្ឍនភាព និងកំណត់ដំណោះស្រាយ...',
             group: 'Agriculture and Agro-Industry',

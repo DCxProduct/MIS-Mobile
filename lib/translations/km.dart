@@ -26,6 +26,7 @@ const Map<String, String> kmTranslations = {
   'descriptions': 'ការពិពណ៌នា',
   'allIssues': 'បញ្ហាទាំងអស់',
   'calendar': 'ប្រតិទិន',
+  'meetingCalendar': 'កាលវិភាគកិច្ចប្រជុំ',
   'issues': 'បញ្ហា',
   'wgIssues': 'បញ្ហាក្រុមការងារ',
   'issuesMatrix': 'តារាងបញ្ហា',

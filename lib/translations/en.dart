@@ -26,6 +26,7 @@ const Map<String, String> enTranslations = {
   'descriptions': 'Descriptions',
   'allIssues': 'All Issues',
   'calendar': 'Calendar',
+  'meetingCalendar': 'Meeting Calendar',
   'issues': 'Issues',
   'wgIssues': 'WG Issues',
   'issuesMatrix': 'Issues Matrix',

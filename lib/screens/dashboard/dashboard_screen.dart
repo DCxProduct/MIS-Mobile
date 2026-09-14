@@ -86,6 +86,37 @@ class _DashboardPageState extends State<_DashboardPage> {
   int _selectedScopeTab = 0;
   int _selectedStatusTab = 0;
 
+  Set<String> _selectedYears = {};
+  Set<String> _selectedStatuses = {};
+  Set<String> _selectedAgencies = {};
+  Set<String> _selectedProgressReports = {};
+
+  Future<void> _openFilterSheet(BuildContext context) async {
+    final result = await showModalBottomSheet<_FilterResult>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: false,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return _GroupFilterSheet(
+          selectedYears: _selectedYears,
+          selectedStatuses: _selectedStatuses,
+          selectedAgencies: _selectedAgencies,
+          selectedProgressReports: _selectedProgressReports,
+        );
+      },
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedYears = result.years;
+        _selectedStatuses = result.statuses;
+        _selectedAgencies = result.agencies;
+        _selectedProgressReports = result.progressReports;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -104,14 +135,27 @@ class _DashboardPageState extends State<_DashboardPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _ScopeHeader(
-                    selectedIndex: _selectedScopeTab,
-                    onSelected: (index) {
-                      setState(() => _selectedScopeTab = index);
-                    },
+                  _ScopeTitle(selectedIndex: _selectedScopeTab),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      _ScopeSelector(
+                        selectedIndex: _selectedScopeTab,
+                        onSelected: (index) {
+                          setState(() => _selectedScopeTab = index);
+                        },
+                      ),
+                      const Spacer(),
+                      _FilterBar(
+                        onTap: () => _openFilterSheet(context),
+                        activeCount:
+                        _selectedYears.length +
+                            _selectedStatuses.length +
+                            _selectedAgencies.length +
+                            _selectedProgressReports.length,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  const _FilterBar(),
                   const SizedBox(height: 14),
                   _MetricGrid(isWorkingGroup: _selectedScopeTab == 1),
                   const SizedBox(height: 8),
@@ -198,15 +242,15 @@ class _DashboardLoadingScreenState extends State<DashboardLoadingScreen>
               end: Alignment(1 + _controller.value * 2, 0),
               colors: isDark
                   ? const [
-                      Color(0xFF191B24),
-                      Color(0xFF283143),
-                      Color(0xFF191B24),
-                    ]
+                Color(0xFF191B24),
+                Color(0xFF283143),
+                Color(0xFF191B24),
+              ]
                   : const [
-                      Color(0xFFE2E2E2),
-                      Color(0xFFF6F6F6),
-                      Color(0xFFE2E2E2),
-                    ],
+                Color(0xFFE2E2E2),
+                Color(0xFFF6F6F6),
+                Color(0xFFE2E2E2),
+              ],
             ),
           ),
         );
@@ -289,8 +333,19 @@ class _DashboardLoadingScreenState extends State<DashboardLoadingScreen>
                   child: Column(
                     children: [
                       const SizedBox(height: 10),
-                      skeleton(width: 206, height: 206, radius: 120),
-                      const Spacer(),
+                      Expanded(
+                        child: Center(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: skeleton(
+                              width: 206,
+                              height: 206,
+                              radius: 120,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Column(
@@ -330,7 +385,7 @@ class _DashboardLoadingScreenState extends State<DashboardLoadingScreen>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(
             5,
-            (_) => Column(
+                (_) => Column(
               children: [
                 skeleton(width: 30, height: 30, radius: 5),
                 const SizedBox(height: 10),
@@ -391,8 +446,33 @@ class _DashboardHeader extends StatelessWidget {
   }
 }
 
-class _ScopeHeader extends StatelessWidget {
-  const _ScopeHeader({required this.selectedIndex, required this.onSelected});
+class _ScopeTitle extends StatelessWidget {
+  const _ScopeTitle({required this.selectedIndex});
+
+  final int selectedIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
+    final labels = [l10n.text('plenary'), l10n.text('workingGroup')];
+
+    return Text(
+      labels[selectedIndex],
+      style: TextStyle(
+        color: colors.onSurface,
+        fontSize: 18,
+        fontWeight: FontWeight.w500,
+      ),
+    );
+  }
+}
+
+class _ScopeSelector extends StatelessWidget {
+  const _ScopeSelector({
+    required this.selectedIndex,
+    required this.onSelected,
+  });
 
   final int selectedIndex;
   final ValueChanged<int> onSelected;
@@ -400,45 +480,30 @@ class _ScopeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final colors = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final labels = [l10n.text('plenary'), l10n.text('workingGroup')];
 
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            labels[selectedIndex],
-            style: TextStyle(
-              color: colors.onSurface,
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+    return Container(
+      height: 30,
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkPrimaryContainer : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : const Color(0xFFE8EBF0),
         ),
-        Container(
-          height: 30,
-          padding: const EdgeInsets.all(3),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.darkPrimaryContainer : Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark ? AppColors.darkBorder : const Color(0xFFE8EBF0),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(
-              labels.length,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(
+          labels.length,
               (index) => _ScopePill(
-                label: labels[index],
-                selected: selectedIndex == index,
-                onTap: () => onSelected(index),
-              ),
-            ),
+            label: labels[index],
+            selected: selectedIndex == index,
+            onTap: () => onSelected(index),
           ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -474,8 +539,8 @@ class _ScopePill extends StatelessWidget {
             color: selected
                 ? Colors.white
                 : (AppColors.isDark(context)
-                      ? const Color(0xFFB9D7ED)
-                      : AppColors.primary),
+                ? const Color(0xFFB9D7ED)
+                : AppColors.primary),
             fontSize: 12,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
           ),
@@ -486,65 +551,554 @@ class _ScopePill extends StatelessWidget {
 }
 
 class _FilterBar extends StatelessWidget {
-  const _FilterBar();
+  const _FilterBar({
+    required this.onTap,
+    required this.activeCount,
+  });
+
+  final VoidCallback onTap;
+  final int activeCount;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return SizedBox(
-      height: 36,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: [
-          _FilterChip(label: l10n.text('year'), width: 108),
-          const SizedBox(width: 8),
-          _FilterChip(label: l10n.text('status'), width: 108),
-          const SizedBox(width: 8),
-          _FilterChip(label: l10n.text('primaryAgency'), width: 148),
-          const SizedBox(width: 8),
-          _FilterChip(label: l10n.text('progressReport'), width: 148),
-        ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Align(
+      alignment: Alignment.centerRight,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(7),
+        child: Container(
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkCard : Colors.white,
+            borderRadius: BorderRadius.circular(7),
+            border: Border.all(
+              color: isDark ? AppColors.darkBorder : const Color(0xFFE3E7EC),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Filter',
+                style: TextStyle(
+                  color: AppColors.mutedText,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (activeCount > 0) ...[
+                const SizedBox(width: 6),
+                Container(
+                  constraints: const BoxConstraints(minWidth: 18),
+                  height: 18,
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColors.accent(context),
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: Text(
+                    '$activeCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(width: 7),
+              Icon(
+                Icons.filter_list,
+                color: Theme.of(context).colorScheme.onSurface,
+                size: 18,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({required this.label, required this.width});
+class _FilterResult {
+  const _FilterResult({
+    required this.years,
+    required this.statuses,
+    required this.agencies,
+    required this.progressReports,
+  });
 
-  final String label;
-  final double width;
+  final Set<String> years;
+  final Set<String> statuses;
+  final Set<String> agencies;
+  final Set<String> progressReports;
+}
+
+class _GroupFilterSheet extends StatefulWidget {
+  const _GroupFilterSheet({
+    required this.selectedYears,
+    required this.selectedStatuses,
+    required this.selectedAgencies,
+    required this.selectedProgressReports,
+  });
+
+  final Set<String> selectedYears;
+  final Set<String> selectedStatuses;
+  final Set<String> selectedAgencies;
+  final Set<String> selectedProgressReports;
+
+  @override
+  State<_GroupFilterSheet> createState() => _GroupFilterSheetState();
+}
+
+class _GroupFilterSheetState extends State<_GroupFilterSheet> {
+  late Set<String> _years;
+  late Set<String> _statuses;
+  late Set<String> _agencies;
+  late Set<String> _progressReports;
+
+  bool _showAllAgencies = true;
+
+  static const _yearItems = ['2026', '2025', '2024', '2023'];
+
+  static const _statusItems = [
+    'Solved',
+    'In Progress',
+    'Not Address',
+  ];
+
+  static const _agencyItems = [
+    'GDT',
+    'MFF',
+    'GDCE',
+    'MLVT',
+    'MPTC',
+    'MAFF',
+    'MoH',
+    'NBC',
+    'MoC',
+    'MoT',
+    'MLMUPC',
+    'MoI',
+    'CDC',
+    'MPWT',
+    'MISTI',
+    'MME',
+    'SHV Admin',
+    'MOC',
+  ];
+
+  static const _progressItems = [
+    'Both',
+    'S1',
+    'S2',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _years = {...widget.selectedYears};
+    _statuses = {...widget.selectedStatuses};
+    _agencies = {...widget.selectedAgencies};
+    _progressReports = {...widget.selectedProgressReports};
+  }
+
+  void _toggle(Set<String> values, String value) {
+    setState(() {
+      if (values.contains(value)) {
+        values.remove(value);
+      } else {
+        values.add(value);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      width: width,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : const Color(0xFFE8EBF0),
+    final background = isDark ? AppColors.darkBackground : Colors.white;
+    final borderColor =
+    isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
+
+    final viewPadding = MediaQuery.of(context).viewPadding;
+    final topInset = viewPadding.top > 48.0 ? viewPadding.top : 48.0;
+    final bottomInset = viewPadding.bottom;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      ),
+      child: FractionallySizedBox(
+        heightFactor: 1.0,
+        child: Container(
+          decoration: BoxDecoration(
+            color: background,
+          ),
+          child: Column(
+            children: [
+              // ================= FILTER HEADER =================
+              Container(
+                padding: EdgeInsets.fromLTRB(
+                  22,
+                  topInset + 24,
+                  22,
+                  12,
+                ),
+                child: Row(
+                  children: [
+                    const SizedBox(width: 28),
+
+                    Expanded(
+                      child: Text(
+                        'Filters',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+
+                    InkWell(
+                      onTap: () => Navigator.pop(context),
+                      borderRadius: BorderRadius.circular(18),
+                      child: const SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: Icon(
+                          Icons.close,
+                          size: 25,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // ================= FILTER CONTENT =================
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(
+                    25,
+                    20,
+                    25,
+                    22,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _FilterGridSection(
+                        title: 'Year',
+                        items: _yearItems,
+                        columns: 4,
+                        selectedItems: _years,
+                        onChanged: (value) => _toggle(_years, value),
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      _FilterGridSection(
+                        title: 'Status',
+                        items: _statusItems,
+                        columns: 3,
+                        selectedItems: _statuses,
+                        onChanged: (value) => _toggle(_statuses, value),
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      Text(
+                        'Primary Agency',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      _FilterGrid(
+                        items: _showAllAgencies
+                            ? _agencyItems
+                            : _agencyItems.take(10).toList(),
+                        columns: 5,
+                        selectedItems: _agencies,
+                        onChanged: (value) => _toggle(_agencies, value),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Center(
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              _showAllAgencies = !_showAllAgencies;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(6),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _showAllAgencies
+                                      ? 'View Less'
+                                      : 'View More',
+                                  style: TextStyle(
+                                    color: AppColors.accent(context),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(width: 7),
+                                Icon(
+                                  _showAllAgencies
+                                      ? Icons.keyboard_arrow_up
+                                      : Icons.keyboard_arrow_down,
+                                  color: AppColors.accent(context),
+                                  size: 15,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      _FilterGridSection(
+                        title: 'Progress Report',
+                        items: _progressItems,
+                        columns: 3,
+                        selectedItems: _progressReports,
+                        onChanged: (value) =>
+                            _toggle(_progressReports, value),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ================= APPLY BUTTON =================
+              Container(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  13,
+                  16,
+                  bottomInset > 0 ? bottomInset + 10 : 12,
+                ),
+                decoration: BoxDecoration(
+                  color: background,
+                  border: Border(
+                    top: BorderSide(
+                      color: borderColor,
+                    ),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent(context),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(9),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(
+                        context,
+                        _FilterResult(
+                          years: {..._years},
+                          statuses: {..._statuses},
+                          agencies: {..._agencies},
+                          progressReports: {
+                            ..._progressReports,
+                          },
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Apply Filters',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _FilterGridSection extends StatelessWidget {
+  const _FilterGridSection({
+    required this.title,
+    required this.items,
+    required this.columns,
+    required this.selectedItems,
+    required this.onChanged,
+  });
+
+  final String title;
+  final List<String> items;
+  final int columns;
+  final Set<String> selectedItems;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 16),
+        _FilterGrid(
+          items: items,
+          columns: columns,
+          selectedItems: selectedItems,
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+}
+
+class _FilterGrid extends StatelessWidget {
+  const _FilterGrid({
+    required this.items,
+    required this.columns,
+    required this.selectedItems,
+    required this.onChanged,
+  });
+
+  final List<String> items;
+  final int columns;
+  final Set<String> selectedItems;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    const horizontalGap = 8.0;
+    const verticalGap = 15.0;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final itemWidth =
+            (constraints.maxWidth - horizontalGap * (columns - 1)) / columns;
+
+        return Wrap(
+          spacing: horizontalGap,
+          runSpacing: verticalGap,
+          children: [
+            for (final item in items)
+              SizedBox(
+                width: itemWidth,
+                child: _FilterCheckItem(
+                  label: item,
+                  selected: selectedItems.contains(item),
+                  onTap: () => onChanged(item),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _FilterCheckItem extends StatelessWidget {
+  const _FilterCheckItem({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(4),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 140),
+            width: 16,
+            height: 16,
+            decoration: BoxDecoration(
+              color: selected
+                  ? AppColors.accent(context)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                color: selected
+                    ? AppColors.accent(context)
+                    : (isDark
+                    ? AppColors.darkBorder
+                    : const Color(0xFFCED7E1)),
+                width: 1,
+              ),
+            ),
+            child: selected
+                ? const Icon(
+              Icons.check,
+              size: 11,
+              color: Colors.white,
+            )
+                : null,
+          ),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               label,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: AppColors.mutedText,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+                fontSize: 11,
+                fontWeight: FontWeight.w400,
               ),
             ),
-          ),
-          Icon(
-            Icons.keyboard_arrow_down,
-            color: Theme.of(context).colorScheme.onSurface,
-            size: 17,
           ),
         ],
       ),
@@ -777,7 +1331,7 @@ class _DashboardTabs extends StatelessWidget {
       child: Row(
         children: List.generate(
           tabs.length,
-          (index) => _TabPill(
+              (index) => _TabPill(
             label: tabs[index],
             selected: selectedIndex == index,
             onTap: () => onSelected(index),
