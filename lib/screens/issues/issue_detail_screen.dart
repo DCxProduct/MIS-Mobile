@@ -24,8 +24,6 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
     return Scaffold(
       backgroundColor: AppColors.pageBackground(context),
       appBar: AppBar(
@@ -42,7 +40,7 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          l10n.text('issueDetails'),
+          'Issue Details',
           style: TextStyle(
             color: AppColors.primaryText(context),
             fontSize: 15,
@@ -64,40 +62,37 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                    'សំណើប្រជុំពិភាក្សាដោះស្រាយបញ្ហាចំនួន ៣ ដែលបានដាក់ជូនក្រសួងខាងក្រោម ។',
                     style: TextStyle(
                       color: AppColors.primaryText(context),
-                      fontSize: 16,
+                      fontSize: 15,
                       height: 1.35,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 16),
                   _IssueInfoGrid(category: widget.category),
-                  const SizedBox(height: 9),
-                  const Row(
-                    children: [
-                      Expanded(
-                        child: _DatePill(
+                  const SizedBox(height: 14),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: const [
+                        _DatePill(
                           label: 'Submitted Date',
                           value: 'July 24, 2025',
                         ),
-                      ),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: _DatePill(
+                        SizedBox(width: 10),
+                        _DatePill(
                           label: 'Meeting Date',
-                          value: 'June 20, 2025',
+                          value: 'June 29, 2025 2:00PM5:00PM',
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 10),
             _IssueDetailTabs(
               selectedIndex: _selectedTab,
               onSelected: (index) => setState(() => _selectedTab = index),
@@ -121,41 +116,39 @@ class _IssueInfoGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
     return Column(
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          children: const [
             Expanded(
               child: _InfoBlock(
-                label: '${l10n.text('governmentAgency')} :',
+                label: 'Government Agency :',
                 value: 'MAFF',
-                leading: const _AgencyLogo(),
+                leading: _AgencyLogo(),
               ),
             ),
-            const SizedBox(width: 20),
+            SizedBox(width: 20),
             Expanded(
               child: _InfoBlock(
-                label: '${l10n.text('status')} :',
-                value: l10n.text('inProgress'),
-                valueColor: const Color(0xFFFF8A00),
+                label: 'Status :',
+                value: 'In Progress',
+                valueColor: Color(0xFFFF8A00),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 14),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: _InfoBlock(label: l10n.text('category'), value: category),
+              child: _InfoBlock(label: 'Category', value: category),
             ),
             const SizedBox(width: 20),
-            Expanded(
+            const Expanded(
               child: _DocumentBlock(
-                label: '${l10n.text('meetingRequestDocument')}:',
+                label: 'Meeting Request Document:',
               ),
             ),
           ],
@@ -193,7 +186,7 @@ class _InfoBlock extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         Row(
           children: [
             if (leading != null) ...[leading!, const SizedBox(width: 6)],
@@ -257,11 +250,11 @@ class _DocumentBlock extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 7),
+        const SizedBox(height: 6),
         Row(
           children: [
-            Icon(Icons.picture_as_pdf, color: Color(0xFFE53935), size: 18),
-            const SizedBox(width: 7),
+            const Icon(Icons.picture_as_pdf, color: Color(0xFFE53935), size: 18),
+            const SizedBox(width: 6),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,7 +310,7 @@ class _DatePill extends StatelessWidget {
           children: [
             TextSpan(
               text: '$label : ',
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppColors.mutedText,
                 fontWeight: FontWeight.w500,
               ),
@@ -331,8 +324,6 @@ class _DatePill extends StatelessWidget {
             ),
           ],
         ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
         style: const TextStyle(fontSize: 11),
       ),
     );
@@ -350,44 +341,47 @@ class _IssueDetailTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final labels = [l10n.text('descriptions'), l10n.text('progressReport')];
+    final labels = ['Descriptions', 'Progress Report'];
 
-    return SizedBox(
-      height: 40,
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.border(context))),
+      ),
       child: Row(
-        children: List.generate(labels.length, (index) {
-          final selected = selectedIndex == index;
-          return Expanded(
+        children: List.generate(
+          labels.length,
+          (index) => Expanded(
             child: InkWell(
               onTap: () => onSelected(index),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    labels[index],
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: selected
+              child: Container(
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: selectedIndex == index
                           ? AppColors.accent(context)
-                          : AppColors.mutedText,
-                      fontSize: 12,
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                          : Colors.transparent,
+                      width: 2,
                     ),
                   ),
-                  const SizedBox(height: 9),
-                  Container(
-                    height: 2,
-                    color: selected
+                ),
+                child: Text(
+                  labels[index],
+                  style: TextStyle(
+                    color: selectedIndex == index
                         ? AppColors.accent(context)
-                        : Colors.transparent,
+                        : AppColors.mutedText,
+                    fontSize: 13,
+                    fontWeight: selectedIndex == index
+                        ? FontWeight.w700
+                        : FontWeight.w600,
                   ),
-                ],
+                ),
               ),
             ),
-          );
-        }),
+          ),
+        ),
       ),
     );
   }

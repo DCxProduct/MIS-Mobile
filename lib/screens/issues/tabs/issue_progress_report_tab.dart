@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
-import '../../../translations/app_localizations.dart';
 import '../issue_progress_report_detail_screen.dart';
 
 class IssueProgressReportTab extends StatelessWidget {
@@ -10,9 +9,9 @@ class IssueProgressReportTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
-      itemCount: 3,
-      separatorBuilder: (_, _) => const SizedBox(height: 14),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 24),
+      itemCount: 2,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) =>
           _ProgressReportCard(title: 'Report S${index + 1} 2025'),
     );
@@ -26,11 +25,10 @@ class _ProgressReportCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.cardBackground(context),
         borderRadius: BorderRadius.circular(10),
@@ -44,7 +42,7 @@ class _ProgressReportCard extends StatelessWidget {
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
               fontSize: 13,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 8),
@@ -55,21 +53,21 @@ class _ProgressReportCard extends StatelessWidget {
                 style: TextStyle(
                   color: AppColors.mutedText,
                   fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Spacer(),
               Text(
-                indexSafeDate,
+                'Oct 30, 2025 | 2:00-3:00PM',
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 11,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Row(
             children: [
               const Text(
@@ -77,36 +75,38 @@ class _ProgressReportCard extends StatelessWidget {
                 style: TextStyle(
                   color: AppColors.mutedText,
                   fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Spacer(),
               Text(
-                'រដ្ឋបាលកណ្តាល',
+                'របាយការណ៍',
                 style: TextStyle(
                   color: AppColors.primaryText(context),
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 10),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: AppColors.subtleBackground(context),
+              color: isDark ? AppColors.darkCard : const Color(0xFFFAFAFA),
               borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: AppColors.border(context)),
+              border: Border.all(
+                color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
-                const SizedBox(width: 6),
+              children: const [
+                Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
+                SizedBox(width: 6),
                 Text(
-                  l10n.text('twoAttachments'),
-                  style: const TextStyle(
+                  '2 Attachement',
+                  style: TextStyle(
                     color: Color(0xFF4C5563),
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
@@ -118,7 +118,7 @@ class _ProgressReportCard extends StatelessWidget {
           const SizedBox(height: 10),
           SizedBox(
             width: double.infinity,
-            height: 30,
+            height: 36,
             child: FilledButton(
               onPressed: () {
                 Navigator.of(context).push(
@@ -131,19 +131,30 @@ class _ProgressReportCard extends StatelessWidget {
               style: FilledButton.styleFrom(
                 backgroundColor: isDark
                     ? AppColors.accent(context).withValues(alpha: 0.18)
-                    : const Color(0xFFEAF7FF),
+                    : const Color(0xFFF0F7FF),
                 foregroundColor: AppColors.accent(context),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(7),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: Text(l10n.text('viewDetails')),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    'View Details',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  Icon(Icons.chevron_right, size: 16),
+                ],
+              ),
             ),
           ),
         ],
       ),
     );
   }
-
-  String get indexSafeDate => 'Oct 30, 2025 | 2:00-3:00PM';
 }

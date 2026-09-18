@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
-import '../../../translations/app_localizations.dart';
 
 class CalendarTab extends StatelessWidget {
   const CalendarTab({super.key});
 
-  static const _month = 'July';
+  static const _month = 'May';
   static const _year = '2026';
-  static const _selectedDay = 9;
+  static const _selectedDay = 2;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
     return ColoredBox(
       color: Theme.of(context).brightness == Brightness.dark
           ? AppColors.darkBackground
@@ -27,35 +24,35 @@ class CalendarTab extends StatelessWidget {
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
               fontSize: 18,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 12),
           const _FullMonthCalendar(),
           const SizedBox(height: 18),
-          _CalendarEventCard(
-            title: l10n.text('calendarEventOne'),
+          const _CalendarEventCard(
+            title: 'ប្រជុំដោះស្រាយបញ្ហាទាំង ៥',
             attendees: '15',
-            time: '2:00PM-5:00PM',
-            color: const Color(0xFF20B8A9),
+            time: '2:00-5:00PM',
+            color: Color(0xFF20B8A9),
           ),
-          _CalendarEventCard(
-            title: l10n.text('calendarEventTwo'),
-            attendees: '9',
-            time: '2:00PM-5:00PM',
-            color: const Color(0xFFFF9C7B),
+          const _CalendarEventCard(
+            title: 'ប្រជុំដោះស្រាយបញ្ហាទាំង ៥',
+            attendees: '15',
+            time: '2:00-5:00PM',
+            color: Color(0xFFFF9C7B),
           ),
-          _CalendarEventCard(
-            title: l10n.text('calendarEventThree'),
-            attendees: '10',
-            time: '8:00AM-5:00PM',
+          const _CalendarEventCard(
+            title: 'ប្រជុំដោះស្រាយបញ្ហាទាំង ៥',
+            attendees: '15',
+            time: '2:00-5:00PM',
             color: AppColors.primary,
           ),
-          _CalendarEventCard(
-            title: l10n.text('calendarEventFour'),
-            attendees: '6',
-            time: '3:00PM-4:00PM',
-            color: const Color(0xFFFF9A4A),
+          const _CalendarEventCard(
+            title: 'ប្រជុំដោះស្រាយបញ្ហាទាំង ៥',
+            attendees: '15',
+            time: '2:00-5:00PM',
+            color: Color(0xFFFF9A4A),
           ),
         ],
       ),
@@ -66,7 +63,7 @@ class CalendarTab extends StatelessWidget {
 class _FullMonthCalendar extends StatelessWidget {
   const _FullMonthCalendar();
 
-  static const _weekdays = ['Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Mon', 'Tue'];
+  static const _weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   @override
   Widget build(BuildContext context) {

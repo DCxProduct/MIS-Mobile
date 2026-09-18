@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../screens/meeting/meeting_request_detail_screen.dart';
+import 'meeting_request_detail_screen.dart';
 
 class LineMinistryMeetingDetailScreen extends StatelessWidget {
   const LineMinistryMeetingDetailScreen({
@@ -12,6 +12,6 @@ class LineMinistryMeetingDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MeetingRequestDetailScreen(title: title);
+    return LineMinistryMeetingRequestDetailScreen(title: title);
   }
 }

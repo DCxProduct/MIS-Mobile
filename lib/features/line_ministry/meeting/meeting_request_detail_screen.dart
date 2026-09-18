@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 
-import '../../core/app_colors.dart';
+import '../../../core/app_colors.dart';
 
-class MeetingRequestDetailScreen extends StatefulWidget {
-  const MeetingRequestDetailScreen({super.key, required this.title});
+class LineMinistryMeetingRequestDetailScreen extends StatefulWidget {
+  const LineMinistryMeetingRequestDetailScreen({
+    super.key,
+    required this.title,
+  });
 
   final String title;
 
   @override
-  State<MeetingRequestDetailScreen> createState() =>
-      _MeetingRequestDetailScreenState();
+  State<LineMinistryMeetingRequestDetailScreen> createState() =>
+      _LineMinistryMeetingRequestDetailScreenState();
 }
 
-class _MeetingRequestDetailScreenState
-    extends State<MeetingRequestDetailScreen> {
+class _LineMinistryMeetingRequestDetailScreenState
+    extends State<LineMinistryMeetingRequestDetailScreen> {
   int _selectedTab = 0;
 
   @override
@@ -64,13 +67,13 @@ class _MeetingRequestDetailScreenState
                     widget.title,
                     style: TextStyle(
                       color: colors.onSurface,
-                      fontSize: 16,
+                      fontSize: 15,
                       height: 1.35,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const _FigmaInfoGrid(),
+                  const _LineMinistryInfoGrid(),
                   const SizedBox(height: 14),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -108,8 +111,8 @@ class _MeetingRequestDetailScreenState
   }
 }
 
-class _FigmaInfoGrid extends StatelessWidget {
-  const _FigmaInfoGrid();
+class _LineMinistryInfoGrid extends StatelessWidget {
+  const _LineMinistryInfoGrid();
 
   @override
   Widget build(BuildContext context) {
@@ -440,7 +443,7 @@ class _IssueCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Text(

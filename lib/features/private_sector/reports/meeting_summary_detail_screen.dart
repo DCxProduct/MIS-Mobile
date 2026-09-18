@@ -43,6 +43,10 @@ class MeetingSummaryDetailScreen extends StatelessWidget {
             onPressed: () {},
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(height: 1, color: AppColors.border(context)),
+        ),
       ),
       body: SafeArea(
         top: false,
@@ -358,28 +362,39 @@ class _IssueDetailsSheet extends StatelessWidget {
         child: GestureDetector(
           onTap: () {},
           child: FractionallySizedBox(
-            heightFactor: 0.74,
+            heightFactor: 0.76,
             child: Container(
               decoration: BoxDecoration(
                 color: AppColors.cardBackground(context),
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(10),
+                  top: Radius.circular(16),
                 ),
               ),
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(14, 16, 14, 28),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
                 children: [
+                  Center(
+                    child: Container(
+                      width: 38,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.border(context),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
                   Center(
                     child: Text(
                       'Issues Details',
                       style: TextStyle(
                         color: AppColors.primaryText(context),
                         fontSize: 15,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
-                  SizedBox(height: 24),
+                  const SizedBox(height: 18),
                   Text(
                     MeetingSummaryDetailScreen._title,
                     style: TextStyle(
@@ -389,25 +404,49 @@ class _IssueDetailsSheet extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(height: 18),
+                  const SizedBox(height: 18),
                   const _IssueSheetInfoGrid(),
-                  const SizedBox(height: 10),
-                  const Row(
-                    children: [
-                      Expanded(
-                        child: _DatePill(
+                  const SizedBox(height: 14),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: const [
+                        _DatePill(
                           label: 'Submitted By',
-                          value: 'Sabada',
+                          name: 'Sabada',
                         ),
-                      ),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: _DatePill(
+                        SizedBox(width: 10),
+                        _DatePill(
                           label: 'Submitted Date',
-                          value: 'Jun 24 2025',
+                          name: 'Jun 24 2025',
                         ),
-                      ),
-                    ],
+                        SizedBox(width: 10),
+                        _DatePill(
+                          label: 'Government Agency',
+                          name: 'MAFF',
+                        ),
+                        SizedBox(width: 10),
+                        _DatePill(
+                          label: "Gov't Second Agency",
+                          name: 'Not Data',
+                        ),
+                        SizedBox(width: 10),
+                        _DatePill(
+                          label: "Gov't Third Agency",
+                          name: 'Not Data',
+                        ),
+                        SizedBox(width: 10),
+                        _DatePill(
+                          label: "Gov't Fourth Agency",
+                          name: 'Not Data',
+                        ),
+                        SizedBox(width: 10),
+                        _DatePill(
+                          label: "Gov't Fifth Agency",
+                          name: 'Not Data',
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 20),
                   const _ReadMorePanel(title: 'Issues Descriptions'),
@@ -462,10 +501,10 @@ class _IssueSheetInfoGrid extends StatelessWidget {
 }
 
 class _DatePill extends StatelessWidget {
-  const _DatePill({required this.label, required this.value});
+  const _DatePill({required this.label, required this.name});
 
   final String label;
-  final String value;
+  final String name;
 
   @override
   Widget build(BuildContext context) {
@@ -489,7 +528,7 @@ class _DatePill extends StatelessWidget {
               ),
             ),
             TextSpan(
-              text: value,
+              text: name,
               style: TextStyle(
                 color: AppColors.primaryText(context),
                 fontWeight: FontWeight.w700,
@@ -497,8 +536,6 @@ class _DatePill extends StatelessWidget {
             ),
           ],
         ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
         style: const TextStyle(fontSize: 11),
       ),
     );
@@ -526,35 +563,37 @@ class _ReadMorePanel extends StatelessWidget {
         const SizedBox(height: 10),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: AppColors.cardBackground(context),
             borderRadius: BorderRadius.circular(6),
             border: Border.all(color: AppColors.border(context)),
           ),
-          child: Text.rich(
-            TextSpan(
-              text:
-                  'ទំនុកចិត្តរបស់វិស័យឯកជនបានលើកឡើងថាការដាំដុះពឹងផ្អែកទៅលើអាកាសធាតុ និងការជូនដំណឹងអំពីអាកាសធាតុនៅតាមតំបន់មិនទាន់បានច្បាស់លាស់គ្រប់គ្រាន់...',
-              children: [
-                TextSpan(
-                  text: '\nRead more',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'ទំនុកចិត្តរបស់វិស័យឯកជនបានលើកឡើងថាការដាំដុះពឹងផ្អែកទៅលើអាកាសធាតុ និងការជូនដំណឹងអំពីអាកាសធាតុនៅតាមតំបន់មិនទាន់បានច្បាស់លាស់គ្រប់គ្រាន់...',
+                style: TextStyle(
+                  color: AppColors.secondaryText(context),
+                  fontSize: 12,
+                  height: 1.5,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 6),
+              InkWell(
+                onTap: () {},
+                child: const Text(
+                  'Read more',
                   style: TextStyle(
                     color: AppColors.primary,
-                    decoration: TextDecoration.underline,
                     fontWeight: FontWeight.w700,
+                    fontSize: 12,
                   ),
                 ),
-              ],
-            ),
-            maxLines: 7,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: AppColors.secondaryText(context),
-              fontSize: 11,
-              height: 1.45,
-              fontWeight: FontWeight.w500,
-            ),
+              ),
+            ],
           ),
         ),
       ],

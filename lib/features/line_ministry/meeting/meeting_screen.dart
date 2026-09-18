@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/app_colors.dart';
-import '../../../screens/meeting/meeting_request_detail_screen.dart';
+import 'meeting_detail_screen.dart';
 import '../../../screens/meeting/tabs/calendar_tab.dart';
 import '../../../screens/report/tabs/meeting_summary_tab.dart';
 import '../../../translations/app_localizations.dart';
@@ -18,10 +18,13 @@ class LineMinistryMeetingScreenView extends StatefulWidget {
 class _LineMinistryMeetingScreenViewState
     extends State<LineMinistryMeetingScreenView> {
   int _selectedTab = 0;
+  bool _isCalendarListView = true;
 
   Set<String> _selectedWorkingGroups = {};
   Set<String> _selectedAgencies = {};
   Set<String> _selectedStatuses = {};
+  Set<String> _selectedYears = {};
+  Set<String> _selectedNumberOfIssues = {};
   String? _selectedDate;
 
   Set<String> _selectedSummaryStatuses = {};
@@ -39,6 +42,8 @@ class _LineMinistryMeetingScreenViewState
           selectedWorkingGroups: _selectedWorkingGroups,
           selectedAgencies: _selectedAgencies,
           selectedStatuses: _selectedStatuses,
+          selectedYears: _selectedYears,
+          selectedNumberOfIssues: _selectedNumberOfIssues,
           selectedDate: _selectedDate,
         );
       },
@@ -49,6 +54,8 @@ class _LineMinistryMeetingScreenViewState
         _selectedWorkingGroups = result.workingGroups;
         _selectedAgencies = result.agencies;
         _selectedStatuses = result.statuses;
+        _selectedYears = result.years;
+        _selectedNumberOfIssues = result.numberOfIssues;
         _selectedDate = result.date;
       });
     }
@@ -79,10 +86,12 @@ class _LineMinistryMeetingScreenViewState
   }
 
   int get _activeFilterCount {
-    if (_selectedTab == 0) {
+    if (_selectedTab == 0 || _selectedTab == 1) {
       int count = _selectedWorkingGroups.length +
           _selectedAgencies.length +
-          _selectedStatuses.length;
+          _selectedStatuses.length +
+          _selectedYears.length +
+          _selectedNumberOfIssues.length;
       if (_selectedDate != null && _selectedDate!.isNotEmpty) {
         count++;
       }
@@ -114,9 +123,9 @@ class _LineMinistryMeetingScreenViewState
 
     return ColoredBox(
       color: contentBackground,
-      child: ListView(
-        padding: EdgeInsets.zero,
+      child: Column(
         children: [
+          // STICKY APP BAR
           Container(
             color: headerBackground,
             padding: EdgeInsets.fromLTRB(14, topPadding > 0 ? topPadding + 12 : 34, 14, 12),
@@ -135,7 +144,13 @@ class _LineMinistryMeetingScreenViewState
                         ),
                       ),
                     ),
-                    if (_selectedTab != 1)
+                    if (_selectedTab == 1) ...[
+                      _ViewModeToggle(
+                        isListView: _isCalendarListView,
+                        onToggle: (isList) =>
+                            setState(() => _isCalendarListView = isList),
+                      ),
+                    ] else ...[
                       _FilterButton(
                         activeCount: _activeFilterCount,
                         onTap: () {
@@ -146,6 +161,7 @@ class _LineMinistryMeetingScreenViewState
                           }
                         },
                       ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 14),
@@ -156,17 +172,29 @@ class _LineMinistryMeetingScreenViewState
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 96),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 180),
-              child: switch (_selectedTab) {
-                0 => const _LineMinistryMeetingRequestTab(
-                    key: ValueKey('line_ministry_requests'),
-                  ),
-                1 => const CalendarTab(key: ValueKey('line_ministry_calendar')),
-                _ => const MeetingSummaryTab(key: ValueKey('line_ministry_summary')),
-              },
+          // SCROLLABLE CONTENT
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 96),
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 180),
+                  child: switch (_selectedTab) {
+                    0 => const _LineMinistryMeetingRequestTab(
+                        key: ValueKey('line_ministry_requests'),
+                      ),
+                    1 => _LineMinistryMeetingCalendarTab(
+                        key: ValueKey('line_ministry_calendar_$_isCalendarListView'),
+                        isListView: _isCalendarListView,
+                        onOpenFilter: () => _openMeetingFilterSheet(context),
+                        activeFilterCount: _activeFilterCount,
+                      ),
+                    _ => const MeetingSummaryTab(
+                        key: ValueKey('line_ministry_summary'),
+                      ),
+                  },
+                ),
+              ],
             ),
           ),
         ],
@@ -175,48 +203,143 @@ class _LineMinistryMeetingScreenViewState
   }
 }
 
-class _LineMinistryMeetingRequestTab extends StatelessWidget {
-  const _LineMinistryMeetingRequestTab({super.key});
+class _ViewModeToggle extends StatelessWidget {
+  const _ViewModeToggle({
+    required this.isListView,
+    required this.onToggle,
+  });
+
+  final bool isListView;
+  final ValueChanged<bool> onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      height: 36,
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : const Color(0xFFF0F2F5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: () => onToggle(true),
+            borderRadius: BorderRadius.circular(6),
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: isListView ? AppColors.accent(context) : Colors.transparent,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Icon(
+                Icons.format_list_bulleted_rounded,
+                color: isListView ? Colors.white : AppColors.mutedText,
+                size: 16,
+              ),
+            ),
+          ),
+          const SizedBox(width: 2),
+          InkWell(
+            onTap: () => onToggle(false),
+            borderRadius: BorderRadius.circular(6),
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: !isListView ? AppColors.accent(context) : Colors.transparent,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Icon(
+                Icons.calendar_month_rounded,
+                color: !isListView ? Colors.white : AppColors.mutedText,
+                size: 16,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LineMinistryMeetingCalendarTab extends StatelessWidget {
+  const _LineMinistryMeetingCalendarTab({
+    super.key,
+    required this.isListView,
+    required this.onOpenFilter,
+    required this.activeFilterCount,
+  });
+
+  final bool isListView;
+  final VoidCallback onOpenFilter;
+  final int activeFilterCount;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: const [
-        _LineMinistryMeetingCard(
-          title: 'កិច្ចប្រជុំពិភាក្សាអន្តរក្រសួងសម្រាប់ដំណោះស្រាយ...',
-          group: 'Law, Tax, and Governance',
-          date: '12 August, 2026',
-          totalIssues: '5',
-          status: _MeetingStatus.underReview,
+      children: [
+        Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _FilterButton(
+              activeCount: activeFilterCount,
+              onTap: onOpenFilter,
+            ),
+          ),
         ),
-        _LineMinistryMeetingCard(
-          title: 'កិច្ចប្រជុំត្រួតពិនិត្យ និងអនុម័តរបាយការណ៍បច្ចេកទេស...',
-          group: 'Agriculture and Agro-Industry',
-          date: '9 July, 2026',
-          totalIssues: '3',
-          status: _MeetingStatus.submitted,
-        ),
-        _LineMinistryMeetingCard(
-          title: 'កិច្ចប្រជុំអន្តរក្រសួងស្ដីពីពន្ធដារ និងគយ...',
-          group: 'Law, Tax, and Governance',
-          date: '15 June, 2026',
-          totalIssues: '4',
-          status: _MeetingStatus.completed,
-        ),
+        if (isListView) ...const [
+          _LineMinistryCalendarListCard(
+            title: 'ប្រជុំពិភាក្សាដោះស្រាយបញ្ហា និងស្វែងរកដំណោះស្រាយរួម',
+            group: 'Agriculture and Agro-Industry',
+            date: '25 May, 2026',
+            totalIssues: '3',
+            status: _MeetingStatus.submitted,
+            description:
+                'ក្នុងគោលបំណងដើម្បីពិភាក្សាអំពីបញ្ហានិងស្វែងរកដំណោះស្រាយរវាងវិស័យរដ្ឋនិងវិស័យឯកជន ដំណាក់កាល ពិភាក្សា និងដំណោះស្រាយរវាងក្រសួង/ស្ថាប័នពាក់ព័ន្ធ និងតំណាងវិស័យឯកជន...',
+            attachmentCount: '2 Attachement',
+          ),
+          _LineMinistryCalendarListCard(
+            title: 'ប្រជុំពិភាក្សាដោះស្រាយបញ្ហា និងស្វែងរកដំណោះស្រាយរួម',
+            group: 'Agriculture and Agro-Industry',
+            date: '25 May, 2026',
+            totalIssues: '3',
+            status: _MeetingStatus.submitted,
+            description:
+                'ក្នុងគោលបំណងដើម្បីពិភាក្សាអំពីបញ្ហានិងស្វែងរកដំណោះស្រាយរវាងវិស័យរដ្ឋនិងវិស័យឯកជន ដំណាក់កាល ពិភាក្សា និងដំណោះស្រាយរវាងក្រសួង/ស្ថាប័នពាក់ព័ន្ធ និងតំណាងវិស័យឯកជន...',
+            attachmentCount: '2 Attachement',
+          ),
+          _LineMinistryCalendarListCard(
+            title: 'ប្រជុំពិភាក្សាដោះស្រាយបញ្ហា និងស្វែងរកដំណោះស្រាយរួម',
+            group: 'Agriculture and Agro-Industry',
+            date: '25 May, 2026',
+            totalIssues: '3',
+            status: _MeetingStatus.submitted,
+            description:
+                'ក្នុងគោលបំណងដើម្បីពិភាក្សាអំពីបញ្ហានិងស្វែងរកដំណោះស្រាយរវាងវិស័យរដ្ឋនិងវិស័យឯកជន ដំណាក់កាល ពិភាក្សា និងដំណោះស្រាយរវាងក្រសួង/ស្ថាប័នពាក់ព័ន្ធ និងតំណាងវិស័យឯកជន...',
+            attachmentCount: '2 Attachement',
+          ),
+        ] else
+          const CalendarTab(),
       ],
     );
   }
 }
 
-enum _MeetingStatus { drafted, submitted, completed, underReview }
-
-class _LineMinistryMeetingCard extends StatelessWidget {
-  const _LineMinistryMeetingCard({
+class _LineMinistryCalendarListCard extends StatelessWidget {
+  const _LineMinistryCalendarListCard({
     required this.title,
     required this.group,
     required this.date,
     required this.totalIssues,
     required this.status,
+    required this.description,
+    required this.attachmentCount,
   });
 
   final String title;
@@ -224,6 +347,8 @@ class _LineMinistryMeetingCard extends StatelessWidget {
   final String date;
   final String totalIssues;
   final _MeetingStatus status;
+  final String description;
+  final String attachmentCount;
 
   @override
   Widget build(BuildContext context) {
@@ -233,7 +358,7 @@ class _LineMinistryMeetingCard extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (_) => MeetingRequestDetailScreen(title: title),
+            builder: (_) => LineMinistryMeetingDetailScreen(title: title),
           ),
         );
       },
@@ -255,18 +380,18 @@ class _LineMinistryMeetingCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 32,
-                  height: 32,
+                  width: 34,
+                  height: 34,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
-                      colors: [Color(0xFF1E73BE), Color(0xFF1EA45B)],
+                      colors: [Color(0xFF216AAA), Color(0xFF1EA45B)],
                     ),
                   ),
                   child: const Icon(
                     Icons.account_balance,
                     color: Colors.white,
-                    size: 17,
+                    size: 18,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -276,15 +401,16 @@ class _LineMinistryMeetingCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                          height: 1.35,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Text(
                         group,
                         style: const TextStyle(
@@ -320,6 +446,228 @@ class _LineMinistryMeetingCard extends StatelessWidget {
                 ),
                 _StatusBadge(status: status),
               ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: AppColors.secondaryText(context),
+                fontSize: 11,
+                height: 1.45,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkCard : const Color(0xFFFAFAFA),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
+                  const SizedBox(width: 6),
+                  Text(
+                    attachmentCount,
+                    style: const TextStyle(
+                      color: Color(0xFF4C5563),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LineMinistryMeetingRequestTab extends StatelessWidget {
+  const _LineMinistryMeetingRequestTab({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: const [
+        _LineMinistryMeetingCard(
+          title: 'សំណើប្រជុំពិភាក្សាដោះស្រាយបញ្ហាចំនួន ៣',
+          group: 'Agriculture and Agro-Industry',
+          date: '25 May, 2026',
+          totalIssues: '3',
+          status: _MeetingStatus.submitted,
+          attachmentCount: '2 Attachement',
+        ),
+        _LineMinistryMeetingCard(
+          title: 'សំណើប្រជុំពិភាក្សាដោះស្រាយបញ្ហាចំនួន ៥',
+          group: 'Agriculture and Agro-Industry',
+          date: '25 May, 2026',
+          totalIssues: '5',
+          status: _MeetingStatus.submitted,
+          attachmentCount: '2 Attachement',
+        ),
+        _LineMinistryMeetingCard(
+          title: 'សំណើប្រជុំពិភាក្សាដោះស្រាយបញ្ហាចំនួន ៧',
+          group: 'Agriculture and Agro-Industry',
+          date: '25 May, 2026',
+          totalIssues: '2',
+          status: _MeetingStatus.submitted,
+          attachmentCount: '2 Attachement',
+        ),
+      ],
+    );
+  }
+}
+
+enum _MeetingStatus { drafted, submitted, completed, underReview }
+
+class _LineMinistryMeetingCard extends StatelessWidget {
+  const _LineMinistryMeetingCard({
+    required this.title,
+    required this.group,
+    required this.date,
+    required this.totalIssues,
+    required this.status,
+    this.attachmentCount = '2 Attachement',
+  });
+
+  final String title;
+  final String group;
+  final String date;
+  final String totalIssues;
+  final _MeetingStatus status;
+  final String attachmentCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return InkWell(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => LineMinistryMeetingDetailScreen(title: title),
+          ),
+        );
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkCard : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDark ? AppColors.darkBorder : const Color(0xFFF0F2F5),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF216AAA), Color(0xFF1EA45B)],
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.account_balance,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        group,
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _MeetingInfo(
+                    icon: Icons.calendar_month_outlined,
+                    label: AppLocalizations.of(context).text('meetingDate'),
+                    value: date,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _MeetingInfo(
+                    icon: Icons.file_copy_outlined,
+                    label: AppLocalizations.of(context).text('totalIssues'),
+                    value: totalIssues,
+                    iconColor: const Color(0xFFB642FF),
+                    iconBackground: const Color(0xFFF2DDFF),
+                  ),
+                ),
+                _StatusBadge(status: status),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkCard : const Color(0xFFFAFAFA),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
+                  const SizedBox(width: 6),
+                  Text(
+                    attachmentCount,
+                    style: const TextStyle(
+                      color: Color(0xFF4C5563),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -631,17 +979,84 @@ class _MeetingTabs extends StatelessWidget {
   }
 }
 
+class _InlineCheckbox extends StatelessWidget {
+  const _InlineCheckbox({
+    required this.label,
+    required this.checked,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool checked;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(4),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 140),
+              width: 16,
+              height: 16,
+              decoration: BoxDecoration(
+                color: checked ? AppColors.accent(context) : Colors.transparent,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: checked
+                      ? AppColors.accent(context)
+                      : (isDark
+                          ? AppColors.darkBorder
+                          : const Color(0xFFCED7E1)),
+                  width: 1,
+                ),
+              ),
+              child: checked
+                  ? const Icon(
+                      Icons.check,
+                      size: 11,
+                      color: Colors.white,
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _LineMinistryMeetingFilterResult {
   const _LineMinistryMeetingFilterResult({
     required this.workingGroups,
     required this.agencies,
     required this.statuses,
+    required this.years,
+    required this.numberOfIssues,
     this.date,
   });
 
   final Set<String> workingGroups;
   final Set<String> agencies;
   final Set<String> statuses;
+  final Set<String> years;
+  final Set<String> numberOfIssues;
   final String? date;
 }
 
@@ -650,12 +1065,16 @@ class _LineMinistryMeetingFilterSheet extends StatefulWidget {
     required this.selectedWorkingGroups,
     required this.selectedAgencies,
     required this.selectedStatuses,
+    required this.selectedYears,
+    required this.selectedNumberOfIssues,
     this.selectedDate,
   });
 
   final Set<String> selectedWorkingGroups;
   final Set<String> selectedAgencies;
   final Set<String> selectedStatuses;
+  final Set<String> selectedYears;
+  final Set<String> selectedNumberOfIssues;
   final String? selectedDate;
 
   @override
@@ -665,32 +1084,21 @@ class _LineMinistryMeetingFilterSheet extends StatefulWidget {
 
 class _LineMinistryMeetingFilterSheetState
     extends State<_LineMinistryMeetingFilterSheet> {
-  late Set<String> _workingGroups;
-  late Set<String> _agencies;
   late Set<String> _statuses;
+  late Set<String> _years;
+  late Set<String> _numberOfIssues;
 
-  static const _workingGroupItems = [
-    'Law, Tax, and Governance',
-    'Tourism',
-    'Construction and Real Estate',
-    'Energy and Mineral Resources',
-    'Agriculture and Agro-Industry',
-  ];
-
-  static const _statusItems = [
-    'Drafted',
-    'Submitted',
-    'Under Review',
-    'Scheduled',
-    'Completed',
-  ];
+  static const _statusRow1 = ['Drafted', 'Submitted', 'Under Review'];
+  static const _statusRow2 = ['Scheduled', 'Completed'];
+  static const _yearItems = ['2026', '2025', '2024', '2023'];
+  static const _issueItems = ['1', '2', '3', '4', '5'];
 
   @override
   void initState() {
     super.initState();
-    _workingGroups = {...widget.selectedWorkingGroups};
-    _agencies = {...widget.selectedAgencies};
     _statuses = {...widget.selectedStatuses};
+    _years = {...widget.selectedYears};
+    _numberOfIssues = {...widget.selectedNumberOfIssues};
   }
 
   void _toggle(Set<String> set, String value) {
@@ -705,7 +1113,6 @@ class _LineMinistryMeetingFilterSheetState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
 
@@ -731,9 +1138,10 @@ class _LineMinistryMeetingFilterSheetState
                     const SizedBox(width: 28),
                     Expanded(
                       child: Text(
-                        l10n.text('filters'),
+                        'Filters',
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                         ),
@@ -753,40 +1161,79 @@ class _LineMinistryMeetingFilterSheetState
                     vertical: 20,
                   ),
                   children: [
-                    Text(
-                      l10n.text('workingGroup'),
-                      style: const TextStyle(
+                    // SECTION 1: STATUS
+                    const Text(
+                      'Status',
+                      style: TextStyle(
                         fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 14),
-                    Column(
-                      children: _workingGroupItems.map((item) {
-                        return CheckboxListTile(
-                          title: Text(item, style: const TextStyle(fontSize: 12)),
-                          value: _workingGroups.contains(item),
-                          onChanged: (_) => _toggle(_workingGroups, item),
-                          contentPadding: EdgeInsets.zero,
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 10,
+                      children: _statusRow1.map((item) {
+                        return _InlineCheckbox(
+                          label: item,
+                          checked: _statuses.contains(item),
+                          onTap: () => _toggle(_statuses, item),
                         );
                       }).toList(),
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      l10n.text('meetingStatus'),
-                      style: const TextStyle(
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 10,
+                      children: _statusRow2.map((item) {
+                        return _InlineCheckbox(
+                          label: item,
+                          checked: _statuses.contains(item),
+                          onTap: () => _toggle(_statuses, item),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // SECTION 2: YEAR
+                    const Text(
+                      'Year',
+                      style: TextStyle(
                         fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 14),
-                    Column(
-                      children: _statusItems.map((item) {
-                        return CheckboxListTile(
-                          title: Text(item, style: const TextStyle(fontSize: 12)),
-                          value: _statuses.contains(item),
-                          onChanged: (_) => _toggle(_statuses, item),
-                          contentPadding: EdgeInsets.zero,
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 20,
+                      runSpacing: 10,
+                      children: _yearItems.map((item) {
+                        return _InlineCheckbox(
+                          label: item,
+                          checked: _years.contains(item),
+                          onTap: () => _toggle(_years, item),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // SECTION 3: NUMBER OF ISSUES
+                    const Text(
+                      'Number of Issues',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 22,
+                      runSpacing: 10,
+                      children: _issueItems.map((item) {
+                        return _InlineCheckbox(
+                          label: item,
+                          checked: _numberOfIssues.contains(item),
+                          onTap: () => _toggle(_numberOfIssues, item),
                         );
                       }).toList(),
                     ),
@@ -807,18 +1254,29 @@ class _LineMinistryMeetingFilterSheetState
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.accent(context),
                       foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                     onPressed: () {
                       Navigator.pop(
                         context,
                         _LineMinistryMeetingFilterResult(
-                          workingGroups: {..._workingGroups},
-                          agencies: {..._agencies},
+                          workingGroups: {},
+                          agencies: {},
                           statuses: {..._statuses},
+                          years: {..._years},
+                          numberOfIssues: {..._numberOfIssues},
                         ),
                       );
                     },
-                    child: Text(l10n.text('applyFilters')),
+                    child: const Text(
+                      'Apply Filters',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -864,8 +1322,10 @@ class _LineMinistrySummaryFilterSheetState
   late Set<String> _years;
   late Set<String> _numberOfIssues;
 
-  static const _statusItems = ['Drafted', 'Submitted', 'Completed'];
-  static const _yearItems = ['2026', '2025', '2024'];
+  static const _statusRow1 = ['Drafted', 'Submitted', 'Under Review'];
+  static const _statusRow2 = ['Scheduled', 'Completed'];
+  static const _yearItems = ['2026', '2025', '2024', '2023'];
+  static const _issueItems = ['1', '2', '3', '4', '5'];
 
   @override
   void initState() {
@@ -887,7 +1347,6 @@ class _LineMinistrySummaryFilterSheetState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
 
@@ -913,9 +1372,10 @@ class _LineMinistrySummaryFilterSheetState
                     const SizedBox(width: 28),
                     Expanded(
                       child: Text(
-                        l10n.text('filters'),
+                        'Filters',
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                         ),
@@ -935,21 +1395,79 @@ class _LineMinistrySummaryFilterSheetState
                     vertical: 20,
                   ),
                   children: [
-                    Text(
-                      l10n.text('status'),
-                      style: const TextStyle(
+                    // SECTION 1: STATUS
+                    const Text(
+                      'Status',
+                      style: TextStyle(
                         fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 14),
-                    Column(
-                      children: _statusItems.map((item) {
-                        return CheckboxListTile(
-                          title: Text(item, style: const TextStyle(fontSize: 12)),
-                          value: _statuses.contains(item),
-                          onChanged: (_) => _toggle(_statuses, item),
-                          contentPadding: EdgeInsets.zero,
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 10,
+                      children: _statusRow1.map((item) {
+                        return _InlineCheckbox(
+                          label: item,
+                          checked: _statuses.contains(item),
+                          onTap: () => _toggle(_statuses, item),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 10,
+                      children: _statusRow2.map((item) {
+                        return _InlineCheckbox(
+                          label: item,
+                          checked: _statuses.contains(item),
+                          onTap: () => _toggle(_statuses, item),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // SECTION 2: YEAR
+                    const Text(
+                      'Year',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 20,
+                      runSpacing: 10,
+                      children: _yearItems.map((item) {
+                        return _InlineCheckbox(
+                          label: item,
+                          checked: _years.contains(item),
+                          onTap: () => _toggle(_years, item),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // SECTION 3: NUMBER OF ISSUES
+                    const Text(
+                      'Number of Issues',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 22,
+                      runSpacing: 10,
+                      children: _issueItems.map((item) {
+                        return _InlineCheckbox(
+                          label: item,
+                          checked: _numberOfIssues.contains(item),
+                          onTap: () => _toggle(_numberOfIssues, item),
                         );
                       }).toList(),
                     ),
@@ -970,6 +1488,9 @@ class _LineMinistrySummaryFilterSheetState
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.accent(context),
                       foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                     onPressed: () {
                       Navigator.pop(
@@ -981,7 +1502,13 @@ class _LineMinistrySummaryFilterSheetState
                         ),
                       );
                     },
-                    child: Text(l10n.text('applyFilters')),
+                    child: const Text(
+                      'Apply Filters',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
               ),
