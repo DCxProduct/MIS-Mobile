@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/app_settings.dart';
+import '../../../core/config/module_config.dart';
+
 class ProfileTile extends StatelessWidget {
   const ProfileTile({super.key, this.onTap});
 
@@ -8,6 +11,18 @@ class ProfileTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final settings = AppSettings.of(context);
+    final email = settings.userEmail.isNotEmpty
+        ? settings.userEmail
+        : 'ministry@gmail.com';
+    final moduleName = switch (settings.moduleType) {
+      AppModuleType.lineMinistry => 'Line Ministry',
+      AppModuleType.privateSector => 'Private Sector',
+      AppModuleType.cdcSection => 'CDC Section',
+      AppModuleType.cefp => 'CEFP',
+      AppModuleType.cdcSecretariat => 'CDC Secretariat',
+    };
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
@@ -30,7 +45,7 @@ class ProfileTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Khon Vakhim',
+                    email,
                     style: TextStyle(
                       color: colors.onSurface,
                       fontSize: 12,
@@ -39,7 +54,7 @@ class ProfileTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    'Software Developer',
+                    moduleName,
                     style: TextStyle(
                       color: colors.onSurfaceVariant,
                       fontSize: 10,

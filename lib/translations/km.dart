@@ -135,4 +135,5 @@ const Map<String, String> kmTranslations = {
   'searchIssues': 'ស្វែងរកបញ្ហា...',
   'filter': 'តម្រង',
   'apply': 'អនុវត្ត',
+  'invalidCredentials': 'អ៊ីមែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវឡើយ',
 };

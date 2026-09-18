@@ -17,9 +17,10 @@ class AccountScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
+    final topPadding = MediaQuery.of(context).viewPadding.top;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 34, 20, 96),
+      padding: EdgeInsets.fromLTRB(20, topPadding > 0 ? topPadding + 12 : 34, 20, 96),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

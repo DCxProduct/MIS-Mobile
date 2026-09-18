@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
+import '../../core/app_settings.dart';
 import '../../translations/app_localizations.dart';
 import '../../widgets/app_logo.dart';
 import '../../widgets/primary_button.dart';
@@ -18,6 +19,17 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  String? _errorMessage;
+
+  static const _allowedAccounts = {
+    'ministry@gmail.com',
+    'privatesector@gmail.com',
+    'cdc@gmail.com',
+    'cefp@gmail.com',
+    'secretariat@gmail.com',
+  };
+
+  static const _requiredPassword = '12345678';
 
   @override
   void dispose() {
@@ -27,7 +39,20 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _submit() {
+    setState(() => _errorMessage = null);
     if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final email = _emailController.text.trim().toLowerCase();
+    final password = _passwordController.text;
+
+    if (!_allowedAccounts.contains(email) || password != _requiredPassword) {
+      setState(() {
+        _errorMessage = AppLocalizations.of(context).text('invalidCredentials');
+      });
+      return;
+    }
+
+    AppSettings.of(context).setUserEmail(email);
     Navigator.of(
       context,
     ).push(MaterialPageRoute<void>(builder: (_) => const LoadingScreen()));
@@ -100,7 +125,41 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
+                if (_errorMessage != null) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.red.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          color: Colors.red,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
                 PrimaryButton(
                   label: l10n.text('signAccount'),
                   onPressed: _submit,
@@ -111,7 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {},
                     child: Text(
                       l10n.text('forgotPassword'),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.red,
                         decoration: TextDecoration.underline,
                         decorationColor: Colors.red,

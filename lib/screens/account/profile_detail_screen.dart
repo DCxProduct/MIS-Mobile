@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
+import '../../core/app_settings.dart';
+import '../../core/config/module_config.dart';
 
 class ProfileDetailScreen extends StatelessWidget {
   const ProfileDetailScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final settings = AppSettings.of(context);
+    final email = settings.userEmail.isNotEmpty
+        ? settings.userEmail
+        : 'ministry@gmail.com';
+
     return Scaffold(
       backgroundColor: AppColors.pageBackground(context),
       appBar: AppBar(
@@ -35,12 +42,12 @@ class ProfileDetailScreen extends StatelessWidget {
         top: false,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-          children: const [
-            _ProfileCard(),
-            SizedBox(height: 20),
-            _SectionTitle(title: 'Personal information'),
-            SizedBox(height: 10),
-            _InfoCard(
+          children: [
+            const _ProfileCard(),
+            const SizedBox(height: 20),
+            const _SectionTitle(title: 'Personal information'),
+            const SizedBox(height: 10),
+            const _InfoCard(
               children: [
                 _InfoItem(
                   icon: Icons.person_outline_rounded,
@@ -60,12 +67,12 @@ class ProfileDetailScreen extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 20),
-            _SectionTitle(title: 'Contact'),
-            SizedBox(height: 10),
+            const SizedBox(height: 20),
+            const _SectionTitle(title: 'Contact'),
+            const SizedBox(height: 10),
             _InfoCard(
               children: [
-                _InfoItem(
+                const _InfoItem(
                   icon: Icons.phone_outlined,
                   label: 'Phone',
                   value: '016 446 646',
@@ -73,7 +80,7 @@ class ProfileDetailScreen extends StatelessWidget {
                 _InfoItem(
                   icon: Icons.email_outlined,
                   label: 'Email',
-                  value: 'khonvakhim@gmail.com',
+                  value: email,
                   showDivider: false,
                 ),
               ],
@@ -91,6 +98,14 @@ class _ProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
+    final settings = AppSettings.of(context);
+    final moduleName = switch (settings.moduleType) {
+      AppModuleType.lineMinistry => 'Line Ministry',
+      AppModuleType.privateSector => 'Private Sector',
+      AppModuleType.cdcSection => 'CDC Section',
+      AppModuleType.cefp => 'CEFP',
+      AppModuleType.cdcSecretariat => 'CDC Secretariat',
+    };
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -133,7 +148,7 @@ class _ProfileCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  'Senior, Software Develop',
+                  moduleName,
                   style: TextStyle(
                     color: AppColors.secondaryText(context),
                     fontSize: 12,

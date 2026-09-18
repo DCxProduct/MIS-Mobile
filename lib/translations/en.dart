@@ -134,4 +134,5 @@ const Map<String, String> enTranslations = {
   'searchIssues': 'Search issues...',
   'filter': 'Filter',
   'apply': 'Apply',
+  'invalidCredentials': 'Invalid email or password.',
 };
