@@ -411,6 +411,70 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
           ),
         ),
         const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkCard : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
+            ),
+          ),
+          child: Column(
+            children: [
+              const DonutChartWidget(
+                slices: [
+                  DonutChartData(
+                    percentage: 0.9273,
+                    color: Color(0xFF10B981),
+                    label: 'Solved',
+                  ),
+                  DonutChartData(
+                    percentage: 0.0727,
+                    color: Color(0xFFF59E0B),
+                    label: 'In Progress',
+                  ),
+                ],
+                centerTitle: 'Total Issues',
+                centerValue: '179',
+                badge1Text: '92.73%',
+                badge1DotColor: Color(0xFF10B981),
+                badge2Text: '7.27%',
+                badge2DotColor: Color(0xFFF59E0B),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Row(
+                    children: [
+                      Icon(Icons.square, color: Color(0xFF10B981), size: 10),
+                      SizedBox(width: 6),
+                      Text('Solved', style: TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                  Text('(166)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Row(
+                    children: [
+                      Icon(Icons.square, color: Color(0xFFF59E0B), size: 10),
+                      SizedBox(width: 6),
+                      Text('In Progress', style: TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                  Text('(13)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
         Text(
           'Overall Implementation Status',
           style: TextStyle(
@@ -432,135 +496,25 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
           ),
           child: Column(
             children: [
-              SizedBox(
-                height: 160,
-                width: 160,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      width: 150,
-                      height: 150,
-                      child: CircularProgressIndicator(
-                        value: 0.9273,
-                        strokeWidth: 26,
-                        backgroundColor: const Color(0xFFF59E0B),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color(0xFF10B981),
-                        ),
-                      ),
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'Total Issues',
-                          style: TextStyle(
-                            color: AppColors.mutedText,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '179',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Row(
-                    children: [
-                      Icon(Icons.square, color: Color(0xFF10B981), size: 10),
-                      SizedBox(width: 6),
-                      Text('Solved', style: TextStyle(fontSize: 12)),
-                    ],
+              const DonutChartWidget(
+                slices: [
+                  DonutChartData(
+                    percentage: 0.923,
+                    color: Color(0xFFF97316),
+                    label: 'Mid Progress',
                   ),
-                  Text('(30)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Row(
-                    children: [
-                      Icon(Icons.square, color: Color(0xFFF59E0B), size: 10),
-                      SizedBox(width: 6),
-                      Text('In Progress', style: TextStyle(fontSize: 12)),
-                    ],
+                  DonutChartData(
+                    percentage: 0.077,
+                    color: Color(0xFFFDE68A),
+                    label: 'Early Progress',
                   ),
-                  Text('(16)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                 ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.darkCard : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
-            ),
-          ),
-          child: Column(
-            children: [
-              SizedBox(
-                height: 160,
-                width: 160,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      width: 150,
-                      height: 150,
-                      child: CircularProgressIndicator(
-                        value: 0.923,
-                        strokeWidth: 26,
-                        backgroundColor: const Color(0xFFFDE68A),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color(0xFFF97316),
-                        ),
-                      ),
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'In Progress',
-                          style: TextStyle(
-                            color: AppColors.mutedText,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '179',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                centerTitle: 'In Progress',
+                centerValue: '179',
+                badge1Text: '7.7%',
+                badge1DotColor: Color(0xFF10B981),
+                badge2Text: '92.3%',
+                badge2DotColor: Color(0xFFF59E0B),
               ),
               const SizedBox(height: 16),
               Row(
@@ -573,7 +527,7 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
                       Text('Mid Progress', style: TextStyle(fontSize: 12)),
                     ],
                   ),
-                  Text('(30)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                  Text('(165)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                 ],
               ),
               const SizedBox(height: 8),
@@ -587,13 +541,203 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
                       Text('Early Progress', style: TextStyle(fontSize: 12)),
                     ],
                   ),
-                  Text('(16)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                  Text('(14)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                 ],
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+class DonutChartData {
+  const DonutChartData({
+    required this.percentage,
+    required this.color,
+    required this.label,
+  });
+
+  final double percentage;
+  final Color color;
+  final String label;
+}
+
+class DonutChartWidget extends StatelessWidget {
+  const DonutChartWidget({
+    super.key,
+    required this.slices,
+    required this.centerTitle,
+    required this.centerValue,
+    required this.badge1Text,
+    required this.badge1DotColor,
+    required this.badge2Text,
+    required this.badge2DotColor,
+    this.startAngle = -0.35,
+  });
+
+  final List<DonutChartData> slices;
+  final String centerTitle;
+  final String centerValue;
+  final String badge1Text;
+  final Color badge1DotColor;
+  final String badge2Text;
+  final Color badge2DotColor;
+  final double startAngle;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 185,
+      width: 240,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          CustomPaint(
+            size: const Size(165, 165),
+            painter: _DonutChartPainter(
+              slices: slices,
+              startAngle: startAngle,
+            ),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                centerTitle,
+                style: const TextStyle(
+                  color: AppColors.mutedText,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                centerValue,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          Positioned(
+            top: 26,
+            left: 6,
+            child: _PercentageBadge(
+              percentText: badge1Text,
+              dotColor: badge1DotColor,
+            ),
+          ),
+          Positioned(
+            bottom: 24,
+            right: 6,
+            child: _PercentageBadge(
+              percentText: badge2Text,
+              dotColor: badge2DotColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DonutChartPainter extends CustomPainter {
+  _DonutChartPainter({
+    required this.slices,
+    required this.startAngle,
+  });
+
+  final List<DonutChartData> slices;
+  final double startAngle;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    const strokeWidth = 28.0;
+    final radius = (size.width - strokeWidth) / 2;
+
+    double currentAngle = startAngle;
+
+    for (final slice in slices) {
+      final sweepAngle = slice.percentage * 2 * 3.141592653589793;
+      final paint = Paint()
+        ..color = slice.color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.butt;
+
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        currentAngle,
+        sweepAngle,
+        false,
+        paint,
+      );
+
+      currentAngle += sweepAngle;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DonutChartPainter oldDelegate) => true;
+}
+
+class _PercentageBadge extends StatelessWidget {
+  const _PercentageBadge({
+    required this.percentText,
+    required this.dotColor,
+  });
+
+  final String percentText;
+  final Color dotColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : Colors.white,
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
+          width: 0.8,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 5,
+            height: 5,
+            decoration: BoxDecoration(
+              color: dotColor,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 5),
+          Text(
+            percentText,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
