@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../core/app_colors.dart';
-import '../../../screens/report/tabs/meeting_summary_tab.dart';
+import '../../../screens/report/plenary_detail_screen.dart';
+import '../../../screens/report/rgc_decision_detail_screen.dart';
 import '../../../translations/app_localizations.dart';
 
 class LineMinistryReportsScreenView extends StatefulWidget {
@@ -121,7 +121,17 @@ class _LineMinistryReportsScreenViewState
                     _FilterButton(
                       activeCount: _activeFilterCount,
                       onTap: () {
-                        if (_selectedTab == 0) {
+                        if (_selectedTab == 1) {
+                          showModalBottomSheet<void>(
+                            context: context,
+                            isScrollControlled: true,
+                            useSafeArea: false,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) {
+                              return const _LineMinistryDashboardFilterSheet();
+                            },
+                          );
+                        } else if (_selectedTab == 0) {
                           _openProgressReportFilterSheet(context);
                         } else {
                           _openMeetingSummaryFilterSheet(context);
@@ -170,10 +180,380 @@ class _LineMinistryReportsScreenViewState
                   ),
                 ] else if (_selectedTab == 1) ...const [
                   _ReportDashboardTab(),
+                ] else if (_selectedTab == 2) ...const [
+                  _PlenaryTab(),
                 ] else ...const [
-                  MeetingSummaryTab(),
+                  _RgcDecisionTab(),
                 ],
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RgcDecisionTab extends StatelessWidget {
+  const _RgcDecisionTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: const [
+        _RgcDecisionCard(
+          agencyName: 'MPWT',
+          status: 'In Progress',
+          meetingDate: 'Oct 30, 2025',
+          category: 'Legislation',
+          focalPerson: 'Peng Ponea',
+          linkCount: '2 Link',
+        ),
+        _RgcDecisionCard(
+          agencyName: 'MPWT',
+          status: 'In Progress',
+          meetingDate: 'Oct 30, 2025',
+          category: 'Legislation',
+          focalPerson: 'Peng Ponea',
+          linkCount: '2 Link',
+        ),
+      ],
+    );
+  }
+}
+
+class _RgcDecisionCard extends StatelessWidget {
+  const _RgcDecisionCard({
+    required this.agencyName,
+    required this.status,
+    required this.meetingDate,
+    required this.category,
+    required this.focalPerson,
+    required this.linkCount,
+  });
+
+  final String agencyName;
+  final String status;
+  final String meetingDate;
+  final String category;
+  final String focalPerson;
+  final String linkCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : const Color(0xFFF0F2F5),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF1E73BE),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.account_balance_outlined,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    agencyName,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF3E2312)
+                      : const Color(0xFFFFF3E0),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: isDark
+                        ? const Color(0xFFC2410C)
+                        : const Color(0xFFFFCC80),
+                  ),
+                ),
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    color: isDark
+                        ? const Color(0xFFFB923C)
+                        : const Color(0xFFF97316),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _ReportRow(label: 'Meeting Date', value: meetingDate),
+          const SizedBox(height: 8),
+          _ReportRow(label: 'Categories', value: category),
+          const SizedBox(height: 8),
+          _ReportRow(label: 'Focal Person (H.E)', value: focalPerson),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkCard : const Color(0xFFFAFAFA),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
+                const SizedBox(width: 6),
+                Text(
+                  linkCount,
+                  style: const TextStyle(
+                    color: Color(0xFF4C5563),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            height: 36,
+            child: FilledButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => RgcDecisionDetailScreen(agencyName: agencyName),
+                  ),
+                );
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: isDark
+                    ? AppColors.accent(context).withValues(alpha: 0.18)
+                    : const Color(0xFFF0F7FF),
+                foregroundColor: AppColors.accent(context),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    'View Details',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  Icon(Icons.chevron_right, size: 16),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlenaryTab extends StatelessWidget {
+  const _PlenaryTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: const [
+        _PlenaryCard(
+          title: '19th G-PSF. Plenary',
+          status: 'Sent',
+          meetingDate: 'Oct 30, 2025',
+          numberOfRgcDecision: 'Jun 07, 2025',
+          deadline: 'Jun 07, 2025',
+          attachmentCount: '2 Attachement',
+        ),
+        _PlenaryCard(
+          title: '18th G-PSF. Plenary',
+          status: 'Sent',
+          meetingDate: 'Oct 30, 2025',
+          numberOfRgcDecision: 'Jun 07, 2025',
+          deadline: 'Jun 07, 2025',
+          attachmentCount: '2 Attachement',
+        ),
+      ],
+    );
+  }
+}
+
+class _PlenaryCard extends StatelessWidget {
+  const _PlenaryCard({
+    required this.title,
+    required this.status,
+    required this.meetingDate,
+    required this.numberOfRgcDecision,
+    required this.deadline,
+    required this.attachmentCount,
+  });
+
+  final String title;
+  final String status;
+  final String meetingDate;
+  final String numberOfRgcDecision;
+  final String deadline;
+  final String attachmentCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : const Color(0xFFF0F2F5),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF123B2A)
+                      : const Color(0xFFEAFBF0),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: isDark
+                        ? const Color(0xFF166534)
+                        : const Color(0xFF9BE2B4),
+                  ),
+                ),
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    color: isDark
+                        ? const Color(0xFF86EFAC)
+                        : const Color(0xFF16A34A),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _ReportRow(label: 'Meeting Date', value: meetingDate),
+          const SizedBox(height: 8),
+          _ReportRow(label: '#Of RGC Decision', value: numberOfRgcDecision),
+          const SizedBox(height: 8),
+          _ReportRow(label: 'Deadline', value: deadline),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkCard : const Color(0xFFFAFAFA),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
+                const SizedBox(width: 6),
+                Text(
+                  attachmentCount,
+                  style: const TextStyle(
+                    color: Color(0xFF4C5563),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            height: 36,
+            child: FilledButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => PlenaryDetailScreen(title: title),
+                  ),
+                );
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: isDark
+                    ? AppColors.accent(context).withValues(alpha: 0.18)
+                    : const Color(0xFFF0F7FF),
+                foregroundColor: AppColors.accent(context),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    'View Details',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  Icon(Icons.chevron_right, size: 16),
+                ],
+              ),
             ),
           ),
         ],
@@ -335,6 +715,30 @@ class _ReportDashboardTab extends StatefulWidget {
 class _ReportDashboardTabState extends State<_ReportDashboardTab> {
   int _selectedFilter = 0;
 
+  static const _agenciesItems = [
+    '1. Adjusting business and investment climate',
+    '10. Construction and real estate sector',
+    '11. Other issues',
+    '2. Easing the burden on compliance',
+    '3. Facilitation of businesses under tax authorities',
+    '5. Improving transportation and infrastructure',
+    '9. Mining and energy sector',
+    '7. (A) Agricultural and agro-industrial development',
+    '4. Trade facilitation under customs jurisdiction',
+  ];
+
+  static const _workingGroupItems = [
+    '(A) Agriculture and Agro-Industry',
+    '(E) Banking and Financial Services',
+    '(M) Construction and Real Estate',
+    '(J) Energy and Mineral Resources',
+    '(G) Export Processing and Trade Facilitation',
+    '(H) Industrial Relations',
+    '(I) Rice and Paddy',
+    '(B) Tourism',
+    '(F) Transportation and Infrastructure',
+  ];
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -411,72 +815,275 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
           ),
         ),
         const SizedBox(height: 16),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.darkCard : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
+        if (_selectedFilter == 1) ...const [
+          _AgenciesListCard(
+            title: 'Agencies',
+            items: _agenciesItems,
+          ),
+        ] else if (_selectedFilter == 2) ...const [
+          _AgenciesListCard(
+            title: 'Working Group',
+            items: _workingGroupItems,
+          ),
+        ] else if (_selectedFilter == 3) ...const [
+          _CategoriesOfIssuesCard(),
+        ] else ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkCard : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
+              ),
+            ),
+            child: Column(
+              children: [
+                const DonutChartWidget(
+                  slices: [
+                    DonutChartData(
+                      percentage: 0.9273,
+                      color: Color(0xFF10B981),
+                      label: 'Solved',
+                    ),
+                    DonutChartData(
+                      percentage: 0.0727,
+                      color: Color(0xFFF59E0B),
+                      label: 'In Progress',
+                    ),
+                  ],
+                  centerTitle: 'Total Issues',
+                  centerValue: '179',
+                  badge1Text: '92.73%',
+                  badge1DotColor: Color(0xFF10B981),
+                  badge2Text: '7.27%',
+                  badge2DotColor: Color(0xFFF59E0B),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Row(
+                      children: [
+                        Icon(Icons.square, color: Color(0xFF10B981), size: 10),
+                        SizedBox(width: 6),
+                        Text('Solved', style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                    Text('(166)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Row(
+                      children: [
+                        Icon(Icons.square, color: Color(0xFFF59E0B), size: 10),
+                        SizedBox(width: 6),
+                        Text('In Progress', style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                    Text('(13)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                  ],
+                ),
+              ],
             ),
           ),
-          child: Column(
-            children: [
-              const DonutChartWidget(
-                slices: [
-                  DonutChartData(
-                    percentage: 0.9273,
-                    color: Color(0xFF10B981),
-                    label: 'Solved',
-                  ),
-                  DonutChartData(
-                    percentage: 0.0727,
-                    color: Color(0xFFF59E0B),
-                    label: 'In Progress',
-                  ),
-                ],
-                centerTitle: 'Total Issues',
-                centerValue: '179',
-                badge1Text: '92.73%',
-                badge1DotColor: Color(0xFF10B981),
-                badge2Text: '7.27%',
-                badge2DotColor: Color(0xFFF59E0B),
+          const SizedBox(height: 16),
+          Text(
+            'Overall Implementation Status',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkCard : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
               ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Row(
-                    children: [
-                      Icon(Icons.square, color: Color(0xFF10B981), size: 10),
-                      SizedBox(width: 6),
-                      Text('Solved', style: TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                  Text('(166)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                ],
+            ),
+            child: Column(
+              children: [
+                const DonutChartWidget(
+                  slices: [
+                    DonutChartData(
+                      percentage: 0.923,
+                      color: Color(0xFFF97316),
+                      label: 'Mid Progress',
+                    ),
+                    DonutChartData(
+                      percentage: 0.077,
+                      color: Color(0xFFFDE68A),
+                      label: 'Early Progress',
+                    ),
+                  ],
+                  centerTitle: 'In Progress',
+                  centerValue: '179',
+                  badge1Text: '7.7%',
+                  badge1DotColor: Color(0xFF10B981),
+                  badge2Text: '92.3%',
+                  badge2DotColor: Color(0xFFF59E0B),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Row(
+                      children: [
+                        Icon(Icons.square, color: Color(0xFFF97316), size: 10),
+                        SizedBox(width: 6),
+                        Text('Mid Progress', style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                    Text('(165)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Row(
+                      children: [
+                        Icon(Icons.square, color: Color(0xFFFDE68A), size: 10),
+                        SizedBox(width: 6),
+                        Text('Early Progress', style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                    Text('(14)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _CategoryProgressBarRow extends StatelessWidget {
+  const _CategoryProgressBarRow({
+    required this.agencyName,
+    required this.solvedCount,
+    required this.inProgressCount,
+  });
+
+  final String agencyName;
+  final int solvedCount;
+  final int inProgressCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final total = solvedCount + inProgressCount;
+    final solvedFlex = total > 0 ? (solvedCount * 100 ~/ total) : 0;
+    final inProgressFlex = total > 0 ? 100 - solvedFlex : 100;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              agencyName,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
               ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Row(
-                    children: [
-                      Icon(Icons.square, color: Color(0xFFF59E0B), size: 10),
-                      SizedBox(width: 6),
-                      Text('In Progress', style: TextStyle(fontSize: 12)),
-                    ],
+            ),
+            Row(
+              children: [
+                if (solvedCount > 0)
+                  SizedBox(
+                    width: 32,
+                    child: Text(
+                      '$solvedCount',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: AppColors.mutedText,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
-                  Text('(13)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                ],
-              ),
-            ],
+                if (inProgressCount > 0)
+                  SizedBox(
+                    width: 32,
+                    child: Text(
+                      '$inProgressCount',
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        color: AppColors.mutedText,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: SizedBox(
+            height: 8,
+            width: double.infinity,
+            child: Row(
+              children: [
+                if (solvedCount > 0)
+                  Expanded(
+                    flex: solvedFlex > 0 ? solvedFlex : 1,
+                    child: Container(color: const Color(0xFF10B981)),
+                  ),
+                if (solvedCount > 0 && inProgressCount > 0)
+                  const SizedBox(width: 3),
+                if (inProgressCount > 0)
+                  Expanded(
+                    flex: inProgressFlex > 0 ? inProgressFlex : 1,
+                    child: Container(color: const Color(0xFFF97316)),
+                  ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 16),
+      ],
+    );
+  }
+}
+
+class _CategoriesOfIssuesCard extends StatelessWidget {
+  const _CategoriesOfIssuesCard();
+
+  static const _categoryData = [
+    (name: 'SHV Admin', solved: 3, inProgress: 3),
+    (name: 'MPWT', solved: 0, inProgress: 1),
+    (name: 'MME', solved: 4, inProgress: 3),
+    (name: 'MISTI', solved: 3, inProgress: 3),
+    (name: 'CDC', solved: 3, inProgress: 3),
+    (name: 'MOL', solved: 3, inProgress: 3),
+    (name: 'NBC', solved: 3, inProgress: 3),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         Text(
-          'Overall Implementation Status',
+          'Categories of Issues',
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 15,
@@ -486,7 +1093,6 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
         const SizedBox(height: 12),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: isDark ? AppColors.darkCard : Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -494,57 +1100,137 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
               color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
             ),
           ),
-          child: Column(
-            children: [
-              const DonutChartWidget(
-                slices: [
-                  DonutChartData(
-                    percentage: 0.923,
-                    color: Color(0xFFF97316),
-                    label: 'Mid Progress',
-                  ),
-                  DonutChartData(
-                    percentage: 0.077,
-                    color: Color(0xFFFDE68A),
-                    label: 'Early Progress',
-                  ),
-                ],
-                centerTitle: 'In Progress',
-                centerValue: '179',
-                badge1Text: '7.7%',
-                badge1DotColor: Color(0xFF10B981),
-                badge2Text: '92.3%',
-                badge2DotColor: Color(0xFFF59E0B),
+          child: ListView.separated(
+            shrinkWrap: true,
+            padding: const EdgeInsets.all(16),
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _categoryData.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 14),
+            itemBuilder: (context, index) {
+              final item = _categoryData[index];
+              return _CategoryProgressBarRow(
+                agencyName: item.name,
+                solvedCount: item.solved,
+                inProgressCount: item.inProgress,
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MiniBarChart extends StatelessWidget {
+  const _MiniBarChart();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 18,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Container(
+            width: 3.5,
+            height: 8,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF97316),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 3),
+          Container(
+            width: 3.5,
+            height: 11,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEF4444),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 3),
+          Container(
+            width: 3.5,
+            height: 16,
+            decoration: BoxDecoration(
+              color: const Color(0xFF10B981),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AgenciesListCard extends StatelessWidget {
+  const _AgenciesListCard({
+    required this.title,
+    required this.items,
+  });
+
+  final String title;
+  final List<String> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkCard : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
+            ),
+          ),
+          child: ListView.separated(
+            shrinkWrap: true,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: items.length,
+            separatorBuilder: (_, _) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Divider(
+                height: 1,
+                color: isDark ? AppColors.darkBorder : const Color(0xFFF0F2F5),
               ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Row(
-                    children: [
-                      Icon(Icons.square, color: Color(0xFFF97316), size: 10),
-                      SizedBox(width: 6),
-                      Text('Mid Progress', style: TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                  Text('(165)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Row(
-                    children: [
-                      Icon(Icons.square, color: Color(0xFFFDE68A), size: 10),
-                      SizedBox(width: 6),
-                      Text('Early Progress', style: TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                  Text('(14)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                ],
-              ),
-            ],
+            ),
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        items[index],
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const _MiniBarChart(),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ],
@@ -574,7 +1260,7 @@ class DonutChartWidget extends StatelessWidget {
     required this.badge1DotColor,
     required this.badge2Text,
     required this.badge2DotColor,
-    this.startAngle = -0.35,
+    this.startAngle = 0.85,
   });
 
   final List<DonutChartData> slices;
@@ -657,13 +1343,16 @@ class _DonutChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    const strokeWidth = 28.0;
+    const strokeWidth = 26.0;
     final radius = (size.width - strokeWidth) / 2;
+    const gapAngle = 0.045;
 
     double currentAngle = startAngle;
 
     for (final slice in slices) {
-      final sweepAngle = slice.percentage * 2 * 3.141592653589793;
+      final totalSweep = slice.percentage * 2 * 3.141592653589793;
+      final drawSweep = (totalSweep - gapAngle).clamp(0.01, totalSweep);
+
       final paint = Paint()
         ..color = slice.color
         ..style = PaintingStyle.stroke
@@ -672,13 +1361,13 @@ class _DonutChartPainter extends CustomPainter {
 
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
-        currentAngle,
-        sweepAngle,
+        currentAngle + gapAngle / 2,
+        drawSweep,
         false,
         paint,
       );
 
-      currentAngle += sweepAngle;
+      currentAngle += totalSweep;
     }
   }
 
@@ -1095,6 +1784,60 @@ class _ReportTabs extends StatelessWidget {
   }
 }
 
+class _FilterChipCheckbox extends StatelessWidget {
+  const _FilterChipCheckbox({
+    required this.label,
+    required this.checked,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool checked;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 18,
+              height: 18,
+              child: Checkbox(
+                value: checked,
+                onChanged: (_) => onTap(),
+                activeColor: AppColors.accent(context),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                side: BorderSide(
+                  color: isDark ? AppColors.darkBorder : const Color(0xFFCBD5E1),
+                ),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _LineMinistryProgressReportFilterResult {
   const _LineMinistryProgressReportFilterResult({
     required this.years,
@@ -1125,18 +1868,28 @@ class _LineMinistryProgressReportFilterSheet extends StatefulWidget {
 
 class _LineMinistryProgressReportFilterSheetState
     extends State<_LineMinistryProgressReportFilterSheet> {
-  late Set<String> _years;
-  late Set<String> _semesters;
   late Set<String> _statuses;
+  late Set<String> _years;
+  late Set<String> _numberOfIssues;
 
-  static const _yearItems = ['2026', '2025', '2024'];
+  static const _statusOptions = [
+    'Drafted',
+    'Submitted',
+    'Under Review',
+    'Scheduled',
+    'Completed',
+  ];
+
+  static const _yearOptions = ['2026', '2025', '2024', '2023'];
+
+  static const _issuesOptions = ['1', '2', '3', '4', '5'];
 
   @override
   void initState() {
     super.initState();
-    _years = {...widget.selectedYears};
-    _semesters = {...widget.selectedSemesters};
     _statuses = {...widget.selectedStatuses};
+    _years = {...widget.selectedYears};
+    _numberOfIssues = {...widget.selectedSemesters};
   }
 
   void _toggle(Set<String> set, String value) {
@@ -1151,100 +1904,155 @@ class _LineMinistryProgressReportFilterSheetState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
 
     final viewPadding = MediaQuery.of(context).viewPadding;
     final topInset = viewPadding.top > 48.0 ? viewPadding.top : 48.0;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-      ),
+    return Material(
+      color: background,
       child: FractionallySizedBox(
         heightFactor: 1.0,
-        child: Container(
-          color: background,
-          child: Column(
-            children: [
-              Container(
-                padding: EdgeInsets.fromLTRB(22, topInset + 24, 22, 12),
-                child: Row(
-                  children: [
-                    const SizedBox(width: 28),
-                    Expanded(
-                      child: Text(
-                        l10n.text('filters'),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                        ),
+        child: Column(
+          children: [
+            // HEADER
+            Container(
+              padding: EdgeInsets.fromLTRB(22, topInset + 16, 22, 16),
+              child: Row(
+                children: [
+                  const SizedBox(width: 28),
+                  Expanded(
+                    child: Text(
+                      'Filters',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    InkWell(
-                      onTap: () => Navigator.pop(context),
-                      child: const Icon(Icons.close, size: 25),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 25,
-                    vertical: 20,
                   ),
-                  children: [
-                    Text(
-                      l10n.text('year'),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
+                  InkWell(
+                    onTap: () => Navigator.pop(context),
+                    child: Icon(
+                      Icons.close,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      size: 22,
                     ),
-                    const SizedBox(height: 14),
-                    Column(
-                      children: _yearItems.map((item) {
-                        return CheckboxListTile(
-                          title: Text(item, style: const TextStyle(fontSize: 12)),
-                          value: _years.contains(item),
-                          onChanged: (_) => _toggle(_years, item),
-                          contentPadding: EdgeInsets.zero,
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              Container(
-                padding: const EdgeInsets.all(16),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent(context),
-                      foregroundColor: Colors.white,
+            ),
+            const Divider(height: 1, color: Color(0xFFF0F2F5)),
+            // FILTER SECTIONS
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+                children: [
+                  // SECTION 1: STATUS
+                  const Text(
+                    'Status',
+                    style: TextStyle(
+                      color: AppColors.mutedText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
                     ),
-                    onPressed: () {
-                      Navigator.pop(
-                        context,
-                        _LineMinistryProgressReportFilterResult(
-                          years: {..._years},
-                          semesters: {..._semesters},
-                          statuses: {..._statuses},
-                        ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
+                    children: _statusOptions.map((item) {
+                      return _FilterChipCheckbox(
+                        label: item,
+                        checked: _statuses.contains(item),
+                        onTap: () => _toggle(_statuses, item),
                       );
-                    },
-                    child: Text(l10n.text('applyFilters')),
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+                  // SECTION 2: YEAR
+                  const Text(
+                    'Year',
+                    style: TextStyle(
+                      color: AppColors.mutedText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 20,
+                    runSpacing: 8,
+                    children: _yearOptions.map((item) {
+                      return _FilterChipCheckbox(
+                        label: item,
+                        checked: _years.contains(item),
+                        onTap: () => _toggle(_years, item),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+                  // SECTION 3: NUMBER OF ISSUES
+                  const Text(
+                    'Number of Issues',
+                    style: TextStyle(
+                      color: AppColors.mutedText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 24,
+                    runSpacing: 8,
+                    children: _issuesOptions.map((item) {
+                      return _FilterChipCheckbox(
+                        label: item,
+                        checked: _numberOfIssues.contains(item),
+                        onTap: () => _toggle(_numberOfIssues, item),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+            // APPLY BUTTON
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+              child: SizedBox(
+                width: double.infinity,
+                height: 46,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.accent(context),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(
+                      context,
+                      _LineMinistryProgressReportFilterResult(
+                        years: {..._years},
+                        semesters: {..._numberOfIssues},
+                        statuses: {..._statuses},
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Apply Filters',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -1285,7 +2093,17 @@ class _LineMinistrySummaryFilterSheetState
   late Set<String> _years;
   late Set<String> _numberOfIssues;
 
-  static const _statusItems = ['Drafted', 'Submitted', 'Completed'];
+  static const _statusOptions = [
+    'Drafted',
+    'Submitted',
+    'Under Review',
+    'Scheduled',
+    'Completed',
+  ];
+
+  static const _yearOptions = ['2026', '2025', '2024', '2023'];
+
+  static const _issuesOptions = ['1', '2', '3', '4', '5'];
 
   @override
   void initState() {
@@ -1307,100 +2125,605 @@ class _LineMinistrySummaryFilterSheetState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
 
     final viewPadding = MediaQuery.of(context).viewPadding;
     final topInset = viewPadding.top > 48.0 ? viewPadding.top : 48.0;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-      ),
+    return Material(
+      color: background,
       child: FractionallySizedBox(
         heightFactor: 1.0,
-        child: Container(
-          color: background,
-          child: Column(
-            children: [
-              Container(
-                padding: EdgeInsets.fromLTRB(22, topInset + 24, 22, 12),
-                child: Row(
-                  children: [
-                    const SizedBox(width: 28),
-                    Expanded(
-                      child: Text(
-                        l10n.text('filters'),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                        ),
+        child: Column(
+          children: [
+            // HEADER
+            Container(
+              padding: EdgeInsets.fromLTRB(22, topInset + 16, 22, 16),
+              child: Row(
+                children: [
+                  const SizedBox(width: 28),
+                  Expanded(
+                    child: Text(
+                      'Filters',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    InkWell(
-                      onTap: () => Navigator.pop(context),
-                      child: const Icon(Icons.close, size: 25),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 25,
-                    vertical: 20,
                   ),
-                  children: [
-                    Text(
-                      l10n.text('status'),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                  InkWell(
+                    onTap: () => Navigator.pop(context),
+                    child: Icon(
+                      Icons.close,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      size: 22,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1, color: Color(0xFFF0F2F5)),
+            // FILTER SECTIONS
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+                children: [
+                  // SECTION 1: STATUS
+                  const Text(
+                    'Status',
+                    style: TextStyle(
+                      color: AppColors.mutedText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
+                    children: _statusOptions.map((item) {
+                      return _FilterChipCheckbox(
+                        label: item,
+                        checked: _statuses.contains(item),
+                        onTap: () => _toggle(_statuses, item),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+                  // SECTION 2: YEAR
+                  const Text(
+                    'Year',
+                    style: TextStyle(
+                      color: AppColors.mutedText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 20,
+                    runSpacing: 8,
+                    children: _yearOptions.map((item) {
+                      return _FilterChipCheckbox(
+                        label: item,
+                        checked: _years.contains(item),
+                        onTap: () => _toggle(_years, item),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+                  // SECTION 3: NUMBER OF ISSUES
+                  const Text(
+                    'Number of Issues',
+                    style: TextStyle(
+                      color: AppColors.mutedText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 24,
+                    runSpacing: 8,
+                    children: _issuesOptions.map((item) {
+                      return _FilterChipCheckbox(
+                        label: item,
+                        checked: _numberOfIssues.contains(item),
+                        onTap: () => _toggle(_numberOfIssues, item),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+            // APPLY BUTTON
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+              child: SizedBox(
+                width: double.infinity,
+                height: 46,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.accent(context),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(
+                      context,
+                      _LineMinistrySummaryFilterResult(
+                        statuses: {..._statuses},
+                        years: {..._years},
+                        numberOfIssues: {..._numberOfIssues},
                       ),
+                    );
+                  },
+                  child: const Text(
+                    'Apply Filters',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(height: 14),
-                    Column(
-                      children: _statusItems.map((item) {
-                        return CheckboxListTile(
-                          title: Text(item, style: const TextStyle(fontSize: 12)),
-                          value: _statuses.contains(item),
-                          onChanged: (_) => _toggle(_statuses, item),
-                          contentPadding: EdgeInsets.zero,
-                        );
-                      }).toList(),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.all(16),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent(context),
-                      foregroundColor: Colors.white,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LineMinistryDashboardFilterSheet extends StatefulWidget {
+  const _LineMinistryDashboardFilterSheet();
+
+  @override
+  State<_LineMinistryDashboardFilterSheet> createState() =>
+      _LineMinistryDashboardFilterSheetState();
+}
+
+class _LineMinistryDashboardFilterSheetState
+    extends State<_LineMinistryDashboardFilterSheet> {
+  final Set<String> _plenaries = {};
+  final Set<String> _statuses = {};
+  final Set<String> _workingGroups = {};
+  final Set<String> _agencies = {};
+  final Set<String> _categories = {};
+  final Set<String> _dates = {};
+
+  bool _expandWorkingGroup = false;
+  bool _expandAgencies = false;
+  bool _expandCategories = false;
+  bool _expandDates = false;
+
+  static const _plenaryOptions = [
+    '19th G-PSF Plenary',
+    '20th G-PSF Plenary',
+    '21st G-PSF Plenary',
+    '22nd G-PSF Plenary',
+  ];
+
+  static const _statusOptions = ['Solved', 'In Progress', 'Not Address'];
+
+  static const _workingGroupItems = [
+    'Agriculture and Agro-Industry',
+    'Tourism',
+    'SMEs, Manufacturing, and Services',
+    'Law, Tax, and Governance',
+    'Banking and Financial Services',
+    'Transportation and Infrastructure',
+    'Export Processing and Trade Facilitation',
+    'Industrial Relations',
+    'Rice and Paddy',
+    'Energy and Mineral Resources',
+    'Education',
+    'Construction and Real Estate',
+    'Non-Bank Financial Services Other issues',
+    'Digital Economy, Society and Telecommunication',
+    'Land Administration, Security, Public Order',
+  ];
+
+  static const _agencyItems = [
+    'GDT', 'MFF', 'GDCE', 'MLVT', 'MPTC',
+    'MAFF', 'Moh', 'NBC', 'MoC', 'MoT',
+    'MLMUPC', 'Mol', 'CDC', 'MPWT',
+    'MISTI', 'MME', 'SHV Admin', 'MOC',
+  ];
+
+  static const _categoryItems = [
+    'Law, Tax, and Governance',
+    'Tourism',
+    'Construction and Real Estate',
+    'Energy and Mineral Resources',
+    'Non-Bank Financial Services Other issues',
+    'Industrial Relations',
+    'Banking and Financial Services',
+    'Agriculture and Agro-Industry',
+    'Other issues',
+    'SMEs, Manufacturing, and Services',
+    'Export Processing and Trad',
+    'Rice and Paddy',
+    'Transportation and Infrastructure',
+  ];
+
+  static const _dateItems = [
+    'Not Specify',
+    '2024-01-24',
+    '2024-11-23',
+    'Not Specified',
+  ];
+
+  void _toggle(Set<String> set, String value) {
+    setState(() {
+      if (set.contains(value)) {
+        set.remove(value);
+      } else {
+        set.add(value);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark ? AppColors.darkBackground : Colors.white;
+
+    final viewPadding = MediaQuery.of(context).viewPadding;
+    final topInset = viewPadding.top > 48.0 ? viewPadding.top : 48.0;
+
+    final visibleWg = _expandWorkingGroup
+        ? _workingGroupItems
+        : _workingGroupItems.take(5).toList();
+
+    final visibleAgencies = _expandAgencies
+        ? _agencyItems
+        : _agencyItems.take(10).toList();
+
+    final visibleCategories = _expandCategories
+        ? _categoryItems
+        : _categoryItems.take(5).toList();
+
+    final visibleDates =
+        _expandDates ? _dateItems : _dateItems.take(2).toList();
+
+    return Material(
+      color: background,
+      child: FractionallySizedBox(
+        heightFactor: 1.0,
+        child: Column(
+          children: [
+            // HEADER
+            Container(
+              padding: EdgeInsets.fromLTRB(22, topInset + 16, 22, 16),
+              child: Row(
+                children: [
+                  const SizedBox(width: 28),
+                  Expanded(
+                    child: Text(
+                      'Filters',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                    onPressed: () {
-                      Navigator.pop(
-                        context,
-                        _LineMinistrySummaryFilterResult(
-                          statuses: {..._statuses},
-                          years: {..._years},
-                          numberOfIssues: {..._numberOfIssues},
+                  ),
+                  InkWell(
+                    onTap: () => Navigator.pop(context),
+                    child: Icon(
+                      Icons.close,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      size: 22,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1, color: Color(0xFFF0F2F5)),
+            // SCROLLABLE FILTER SECTIONS
+            Expanded(
+              child: ListView(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+                children: [
+                  // 1. PLENARY
+                  const Text(
+                    'Plenary',
+                    style: TextStyle(
+                      color: AppColors.mutedText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    childAspectRatio: 4.5,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    children: _plenaryOptions.map((item) {
+                      return _FilterChipCheckbox(
+                        label: item,
+                        checked: _plenaries.contains(item),
+                        onTap: () => _toggle(_plenaries, item),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 2. STATUS
+                  const Text(
+                    'Status',
+                    style: TextStyle(
+                      color: AppColors.mutedText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 8,
+                    children: _statusOptions.map((item) {
+                      return _FilterChipCheckbox(
+                        label: item,
+                        checked: _statuses.contains(item),
+                        onTap: () => _toggle(_statuses, item),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 3. WORKING GROUP
+                  const Text(
+                    'Working Group',
+                    style: TextStyle(
+                      color: AppColors.mutedText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: visibleWg.map((item) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: _FilterChipCheckbox(
+                          label: item,
+                          checked: _workingGroups.contains(item),
+                          onTap: () => _toggle(_workingGroups, item),
                         ),
                       );
-                    },
-                    child: Text(l10n.text('applyFilters')),
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: InkWell(
+                      onTap: () => setState(
+                          () => _expandWorkingGroup = !_expandWorkingGroup),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _expandWorkingGroup ? 'View Less' : 'View All',
+                            style: const TextStyle(
+                              color: Color(0xFF1E73BE),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            _expandWorkingGroup
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            color: const Color(0xFF1E73BE),
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 4. PRIMARY AGENCY
+                  const Text(
+                    'Primary Agency',
+                    style: TextStyle(
+                      color: AppColors.mutedText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
+                    children: visibleAgencies.map((item) {
+                      return _FilterChipCheckbox(
+                        label: item,
+                        checked: _agencies.contains(item),
+                        onTap: () => _toggle(_agencies, item),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: InkWell(
+                      onTap: () =>
+                          setState(() => _expandAgencies = !_expandAgencies),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _expandAgencies ? 'View Less' : 'View All',
+                            style: const TextStyle(
+                              color: Color(0xFF1E73BE),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            _expandAgencies
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            color: const Color(0xFF1E73BE),
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 5. MEASURE CATEGORY
+                  const Text(
+                    'Measure Category',
+                    style: TextStyle(
+                      color: AppColors.mutedText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: visibleCategories
+                        .map(
+                          (item) => Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
+                            child: _FilterChipCheckbox(
+                              label: item,
+                              checked: _categories.contains(item),
+                              onTap: () => _toggle(_categories, item),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: InkWell(
+                      onTap: () => setState(
+                          () => _expandCategories = !_expandCategories),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _expandCategories ? 'View Less' : 'View All',
+                            style: const TextStyle(
+                              color: Color(0xFF1E73BE),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            _expandCategories
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            color: const Color(0xFF1E73BE),
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 6. DECISION DATE
+                  const Text(
+                    'Decision Date',
+                    style: TextStyle(
+                      color: AppColors.mutedText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    childAspectRatio: 4.5,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    children: visibleDates.map((item) {
+                      return _FilterChipCheckbox(
+                        label: item,
+                        checked: _dates.contains(item),
+                        onTap: () => _toggle(_dates, item),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: InkWell(
+                      onTap: () => setState(() => _expandDates = !_expandDates),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _expandDates ? 'View Less' : 'View All',
+                            style: const TextStyle(
+                              color: Color(0xFF1E73BE),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            _expandDates
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            color: const Color(0xFF1E73BE),
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // APPLY BUTTON
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+              child: SizedBox(
+                width: double.infinity,
+                height: 46,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.accent(context),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    'Apply Filters',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
