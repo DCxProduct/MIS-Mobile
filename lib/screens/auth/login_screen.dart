@@ -45,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim().toLowerCase();
     final password = _passwordController.text;
 
-    if (!_allowedAccounts.contains(email) || password != _requiredPassword) {
+    if (password.isEmpty) {
       setState(() {
         _errorMessage = AppLocalizations.of(context).text('invalidCredentials');
       });
