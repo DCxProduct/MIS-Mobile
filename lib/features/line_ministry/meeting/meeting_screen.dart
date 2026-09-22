@@ -979,6 +979,34 @@ class _MeetingTabs extends StatelessWidget {
   }
 }
 
+String _translateFilterLabel(String item, AppLocalizations l10n) {
+  switch (item) {
+    case 'Drafted':
+      return l10n.text('drafted');
+    case 'Submitted':
+      return l10n.text('submitted');
+    case 'Under Review':
+      return l10n.text('underReview');
+    case 'Scheduled':
+      return l10n.text('scheduled');
+    case 'Completed':
+      return l10n.text('completed');
+    case 'Solved':
+      return l10n.text('solved');
+    case 'In Progress':
+      return l10n.text('inProgress');
+    case 'Not Address':
+    case 'Not Addressed':
+      return l10n.text('notAddressed');
+    case 'Sent':
+      return l10n.text('sent');
+    case 'Draft':
+      return l10n.text('draft');
+    default:
+      return item;
+  }
+}
+
 class _InlineCheckbox extends StatelessWidget {
   const _InlineCheckbox({
     required this.label,
@@ -993,6 +1021,8 @@ class _InlineCheckbox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
+    final translatedLabel = _translateFilterLabel(label, l10n);
 
     return InkWell(
       onTap: onTap,
@@ -1028,7 +1058,7 @@ class _InlineCheckbox extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              label,
+              translatedLabel,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 12,
@@ -1113,6 +1143,7 @@ class _LineMinistryMeetingFilterSheetState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
 
@@ -1138,7 +1169,7 @@ class _LineMinistryMeetingFilterSheetState
                     const SizedBox(width: 28),
                     Expanded(
                       child: Text(
-                        'Filters',
+                        l10n.text('filters'),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
@@ -1162,9 +1193,9 @@ class _LineMinistryMeetingFilterSheetState
                   ),
                   children: [
                     // SECTION 1: STATUS
-                    const Text(
-                      'Status',
-                      style: TextStyle(
+                    Text(
+                      l10n.text('status'),
+                      style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1196,9 +1227,9 @@ class _LineMinistryMeetingFilterSheetState
                     const SizedBox(height: 24),
 
                     // SECTION 2: YEAR
-                    const Text(
-                      'Year',
-                      style: TextStyle(
+                    Text(
+                      l10n.text('year'),
+                      style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1218,9 +1249,9 @@ class _LineMinistryMeetingFilterSheetState
                     const SizedBox(height: 24),
 
                     // SECTION 3: NUMBER OF ISSUES
-                    const Text(
-                      'Number of Issues',
-                      style: TextStyle(
+                    Text(
+                      l10n.text('numberOfIssues'),
+                      style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1270,9 +1301,9 @@ class _LineMinistryMeetingFilterSheetState
                         ),
                       );
                     },
-                    child: const Text(
-                      'Apply Filters',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.text('applyFilters'),
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),

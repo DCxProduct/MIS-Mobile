@@ -113,7 +113,7 @@ class _LineMinistryIssuesScreenViewState
                 const _TotalPrimaryAgenciesCard(value: '14'),
                 const SizedBox(height: 16),
                 Text(
-                  'List of Issues',
+                  l10n.text('allIssues'),
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 15,
@@ -282,9 +282,9 @@ class _TotalPrimaryAgenciesCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Total Primary Agencies',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context).text('totalPrimaryAgencies'),
+                style: const TextStyle(
                   color: AppColors.mutedText,
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -705,7 +705,8 @@ class _IssueTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final tabs = ['Ministry Issues', 'Issues Matrix'];
+    final l10n = AppLocalizations.of(context);
+    final tabs = [l10n.text('wgIssues'), l10n.text('issuesMatrix')];
 
     return Container(
       height: 38,
@@ -768,6 +769,34 @@ class _IssueTabs extends StatelessWidget {
   }
 }
 
+String _translateFilterLabel(String item, AppLocalizations l10n) {
+  switch (item) {
+    case 'Drafted':
+      return l10n.text('drafted');
+    case 'Submitted':
+      return l10n.text('submitted');
+    case 'Under Review':
+      return l10n.text('underReview');
+    case 'Scheduled':
+      return l10n.text('scheduled');
+    case 'Completed':
+      return l10n.text('completed');
+    case 'Solved':
+      return l10n.text('solved');
+    case 'In Progress':
+      return l10n.text('inProgress');
+    case 'Not Address':
+    case 'Not Addressed':
+      return l10n.text('notAddressed');
+    case 'Sent':
+      return l10n.text('sent');
+    case 'Draft':
+      return l10n.text('draft');
+    default:
+      return item;
+  }
+}
+
 class _InlineCheckbox extends StatelessWidget {
   const _InlineCheckbox({
     required this.label,
@@ -782,6 +811,8 @@ class _InlineCheckbox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
+    final translatedLabel = _translateFilterLabel(label, l10n);
 
     return InkWell(
       onTap: onTap,
@@ -817,7 +848,7 @@ class _InlineCheckbox extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              label,
+              translatedLabel,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 12,
@@ -917,6 +948,7 @@ class _LineMinistryIssuesFilterSheetState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
 
@@ -946,7 +978,7 @@ class _LineMinistryIssuesFilterSheetState
                     const SizedBox(width: 28),
                     Expanded(
                       child: Text(
-                        'Filters',
+                        l10n.text('filters'),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
@@ -970,9 +1002,9 @@ class _LineMinistryIssuesFilterSheetState
                   ),
                   children: [
                     // SECTION 1: CATEGORIES
-                    const Text(
-                      'Categories',
-                      style: TextStyle(
+                    Text(
+                      l10n.text('categories'),
+                      style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1047,8 +1079,8 @@ class _LineMinistryIssuesFilterSheetState
                             children: [
                               Text(
                                 _isCategoriesExpanded
-                                    ? 'View less'
-                                    : 'View All',
+                                    ? l10n.text('viewLess')
+                                    : l10n.text('viewAll'),
                                 style: const TextStyle(
                                   color: AppColors.primary,
                                   fontSize: 12,
@@ -1071,9 +1103,9 @@ class _LineMinistryIssuesFilterSheetState
                     const SizedBox(height: 20),
 
                     // SECTION 2: STATUS
-                    const Text(
-                      'Status',
-                      style: TextStyle(
+                    Text(
+                      l10n.text('status'),
+                      style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1127,9 +1159,9 @@ class _LineMinistryIssuesFilterSheetState
                     const SizedBox(height: 24),
 
                     // SECTION 4: YEAR
-                    const Text(
-                      'Year',
-                      style: TextStyle(
+                    Text(
+                      l10n.text('year'),
+                      style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1178,9 +1210,9 @@ class _LineMinistryIssuesFilterSheetState
                         ),
                       );
                     },
-                    child: const Text(
-                      'Apply Filters',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.text('applyFilters'),
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),

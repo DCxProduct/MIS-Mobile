@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/app_colors.dart';
 import '../../../screens/report/plenary_detail_screen.dart';
 import '../../../screens/report/rgc_decision_detail_screen.dart';
+import '../../../translations/app_language.dart';
 import '../../../translations/app_localizations.dart';
 
 class LineMinistryReportsScreenView extends StatefulWidget {
@@ -110,7 +111,7 @@ class _LineMinistryReportsScreenViewState
                   children: [
                     Expanded(
                       child: Text(
-                        'Report',
+                        AppLocalizations.of(context).text('report'),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 20,
@@ -121,7 +122,7 @@ class _LineMinistryReportsScreenViewState
                     _FilterButton(
                       activeCount: _activeFilterCount,
                       onTap: () {
-                        if (_selectedTab == 1) {
+                        if (_selectedTab == 1 || _selectedTab == 3) {
                           showModalBottomSheet<void>(
                             context: context,
                             isScrollControlled: true,
@@ -129,6 +130,18 @@ class _LineMinistryReportsScreenViewState
                             backgroundColor: Colors.transparent,
                             builder: (context) {
                               return const _LineMinistryDashboardFilterSheet();
+                            },
+                          );
+                        } else if (_selectedTab == 2) {
+                          showModalBottomSheet<void>(
+                            context: context,
+                            isScrollControlled: true,
+                            useSafeArea: false,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) {
+                              return _LineMinistryPlenaryFilterSheet(
+                                selectedStatuses: _selectedSummaryStatuses,
+                              );
                             },
                           );
                         } else if (_selectedTab == 0) {
@@ -242,6 +255,11 @@ class _RgcDecisionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
+    final isKhmer = l10n.language == AppLanguage.khmer;
+    final translatedStatus = status == 'In Progress'
+        ? l10n.text('inProgress')
+        : (status == 'Solved' ? l10n.text('solved') : l10n.text('notAddressed'));
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -300,7 +318,7 @@ class _RgcDecisionCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  status,
+                  translatedStatus,
                   style: TextStyle(
                     color: isDark
                         ? const Color(0xFFFB923C)
@@ -313,11 +331,14 @@ class _RgcDecisionCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _ReportRow(label: 'Meeting Date', value: meetingDate),
+          _ReportRow(label: l10n.text('meetingDate'), value: meetingDate),
           const SizedBox(height: 8),
-          _ReportRow(label: 'Categories', value: category),
+          _ReportRow(label: l10n.text('categories'), value: category),
           const SizedBox(height: 8),
-          _ReportRow(label: 'Focal Person (H.E)', value: focalPerson),
+          _ReportRow(
+            label: isKhmer ? 'មន្ត្រីសម្របសម្រួល' : 'Focal Person (H.E)',
+            value: focalPerson,
+          ),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -334,7 +355,7 @@ class _RgcDecisionCard extends StatelessWidget {
                 const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
                 const SizedBox(width: 6),
                 Text(
-                  linkCount,
+                  linkCount == '2 Link' ? (isKhmer ? '2 តំណភ្ជាប់' : '2 Link') : linkCount,
                   style: const TextStyle(
                     color: Color(0xFF4C5563),
                     fontSize: 11,
@@ -367,9 +388,9 @@ class _RgcDecisionCard extends StatelessWidget {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   Text(
-                    'View Details',
+                    l10n.text('viewDetails'),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -435,6 +456,8 @@ class _PlenaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
+    final translatedStatus = status == 'Sent' ? l10n.text('sent') : status;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -475,7 +498,7 @@ class _PlenaryCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  status,
+                  translatedStatus,
                   style: TextStyle(
                     color: isDark
                         ? const Color(0xFF86EFAC)
@@ -488,11 +511,11 @@ class _PlenaryCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _ReportRow(label: 'Meeting Date', value: meetingDate),
+          _ReportRow(label: l10n.text('meetingDate'), value: meetingDate),
           const SizedBox(height: 8),
-          _ReportRow(label: '#Of RGC Decision', value: numberOfRgcDecision),
+          _ReportRow(label: l10n.text('rgcDecision'), value: numberOfRgcDecision),
           const SizedBox(height: 8),
-          _ReportRow(label: 'Deadline', value: deadline),
+          _ReportRow(label: l10n.text('deadline'), value: deadline),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -509,7 +532,7 @@ class _PlenaryCard extends StatelessWidget {
                 const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
                 const SizedBox(width: 6),
                 Text(
-                  attachmentCount,
+                  attachmentCount == '2 Attachement' ? l10n.text('twoAttachments') : attachmentCount,
                   style: const TextStyle(
                     color: Color(0xFF4C5563),
                     fontSize: 11,
@@ -542,9 +565,9 @@ class _PlenaryCard extends StatelessWidget {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   Text(
-                    'View Details',
+                    l10n.text('viewDetails'),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -582,6 +605,11 @@ class _ProgressReportCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
+    final isKhmer = l10n.language == AppLanguage.khmer;
+    final translatedTitle = title == 'Semester 2'
+        ? (isKhmer ? 'ឆមាសទី ២' : 'Semester 2')
+        : title;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -599,7 +627,7 @@ class _ProgressReportCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                title,
+                translatedTitle,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 15,
@@ -629,13 +657,22 @@ class _ProgressReportCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _ReportRow(label: 'Deadline', value: deadline),
+          _ReportRow(label: l10n.text('deadline'), value: deadline),
           const SizedBox(height: 8),
-          _ReportRow(label: '1st Meeting', value: firstMeeting),
+          _ReportRow(
+            label: isKhmer ? 'កិច្ចប្រជុំលើកទី១' : '1st Meeting',
+            value: firstMeeting,
+          ),
           const SizedBox(height: 8),
-          _ReportRow(label: '2nd Deadline', value: secondDeadline),
+          _ReportRow(
+            label: isKhmer ? 'កាលបរិច្ឆេទកំណត់លើកទី២' : '2nd Deadline',
+            value: secondDeadline,
+          ),
           const SizedBox(height: 8),
-          _ReportRow(label: '2nd Meeting', value: secondMeeting),
+          _ReportRow(
+            label: isKhmer ? 'កិច្ចប្រជុំលើកទី២' : '2nd Meeting',
+            value: secondMeeting,
+          ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
@@ -653,9 +690,9 @@ class _ProgressReportCard extends StatelessWidget {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   Text(
-                    'View Details',
+                    l10n.text('viewDetails'),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -742,6 +779,7 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -754,27 +792,27 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
           childAspectRatio: 2.26,
-          children: const [
+          children: [
             _MetricCard(
-              label: 'Total Issues',
+              label: l10n.text('totalIssues'),
               value: '179',
               background: Color(0xFFDDEEFF),
               icon: Icons.library_books_outlined,
             ),
             _MetricCard(
-              label: 'Solved',
+              label: l10n.text('solved'),
               value: '166/179',
               background: Color(0xFFE5FAEF),
               icon: Icons.fact_check_outlined,
             ),
             _MetricCard(
-              label: 'In Progress',
+              label: l10n.text('inProgress'),
               value: '13/179',
               background: Color(0xFFFFF8DC),
               icon: Icons.add_box_outlined,
             ),
             _MetricCard(
-              label: 'Not Addressed',
+              label: l10n.text('notAddressed'),
               value: '0/179',
               background: Color(0xFFFFEEEE),
               icon: Icons.assignment_late_outlined,
@@ -789,25 +827,25 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
           child: Row(
             children: [
               _SubFilterChip(
-                label: 'Over All',
+                label: l10n.text('overall'),
                 selected: _selectedFilter == 0,
                 onTap: () => setState(() => _selectedFilter = 0),
               ),
               const SizedBox(width: 8),
               _SubFilterChip(
-                label: 'Agencies',
+                label: l10n.text('agencies'),
                 selected: _selectedFilter == 1,
                 onTap: () => setState(() => _selectedFilter = 1),
               ),
               const SizedBox(width: 8),
               _SubFilterChip(
-                label: 'Working Group',
+                label: l10n.text('workingGroup'),
                 selected: _selectedFilter == 2,
                 onTap: () => setState(() => _selectedFilter = 2),
               ),
               const SizedBox(width: 8),
               _SubFilterChip(
-                label: 'Categories',
+                label: l10n.text('categories'),
                 selected: _selectedFilter == 3,
                 onTap: () => setState(() => _selectedFilter = 3),
               ),
@@ -815,14 +853,14 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
           ),
         ),
         const SizedBox(height: 16),
-        if (_selectedFilter == 1) ...const [
+        if (_selectedFilter == 1) ...[
           _AgenciesListCard(
-            title: 'Agencies',
+            title: l10n.text('agencies'),
             items: _agenciesItems,
           ),
-        ] else if (_selectedFilter == 2) ...const [
+        ] else if (_selectedFilter == 2) ...[
           _AgenciesListCard(
-            title: 'Working Group',
+            title: l10n.text('workingGroup'),
             items: _workingGroupItems,
           ),
         ] else if (_selectedFilter == 3) ...const [
@@ -840,8 +878,8 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
             ),
             child: Column(
               children: [
-                const DonutChartWidget(
-                  slices: [
+                DonutChartWidget(
+                  slices: const [
                     DonutChartData(
                       percentage: 0.9273,
                       color: Color(0xFF10B981),
@@ -853,7 +891,7 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
                       label: 'In Progress',
                     ),
                   ],
-                  centerTitle: 'Total Issues',
+                  centerTitle: l10n.text('totalIssues'),
                   centerValue: '179',
                   badge1Text: '92.73%',
                   badge1DotColor: Color(0xFF10B981),
@@ -863,12 +901,12 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
+                  children: [
                     Row(
                       children: [
-                        Icon(Icons.square, color: Color(0xFF10B981), size: 10),
-                        SizedBox(width: 6),
-                        Text('Solved', style: TextStyle(fontSize: 12)),
+                        const Icon(Icons.square, color: Color(0xFF10B981), size: 10),
+                        const SizedBox(width: 6),
+                        Text(l10n.text('solved'), style: const TextStyle(fontSize: 12)),
                       ],
                     ),
                     Text('(166)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
@@ -877,12 +915,12 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
+                  children: [
                     Row(
                       children: [
-                        Icon(Icons.square, color: Color(0xFFF59E0B), size: 10),
-                        SizedBox(width: 6),
-                        Text('In Progress', style: TextStyle(fontSize: 12)),
+                        const Icon(Icons.square, color: Color(0xFFF59E0B), size: 10),
+                        const SizedBox(width: 6),
+                        Text(l10n.text('inProgress'), style: const TextStyle(fontSize: 12)),
                       ],
                     ),
                     Text('(13)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
@@ -893,7 +931,7 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Overall Implementation Status',
+            l10n.text('overallStatus'),
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
               fontSize: 15,
@@ -913,8 +951,8 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
             ),
             child: Column(
               children: [
-                const DonutChartWidget(
-                  slices: [
+                DonutChartWidget(
+                  slices: const [
                     DonutChartData(
                       percentage: 0.923,
                       color: Color(0xFFF97316),
@@ -926,7 +964,7 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
                       label: 'Early Progress',
                     ),
                   ],
-                  centerTitle: 'In Progress',
+                  centerTitle: l10n.text('inProgress'),
                   centerValue: '179',
                   badge1Text: '7.7%',
                   badge1DotColor: Color(0xFF10B981),
@@ -1083,7 +1121,7 @@ class _CategoriesOfIssuesCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Categories of Issues',
+          AppLocalizations.of(context).text('categoriesOfIssues'),
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 15,
@@ -1586,9 +1624,9 @@ class _TotalPrimaryAgenciesCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Total Primary Agencies',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context).text('totalPrimaryAgencies'),
+                style: const TextStyle(
                   color: AppColors.mutedText,
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -1707,11 +1745,12 @@ class _ReportTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
     final tabs = [
-      (icon: Icons.calendar_month_outlined, label: 'Progress Report'),
-      (icon: Icons.add_box_outlined, label: 'Dashboard'),
-      (icon: Icons.calendar_month_outlined, label: 'Plenaries'),
-      (icon: Icons.assignment_outlined, label: 'RGC Decision'),
+      (icon: Icons.calendar_month_outlined, label: l10n.text('progressReport')),
+      (icon: Icons.add_box_outlined, label: l10n.text('dashboard')),
+      (icon: Icons.calendar_month_outlined, label: l10n.text('plenary')),
+      (icon: Icons.assignment_outlined, label: l10n.text('rgcDecision')),
     ];
 
     return Container(
@@ -1784,6 +1823,34 @@ class _ReportTabs extends StatelessWidget {
   }
 }
 
+String _translateFilterLabel(String item, AppLocalizations l10n) {
+  switch (item) {
+    case 'Drafted':
+      return l10n.text('drafted');
+    case 'Submitted':
+      return l10n.text('submitted');
+    case 'Under Review':
+      return l10n.text('underReview');
+    case 'Scheduled':
+      return l10n.text('scheduled');
+    case 'Completed':
+      return l10n.text('completed');
+    case 'Solved':
+      return l10n.text('solved');
+    case 'In Progress':
+      return l10n.text('inProgress');
+    case 'Not Address':
+    case 'Not Addressed':
+      return l10n.text('notAddressed');
+    case 'Sent':
+      return l10n.text('sent');
+    case 'Draft':
+      return l10n.text('draft');
+    default:
+      return item;
+  }
+}
+
 class _FilterChipCheckbox extends StatelessWidget {
   const _FilterChipCheckbox({
     required this.label,
@@ -1798,6 +1865,8 @@ class _FilterChipCheckbox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
+    final translatedLabel = _translateFilterLabel(label, l10n);
 
     return InkWell(
       onTap: onTap,
@@ -1824,7 +1893,7 @@ class _FilterChipCheckbox extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Text(
-              label,
+              translatedLabel,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 12,
@@ -2280,6 +2349,144 @@ class _LineMinistrySummaryFilterSheetState
   }
 }
 
+class _LineMinistryPlenaryFilterSheet extends StatefulWidget {
+  const _LineMinistryPlenaryFilterSheet({
+    required this.selectedStatuses,
+  });
+
+  final Set<String> selectedStatuses;
+
+  @override
+  State<_LineMinistryPlenaryFilterSheet> createState() =>
+      _LineMinistryPlenaryFilterSheetState();
+}
+
+class _LineMinistryPlenaryFilterSheetState
+    extends State<_LineMinistryPlenaryFilterSheet> {
+  late Set<String> _statuses;
+
+  static const _statusOptions = ['Sent', 'Draft'];
+
+  @override
+  void initState() {
+    super.initState();
+    _statuses = {...widget.selectedStatuses};
+  }
+
+  void _toggle(Set<String> set, String value) {
+    setState(() {
+      if (set.contains(value)) {
+        set.remove(value);
+      } else {
+        set.add(value);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark ? AppColors.darkBackground : Colors.white;
+
+    final viewPadding = MediaQuery.of(context).viewPadding;
+    final topInset = viewPadding.top > 48.0 ? viewPadding.top : 48.0;
+
+    return Material(
+      color: background,
+      child: FractionallySizedBox(
+        heightFactor: 1.0,
+        child: Column(
+          children: [
+            // HEADER
+            Container(
+              padding: EdgeInsets.fromLTRB(22, topInset + 16, 22, 16),
+              child: Row(
+                children: [
+                  const SizedBox(width: 28),
+                  Expanded(
+                    child: Text(
+                      'Filters',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () => Navigator.pop(context),
+                    child: Icon(
+                      Icons.close,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      size: 22,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1, color: Color(0xFFF0F2F5)),
+            // FILTER SECTIONS
+            Expanded(
+              child: ListView(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+                children: [
+                  const Text(
+                    'Status',
+                    style: TextStyle(
+                      color: AppColors.mutedText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 24,
+                    runSpacing: 8,
+                    children: _statusOptions.map((item) {
+                      return _FilterChipCheckbox(
+                        label: item,
+                        checked: _statuses.contains(item),
+                        onTap: () => _toggle(_statuses, item),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+            // APPLY BUTTON
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+              child: SizedBox(
+                width: double.infinity,
+                height: 46,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.accent(context),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(context, _statuses),
+                  child: const Text(
+                    'Apply Filters',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _LineMinistryDashboardFilterSheet extends StatefulWidget {
   const _LineMinistryDashboardFilterSheet();
 
@@ -2357,6 +2564,10 @@ class _LineMinistryDashboardFilterSheetState
     '2024-01-24',
     '2024-11-23',
     'Not Specified',
+    '2024-01-23',
+    '2024-10-23',
+    '2024-06-24',
+    'Not applicable',
   ];
 
   void _toggle(Set<String> set, String value) {
