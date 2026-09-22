@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../widgets/app_logo.dart';
-import '../onboarding/get_started_screen.dart';
+import '../auth/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -16,15 +16,15 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 2), _openGetStarted);
+    Timer(const Duration(seconds: 2), _openLogin);
   }
 
-  void _openGetStarted() {
+  void _openLogin() {
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       PageRouteBuilder<void>(
         pageBuilder: (_, animation, _) =>
-            FadeTransition(opacity: animation, child: const GetStartedScreen()),
+            FadeTransition(opacity: animation, child: const LoginScreen()),
       ),
     );
   }

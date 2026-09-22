@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../screens/meeting/meeting_screen.dart';
+import '../../private_sector/meeting/meeting_screen.dart';
 
 class CdcSecretariatMeetingScreenView extends StatelessWidget {
   const CdcSecretariatMeetingScreenView({super.key});

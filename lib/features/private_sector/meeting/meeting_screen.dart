@@ -1,3 +1,6 @@
+import '../../../core/app_settings.dart';
+import '../../../core/config/module_config.dart';
+import '../../cdc_secretariat/meeting/meeting_request_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -80,7 +83,8 @@ class _MeetingScreenState extends State<MeetingScreen> {
 
   int get _activeFilterCount {
     if (_selectedTab == 0) {
-      int count = _selectedWorkingGroups.length +
+      int count =
+          _selectedWorkingGroups.length +
           _selectedAgencies.length +
           _selectedStatuses.length;
       if (_selectedDate != null && _selectedDate!.isNotEmpty) {
@@ -105,7 +109,11 @@ class _MeetingScreenState extends State<MeetingScreen> {
     final headerBackground = isDark ? AppColors.darkBackground : Colors.white;
 
     final title = switch (_selectedTab) {
-      0 => l10n.text('meetingRequests'),
+      0 => l10n.text(
+        AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat
+            ? 'meetingRequest'
+            : 'meetingRequests',
+      ),
       1 => l10n.text('meetingCalendar'),
       _ => l10n.text('meetingSummary'),
     };
@@ -119,7 +127,12 @@ class _MeetingScreenState extends State<MeetingScreen> {
         children: [
           Container(
             color: headerBackground,
-            padding: EdgeInsets.fromLTRB(14, topPadding > 0 ? topPadding + 12 : 34, 14, 12),
+            padding: EdgeInsets.fromLTRB(
+              14,
+              topPadding > 0 ? topPadding + 12 : 34,
+              14,
+              12,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -161,7 +174,13 @@ class _MeetingScreenState extends State<MeetingScreen> {
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 180),
               child: switch (_selectedTab) {
-                0 => const MeetingRequestTab(key: ValueKey('requests')),
+                0 =>
+                  AppSettings.of(context).moduleType ==
+                          AppModuleType.cdcSecretariat
+                      ? const CdcMeetingRequestTab(
+                          key: ValueKey('cdc-requests'),
+                        )
+                      : const MeetingRequestTab(key: ValueKey('requests')),
                 1 => const CalendarTab(key: ValueKey('calendar')),
                 _ => const MeetingSummaryTab(key: ValueKey('summary')),
               },
@@ -174,10 +193,7 @@ class _MeetingScreenState extends State<MeetingScreen> {
 }
 
 class _FilterButton extends StatelessWidget {
-  const _FilterButton({
-    required this.activeCount,
-    required this.onTap,
-  });
+  const _FilterButton({required this.activeCount, required this.onTap});
 
   final int activeCount;
   final VoidCallback onTap;
@@ -245,10 +261,7 @@ class _FilterButton extends StatelessWidget {
 }
 
 class _MeetingTabs extends StatelessWidget {
-  const _MeetingTabs({
-    required this.selectedIndex,
-    required this.onSelected,
-  });
+  const _MeetingTabs({required this.selectedIndex, required this.onSelected});
 
   final int selectedIndex;
   final ValueChanged<int> onSelected;
@@ -259,18 +272,15 @@ class _MeetingTabs extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final tabs = [
-      (
-        icon: Icons.add_box_outlined,
-        label: l10n.text('meetingRequest'),
-      ),
+      (icon: Icons.add_box_outlined, label: l10n.text('meetingRequest')),
       (
         icon: Icons.calendar_month_outlined,
-        label: l10n.text('meetingCalendar'),
+        label:
+            AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat
+            ? l10n.text('wgMeeting')
+            : l10n.text('meetingCalendar'),
       ),
-      (
-        icon: Icons.assignment_outlined,
-        label: l10n.text('meetingSummary'),
-      ),
+      (icon: Icons.assignment_outlined, label: l10n.text('meetingSummary')),
     ];
 
     return Container(
@@ -286,57 +296,52 @@ class _MeetingTabs extends StatelessWidget {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
-          children: List.generate(
-            tabs.length,
-            (index) {
-              final isSelected = selectedIndex == index;
-              return Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: InkWell(
-                  onTap: () => onSelected(index),
-                  borderRadius: BorderRadius.circular(6),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.accent(context)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          tabs[index].icon,
+          children: List.generate(tabs.length, (index) {
+            final isSelected = selectedIndex == index;
+            return Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: InkWell(
+                onTap: () => onSelected(index),
+                borderRadius: BorderRadius.circular(6),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.accent(context)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        tabs[index].icon,
+                        color: isSelected ? Colors.white : AppColors.mutedText,
+                        size: 15,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        tabs[index].label,
+                        style: TextStyle(
                           color: isSelected
                               ? Colors.white
                               : AppColors.mutedText,
-                          size: 15,
+                          fontSize: 12,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w600,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          tabs[index].label,
-                          style: TextStyle(
-                            color: isSelected
-                                ? Colors.white
-                                : AppColors.mutedText,
-                            fontSize: 12,
-                            fontWeight: isSelected
-                                ? FontWeight.w700
-                                : FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          }),
         ),
       ),
     );
@@ -473,7 +478,7 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
       'September',
       'October',
       'November',
-      'December'
+      'December',
     ];
     return months[(month - 1) % 12];
   }
@@ -483,8 +488,7 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
-    final borderColor =
-        isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
+    final borderColor = isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
 
     final viewPadding = MediaQuery.of(context).viewPadding;
     final topInset = viewPadding.top > 48.0 ? viewPadding.top : 48.0;
@@ -499,19 +503,12 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
       child: FractionallySizedBox(
         heightFactor: 1.0,
         child: Container(
-          decoration: BoxDecoration(
-            color: background,
-          ),
+          decoration: BoxDecoration(color: background),
           child: Column(
             children: [
               // ================= FILTER HEADER =================
               Container(
-                padding: EdgeInsets.fromLTRB(
-                  22,
-                  topInset + 24,
-                  22,
-                  12,
-                ),
+                padding: EdgeInsets.fromLTRB(22, topInset + 24, 22, 12),
                 child: Row(
                   children: [
                     const SizedBox(width: 28),
@@ -534,10 +531,7 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
                       child: const SizedBox(
                         width: 28,
                         height: 28,
-                        child: Icon(
-                          Icons.close,
-                          size: 25,
-                        ),
+                        child: Icon(Icons.close, size: 25),
                       ),
                     ),
                   ],
@@ -547,12 +541,7 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
               // ================= FILTER CONTENT =================
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    25,
-                    20,
-                    25,
-                    22,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(25, 20, 25, 22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -735,11 +724,7 @@ class _MeetingFilterSheetState extends State<_MeetingFilterSheet> {
                 ),
                 decoration: BoxDecoration(
                   color: background,
-                  border: Border(
-                    top: BorderSide(
-                      color: borderColor,
-                    ),
-                  ),
+                  border: Border(top: BorderSide(color: borderColor)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.03),
@@ -825,22 +810,26 @@ class _InlineCalendarPickerState extends State<_InlineCalendarPicker> {
     'September',
     'October',
     'November',
-    'December'
+    'December',
   ];
 
   static const _weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
   void _previousMonth() {
     setState(() {
-      _displayedMonth =
-          DateTime(_displayedMonth.year, _displayedMonth.month - 1);
+      _displayedMonth = DateTime(
+        _displayedMonth.year,
+        _displayedMonth.month - 1,
+      );
     });
   }
 
   void _nextMonth() {
     setState(() {
-      _displayedMonth =
-          DateTime(_displayedMonth.year, _displayedMonth.month + 1);
+      _displayedMonth = DateTime(
+        _displayedMonth.year,
+        _displayedMonth.month + 1,
+      );
     });
   }
 
@@ -943,7 +932,8 @@ class _InlineCalendarPickerState extends State<_InlineCalendarPicker> {
               }
               final dayNumber = index - startingWeekday + 1;
               final date = DateTime(year, month, dayNumber);
-              final isSelected = _selectedDate.year == date.year &&
+              final isSelected =
+                  _selectedDate.year == date.year &&
                   _selectedDate.month == date.month &&
                   _selectedDate.day == date.day;
 
@@ -969,8 +959,9 @@ class _InlineCalendarPickerState extends State<_InlineCalendarPicker> {
                           ? Colors.white
                           : Theme.of(context).colorScheme.onSurface,
                       fontSize: 13,
-                      fontWeight:
-                          isSelected ? FontWeight.w700 : FontWeight.w400,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w400,
                     ),
                   ),
                 ),
@@ -1050,20 +1041,9 @@ class _MeetingSummaryFilterSheetState
     'Completed',
   ];
 
-  static const _yearItems = [
-    '2026',
-    '2025',
-    '2024',
-    '2023',
-  ];
+  static const _yearItems = ['2026', '2025', '2024', '2023'];
 
-  static const _issueNumberItems = [
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-  ];
+  static const _issueNumberItems = ['1', '2', '3', '4', '5'];
 
   @override
   void initState() {
@@ -1088,8 +1068,7 @@ class _MeetingSummaryFilterSheetState
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
-    final borderColor =
-        isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
+    final borderColor = isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
 
     final viewPadding = MediaQuery.of(context).viewPadding;
     final topInset = viewPadding.top > 48.0 ? viewPadding.top : 48.0;
@@ -1104,19 +1083,12 @@ class _MeetingSummaryFilterSheetState
       child: FractionallySizedBox(
         heightFactor: 1.0,
         child: Container(
-          decoration: BoxDecoration(
-            color: background,
-          ),
+          decoration: BoxDecoration(color: background),
           child: Column(
             children: [
               // ================= FILTER HEADER =================
               Container(
-                padding: EdgeInsets.fromLTRB(
-                  22,
-                  topInset + 24,
-                  22,
-                  12,
-                ),
+                padding: EdgeInsets.fromLTRB(22, topInset + 24, 22, 12),
                 child: Row(
                   children: [
                     const SizedBox(width: 28),
@@ -1139,10 +1111,7 @@ class _MeetingSummaryFilterSheetState
                       child: const SizedBox(
                         width: 28,
                         height: 28,
-                        child: Icon(
-                          Icons.close,
-                          size: 25,
-                        ),
+                        child: Icon(Icons.close, size: 25),
                       ),
                     ),
                   ],
@@ -1152,12 +1121,7 @@ class _MeetingSummaryFilterSheetState
               // ================= FILTER CONTENT =================
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    25,
-                    20,
-                    25,
-                    22,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(25, 20, 25, 22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1227,11 +1191,7 @@ class _MeetingSummaryFilterSheetState
                 ),
                 decoration: BoxDecoration(
                   color: background,
-                  border: Border(
-                    top: BorderSide(
-                      color: borderColor,
-                    ),
-                  ),
+                  border: Border(top: BorderSide(color: borderColor)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.03),
@@ -1376,8 +1336,9 @@ class _AgencyBadgeGrid extends StatelessWidget {
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 11,
-                        fontWeight:
-                            selected ? FontWeight.w600 : FontWeight.w500,
+                        fontWeight: selected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
                       ),
                     ),
                   ),
@@ -1448,7 +1409,7 @@ class _CheckTile extends StatelessWidget {
             child: Text(
               _localizeLabel(context, label),
               style: const TextStyle(
-                color: AppColors.mutedText,
+                color: AppColors.filterLabel,
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
               ),
@@ -1499,18 +1460,15 @@ class _CheckTileBox extends StatelessWidget {
         border: Border.all(
           color: selected
               ? AppColors.accent(context)
-              : (isDark ? AppColors.darkBorder : const Color(0xFFCED7E1)),
+              : (isDark ? AppColors.darkBorder : AppColors.filterOutline),
           width: 1,
         ),
       ),
       child: selected
-          ? const Icon(
-              Icons.check,
-              size: 11,
-              color: Colors.white,
-            )
+          ? const Icon(Icons.check, size: 11, color: Colors.white)
           : null,
     );
   }
 }
+
 // End of MeetingScreen

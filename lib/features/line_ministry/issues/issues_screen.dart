@@ -834,7 +834,7 @@ class _InlineCheckbox extends StatelessWidget {
                       ? AppColors.accent(context)
                       : (isDark
                           ? AppColors.darkBorder
-                          : const Color(0xFFCED7E1)),
+                          : AppColors.filterOutline),
                   width: 1,
                 ),
               ),

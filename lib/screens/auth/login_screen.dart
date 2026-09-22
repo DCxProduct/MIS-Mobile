@@ -27,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     'cdc@gmail.com',
     'cefp@gmail.com',
     'secretariat@gmail.com',
+    'cdcgpsf@gmail.com',
   };
 
   static const _requiredPassword = '12345678';

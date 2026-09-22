@@ -8,6 +8,8 @@ class AppColors {
   static const darkPrimary = Color(0xFF41A1E3);
   static const darkPrimaryContainer = Color(0xFF0F2133);
   static const text = Color(0xFF101828);
+  static const filterLabel = Color(0xFF8892A5);
+  static const filterOutline = Color(0xFFD4DCE7);
   static const mutedText = Color(0xFF7E8792);
   static const fieldBorder = Color(0xFFE3E6EA);
   static const surface = Color(0xFFFFFFFF);

@@ -1204,7 +1204,7 @@ class _CheckTile extends StatelessWidget {
             child: Text(
               _localizeLabel(context, label),
               style: const TextStyle(
-                color: AppColors.mutedText,
+                color: AppColors.filterLabel,
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
               ),
@@ -1255,7 +1255,7 @@ class _CheckTileBox extends StatelessWidget {
         border: Border.all(
           color: selected
               ? AppColors.accent(context)
-              : (isDark ? AppColors.darkBorder : const Color(0xFFCED7E1)),
+              : (isDark ? AppColors.darkBorder : AppColors.filterOutline),
           width: 1,
         ),
       ),

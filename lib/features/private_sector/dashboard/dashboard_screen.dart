@@ -1,3 +1,7 @@
+import '../../cdc_secretariat/dashboard/filter_sheet.dart';
+import '../../cdc_secretariat/dashboard/categories_tab.dart';
+import '../../cdc_secretariat/dashboard/working_group_tab.dart';
+import '../../cdc_secretariat/dashboard/agencies_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -5,7 +9,6 @@ import '../../../core/app_colors.dart';
 import '../../../core/app_settings.dart';
 import '../../../core/config/module_config.dart';
 import '../../../screens/account/account_screen.dart';
-import '../../../screens/notification/notification_screen.dart';
 import '../../../translations/app_localizations.dart';
 import '../../../widgets/app_bottom_nav_bar.dart';
 import '../../../widgets/app_header.dart';
@@ -40,6 +43,7 @@ import '../reports/reports_screen.dart';
 import 'tabs/agencies_tab.dart';
 import 'tabs/categories_tab.dart';
 import 'tabs/overall_tab.dart';
+import '../../cdc_secretariat/dashboard/overall_tab.dart';
 import 'tabs/working_group_tab.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -67,40 +71,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildBodyForModule(AppModuleType moduleType, int index) {
     return switch (moduleType) {
       AppModuleType.lineMinistry => switch (index) {
-          0 => const LineMinistryDashboardScreen(),
-          1 => const LineMinistryMeetingScreenView(),
-          2 => const LineMinistryIssuesScreenView(),
-          3 => const LineMinistryReportsScreenView(),
-          _ => const LineMinistryProfileScreenView(),
-        },
+        0 => const LineMinistryDashboardScreen(),
+        1 => const LineMinistryMeetingScreenView(),
+        2 => const LineMinistryIssuesScreenView(),
+        3 => const LineMinistryReportsScreenView(),
+        _ => const LineMinistryProfileScreenView(),
+      },
       AppModuleType.cdcSection => switch (index) {
-          0 => const CdcSectionDashboardScreenView(),
-          1 => const CdcSectionMeetingScreenView(),
-          2 => const CdcSectionIssuesScreenView(),
-          3 => const CdcSectionReportsScreenView(),
-          _ => const CdcSectionProfileScreenView(),
-        },
+        0 => const CdcSectionDashboardScreenView(),
+        1 => const CdcSectionMeetingScreenView(),
+        2 => const CdcSectionIssuesScreenView(),
+        3 => const CdcSectionReportsScreenView(),
+        _ => const CdcSectionProfileScreenView(),
+      },
       AppModuleType.cefp => switch (index) {
-          0 => const CefpDashboardScreenView(),
-          1 => const CefpMeetingScreenView(),
-          2 => const CefpIssuesScreenView(),
-          3 => const CefpReportsScreenView(),
-          _ => const CefpProfileScreenView(),
-        },
+        0 => const CefpDashboardScreenView(),
+        1 => const CefpMeetingScreenView(),
+        2 => const CefpIssuesScreenView(),
+        3 => const CefpReportsScreenView(),
+        _ => const CefpProfileScreenView(),
+      },
       AppModuleType.cdcSecretariat => switch (index) {
-          0 => const CdcSecretariatDashboardScreenView(),
-          1 => const CdcSecretariatMeetingScreenView(),
-          2 => const CdcSecretariatIssuesScreenView(),
-          3 => const CdcSecretariatReportsScreenView(),
-          _ => const CdcSecretariatProfileScreenView(),
-        },
+        0 => const CdcSecretariatDashboardScreenView(),
+        1 => const CdcSecretariatMeetingScreenView(),
+        2 => const CdcSecretariatIssuesScreenView(),
+        3 => const CdcSecretariatReportsScreenView(),
+        _ => const CdcSecretariatProfileScreenView(),
+      },
       AppModuleType.privateSector => switch (index) {
-          0 => const _DashboardPage(),
-          1 => const MeetingScreen(),
-          2 => const IssuesScreen(),
-          3 => const ReportScreen(),
-          _ => const AccountScreen(),
-        },
+        0 => const DashboardPage(),
+        1 => const MeetingScreen(),
+        2 => const IssuesScreen(),
+        3 => const ReportScreen(),
+        _ => const AccountScreen(),
+      },
     };
   }
 
@@ -112,8 +116,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     final moduleType = AppSettings.of(context).moduleType;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final background =
-        isDark ? AppColors.darkBackground : const Color(0xFFF5F7FB);
+    final background = isDark
+        ? AppColors.darkBackground
+        : const Color(0xFFF5F7FB);
     final body = _buildBodyForModule(moduleType, _selectedIndex);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -139,14 +144,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-class _DashboardPage extends StatefulWidget {
-  const _DashboardPage();
+class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
 
   @override
-  State<_DashboardPage> createState() => _DashboardPageState();
+  State<DashboardPage> createState() => DashboardPageState();
 }
 
-class _DashboardPageState extends State<_DashboardPage> {
+class DashboardPageState extends State<DashboardPage> {
+  CdcDashboardFilters _cdcFilters = CdcDashboardFilters();
   int _selectedScopeTab = 0;
   int _selectedStatusTab = 0;
 
@@ -156,6 +162,17 @@ class _DashboardPageState extends State<_DashboardPage> {
   Set<String> _selectedProgressReports = {};
 
   Future<void> _openFilterSheet(BuildContext context) async {
+    if (AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat) {
+      final result = await Navigator.of(context).push<CdcDashboardFilters>(
+        MaterialPageRoute<CdcDashboardFilters>(
+          fullscreenDialog: true,
+          builder: (_) => CdcDashboardFilterSheet(initial: _cdcFilters),
+        ),
+      );
+      if (!mounted || result == null) return;
+      setState(() => _cdcFilters = result);
+      return;
+    }
     final result = await showModalBottomSheet<_FilterResult>(
       context: context,
       isScrollControlled: true,
@@ -206,24 +223,37 @@ class _DashboardPageState extends State<_DashboardPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _ScopeTitle(selectedIndex: _selectedScopeTab),
+                    if (moduleType != AppModuleType.cdcSecretariat)
+                      _ScopeTitle(selectedIndex: _selectedScopeTab),
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        _ScopeSelector(
-                          selectedIndex: _selectedScopeTab,
-                          onSelected: (index) {
-                            setState(() => _selectedScopeTab = index);
-                          },
-                        ),
+                        if (moduleType == AppModuleType.cdcSecretariat)
+                          Text(
+                            l10n.text('dashboard'),
+                            style: TextStyle(
+                              color: colors.onSurface,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          )
+                        else
+                          _ScopeSelector(
+                            selectedIndex: _selectedScopeTab,
+                            onSelected: (index) {
+                              setState(() => _selectedScopeTab = index);
+                            },
+                          ),
                         const Spacer(),
                         _FilterBar(
                           onTap: () => _openFilterSheet(context),
                           activeCount:
-                              _selectedYears.length +
-                              _selectedStatuses.length +
-                              _selectedAgencies.length +
-                              _selectedProgressReports.length,
+                              moduleType == AppModuleType.cdcSecretariat
+                              ? _cdcFilters.count
+                              : _selectedYears.length +
+                                    _selectedStatuses.length +
+                                    _selectedAgencies.length +
+                                    _selectedProgressReports.length,
                         ),
                       ],
                     ),
@@ -261,7 +291,7 @@ class _DashboardPageState extends State<_DashboardPage> {
 
   String _statusTitleKey(int selectedIndex, AppLocalizations l10n) {
     return switch (selectedIndex) {
-      1 => l10n.text('overallStatus'),
+      1 => l10n.text('agencies'),
       2 => l10n.text('workingGroup'),
       3 => l10n.text('categoriesOfIssues'),
       _ => l10n.text('overallStatus'),
@@ -273,8 +303,7 @@ class DashboardLoadingScreen extends StatefulWidget {
   const DashboardLoadingScreen({super.key});
 
   @override
-  State<DashboardLoadingScreen> createState() =>
-      _DashboardLoadingScreenState();
+  State<DashboardLoadingScreen> createState() => _DashboardLoadingScreenState();
 }
 
 class _DashboardLoadingScreenState extends State<DashboardLoadingScreen>
@@ -333,6 +362,7 @@ class _DashboardLoadingScreenState extends State<DashboardLoadingScreen>
 
   Widget cardSkeleton({double height = 72}) {
     return Container(
+      width: double.infinity,
       height: height,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -493,10 +523,7 @@ class _ScopeTitle extends StatelessWidget {
 }
 
 class _ScopeSelector extends StatelessWidget {
-  const _ScopeSelector({
-    required this.selectedIndex,
-    required this.onSelected,
-  });
+  const _ScopeSelector({required this.selectedIndex, required this.onSelected});
 
   final int selectedIndex;
   final ValueChanged<int> onSelected;
@@ -563,8 +590,8 @@ class _ScopePill extends StatelessWidget {
             color: selected
                 ? Colors.white
                 : (AppColors.isDark(context)
-                    ? const Color(0xFFB9D7ED)
-                    : AppColors.primary),
+                      ? const Color(0xFFB9D7ED)
+                      : AppColors.primary),
             fontSize: 12,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
           ),
@@ -575,10 +602,7 @@ class _ScopePill extends StatelessWidget {
 }
 
 class _FilterBar extends StatelessWidget {
-  const _FilterBar({
-    required this.onTap,
-    required this.activeCount,
-  });
+  const _FilterBar({required this.onTap, required this.activeCount});
 
   final VoidCallback onTap;
   final int activeCount;
@@ -689,11 +713,7 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
 
   static const _yearItems = ['2026', '2025', '2024', '2023'];
 
-  static const _statusItems = [
-    'Solved',
-    'In Progress',
-    'Not Address',
-  ];
+  static const _statusItems = ['Solved', 'In Progress', 'Not Address'];
 
   static const _agencyItems = [
     'GDT',
@@ -716,11 +736,7 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
     'MOC',
   ];
 
-  static const _progressItems = [
-    'Both',
-    'S1',
-    'S2',
-  ];
+  static const _progressItems = ['Both', 'S1', 'S2'];
 
   @override
   void initState() {
@@ -746,8 +762,7 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
-    final borderColor =
-        isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
+    final borderColor = isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
 
     final viewPadding = MediaQuery.of(context).viewPadding;
     final topInset = viewPadding.top > 48.0 ? viewPadding.top : 48.0;
@@ -762,19 +777,12 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
       child: FractionallySizedBox(
         heightFactor: 1.0,
         child: Container(
-          decoration: BoxDecoration(
-            color: background,
-          ),
+          decoration: BoxDecoration(color: background),
           child: Column(
             children: [
               // ================= FILTER HEADER =================
               Container(
-                padding: EdgeInsets.fromLTRB(
-                  22,
-                  topInset + 24,
-                  22,
-                  12,
-                ),
+                padding: EdgeInsets.fromLTRB(22, topInset + 24, 22, 12),
                 child: Row(
                   children: [
                     const SizedBox(width: 28),
@@ -797,10 +805,7 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
                       child: const SizedBox(
                         width: 28,
                         height: 28,
-                        child: Icon(
-                          Icons.close,
-                          size: 25,
-                        ),
+                        child: Icon(Icons.close, size: 25),
                       ),
                     ),
                   ],
@@ -810,12 +815,7 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
               // ================= FILTER CONTENT =================
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    25,
-                    20,
-                    25,
-                    22,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(25, 20, 25, 22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -908,8 +908,7 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
                         items: _progressItems,
                         columns: 3,
                         selectedItems: _progressReports,
-                        onChanged: (value) =>
-                            _toggle(_progressReports, value),
+                        onChanged: (value) => _toggle(_progressReports, value),
                       ),
                     ],
                   ),
@@ -926,11 +925,7 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
                 ),
                 decoration: BoxDecoration(
                   color: background,
-                  border: Border(
-                    top: BorderSide(
-                      color: borderColor,
-                    ),
-                  ),
+                  border: Border(top: BorderSide(color: borderColor)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.03),
@@ -958,9 +953,7 @@ class _GroupFilterSheetState extends State<_GroupFilterSheet> {
                           years: {..._years},
                           statuses: {..._statuses},
                           agencies: {..._agencies},
-                          progressReports: {
-                            ..._progressReports,
-                          },
+                          progressReports: {..._progressReports},
                         ),
                       );
                     },
@@ -1091,25 +1084,17 @@ class _FilterCheckItem extends StatelessWidget {
             width: 16,
             height: 16,
             decoration: BoxDecoration(
-              color: selected
-                  ? AppColors.accent(context)
-                  : Colors.transparent,
+              color: selected ? AppColors.accent(context) : Colors.transparent,
               borderRadius: BorderRadius.circular(4),
               border: Border.all(
                 color: selected
                     ? AppColors.accent(context)
-                    : (isDark
-                        ? AppColors.darkBorder
-                        : const Color(0xFFCED7E1)),
+                    : (isDark ? AppColors.darkBorder : const Color(0xFFCED7E1)),
                 width: 1,
               ),
             ),
             child: selected
-                ? const Icon(
-                    Icons.check,
-                    size: 11,
-                    color: Colors.white,
-                  )
+                ? const Icon(Icons.check, size: 11, color: Colors.white)
                 : null,
           ),
           const SizedBox(width: 8),
@@ -1158,13 +1143,27 @@ class _MetricGrid extends StatelessWidget {
     final moduleType = AppSettings.of(context).moduleType;
     final isLineMinistry = moduleType == AppModuleType.lineMinistry;
 
-    final totalIssues = isWorkingGroup ? '20' : (isLineMinistry ? '56' : '20');
-    final solved =
-        isWorkingGroup ? '15/20' : (isLineMinistry ? '30/56' : '15/20');
-    final inProgress =
-        isWorkingGroup ? '4/20' : (isLineMinistry ? '16/56' : '4/20');
-    final notAddressed =
-        isWorkingGroup ? '1/20' : (isLineMinistry ? '10/56' : '1/20');
+    final isSecretariat = moduleType == AppModuleType.cdcSecretariat;
+    final totalIssues = isSecretariat
+        ? '179'
+        : isWorkingGroup
+        ? '20'
+        : (isLineMinistry ? '56' : '20');
+    final solved = isSecretariat
+        ? '166/179'
+        : isWorkingGroup
+        ? '15/20'
+        : (isLineMinistry ? '30/56' : '15/20');
+    final inProgress = isSecretariat
+        ? '13/179'
+        : isWorkingGroup
+        ? '4/20'
+        : (isLineMinistry ? '16/56' : '4/20');
+    final notAddressed = isSecretariat
+        ? '0/179'
+        : isWorkingGroup
+        ? '1/20'
+        : (isLineMinistry ? '10/56' : '1/20');
 
     return GridView.count(
       crossAxisCount: 2,
@@ -1349,10 +1348,7 @@ class _WideMetricCard extends StatelessWidget {
 }
 
 class _DashboardTabs extends StatelessWidget {
-  const _DashboardTabs({
-    required this.selectedIndex,
-    required this.onSelected,
-  });
+  const _DashboardTabs({required this.selectedIndex, required this.onSelected});
 
   final int selectedIndex;
   final ValueChanged<int> onSelected;
@@ -1421,6 +1417,14 @@ class _StatusTabContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat) {
+      return switch (selectedIndex) {
+        1 => const CdcSecretariatAgenciesTab(),
+        2 => const CdcSecretariatWorkingGroupTab(),
+        3 => const CdcSecretariatCategoriesTab(),
+        _ => const CdcSecretariatOverallTab(),
+      };
+    }
     return switch (selectedIndex) {
       1 => const AgenciesTab(),
       2 => const WorkingGroupTab(),

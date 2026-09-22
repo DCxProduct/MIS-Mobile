@@ -17,26 +17,11 @@ class AppBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final items = [
-      (
-        icon: Icons.grid_view_rounded,
-        label: l10n.text('dashboard'),
-      ),
-      (
-        icon: Icons.calendar_month_outlined,
-        label: l10n.text('meeting'),
-      ),
-      (
-        icon: Icons.assignment_outlined,
-        label: l10n.text('issues'),
-      ),
-      (
-        icon: Icons.folder_outlined,
-        label: l10n.text('report'),
-      ),
-      (
-        icon: Icons.person_outline_rounded,
-        label: l10n.text('account'),
-      ),
+      (icon: Icons.grid_view_rounded, label: l10n.text('dashboard')),
+      (icon: Icons.calendar_month_outlined, label: l10n.text('meeting')),
+      (icon: Icons.assignment_outlined, label: l10n.text('issues')),
+      (icon: Icons.folder_outlined, label: l10n.text('report')),
+      (icon: Icons.person_outline_rounded, label: l10n.text('account')),
     ];
 
     return Container(
@@ -58,32 +43,38 @@ class AppBottomNavBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(items.length, (index) {
           final isSelected = selectedIndex == index;
-          return InkWell(
-            onTap: () => onSelected(index),
-            borderRadius: BorderRadius.circular(10),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  items[index].icon,
-                  color: isSelected
-                      ? AppColors.accent(context)
-                      : AppColors.mutedText,
-                  size: 22,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  items[index].label,
-                  style: TextStyle(
+          return Expanded(
+            child: InkWell(
+              onTap: () => onSelected(index),
+              borderRadius: BorderRadius.circular(10),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    items[index].icon,
                     color: isSelected
                         ? AppColors.accent(context)
                         : AppColors.mutedText,
-                    fontSize: 11,
-                    fontWeight:
-                        isSelected ? FontWeight.w700 : FontWeight.w500,
+                    size: 22,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      items[index].label,
+                      style: TextStyle(
+                        color: isSelected
+                            ? AppColors.accent(context)
+                            : AppColors.mutedText,
+                        fontSize: 11,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }),
