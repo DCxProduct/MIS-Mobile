@@ -21,24 +21,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   String? _errorMessage;
 
-  static const _allowedAccounts = {
-    'ministry@gmail.com',
-    'privatesector@gmail.com',
-    'cdc@gmail.com',
-    'cefp@gmail.com',
-    'secretariat@gmail.com',
-    'cdcgpsf@gmail.com',
-  };
-
-  static const _requiredPassword = '12345678';
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
   void _submit() {
     setState(() => _errorMessage = null);
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -46,7 +28,16 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim().toLowerCase();
     final password = _passwordController.text;
 
-    if (password.isEmpty) {
+    const allowedAccounts = {
+      'ministry@gmail.com',
+      'privatesector@gmail.com',
+      'cdc@gmail.com',
+      'cdcgpsf@gmail.com',
+      'cefp@gmail.com',
+    };
+    const requiredPassword = '12345678';
+
+    if (!allowedAccounts.contains(email) || password != requiredPassword) {
       setState(() {
         _errorMessage = AppLocalizations.of(context).text('invalidCredentials');
       });

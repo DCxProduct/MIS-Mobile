@@ -37,20 +37,20 @@ class AppSettingsController extends ChangeNotifier {
   }
 
   void setUserEmail(String email) {
-    _userEmail = email.trim().toLowerCase();
-    email = _userEmail;
-    if (email.toLowerCase().contains('ministry') ||
-        email == 'ministry@gmail.com') {
+    final e = email.trim().toLowerCase();
+    _userEmail = e;
+    if (e == 'ministry@gmail.com' || e.contains('ministry')) {
       _moduleType = AppModuleType.lineMinistry;
-    } else if (email.toLowerCase().contains('section')) {
-      _moduleType = AppModuleType.cdcSection;
-    } else if (email.toLowerCase().contains('cefp')) {
-      _moduleType = AppModuleType.cefp;
-    } else if (email == 'cdcgpsf@gmail.com' ||
-        email.toLowerCase().contains('secretariat')) {
-      _moduleType = AppModuleType.cdcSecretariat;
-    } else {
+    } else if (e == 'privatesector@gmail.com' || e.contains('private')) {
       _moduleType = AppModuleType.privateSector;
+    } else if (e == 'cdc@gmail.com' || e.contains('section')) {
+      _moduleType = AppModuleType.cdcSection;
+    } else if (e == 'cdcgpsf@gmail.com' || e.contains('secretariat')) {
+      _moduleType = AppModuleType.cdcSecretariat;
+    } else if (e == 'cefp@gmail.com' || e.contains('cefp')) {
+      _moduleType = AppModuleType.cefp;
+    } else {
+      _moduleType = AppModuleType.lineMinistry;
     }
     notifyListeners();
   }

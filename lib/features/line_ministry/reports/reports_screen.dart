@@ -129,7 +129,7 @@ class _LineMinistryReportsScreenViewState
                             useSafeArea: false,
                             backgroundColor: Colors.transparent,
                             builder: (context) {
-                              return const _LineMinistryDashboardFilterSheet();
+                              return const LineMinistryDashboardFilterSheet();
                             },
                           );
                         } else if (_selectedTab == 2) {
@@ -2487,16 +2487,16 @@ class _LineMinistryPlenaryFilterSheetState
   }
 }
 
-class _LineMinistryDashboardFilterSheet extends StatefulWidget {
-  const _LineMinistryDashboardFilterSheet();
+class LineMinistryDashboardFilterSheet extends StatefulWidget {
+  const LineMinistryDashboardFilterSheet({super.key});
 
   @override
-  State<_LineMinistryDashboardFilterSheet> createState() =>
-      _LineMinistryDashboardFilterSheetState();
+  State<LineMinistryDashboardFilterSheet> createState() =>
+      LineMinistryDashboardFilterSheetState();
 }
 
-class _LineMinistryDashboardFilterSheetState
-    extends State<_LineMinistryDashboardFilterSheet> {
+class LineMinistryDashboardFilterSheetState
+    extends State<LineMinistryDashboardFilterSheet> {
   final Set<String> _plenaries = {};
   final Set<String> _statuses = {};
   final Set<String> _workingGroups = {};
