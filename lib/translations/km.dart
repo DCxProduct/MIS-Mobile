@@ -142,4 +142,8 @@ const Map<String, String> kmTranslations = {
   'filter': 'តម្រង',
   'apply': 'អនុវត្ត',
   'invalidCredentials': 'អ៊ីមែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវឡើយ',
+  'cdcIssues': 'បញ្ហា CDC',
+  'cdcIssuesMatrix': 'តារាងបញ្ហា CDC',
+  'plenaryEscalation': 'ការលើកទៅពេញអង្គ',
+  'newSubmission': 'ការដាក់ស្នើថ្មី',
 };

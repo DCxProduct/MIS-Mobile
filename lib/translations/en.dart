@@ -141,4 +141,8 @@ const Map<String, String> enTranslations = {
   'filter': 'Filter',
   'apply': 'Apply',
   'invalidCredentials': 'Invalid email or password.',
+  'cdcIssues': 'CDC Issues',
+  'cdcIssuesMatrix': 'CDC Issues Matrix',
+  'plenaryEscalation': 'Plenary Escalation',
+  'newSubmission': 'New Submission',
 };
