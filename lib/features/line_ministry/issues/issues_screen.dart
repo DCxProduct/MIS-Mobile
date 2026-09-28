@@ -12,7 +12,25 @@ import '../../../screens/issues/issue_detail_screen.dart';
 import '../../../translations/app_localizations.dart';
 
 class LineMinistryIssuesScreenView extends StatefulWidget {
-  const LineMinistryIssuesScreenView({super.key});
+  const LineMinistryIssuesScreenView({
+    super.key,
+    this.titleKey = 'issuesMatrix',
+    this.showTabs = true,
+    this.staticPreview = false,
+    this.issueDetailBuilder,
+    this.previewStatus = 'In Progress',
+  });
+
+  final String titleKey;
+  final bool showTabs;
+  final bool staticPreview;
+  final String previewStatus;
+  final Widget Function(
+    String title,
+    String category,
+    WorkingGroupIssue? issue,
+  )?
+  issueDetailBuilder;
 
   @override
   State<LineMinistryIssuesScreenView> createState() =>
@@ -29,6 +47,10 @@ class _LineMinistryIssuesScreenViewState
   Set<String> _selectedProgressReports = {};
 
   Future<void> _openFilterSheet(BuildContext context) async {
+    if (widget.staticPreview) {
+      await _openPreviewFilters(context);
+      return;
+    }
     final result = await showModalBottomSheet<_LineMinistryIssuesFilterResult>(
       context: context,
       isScrollControlled: true,
@@ -52,6 +74,91 @@ class _LineMinistryIssuesScreenViewState
         _selectedProgressReports = result.progressReports;
       });
     }
+  }
+
+  Future<void> _openPreviewFilters(BuildContext context) async {
+    final years = {..._selectedYears};
+    final statuses = {..._selectedStatuses};
+    final l10n = AppLocalizations.of(context);
+    final applied = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (sheetContext, updateSheet) => Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.text('filter'),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              Text(l10n.text('year')),
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final year in ['2025', '2024', '2023'])
+                    FilterChip(
+                      label: Text(year),
+                      selected: years.contains(year),
+                      onSelected: (selected) => updateSheet(() {
+                        selected ? years.add(year) : years.remove(year);
+                      }),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(l10n.text('status')),
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final entry in {
+                    'In Progress': 'inProgress',
+                    'Solved': 'solved',
+                    'Not Addressed': 'notAddressed',
+                  }.entries)
+                    FilterChip(
+                      label: Text(l10n.text(entry.value)),
+                      selected: statuses.contains(entry.key),
+                      onSelected: (selected) => updateSheet(() {
+                        selected
+                            ? statuses.add(entry.key)
+                            : statuses.remove(entry.key);
+                      }),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => updateSheet(() {
+                      years.clear();
+                      statuses.clear();
+                    }),
+                    child: Text(l10n.text('resetFilters')),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(sheetContext, true),
+                    child: Text(l10n.text('apply')),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (!mounted || applied != true) return;
+    setState(() {
+      _selectedYears = years;
+      _selectedStatuses = statuses;
+    });
   }
 
   int get _activeFilterCount {
@@ -92,7 +199,7 @@ class _LineMinistryIssuesScreenViewState
                   children: [
                     Expanded(
                       child: Text(
-                        l10n.text('issuesMatrix'),
+                        l10n.text(widget.titleKey),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 20,
@@ -106,11 +213,13 @@ class _LineMinistryIssuesScreenViewState
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
-                _IssueTabs(
-                  selectedIndex: _selectedTab,
-                  onSelected: (index) => setState(() => _selectedTab = index),
-                ),
+                if (widget.showTabs) ...[
+                  const SizedBox(height: 14),
+                  _IssueTabs(
+                    selectedIndex: _selectedTab,
+                    onSelected: (index) => setState(() => _selectedTab = index),
+                  ),
+                ],
               ],
             ),
           ),
@@ -119,64 +228,100 @@ class _LineMinistryIssuesScreenViewState
             child: ListView(
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 96),
               children: [
-                WgIssueSummaryLoader(
-                  matrix: _selectedTab == 1,
-                  builder: (summary) => Column(
-                    children: [
-                      _LineMinistryMetricGrid(summary: summary),
-                      const SizedBox(height: 12),
-                      _TotalPrimaryAgenciesCard(
-                        value: '${summary.totalPrimaryAgencies}',
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.text('allIssues'),
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _selectedTab == 0
-                    ? WgIssuesList(
-                        itemBuilder: (issue) => _LineMinistryIssueListCard(
-                          title: issue.title,
-                          category: issue.category.isEmpty
-                              ? '—'
-                              : issue.category,
-                          status: issueStatusLabel(context, issue),
-                          submissionDate: issueDate(context, issue.createdAt),
-                          submittedBy: issue.submittedBy.isEmpty
-                              ? '—'
-                              : issue.submittedBy,
-                          description: issue.description,
-                          attachmentCount:
-                              '${issue.attachmentCount} ${l10n.text('attachmentsLabel')}',
-                          issue: issue,
-                        ),
+                if (widget.staticPreview) ...[
+                  const _LineMinistryMetricGrid(),
+                  const SizedBox(height: 8),
+                  const _TotalPrimaryAgenciesCard(value: '14'),
+                  const SizedBox(height: 16),
+                  if ((_selectedYears.isEmpty ||
+                          _selectedYears.contains('2025')) &&
+                      (_selectedStatuses.isEmpty ||
+                          _selectedStatuses.contains(widget.previewStatus)))
+                    for (final title in [
+                      'Joint Inspection',
+                      'Law on Contract Farming & Agricultural Production',
+                    ])
+                      _LineMinistryIssueListCard(
+                        title: title,
+                        category: title == 'Joint Inspection'
+                            ? 'Procedure'
+                            : 'Legislation',
+                        status: widget.previewStatus,
+                        submissionDate: 'July 24, 2025',
+                        submittedBy: 'Agriculture and Agro-industry',
+                        description:
+                            'The private sector said that the Economic Land Concession (ELCs), which invest in rubber, cashew, plantations, etc., are now fully developed and some are ready for production.',
+                        attachmentCount: '2 ${l10n.text('attachmentsLabel')}',
+                        matrixPreview: true,
+                        detailBuilder: widget.issueDetailBuilder,
                       )
-                    : WgIssuesList(
-                        matrix: true,
-                        itemBuilder: (issue) => _LineMinistryIssueListCard(
-                          title: issue.title,
-                          category: issue.category.isEmpty
-                              ? '—'
-                              : issue.category,
-                          status: issueStatusLabel(context, issue),
-                          submissionDate: issueDate(context, issue.createdAt),
-                          submittedBy: issue.submittedBy.isEmpty
-                              ? '—'
-                              : issue.submittedBy,
-                          description: issue.description,
-                          attachmentCount:
-                              '${issue.attachmentCount} ${l10n.text('attachmentsLabel')}',
-                          issue: issue,
+                  else
+                    Text(
+                      l10n.text('noIssuesFound'),
+                      textAlign: TextAlign.center,
+                    ),
+                ] else ...[
+                  WgIssueSummaryLoader(
+                    matrix: !widget.showTabs || _selectedTab == 1,
+                    builder: (summary) => Column(
+                      children: [
+                        _LineMinistryMetricGrid(summary: summary),
+                        const SizedBox(height: 12),
+                        _TotalPrimaryAgenciesCard(
+                          value: '${summary.totalPrimaryAgencies}',
                         ),
-                      ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.text('allIssues'),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _selectedTab == 0 && widget.showTabs
+                      ? WgIssuesList(
+                          itemBuilder: (issue) => _LineMinistryIssueListCard(
+                            title: issue.title,
+                            category: issue.category.isEmpty
+                                ? '—'
+                                : issue.category,
+                            status: issueStatusLabel(context, issue),
+                            submissionDate: issueDate(context, issue.createdAt),
+                            submittedBy: issue.submittedBy.isEmpty
+                                ? '—'
+                                : issue.submittedBy,
+                            description: issue.description,
+                            attachmentCount:
+                                '${issue.attachmentCount} ${l10n.text('attachmentsLabel')}',
+                            issue: issue,
+                            detailBuilder: widget.issueDetailBuilder,
+                          ),
+                        )
+                      : WgIssuesList(
+                          matrix: true,
+                          itemBuilder: (issue) => _LineMinistryIssueListCard(
+                            title: issue.title,
+                            category: issue.category.isEmpty
+                                ? '—'
+                                : issue.category,
+                            status: issueStatusLabel(context, issue),
+                            submissionDate: issueDate(context, issue.createdAt),
+                            submittedBy: issue.submittedBy.isEmpty
+                                ? '—'
+                                : issue.submittedBy,
+                            description: issue.description,
+                            attachmentCount:
+                                '${issue.attachmentCount} ${l10n.text('attachmentsLabel')}',
+                            issue: issue,
+                            detailBuilder: widget.issueDetailBuilder,
+                          ),
+                        ),
+                ],
               ],
             ),
           ),
@@ -396,6 +541,8 @@ class _LineMinistryIssueListCard extends StatelessWidget {
     required this.submittedBy,
     required this.description,
     required this.attachmentCount,
+    this.matrixPreview = false,
+    this.detailBuilder,
   });
 
   final WorkingGroupIssue? issue;
@@ -406,6 +553,13 @@ class _LineMinistryIssueListCard extends StatelessWidget {
   final String submittedBy;
   final String description;
   final String attachmentCount;
+  final bool matrixPreview;
+  final Widget Function(
+    String title,
+    String category,
+    WorkingGroupIssue? issue,
+  )?
+  detailBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -437,11 +591,13 @@ class _LineMinistryIssueListCard extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (_) => IssueDetailScreen(
-              title: title,
-              category: category,
-              issue: issue,
-            ),
+            builder: (_) =>
+                detailBuilder?.call(title, category, issue) ??
+                IssueDetailScreen(
+                  title: title,
+                  category: category,
+                  issue: issue,
+                ),
           ),
         );
       },
@@ -462,21 +618,31 @@ class _LineMinistryIssueListCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF216AAA), Color(0xFF1EA45B)],
+                if (matrixPreview)
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/images/maff.jpg',
+                      width: 34,
+                      height: 34,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                else
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF216AAA), Color(0xFF1EA45B)],
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.account_balance,
+                      color: Colors.white,
+                      size: 18,
                     ),
                   ),
-                  child: const Icon(
-                    Icons.account_balance,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -484,19 +650,27 @@ class _LineMinistryIssueListCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
+                        maxLines: matrixPreview ? 1 : null,
+                        overflow: matrixPreview ? TextOverflow.ellipsis : null,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                          fontSize: matrixPreview ? 13 : 14,
+                          fontWeight: matrixPreview
+                              ? FontWeight.w400
+                              : FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         category,
-                        style: const TextStyle(
-                          color: Color(0xFF7C3AED),
+                        style: TextStyle(
+                          color: matrixPreview
+                              ? AppColors.primary
+                              : const Color(0xFF7C3AED),
                           fontSize: 12,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: matrixPreview
+                              ? FontWeight.w400
+                              : FontWeight.w700,
                         ),
                       ),
                     ],
@@ -548,13 +722,17 @@ class _LineMinistryIssueListCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
+            if (matrixPreview) ...[
+              Divider(height: 1, color: AppColors.border(context)),
+              const SizedBox(height: 16),
+            ],
             Text(
               description,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: AppColors.secondaryText(context),
-                fontSize: 11,
+                fontSize: matrixPreview ? 13 : 11,
                 height: 1.45,
                 fontWeight: FontWeight.w400,
               ),

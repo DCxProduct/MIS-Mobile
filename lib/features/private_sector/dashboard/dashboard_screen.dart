@@ -23,7 +23,7 @@ import '../../cdc_secretariat/reports/reports_screen.dart';
 
 import '../../cdc_section/dashboard/dashboard_screen.dart';
 import '../../cdc_section/issues/issues_screen.dart';
-import '../../cdc_section/meetings/meeting_screen.dart';
+import '../../cdc_section/issues/cdc_issues_matrix_screen.dart';
 import '../../cdc_section/profile/profile_screen.dart';
 import '../../cdc_section/reports/reports_screen.dart';
 
@@ -81,7 +81,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       },
       AppModuleType.cdcSection => switch (index) {
         0 => const CdcSectionDashboardScreenView(),
-        1 => const CdcSectionMeetingScreenView(),
+        1 => const CdcSectionIssuesMatrixScreen(),
         2 => const CdcSectionIssuesScreenView(),
         3 => const CdcSectionReportsScreenView(),
         _ => const CdcSectionProfileScreenView(),

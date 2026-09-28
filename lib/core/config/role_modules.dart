@@ -15,6 +15,7 @@ AppModuleType? moduleForRoles(Iterable<String> roles) {
   const mapping = {
     'cdc_secretariat': AppModuleType.cdcSecretariat,
     'cdc_section': AppModuleType.cdcSection,
+    'cdc': AppModuleType.cdcSection,
     'cefp': AppModuleType.cefp,
     'line_ministry': AppModuleType.lineMinistry,
     'private_sector': AppModuleType.privateSector,
@@ -25,7 +26,8 @@ AppModuleType? moduleForRoles(Iterable<String> roles) {
   // `cdc_secretariat_user` or `cdc_secretariat_admin`.
   if (normalized.any(
     (role) =>
-        role == 'cdc' ||
+        role == 'cdcgpsf' ||
+        role == 'cdc_gpsf' ||
         role == 'cdc_g_psf' ||
         role.startsWith('cdc_secretariat_'),
   )) {

@@ -4,21 +4,21 @@ import '../../../core/app_settings.dart';
 import '../../line_ministry/issues/issues_screen.dart';
 import 'issue_detail_screen.dart';
 
-class CdcSectionIssuesScreenView extends StatelessWidget {
-  const CdcSectionIssuesScreenView({super.key});
+class CdcSectionIssuesMatrixScreen extends StatelessWidget {
+  const CdcSectionIssuesMatrixScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return LineMinistryIssuesScreenView(
+      titleKey: 'cdcIssuesMatrix',
       showTabs: false,
       staticPreview: AppSettings.of(context).auth.isStaticSession,
-      previewStatus: 'Solved',
-      issueDetailBuilder: (title, category, issue) => CdcSectionIssueDetailScreen(
-        title: title,
-        category: category,
-        issue: issue,
-        generalIssue: true,
-      ),
+      issueDetailBuilder: (title, category, issue) =>
+          CdcSectionIssueDetailScreen(
+            title: title,
+            category: category,
+            issue: issue,
+          ),
     );
   }
 }

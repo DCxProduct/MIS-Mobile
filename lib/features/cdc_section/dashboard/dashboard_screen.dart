@@ -4,6 +4,7 @@ import '../../shared/dashboard/data/working_group_summary.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
+import '../../../core/app_settings.dart';
 import '../../../translations/app_localizations.dart';
 import '../../../widgets/app_logo.dart';
 import '../../line_ministry/reports/reports_screen.dart';
@@ -48,6 +49,9 @@ class _CdcSectionDashboardScreenViewState
 
   @override
   Widget build(BuildContext context) {
+    if (AppSettings.of(context).auth.isStaticSession) {
+      return _buildContent(context);
+    }
     return PswgDataLoader(
       scope: _mainTab == 0 ? DashboardScope.plenary : DashboardScope.pswg,
       builder: _buildContent,

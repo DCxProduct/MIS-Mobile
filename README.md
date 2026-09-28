@@ -6,8 +6,10 @@ A modern, multi-module Flutter mobile application for the Government-Private Sec
 
 ## API authentication
 
-Login uses `POST /auth/login`, followed by `GET /auth/me`. Use an account
-registered on the configured backend; local demo credentials are no longer accepted.
+The static CDC Section UI can be opened with `cdc@gmail.com` and password
+`12345678`. This account uses local login and logout and the dashboard's sample data.
+Other accounts use `POST /auth/login`, followed by `GET /auth/me`, and must be
+registered on the configured backend.
 See [API coding standard](docs/api_standard.md) for structure, configuration,
 session handling, and remaining backend integration details.
 
