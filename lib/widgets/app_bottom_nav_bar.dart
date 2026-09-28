@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import '../translations/app_localizations.dart';
 
+import '../core/app_settings.dart';
+import '../core/config/module_config.dart';
+
 class AppBottomNavBar extends StatelessWidget {
   const AppBottomNavBar({
     super.key,
@@ -16,9 +19,17 @@ class AppBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final moduleType = AppSettings.of(context).moduleType;
+    final isCdcSection = moduleType == AppModuleType.cdcSection;
+
     final items = [
       (icon: Icons.grid_view_rounded, label: l10n.text('dashboard')),
-      (icon: Icons.calendar_month_outlined, label: l10n.text('meeting')),
+      (
+        icon: isCdcSection
+            ? Icons.description_outlined
+            : Icons.calendar_month_outlined,
+        label: isCdcSection ? l10n.text('cdcIssues') : l10n.text('meeting'),
+      ),
       (icon: Icons.assignment_outlined, label: l10n.text('issues')),
       (icon: Icons.folder_outlined, label: l10n.text('report')),
       (icon: Icons.person_outline_rounded, label: l10n.text('account')),
