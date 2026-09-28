@@ -1,15 +1,62 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_colors.dart';
+import '../../../../core/app_settings.dart';
+import '../../../../core/widgets/pdf_attachment_preview.dart';
+import '../../shared/meetings/data/meeting_summary.dart';
+import '../../../../translations/app_localizations.dart';
 
-class MeetingSummaryDetailScreen extends StatelessWidget {
-  const MeetingSummaryDetailScreen({super.key});
+const _fallbackSummaryTitle =
+    'សិក្ខាសាលាប្រចាំឆ្នាំរបស់ក្រុមការងារ ៣ ដែលមាននាង\nទ្រព្យអ្នកប្រតិបត្តិការ ៤';
 
-  static const _title =
-      'សិក្ខាសាលាប្រចាំឆ្នាំរបស់ក្រុមការងារ ៣ ដែលមាននាង\nទ្រព្យអ្នកប្រតិបត្តិការ ៤';
+class MeetingSummaryDetailScreen extends StatefulWidget {
+  const MeetingSummaryDetailScreen({super.key, this.id, this.summary});
+
+  final int? id;
+  final MeetingSummary? summary;
+
+  @override
+  State<MeetingSummaryDetailScreen> createState() =>
+      _MeetingSummaryDetailScreenState();
+}
+
+class _MeetingSummaryDetailScreenState
+    extends State<MeetingSummaryDetailScreen> {
+  Future<MeetingSummary>? _future;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _future ??= widget.summary != null
+        ? Future.value(widget.summary!)
+        : AppSettings.of(context).meetingSummaries.getSummary(widget.id!);
+  }
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<MeetingSummary>(
+      future: _future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (snapshot.hasError || snapshot.data == null) {
+          return Scaffold(
+            body: Center(
+              child: Text(
+                AppLocalizations.of(context).text('dashboardLoadError'),
+              ),
+            ),
+          );
+        }
+        return _buildContent(context, snapshot.data!);
+      },
+    );
+  }
+
+  Widget _buildContent(BuildContext context, MeetingSummary summary) {
     return Scaffold(
       backgroundColor: AppColors.pageBackground(context),
       appBar: AppBar(
@@ -58,7 +105,9 @@ class MeetingSummaryDetailScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _title,
+                    summary.detailTitle.isEmpty
+                        ? _fallbackSummaryTitle
+                        : summary.detailTitle,
                     style: TextStyle(
                       color: AppColors.primaryText(context),
                       fontSize: 15,
@@ -67,7 +116,7 @@ class MeetingSummaryDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  const _SummaryInfoGrid(),
+                  _SummaryInfoGrid(summary: summary),
                   const SizedBox(height: 16),
                   const _AllIssuesTabHeader(),
                 ],
@@ -76,10 +125,15 @@ class MeetingSummaryDetailScreen extends StatelessWidget {
             Expanded(
               child: ListView.separated(
                 padding: const EdgeInsets.fromLTRB(14, 14, 14, 28),
-                itemCount: 3,
+                itemCount: summary.issues.isEmpty ? 3 : summary.issues.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 14),
-                itemBuilder: (context, index) =>
-                    _ClimateIssueCard(onTap: () => _showIssueDetails(context)),
+                itemBuilder: (context, index) => _ClimateIssueCard(
+                  issue: summary.issues.isEmpty ? null : summary.issues[index],
+                  onTap: () => _showIssueDetails(
+                    context,
+                    summary.issues.isEmpty ? null : summary.issues[index],
+                  ),
+                ),
               ),
             ),
           ],
@@ -88,7 +142,7 @@ class MeetingSummaryDetailScreen extends StatelessWidget {
     );
   }
 
-  void _showIssueDetails(BuildContext context) {
+  void _showIssueDetails(BuildContext context, MeetingSummaryIssue? issue) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -96,17 +150,19 @@ class MeetingSummaryDetailScreen extends StatelessWidget {
       enableDrag: true,
       barrierColor: Colors.black54,
       backgroundColor: Colors.transparent,
-      builder: (context) => const _IssueDetailsSheet(),
+      builder: (context) => _IssueDetailsSheet(issue: issue),
     );
   }
 }
 
 class _SummaryInfoGrid extends StatelessWidget {
-  const _SummaryInfoGrid();
+  const _SummaryInfoGrid({required this.summary});
+
+  final MeetingSummary summary;
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,14 +170,22 @@ class _SummaryInfoGrid extends StatelessWidget {
             Expanded(
               child: _InfoBlock(
                 label: 'Meeting Time',
-                value: '2:00 PM - 4:00 PM',
+                value: summary.detailDate == null
+                    ? '—'
+                    : MaterialLocalizations.of(context).formatTimeOfDay(
+                        TimeOfDay.fromDateTime(summary.detailDate!.toLocal()),
+                      ),
               ),
             ),
             SizedBox(width: 24),
             Expanded(
               child: _InfoBlock(
                 label: 'Schedule Meeting :',
-                value: 'September 22, 2025',
+                value: summary.detailDate == null
+                    ? '—'
+                    : MaterialLocalizations.of(
+                        context,
+                      ).formatMediumDate(summary.detailDate!.toLocal()),
               ),
             ),
           ],
@@ -131,10 +195,19 @@ class _SummaryInfoGrid extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: _InfoBlock(label: 'Location', value: 'Chbar Ompov'),
+              child: _InfoBlock(
+                label: 'Location',
+                value: summary.location.isEmpty ? '—' : summary.location,
+              ),
             ),
             SizedBox(width: 24),
-            Expanded(child: _DocumentBlock(label: 'Meeting Request Document:')),
+            Expanded(
+              child: _DocumentBlock(
+                label: 'Meeting Request Document:',
+                path:
+                    summary.requestDocumentPath ?? summary.meetingDocumentPath,
+              ),
+            ),
           ],
         ),
       ],
@@ -179,63 +252,68 @@ class _InfoBlock extends StatelessWidget {
 }
 
 class _DocumentBlock extends StatelessWidget {
-  const _DocumentBlock({required this.label});
+  const _DocumentBlock({required this.label, this.path});
 
   final String label;
+  final String? path;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: AppColors.mutedText,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
+    return PdfAttachmentPreview(
+      path: path ?? '',
+      name: path == null ? null : pdfAttachmentName(path!),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: AppColors.mutedText,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
-        const SizedBox(height: 7),
-        Row(
-          children: [
-            const Icon(
-              Icons.picture_as_pdf,
-              color: Color(0xFFE53935),
-              size: 18,
-            ),
-            const SizedBox(width: 7),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Request Doc',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: AppColors.primaryText(context),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 1),
-                  const Text(
-                    '200 KB',
-                    style: TextStyle(
-                      color: AppColors.mutedText,
-                      fontSize: 7,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+          const SizedBox(height: 7),
+          Row(
+            children: [
+              const Icon(
+                Icons.picture_as_pdf,
+                color: Color(0xFFE53935),
+                size: 18,
               ),
-            ),
-          ],
-        ),
-      ],
+              const SizedBox(width: 7),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Request Doc',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: AppColors.primaryText(context),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    const Text(
+                      '200 KB',
+                      style: TextStyle(
+                        color: AppColors.mutedText,
+                        fontSize: 7,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -270,9 +348,10 @@ class _AllIssuesTabHeader extends StatelessWidget {
 }
 
 class _ClimateIssueCard extends StatelessWidget {
-  const _ClimateIssueCard({required this.onTap});
+  const _ClimateIssueCard({required this.onTap, this.issue});
 
   final VoidCallback onTap;
+  final MeetingSummaryIssue? issue;
 
   @override
   Widget build(BuildContext context) {
@@ -292,7 +371,9 @@ class _ClimateIssueCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Climate Issue',
+                    issue?.title.isNotEmpty == true
+                        ? issue!.title
+                        : 'Climate Issue',
                     style: TextStyle(
                       color: AppColors.primaryText(context),
                       fontSize: 14,
@@ -311,7 +392,9 @@ class _ClimateIssueCard extends StatelessWidget {
                     border: Border.all(color: AppColors.border(context)),
                   ),
                   child: Text(
-                    'Not Addressed',
+                    issue?.status.isNotEmpty == true
+                        ? issue!.status
+                        : 'Not Addressed',
                     style: TextStyle(
                       color: AppColors.secondaryText(context),
                       fontSize: 12,
@@ -322,8 +405,10 @@ class _ClimateIssueCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Governance',
+            Text(
+              issue?.category.isNotEmpty == true
+                  ? issue!.category
+                  : 'Governance',
               style: TextStyle(
                 color: Color(0xFF7C3AED),
                 fontSize: 12,
@@ -332,7 +417,9 @@ class _ClimateIssueCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'The private sector stated that cultivation is largely dependent on the weather (rain), and the private sector also observed that the Ministry of Water Resources and...',
+              issue?.description.isNotEmpty == true
+                  ? issue!.description
+                  : 'The private sector stated that cultivation is largely dependent on the weather (rain), and the private sector also observed that the Ministry of Water Resources and...',
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -350,7 +437,9 @@ class _ClimateIssueCard extends StatelessWidget {
 }
 
 class _IssueDetailsSheet extends StatelessWidget {
-  const _IssueDetailsSheet();
+  const _IssueDetailsSheet({this.issue});
+
+  final MeetingSummaryIssue? issue;
 
   @override
   Widget build(BuildContext context) {
@@ -396,7 +485,9 @@ class _IssueDetailsSheet extends StatelessWidget {
                   ),
                   const SizedBox(height: 18),
                   Text(
-                    MeetingSummaryDetailScreen._title,
+                    issue?.title.isNotEmpty == true
+                        ? issue!.title
+                        : _fallbackSummaryTitle,
                     style: TextStyle(
                       color: AppColors.primaryText(context),
                       fontSize: 15,
@@ -405,26 +496,22 @@ class _IssueDetailsSheet extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  const _IssueSheetInfoGrid(),
+                  _IssueSheetInfoGrid(issue: issue),
                   const SizedBox(height: 14),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: const [
+                      children: [
                         _DatePill(
                           label: 'Submitted By',
-                          name: 'Sabada',
+                          name: issue?.agency.isNotEmpty == true
+                              ? issue!.agency
+                              : '—',
                         ),
                         SizedBox(width: 10),
-                        _DatePill(
-                          label: 'Submitted Date',
-                          name: 'Jun 24 2025',
-                        ),
+                        _DatePill(label: 'Submitted Date', name: 'Jun 24 2025'),
                         SizedBox(width: 10),
-                        _DatePill(
-                          label: 'Government Agency',
-                          name: 'MAFF',
-                        ),
+                        _DatePill(label: 'Government Agency', name: 'MAFF'),
                         SizedBox(width: 10),
                         _DatePill(
                           label: "Gov't Second Agency",
@@ -449,9 +536,15 @@ class _IssueDetailsSheet extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const _ReadMorePanel(title: 'Issues Descriptions'),
+                  _ReadMorePanel(
+                    title: 'Issues Descriptions',
+                    body: issue?.description,
+                  ),
                   const SizedBox(height: 18),
-                  const _ReadMorePanel(title: 'Recommendations'),
+                  _ReadMorePanel(
+                    title: 'Recommendations',
+                    body: issue?.recommendation,
+                  ),
                 ],
               ),
             ),
@@ -463,11 +556,13 @@ class _IssueDetailsSheet extends StatelessWidget {
 }
 
 class _IssueSheetInfoGrid extends StatelessWidget {
-  const _IssueSheetInfoGrid();
+  const _IssueSheetInfoGrid({this.issue});
+
+  final MeetingSummaryIssue? issue;
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -475,12 +570,16 @@ class _IssueSheetInfoGrid extends StatelessWidget {
             Expanded(
               child: _InfoBlock(
                 label: 'Submitted by',
-                value: 'Agriculture and Agro-In...',
+                value: issue?.agency.isNotEmpty == true ? issue!.agency : '—',
               ),
             ),
             SizedBox(width: 18),
             Expanded(
-              child: _InfoBlock(label: 'Status :', value: '• Not Addressed'),
+              child: _InfoBlock(
+                label: 'Status :',
+                value:
+                    '• ${issue?.status.isNotEmpty == true ? issue!.status : '—'}',
+              ),
             ),
           ],
         ),
@@ -489,10 +588,20 @@ class _IssueSheetInfoGrid extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: _InfoBlock(label: 'Categories', value: 'Legislation'),
+              child: _InfoBlock(
+                label: 'Categories',
+                value: issue?.category.isNotEmpty == true
+                    ? issue!.category
+                    : '—',
+              ),
             ),
             SizedBox(width: 18),
-            Expanded(child: _DocumentBlock(label: 'Meeting Request Document:')),
+            Expanded(
+              child: _DocumentBlock(
+                label: 'Meeting Request Document:',
+                path: issue?.attachmentPath ?? issue?.referencePath,
+              ),
+            ),
           ],
         ),
       ],
@@ -543,9 +652,10 @@ class _DatePill extends StatelessWidget {
 }
 
 class _ReadMorePanel extends StatelessWidget {
-  const _ReadMorePanel({required this.title});
+  const _ReadMorePanel({required this.title, this.body});
 
   final String title;
+  final String? body;
 
   @override
   Widget build(BuildContext context) {
@@ -573,7 +683,7 @@ class _ReadMorePanel extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'ទំនុកចិត្តរបស់វិស័យឯកជនបានលើកឡើងថាការដាំដុះពឹងផ្អែកទៅលើអាកាសធាតុ និងការជូនដំណឹងអំពីអាកាសធាតុនៅតាមតំបន់មិនទាន់បានច្បាស់លាស់គ្រប់គ្រាន់...',
+                body?.isNotEmpty == true ? body! : '—',
                 style: TextStyle(
                   color: AppColors.secondaryText(context),
                   fontSize: 12,

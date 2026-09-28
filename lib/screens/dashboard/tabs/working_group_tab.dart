@@ -1,23 +1,25 @@
+import '../../../features/shared/dashboard/widgets/working_group_live_tab.dart';
+import '../../../features/shared/dashboard/widgets/pswg_live_dashboard.dart';
+import '../../../features/shared/dashboard/data/working_group_summary.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
 
 class WorkingGroupTab extends StatelessWidget {
-  const WorkingGroupTab({super.key});
+  const WorkingGroupTab({super.key, this.groups});
 
-  static const _items = [
-    '(A) Agriculture and Agro-industry',
-    '(B) Tourism',
-    '(C) SMEs, Manufacturing, and Services',
-    '(D) Law, Tax, and Governance',
-    '(E) Banking and Financial Services',
-    '(F) Transportation and Infrastructure',
-    '(G) Export Processing and Trade Facilitation',
-    '(H) Industrial Relations',
-  ];
+  final List<WorkingGroupSummary>? groups;
 
   @override
   Widget build(BuildContext context) {
+    final data = groups ?? PswgDataScope.maybeOf(context)?.workingGroups;
+    if (data == null) {
+      return WorkingGroupLiveTab(
+        builder: (groups) => WorkingGroupTab(groups: groups),
+      );
+    }
+    final items = data.map((group) => group.name).toList();
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -32,10 +34,11 @@ class WorkingGroupTab extends StatelessWidget {
       ),
       child: Column(
         children: List.generate(
-          _items.length,
+          items.length,
           (index) => _WorkingGroupRow(
-            label: _items[index],
-            showDivider: index != _items.length - 1,
+            label: items[index],
+            group: data[index],
+            showDivider: index != items.length - 1,
           ),
         ),
       ),
@@ -44,8 +47,13 @@ class WorkingGroupTab extends StatelessWidget {
 }
 
 class _WorkingGroupRow extends StatelessWidget {
-  const _WorkingGroupRow({required this.label, required this.showDivider});
+  const _WorkingGroupRow({
+    required this.label,
+    required this.showDivider,
+    required this.group,
+  });
 
+  final WorkingGroupSummary group;
   final String label;
   final bool showDivider;
 
@@ -79,7 +87,7 @@ class _WorkingGroupRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          const _MiniStatusBars(),
+          _MiniStatusBars(group: group),
           const SizedBox(width: 12),
         ],
       ),
@@ -88,7 +96,9 @@ class _WorkingGroupRow extends StatelessWidget {
 }
 
 class _MiniStatusBars extends StatelessWidget {
-  const _MiniStatusBars();
+  const _MiniStatusBars({required this.group});
+
+  final WorkingGroupSummary group;
 
   @override
   Widget build(BuildContext context) {

@@ -76,10 +76,7 @@ class LineMinistryReportCard extends StatelessWidget {
               const Spacer(),
               const Text(
                 'July 24, 2025',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
               ),
             ],
           ),

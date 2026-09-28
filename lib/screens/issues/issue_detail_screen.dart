@@ -1,6 +1,9 @@
+import '../../features/shared/issues/widgets/issue_display.dart';
+import '../../features/shared/issues/data/working_group_issue.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
+import '../../core/widgets/pdf_attachment_preview.dart';
 import '../../translations/app_localizations.dart';
 import 'tabs/issue_descriptions_tab.dart';
 import 'tabs/issue_progress_report_tab.dart';
@@ -10,8 +13,10 @@ class IssueDetailScreen extends StatefulWidget {
     super.key,
     required this.title,
     required this.category,
+    this.issue,
   });
 
+  final WorkingGroupIssue? issue;
   final String title;
   final String category;
 
@@ -62,7 +67,8 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'សំណើប្រជុំពិភាក្សាដោះស្រាយបញ្ហាចំនួន ៣ ដែលបានដាក់ជូនក្រសួងខាងក្រោម ។',
+                    widget.issue?.title ??
+                        'សំណើប្រជុំពិភាក្សាដោះស្រាយបញ្ហាចំនួន ៣ ដែលបានដាក់ជូនក្រសួងខាងក្រោម ។',
                     style: TextStyle(
                       color: AppColors.primaryText(context),
                       fontSize: 15,
@@ -71,20 +77,27 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _IssueInfoGrid(category: widget.category),
+                  _IssueInfoGrid(
+                    category: widget.category,
+                    issue: widget.issue,
+                  ),
                   const SizedBox(height: 14),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: const [
+                      children: [
                         _DatePill(
                           label: 'Submitted Date',
-                          value: 'July 24, 2025',
+                          value: widget.issue == null
+                              ? 'July 24, 2025'
+                              : issueDate(context, widget.issue!.createdAt),
                         ),
                         SizedBox(width: 10),
                         _DatePill(
                           label: 'Meeting Date',
-                          value: 'June 29, 2025 2:00PM5:00PM',
+                          value: widget.issue == null
+                              ? 'June 29, 2025 2:00PM5:00PM'
+                              : issueDate(context, widget.issue!.meetingDate),
                         ),
                       ],
                     ),
@@ -99,8 +112,16 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
             ),
             Expanded(
               child: _selectedTab == 0
-                  ? const IssueDescriptionsTab()
-                  : const IssueProgressReportTab(),
+                  ? IssueDescriptionsTab(issue: widget.issue)
+                  : widget.issue == null
+                  ? const IssueProgressReportTab()
+                  : Center(
+                      child: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).text('noIssueProgressData'),
+                      ),
+                    ),
             ),
           ],
         ),
@@ -110,8 +131,9 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
 }
 
 class _IssueInfoGrid extends StatelessWidget {
-  const _IssueInfoGrid({required this.category});
+  const _IssueInfoGrid({required this.category, this.issue});
 
+  final WorkingGroupIssue? issue;
   final String category;
 
   @override
@@ -120,11 +142,15 @@ class _IssueInfoGrid extends StatelessWidget {
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Expanded(
               child: _InfoBlock(
                 label: 'Government Agency :',
-                value: 'MAFF',
+                value: issue == null
+                    ? 'MAFF'
+                    : issue!.agency.isEmpty
+                    ? '—'
+                    : issue!.agency,
                 leading: _AgencyLogo(),
               ),
             ),
@@ -132,7 +158,9 @@ class _IssueInfoGrid extends StatelessWidget {
             Expanded(
               child: _InfoBlock(
                 label: 'Status :',
-                value: 'In Progress',
+                value: issue == null
+                    ? 'In Progress'
+                    : issueStatusLabel(context, issue!),
                 valueColor: Color(0xFFFF8A00),
               ),
             ),
@@ -146,11 +174,17 @@ class _IssueInfoGrid extends StatelessWidget {
               child: _InfoBlock(label: 'Category', value: category),
             ),
             const SizedBox(width: 20),
-            const Expanded(
-              child: _DocumentBlock(
-                label: 'Meeting Request Document:',
+            if (issue != null)
+              Expanded(
+                child: _DocumentBlock(
+                  label: 'Meeting Request Document:',
+                  path: issue!.meetingRequestDocumentPath ?? '',
+                ),
+              )
+            else
+              const Expanded(
+                child: _DocumentBlock(label: 'Meeting Request Document:'),
               ),
-            ),
           ],
         ),
       ],
@@ -231,59 +265,70 @@ class _AgencyLogo extends StatelessWidget {
 }
 
 class _DocumentBlock extends StatelessWidget {
-  const _DocumentBlock({required this.label});
+  const _DocumentBlock({required this.label, this.path});
 
   final String label;
+  final String? path;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: AppColors.mutedText,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Row(
-          children: [
-            const Icon(Icons.picture_as_pdf, color: Color(0xFFE53935), size: 18),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Request Doc',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: AppColors.primaryText(context),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 1),
-                  const Text(
-                    '200 KB',
-                    style: TextStyle(
-                      color: AppColors.mutedText,
-                      fontSize: 7,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+    return PdfAttachmentPreview(
+      path: path ?? '',
+      name: path == null ? null : pdfAttachmentName(path!),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: AppColors.mutedText,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
-          ],
-        ),
-      ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              const Icon(
+                Icons.picture_as_pdf,
+                color: Color(0xFFE53935),
+                size: 18,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      path == null || path!.isEmpty
+                          ? 'Request Doc'
+                          : pdfAttachmentName(path!),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: AppColors.primaryText(context),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    const Text(
+                      '200 KB',
+                      style: TextStyle(
+                        color: AppColors.mutedText,
+                        fontSize: 7,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

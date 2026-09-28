@@ -1,3 +1,8 @@
+import '../../shared/issues/data/working_group_issue.dart';
+import '../../shared/issues/widgets/wg_issues_list.dart';
+import '../../shared/issues/widgets/issue_display.dart';
+import '../../shared/issues/data/wg_issue_summary.dart';
+import '../../shared/issues/widgets/wg_issue_summary_loader.dart';
 import 'package:flutter/material.dart';
 import '../../../core/app_colors.dart';
 import '../../../translations/app_localizations.dart';
@@ -7,6 +12,7 @@ import '../dashboard/filter_sheet.dart';
 
 class CdcSecretariatIssuesScreenView extends StatefulWidget {
   const CdcSecretariatIssuesScreenView({super.key});
+
   @override
   State<CdcSecretariatIssuesScreenView> createState() => _CdcIssuesState();
 }
@@ -95,7 +101,13 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
               key: ValueKey(_tab),
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
               children: [
-                const _IssueMetricGrid(),
+                _tab == 0
+                    ? const _IssueMetricGrid()
+                    : WgIssueSummaryLoader(
+                        matrix: true,
+                        builder: (summary) =>
+                            _IssueMetricGrid(summary: summary),
+                      ),
                 const SizedBox(height: 16),
                 if (_tab == 0) ...[
                   const _DecisionCard(
@@ -107,15 +119,9 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
                     status: _IssueCardStatus.solved,
                   ),
                 ] else ...[
-                  const _IssueCard(
-                    title: 'Law on Contract Farming & Agricultural Production',
-                    category: 'Legislation',
-                    status: _IssueCardStatus.inProgress,
-                  ),
-                  const _IssueCard(
-                    title: 'Import of frozen meat and agricultural products',
-                    category: 'Trade',
-                    status: _IssueCardStatus.solved,
+                  WgIssuesList(
+                    matrix: true,
+                    itemBuilder: (issue) => _IssueCard(issue: issue),
                   ),
                 ],
               ],
@@ -129,13 +135,14 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
 
 class _DecisionCard extends StatelessWidget {
   const _DecisionCard({required this.date, required this.status});
+
   final String date;
   final _IssueCardStatus status;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    void openDetails() => Navigator.of(context).push(
+    void openDetails() => Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
         builder: (_) => const RgcDecisionDetailScreen(agencyName: 'MPWT'),
       ),
@@ -166,8 +173,8 @@ class _DecisionCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 7),
-              const Expanded(
-                child: Text('MPWT', style: TextStyle(fontSize: 13)),
+              Expanded(
+                child: const Text('MPWT', style: TextStyle(fontSize: 13)),
               ),
               _IssueStatusBadge(status: status),
             ],
@@ -242,7 +249,14 @@ class _DecisionCard extends StatelessWidget {
             ),
           ),
         ),
-        Text(value, style: const TextStyle(fontSize: 13)),
+        Flexible(
+          child: Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 13),
+          ),
+        ),
       ],
     ),
   );
@@ -326,7 +340,9 @@ class _IssueTabs extends StatelessWidget {
 }
 
 class _IssueMetricGrid extends StatelessWidget {
-  const _IssueMetricGrid();
+  const _IssueMetricGrid({this.summary});
+
+  final WgIssueSummary? summary;
 
   @override
   Widget build(BuildContext context) {
@@ -343,25 +359,31 @@ class _IssueMetricGrid extends StatelessWidget {
       children: [
         _IssueMetricCard(
           label: l10n.text('totalIssues'),
-          value: '20',
+          value: summary == null ? '20' : '${summary!.totalIssues}',
           background: const Color(0xFFDDEEFF),
           icon: Icons.library_books_outlined,
         ),
         _IssueMetricCard(
           label: l10n.text('solved'),
-          value: '15/20',
+          value: summary == null
+              ? '15/20'
+              : '${summary!.solved}/${summary!.totalIssues}',
           background: const Color(0xFFE5FAEF),
           icon: Icons.fact_check_outlined,
         ),
         _IssueMetricCard(
           label: l10n.text('inProgress'),
-          value: '4/20',
+          value: summary == null
+              ? '4/20'
+              : '${summary!.inProgress}/${summary!.totalIssues}',
           background: const Color(0xFFFFF8DC),
           icon: Icons.add_box_outlined,
         ),
         _IssueMetricCard(
           label: l10n.text('notAddressed'),
-          value: '1/20',
+          value: summary == null
+              ? '1/20'
+              : '${summary!.notAddressed}/${summary!.totalIssues}',
           background: const Color(0xFFFFEEEE),
           icon: Icons.assignment_late_outlined,
         ),
@@ -454,25 +476,28 @@ class _IssueMetricCard extends StatelessWidget {
 enum _IssueCardStatus { solved, inProgress, notAddressed }
 
 class _IssueCard extends StatelessWidget {
-  const _IssueCard({
-    required this.title,
-    required this.category,
-    required this.status,
-  });
+  const _IssueCard({required this.issue});
 
-  final String title;
-  final String category;
-  final _IssueCardStatus status;
+  final WorkingGroupIssue issue;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final status = switch (issue.statusCode.toUpperCase()) {
+      'SOLVED' => _IssueCardStatus.solved,
+      'IN_PROGRESS' => _IssueCardStatus.inProgress,
+      _ => _IssueCardStatus.notAddressed,
+    };
 
     return InkWell(
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (_) => IssueDetailScreen(title: title, category: category),
+            builder: (_) => IssueDetailScreen(
+              title: issue.title,
+              category: issue.category,
+              issue: issue,
+            ),
           ),
         );
       },
@@ -507,7 +532,7 @@ class _IssueCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title,
+                        issue.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -518,7 +543,7 @@ class _IssueCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        category,
+                        issue.category.isEmpty ? '—' : issue.category,
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontSize: 12,
@@ -538,7 +563,7 @@ class _IssueCard extends StatelessWidget {
                   child: _IssueMeta(
                     icon: Icons.calendar_month_outlined,
                     label: AppLocalizations.of(context).text('submissionDate'),
-                    value: 'July 24, 2025',
+                    value: issueDate(context, issue.meetingDate),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -546,7 +571,7 @@ class _IssueCard extends StatelessWidget {
                   child: _IssueMeta(
                     icon: Icons.person_outline,
                     label: AppLocalizations.of(context).text('submittedBy'),
-                    value: 'Agriculture and Agro...',
+                    value: issue.submittedBy.isEmpty ? '—' : issue.submittedBy,
                     iconColor: const Color(0xFFB642FF),
                     iconBackground: const Color(0xFFF2DDFF),
                   ),
@@ -555,9 +580,7 @@ class _IssueCard extends StatelessWidget {
             ),
             const Divider(height: 18),
             Text(
-              title.startsWith('Law')
-                  ? 'The private sector said that currently, aquaculture production in Cambodia can produce sufficient fish to supply the local market, but not every month. The sector requests further support.'
-                  : 'The private sector said that the Economic Land Concession (ELCs), which invest in rubber and cashew plantations, are now fully developed.',
+              issue.description.isEmpty ? '—' : issue.description,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -585,7 +608,7 @@ class _IssueCard extends StatelessWidget {
                   const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
                   const SizedBox(width: 6),
                   Text(
-                    AppLocalizations.of(context).text('twoAttachments'),
+                    '${issue.linkCount} ${AppLocalizations.of(context).text('linksLabel')}',
                     style: const TextStyle(
                       color: Color(0xFF4C5563),
                       fontSize: 12,

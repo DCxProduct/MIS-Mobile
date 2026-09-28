@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
+import '../../shared/dashboard/data/dashboard_repository.dart';
+import '../../shared/dashboard/widgets/pswg_live_dashboard.dart';
+import '../../private_sector/dashboard/tabs/agencies_tab.dart';
+import '../../private_sector/dashboard/tabs/categories_tab.dart';
+import '../../private_sector/dashboard/tabs/overall_tab.dart';
+import '../../private_sector/dashboard/tabs/working_group_tab.dart';
 import '../../../screens/report/plenary_detail_screen.dart';
 import '../../../screens/report/rgc_decision_detail_screen.dart';
+import '../../../screens/report/tabs/report_progress_report_tab.dart';
+import '../../../features/shared/meetings/data/plenary.dart';
+import '../../../features/shared/meetings/widgets/plenaries_loader.dart';
+import '../../../features/shared/meetings/widgets/rgc_decisions_loader.dart';
 import '../../../translations/app_language.dart';
 import '../../../translations/app_localizations.dart';
 
@@ -27,19 +37,20 @@ class _LineMinistryReportsScreenViewState
   Set<String> _selectedSummaryIssues = {};
 
   Future<void> _openProgressReportFilterSheet(BuildContext context) async {
-    final result = await showModalBottomSheet<_LineMinistryProgressReportFilterResult>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: false,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return _LineMinistryProgressReportFilterSheet(
-          selectedYears: _selectedProgressYears,
-          selectedSemesters: _selectedSemesters,
-          selectedStatuses: _selectedProgressStatuses,
+    final result =
+        await showModalBottomSheet<_LineMinistryProgressReportFilterResult>(
+          context: context,
+          isScrollControlled: true,
+          useSafeArea: false,
+          backgroundColor: Colors.transparent,
+          builder: (context) {
+            return _LineMinistryProgressReportFilterSheet(
+              selectedYears: _selectedProgressYears,
+              selectedSemesters: _selectedSemesters,
+              selectedStatuses: _selectedProgressStatuses,
+            );
+          },
         );
-      },
-    );
 
     if (result != null) {
       setState(() {
@@ -103,7 +114,12 @@ class _LineMinistryReportsScreenViewState
           // STICKY HEADER
           Container(
             color: headerBackground,
-            padding: EdgeInsets.fromLTRB(14, topPadding > 0 ? topPadding + 12 : 34, 14, 12),
+            padding: EdgeInsets.fromLTRB(
+              14,
+              topPadding > 0 ? topPadding + 12 : 34,
+              14,
+              12,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -166,38 +182,17 @@ class _LineMinistryReportsScreenViewState
             child: ListView(
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 96),
               children: [
-                if (_selectedTab == 0) ...const [
-                  _ProgressReportCard(
-                    title: 'Semester 2',
-                    year: '2026',
-                    deadline: 'Oct 30, 2025',
-                    firstMeeting: 'Jun 07, 2025',
-                    secondDeadline: 'Jun 07, 2025',
-                    secondMeeting: 'Jun 07, 2025',
-                  ),
-                  _ProgressReportCard(
-                    title: 'Semester 2',
-                    year: '2026',
-                    deadline: 'Oct 30, 2025',
-                    firstMeeting: 'Jun 07, 2025',
-                    secondDeadline: 'Jun 07, 2025',
-                    secondMeeting: 'Jun 07, 2025',
-                  ),
-                  _ProgressReportCard(
-                    title: 'Semester 2',
-                    year: '2026',
-                    deadline: 'Oct 30, 2025',
-                    firstMeeting: 'Jun 07, 2025',
-                    secondDeadline: 'Jun 07, 2025',
-                    secondMeeting: 'Jun 07, 2025',
-                  ),
-                ] else if (_selectedTab == 1) ...const [
+                if (_selectedTab == 0)
+                  ReportProgressReportTab(
+                    years: _selectedProgressYears,
+                    semesters: _selectedSemesters,
+                    statuses: _selectedProgressStatuses,
+                  )
+                else if (_selectedTab == 1) ...const [
                   _ReportDashboardTab(),
                 ] else if (_selectedTab == 2) ...const [
                   _PlenaryTab(),
-                ] else ...const [
-                  _RgcDecisionTab(),
-                ],
+                ] else ...const [_RgcDecisionTab()],
               ],
             ),
           ),
@@ -212,25 +207,24 @@ class _RgcDecisionTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        _RgcDecisionCard(
-          agencyName: 'MPWT',
-          status: 'In Progress',
-          meetingDate: 'Oct 30, 2025',
-          category: 'Legislation',
-          focalPerson: 'Peng Ponea',
-          linkCount: '2 Link',
-        ),
-        _RgcDecisionCard(
-          agencyName: 'MPWT',
-          status: 'In Progress',
-          meetingDate: 'Oct 30, 2025',
-          category: 'Legislation',
-          focalPerson: 'Peng Ponea',
-          linkCount: '2 Link',
-        ),
-      ],
+    return RgcDecisionsLoader(
+      builder: (decisions) => Column(
+        children: [
+          for (final decision in decisions)
+            _RgcDecisionCard(
+              agencyName: decision.agencyName,
+              status: decision.status,
+              meetingDate: decision.meetingDate == null
+                  ? '—'
+                  : MaterialLocalizations.of(
+                      context,
+                    ).formatMediumDate(decision.meetingDate!.toLocal()),
+              category: decision.category,
+              focalPerson: decision.focalPerson,
+              linkCount: '${decision.linkCount} Link',
+            ),
+        ],
+      ),
     );
   }
 }
@@ -259,7 +253,9 @@ class _RgcDecisionCard extends StatelessWidget {
     final isKhmer = l10n.language == AppLanguage.khmer;
     final translatedStatus = status == 'In Progress'
         ? l10n.text('inProgress')
-        : (status == 'Solved' ? l10n.text('solved') : l10n.text('notAddressed'));
+        : (status == 'Solved'
+              ? l10n.text('solved')
+              : l10n.text('notAddressed'));
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -304,8 +300,10 @@ class _RgcDecisionCard extends StatelessWidget {
                 ],
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: isDark
                       ? const Color(0xFF3E2312)
@@ -355,7 +353,9 @@ class _RgcDecisionCard extends StatelessWidget {
                 const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
                 const SizedBox(width: 6),
                 Text(
-                  linkCount == '2 Link' ? (isKhmer ? '2 តំណភ្ជាប់' : '2 Link') : linkCount,
+                  linkCount == '2 Link'
+                      ? (isKhmer ? '2 តំណភ្ជាប់' : '2 Link')
+                      : linkCount,
                   style: const TextStyle(
                     color: Color(0xFF4C5563),
                     fontSize: 11,
@@ -373,7 +373,8 @@ class _RgcDecisionCard extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => RgcDecisionDetailScreen(agencyName: agencyName),
+                    builder: (_) =>
+                        RgcDecisionDetailScreen(agencyName: agencyName),
                   ),
                 );
               },
@@ -391,10 +392,7 @@ class _RgcDecisionCard extends StatelessWidget {
                 children: [
                   Text(
                     l10n.text('viewDetails'),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                   SizedBox(width: 4),
                   Icon(Icons.chevron_right, size: 16),
@@ -413,26 +411,31 @@ class _PlenaryTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        _PlenaryCard(
-          title: '19th G-PSF. Plenary',
-          status: 'Sent',
-          meetingDate: 'Oct 30, 2025',
-          numberOfRgcDecision: 'Jun 07, 2025',
-          deadline: 'Jun 07, 2025',
-          attachmentCount: '2 Attachement',
-        ),
-        _PlenaryCard(
-          title: '18th G-PSF. Plenary',
-          status: 'Sent',
-          meetingDate: 'Oct 30, 2025',
-          numberOfRgcDecision: 'Jun 07, 2025',
-          deadline: 'Jun 07, 2025',
-          attachmentCount: '2 Attachement',
-        ),
-      ],
+    return PlenariesLoader(
+      builder: (plenaries) => Column(
+        children: [
+          for (final plenary in plenaries)
+            _PlenaryCard(
+              title: plenary.name,
+              status: plenary.status,
+              meetingDate: _formatDate(context, plenary.meetingDate),
+              numberOfRgcDecision: '${plenary.numberOfRgcDecisions}',
+              deadline: _formatDate(context, plenary.deadline),
+              attachmentCount: _attachmentLabel(context, plenary),
+            ),
+        ],
+      ),
     );
+  }
+
+  static String _formatDate(BuildContext context, DateTime? value) {
+    if (value == null) return '-';
+    return MaterialLocalizations.of(context).formatMediumDate(value.toLocal());
+  }
+
+  static String _attachmentLabel(BuildContext context, Plenary plenary) {
+    if (plenary.attachmentCount == 2) return '2 Attachement';
+    return '${plenary.attachmentCount} ${AppLocalizations.of(context).text('attachmentsLabel')}';
   }
 }
 
@@ -484,8 +487,10 @@ class _PlenaryCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: isDark
                       ? const Color(0xFF123B2A)
@@ -513,7 +518,10 @@ class _PlenaryCard extends StatelessWidget {
           const SizedBox(height: 12),
           _ReportRow(label: l10n.text('meetingDate'), value: meetingDate),
           const SizedBox(height: 8),
-          _ReportRow(label: l10n.text('rgcDecision'), value: numberOfRgcDecision),
+          _ReportRow(
+            label: l10n.text('rgcDecision'),
+            value: numberOfRgcDecision,
+          ),
           const SizedBox(height: 8),
           _ReportRow(label: l10n.text('deadline'), value: deadline),
           const SizedBox(height: 12),
@@ -532,7 +540,9 @@ class _PlenaryCard extends StatelessWidget {
                 const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
                 const SizedBox(width: 6),
                 Text(
-                  attachmentCount == '2 Attachement' ? l10n.text('twoAttachments') : attachmentCount,
+                  attachmentCount == '2 Attachement'
+                      ? l10n.text('twoAttachments')
+                      : attachmentCount,
                   style: const TextStyle(
                     color: Color(0xFF4C5563),
                     fontSize: 11,
@@ -568,10 +578,7 @@ class _PlenaryCard extends StatelessWidget {
                 children: [
                   Text(
                     l10n.text('viewDetails'),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                   SizedBox(width: 4),
                   Icon(Icons.chevron_right, size: 16),
@@ -585,6 +592,8 @@ class _PlenaryCard extends StatelessWidget {
   }
 }
 
+// Kept for the legacy report layout used by older saved screens.
+// ignore: unused_element
 class _ProgressReportCard extends StatelessWidget {
   const _ProgressReportCard({
     required this.title,
@@ -693,10 +702,7 @@ class _ProgressReportCard extends StatelessWidget {
                 children: [
                   Text(
                     l10n.text('viewDetails'),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                   SizedBox(width: 4),
                   Icon(Icons.chevron_right, size: 16),
@@ -778,8 +784,19 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return PswgDataLoader(
+      scope: DashboardScope.plenary,
+      builder: _buildContent,
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final cards = PswgDataScope.maybeOf(context)?.cards;
+    final totalIssues = cards?['totalIssues'] ?? 179;
+    final solved = cards?['solved'] ?? 166;
+    final inProgress = cards?['inProgress'] ?? 13;
+    final notAddressed = cards?['notAddressed'] ?? 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -795,32 +812,129 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
           children: [
             _MetricCard(
               label: l10n.text('totalIssues'),
-              value: '179',
+              value: '$totalIssues',
+              background: const Color(0xFFDDEEFF),
+              icon: Icons.library_books_outlined,
+            ),
+            _MetricCard(
+              label: l10n.text('solved'),
+              value: '$solved/$totalIssues',
+              background: const Color(0xFFE5FAEF),
+              icon: Icons.fact_check_outlined,
+            ),
+            _MetricCard(
+              label: l10n.text('inProgress'),
+              value: '$inProgress/$totalIssues',
+              background: const Color(0xFFFFF8DC),
+              icon: Icons.add_box_outlined,
+            ),
+            _MetricCard(
+              label: l10n.text('notAddressed'),
+              value: '$notAddressed/$totalIssues',
+              background: const Color(0xFFFFEEEE),
+              icon: Icons.assignment_late_outlined,
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _TotalPrimaryAgenciesCard(
+          value: '${cards?['totalPrimaryAgencies'] ?? 14}',
+        ),
+        const SizedBox(height: 16),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _SubFilterChip(
+                label: l10n.text('overall'),
+                selected: _selectedFilter == 0,
+                onTap: () => setState(() => _selectedFilter = 0),
+              ),
+              const SizedBox(width: 8),
+              _SubFilterChip(
+                label: l10n.text('agencies'),
+                selected: _selectedFilter == 1,
+                onTap: () => setState(() => _selectedFilter = 1),
+              ),
+              const SizedBox(width: 8),
+              _SubFilterChip(
+                label: l10n.text('workingGroup'),
+                selected: _selectedFilter == 2,
+                onTap: () => setState(() => _selectedFilter = 2),
+              ),
+              const SizedBox(width: 8),
+              _SubFilterChip(
+                label: l10n.text('categories'),
+                selected: _selectedFilter == 3,
+                onTap: () => setState(() => _selectedFilter = 3),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        switch (_selectedFilter) {
+          1 => const AgenciesTab(),
+          2 => const WorkingGroupTab(),
+          3 => const CategoriesTab(),
+          _ => const OverallTab(),
+        },
+      ],
+    );
+  }
+
+  // Legacy layout retained for compatibility with existing saved screens.
+  // ignore: unused_element
+  Widget _buildLegacyContent(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
+    final cards = PswgDataScope.maybeOf(context)?.cards;
+    final totalIssues = cards?['totalIssues'] ?? 179;
+    final solved = cards?['solved'] ?? 166;
+    final inProgress = cards?['inProgress'] ?? 13;
+    final notAddressed = cards?['notAddressed'] ?? 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          padding: EdgeInsets.zero,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          childAspectRatio: 2.26,
+          children: [
+            _MetricCard(
+              label: l10n.text('totalIssues'),
+              value: '$totalIssues',
               background: Color(0xFFDDEEFF),
               icon: Icons.library_books_outlined,
             ),
             _MetricCard(
               label: l10n.text('solved'),
-              value: '166/179',
+              value: '$solved/$totalIssues',
               background: Color(0xFFE5FAEF),
               icon: Icons.fact_check_outlined,
             ),
             _MetricCard(
               label: l10n.text('inProgress'),
-              value: '13/179',
+              value: '$inProgress/$totalIssues',
               background: Color(0xFFFFF8DC),
               icon: Icons.add_box_outlined,
             ),
             _MetricCard(
               label: l10n.text('notAddressed'),
-              value: '0/179',
+              value: '$notAddressed/$totalIssues',
               background: Color(0xFFFFEEEE),
               icon: Icons.assignment_late_outlined,
             ),
           ],
         ),
         const SizedBox(height: 12),
-        const _TotalPrimaryAgenciesCard(value: '14'),
+        _TotalPrimaryAgenciesCard(
+          value: '${cards?['totalPrimaryAgencies'] ?? 14}',
+        ),
         const SizedBox(height: 16),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -904,12 +1018,25 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.square, color: Color(0xFF10B981), size: 10),
+                        const Icon(
+                          Icons.square,
+                          color: Color(0xFF10B981),
+                          size: 10,
+                        ),
                         const SizedBox(width: 6),
-                        Text(l10n.text('solved'), style: const TextStyle(fontSize: 12)),
+                        Text(
+                          l10n.text('solved'),
+                          style: const TextStyle(fontSize: 12),
+                        ),
                       ],
                     ),
-                    Text('(166)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                    Text(
+                      '(166)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -918,12 +1045,25 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.square, color: Color(0xFFF59E0B), size: 10),
+                        const Icon(
+                          Icons.square,
+                          color: Color(0xFFF59E0B),
+                          size: 10,
+                        ),
                         const SizedBox(width: 6),
-                        Text(l10n.text('inProgress'), style: const TextStyle(fontSize: 12)),
+                        Text(
+                          l10n.text('inProgress'),
+                          style: const TextStyle(fontSize: 12),
+                        ),
                       ],
                     ),
-                    Text('(13)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                    Text(
+                      '(13)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -982,7 +1122,13 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
                         Text('Mid Progress', style: TextStyle(fontSize: 12)),
                       ],
                     ),
-                    Text('(165)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                    Text(
+                      '(165)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -996,7 +1142,13 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
                         Text('Early Progress', style: TextStyle(fontSize: 12)),
                       ],
                     ),
-                    Text('(14)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                    Text(
+                      '(14)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -1203,10 +1355,7 @@ class _MiniBarChart extends StatelessWidget {
 }
 
 class _AgenciesListCard extends StatelessWidget {
-  const _AgenciesListCard({
-    required this.title,
-    required this.items,
-  });
+  const _AgenciesListCard({required this.title, required this.items});
 
   final String title;
   final List<String> items;
@@ -1320,10 +1469,7 @@ class DonutChartWidget extends StatelessWidget {
         children: [
           CustomPaint(
             size: const Size(165, 165),
-            painter: _DonutChartPainter(
-              slices: slices,
-              startAngle: startAngle,
-            ),
+            painter: _DonutChartPainter(slices: slices, startAngle: startAngle),
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
@@ -1370,10 +1516,7 @@ class DonutChartWidget extends StatelessWidget {
 }
 
 class _DonutChartPainter extends CustomPainter {
-  _DonutChartPainter({
-    required this.slices,
-    required this.startAngle,
-  });
+  _DonutChartPainter({required this.slices, required this.startAngle});
 
   final List<DonutChartData> slices;
   final double startAngle;
@@ -1388,8 +1531,10 @@ class _DonutChartPainter extends CustomPainter {
     double currentAngle = startAngle;
 
     for (final slice in slices) {
+      if (!slice.percentage.isFinite || slice.percentage <= 0) continue;
       final totalSweep = slice.percentage * 2 * 3.141592653589793;
-      final drawSweep = (totalSweep - gapAngle).clamp(0.01, totalSweep);
+      final effectiveGap = totalSweep < gapAngle ? 0.0 : gapAngle;
+      final drawSweep = totalSweep - effectiveGap;
 
       final paint = Paint()
         ..color = slice.color
@@ -1399,7 +1544,7 @@ class _DonutChartPainter extends CustomPainter {
 
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
-        currentAngle + gapAngle / 2,
+        currentAngle + effectiveGap / 2,
         drawSweep,
         false,
         paint,
@@ -1414,10 +1559,7 @@ class _DonutChartPainter extends CustomPainter {
 }
 
 class _PercentageBadge extends StatelessWidget {
-  const _PercentageBadge({
-    required this.percentText,
-    required this.dotColor,
-  });
+  const _PercentageBadge({required this.percentText, required this.dotColor});
 
   final String percentText;
   final Color dotColor;
@@ -1449,10 +1591,7 @@ class _PercentageBadge extends StatelessWidget {
           Container(
             width: 5,
             height: 5,
-            decoration: BoxDecoration(
-              color: dotColor,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
           ),
           const SizedBox(width: 5),
           Text(
@@ -1507,8 +1646,8 @@ class _SubFilterChip extends StatelessWidget {
             color: selected
                 ? Colors.white
                 : (isDark
-                    ? AppColors.secondaryText(context)
-                    : const Color(0xFF4C5563)),
+                      ? AppColors.secondaryText(context)
+                      : const Color(0xFF4C5563)),
             fontSize: 12,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
           ),
@@ -1666,10 +1805,7 @@ class _TotalPrimaryAgenciesCard extends StatelessWidget {
 }
 
 class _FilterButton extends StatelessWidget {
-  const _FilterButton({
-    required this.activeCount,
-    required this.onTap,
-  });
+  const _FilterButton({required this.activeCount, required this.onTap});
 
   final int activeCount;
   final VoidCallback onTap;
@@ -1766,57 +1902,52 @@ class _ReportTabs extends StatelessWidget {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
-          children: List.generate(
-            tabs.length,
-            (index) {
-              final isSelected = selectedIndex == index;
-              return Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: InkWell(
-                  onTap: () => onSelected(index),
-                  borderRadius: BorderRadius.circular(6),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.accent(context)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          tabs[index].icon,
+          children: List.generate(tabs.length, (index) {
+            final isSelected = selectedIndex == index;
+            return Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: InkWell(
+                onTap: () => onSelected(index),
+                borderRadius: BorderRadius.circular(6),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.accent(context)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        tabs[index].icon,
+                        color: isSelected ? Colors.white : AppColors.mutedText,
+                        size: 15,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        tabs[index].label,
+                        style: TextStyle(
                           color: isSelected
                               ? Colors.white
                               : AppColors.mutedText,
-                          size: 15,
+                          fontSize: 12,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w600,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          tabs[index].label,
-                          style: TextStyle(
-                            color: isSelected
-                                ? Colors.white
-                                : AppColors.mutedText,
-                            fontSize: 12,
-                            fontWeight: isSelected
-                                ? FontWeight.w700
-                                : FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          }),
         ),
       ),
     );
@@ -1887,7 +2018,9 @@ class _FilterChipCheckbox extends StatelessWidget {
                   borderRadius: BorderRadius.circular(3),
                 ),
                 side: BorderSide(
-                  color: isDark ? AppColors.darkBorder : const Color(0xFFCBD5E1),
+                  color: isDark
+                      ? AppColors.darkBorder
+                      : const Color(0xFFCBD5E1),
                 ),
               ),
             ),
@@ -2017,7 +2150,10 @@ class _LineMinistryProgressReportFilterSheetState
             // FILTER SECTIONS
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22,
+                  vertical: 20,
+                ),
                 children: [
                   // SECTION 1: STATUS
                   const Text(
@@ -2113,10 +2249,7 @@ class _LineMinistryProgressReportFilterSheetState
                   },
                   child: const Text(
                     'Apply Filters',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -2238,7 +2371,10 @@ class _LineMinistrySummaryFilterSheetState
             // FILTER SECTIONS
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22,
+                  vertical: 20,
+                ),
                 children: [
                   // SECTION 1: STATUS
                   const Text(
@@ -2334,10 +2470,7 @@ class _LineMinistrySummaryFilterSheetState
                   },
                   child: const Text(
                     'Apply Filters',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -2350,9 +2483,7 @@ class _LineMinistrySummaryFilterSheetState
 }
 
 class _LineMinistryPlenaryFilterSheet extends StatefulWidget {
-  const _LineMinistryPlenaryFilterSheet({
-    required this.selectedStatuses,
-  });
+  const _LineMinistryPlenaryFilterSheet({required this.selectedStatuses});
 
   final Set<String> selectedStatuses;
 
@@ -2429,8 +2560,10 @@ class _LineMinistryPlenaryFilterSheetState
             // FILTER SECTIONS
             Expanded(
               child: ListView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22,
+                  vertical: 20,
+                ),
                 children: [
                   const Text(
                     'Status',
@@ -2472,10 +2605,7 @@ class _LineMinistryPlenaryFilterSheetState
                   onPressed: () => Navigator.pop(context, _statuses),
                   child: const Text(
                     'Apply Filters',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -2537,10 +2667,24 @@ class LineMinistryDashboardFilterSheetState
   ];
 
   static const _agencyItems = [
-    'GDT', 'MFF', 'GDCE', 'MLVT', 'MPTC',
-    'MAFF', 'Moh', 'NBC', 'MoC', 'MoT',
-    'MLMUPC', 'Mol', 'CDC', 'MPWT',
-    'MISTI', 'MME', 'SHV Admin', 'MOC',
+    'GDT',
+    'MFF',
+    'GDCE',
+    'MLVT',
+    'MPTC',
+    'MAFF',
+    'Moh',
+    'NBC',
+    'MoC',
+    'MoT',
+    'MLMUPC',
+    'Mol',
+    'CDC',
+    'MPWT',
+    'MISTI',
+    'MME',
+    'SHV Admin',
+    'MOC',
   ];
 
   static const _categoryItems = [
@@ -2600,8 +2744,9 @@ class LineMinistryDashboardFilterSheetState
         ? _categoryItems
         : _categoryItems.take(5).toList();
 
-    final visibleDates =
-        _expandDates ? _dateItems : _dateItems.take(2).toList();
+    final visibleDates = _expandDates
+        ? _dateItems
+        : _dateItems.take(2).toList();
 
     return Material(
       color: background,
@@ -2641,8 +2786,10 @@ class LineMinistryDashboardFilterSheetState
             // SCROLLABLE FILTER SECTIONS
             Expanded(
               child: ListView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22,
+                  vertical: 20,
+                ),
                 children: [
                   // 1. PLENARY
                   const Text(
@@ -2721,7 +2868,8 @@ class LineMinistryDashboardFilterSheetState
                   Center(
                     child: InkWell(
                       onTap: () => setState(
-                          () => _expandWorkingGroup = !_expandWorkingGroup),
+                        () => _expandWorkingGroup = !_expandWorkingGroup,
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -2827,7 +2975,8 @@ class LineMinistryDashboardFilterSheetState
                   Center(
                     child: InkWell(
                       onTap: () => setState(
-                          () => _expandCategories = !_expandCategories),
+                        () => _expandCategories = !_expandCategories,
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -2926,10 +3075,7 @@ class LineMinistryDashboardFilterSheetState
                   onPressed: () => Navigator.pop(context),
                   child: const Text(
                     'Apply Filters',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),

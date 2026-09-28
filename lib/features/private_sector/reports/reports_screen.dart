@@ -108,7 +108,12 @@ class _ReportScreenState extends State<ReportScreen> {
         children: [
           Container(
             color: headerBackground,
-            padding: EdgeInsets.fromLTRB(14, topPadding > 0 ? topPadding + 12 : 34, 14, 12),
+            padding: EdgeInsets.fromLTRB(
+              14,
+              topPadding > 0 ? topPadding + 12 : 34,
+              14,
+              12,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -147,8 +152,16 @@ class _ReportScreenState extends State<ReportScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 14, 14, 96),
             child: _selectedTab == 0
-                ? const ReportProgressReportTab()
-                : const MeetingSummaryTab(),
+                ? ReportProgressReportTab(
+                    years: _selectedProgressYears,
+                    semesters: _selectedSemesters,
+                    statuses: _selectedProgressStatuses,
+                  )
+                : MeetingSummaryTab(
+                    statuses: _selectedSummaryStatuses,
+                    years: _selectedSummaryYears,
+                    issueCounts: _selectedSummaryIssues,
+                  ),
           ),
         ],
       ),
@@ -157,10 +170,7 @@ class _ReportScreenState extends State<ReportScreen> {
 }
 
 class _FilterButton extends StatelessWidget {
-  const _FilterButton({
-    required this.activeCount,
-    required this.onTap,
-  });
+  const _FilterButton({required this.activeCount, required this.onTap});
 
   final int activeCount;
   final VoidCallback onTap;
@@ -336,9 +346,9 @@ class _ProgressReportFilterSheetState
   late Set<String> _semesters;
   late Set<String> _statuses;
 
-  static const _yearItems = ['2026', '2025', '2024', '2023'];
+  static const _yearItems = ['2027', '2026', '2025', '2024', '2023'];
   static const _semesterItems = ['Both', 'S1', 'S2'];
-  static const _statusItems = ['Sent', 'Draft'];
+  static const _statusItems = ['Sent', 'Draft', 'Shared with PSWG'];
 
   @override
   void initState() {
@@ -363,8 +373,7 @@ class _ProgressReportFilterSheetState
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
-    final borderColor =
-        isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
+    final borderColor = isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
 
     final viewPadding = MediaQuery.of(context).viewPadding;
     final topInset = viewPadding.top > 48.0 ? viewPadding.top : 48.0;
@@ -379,19 +388,12 @@ class _ProgressReportFilterSheetState
       child: FractionallySizedBox(
         heightFactor: 1.0,
         child: Container(
-          decoration: BoxDecoration(
-            color: background,
-          ),
+          decoration: BoxDecoration(color: background),
           child: Column(
             children: [
               // ================= FILTER HEADER =================
               Container(
-                padding: EdgeInsets.fromLTRB(
-                  22,
-                  topInset + 24,
-                  22,
-                  12,
-                ),
+                padding: EdgeInsets.fromLTRB(22, topInset + 24, 22, 12),
                 child: Row(
                   children: [
                     const SizedBox(width: 28),
@@ -414,10 +416,7 @@ class _ProgressReportFilterSheetState
                       child: const SizedBox(
                         width: 28,
                         height: 28,
-                        child: Icon(
-                          Icons.close,
-                          size: 25,
-                        ),
+                        child: Icon(Icons.close, size: 25),
                       ),
                     ),
                   ],
@@ -427,12 +426,7 @@ class _ProgressReportFilterSheetState
               // ================= FILTER CONTENT =================
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    25,
-                    20,
-                    25,
-                    22,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(25, 20, 25, 22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -481,11 +475,7 @@ class _ProgressReportFilterSheetState
                 ),
                 decoration: BoxDecoration(
                   color: background,
-                  border: Border(
-                    top: BorderSide(
-                      color: borderColor,
-                    ),
-                  ),
+                  border: Border(top: BorderSide(color: borderColor)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.03),
@@ -574,22 +564,12 @@ class _MeetingSummaryFilterSheetState
     'Under Review',
     'Scheduled',
     'Completed',
+    'Shared',
   ];
 
-  static const _yearItems = [
-    '2026',
-    '2025',
-    '2024',
-    '2023',
-  ];
+  static const _yearItems = ['2026', '2025', '2024', '2023'];
 
-  static const _issueNumberItems = [
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-  ];
+  static const _issueNumberItems = ['1', '2', '3', '4', '5'];
 
   @override
   void initState() {
@@ -614,8 +594,7 @@ class _MeetingSummaryFilterSheetState
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
-    final borderColor =
-        isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
+    final borderColor = isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
 
     final viewPadding = MediaQuery.of(context).viewPadding;
     final topInset = viewPadding.top > 48.0 ? viewPadding.top : 48.0;
@@ -630,19 +609,12 @@ class _MeetingSummaryFilterSheetState
       child: FractionallySizedBox(
         heightFactor: 1.0,
         child: Container(
-          decoration: BoxDecoration(
-            color: background,
-          ),
+          decoration: BoxDecoration(color: background),
           child: Column(
             children: [
               // ================= FILTER HEADER =================
               Container(
-                padding: EdgeInsets.fromLTRB(
-                  22,
-                  topInset + 24,
-                  22,
-                  12,
-                ),
+                padding: EdgeInsets.fromLTRB(22, topInset + 24, 22, 12),
                 child: Row(
                   children: [
                     const SizedBox(width: 28),
@@ -665,10 +637,7 @@ class _MeetingSummaryFilterSheetState
                       child: const SizedBox(
                         width: 28,
                         height: 28,
-                        child: Icon(
-                          Icons.close,
-                          size: 25,
-                        ),
+                        child: Icon(Icons.close, size: 25),
                       ),
                     ),
                   ],
@@ -678,12 +647,7 @@ class _MeetingSummaryFilterSheetState
               // ================= FILTER CONTENT =================
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    25,
-                    20,
-                    25,
-                    22,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(25, 20, 25, 22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -732,11 +696,7 @@ class _MeetingSummaryFilterSheetState
                 ),
                 decoration: BoxDecoration(
                   color: background,
-                  border: Border(
-                    top: BorderSide(
-                      color: borderColor,
-                    ),
-                  ),
+                  border: Border(top: BorderSide(color: borderColor)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.03),
@@ -950,11 +910,7 @@ class _CheckTileBox extends StatelessWidget {
         ),
       ),
       child: selected
-          ? const Icon(
-              Icons.check,
-              size: 11,
-              color: Colors.white,
-            )
+          ? const Icon(Icons.check, size: 11, color: Colors.white)
           : null,
     );
   }

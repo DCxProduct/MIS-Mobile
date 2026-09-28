@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
+import '../../core/widgets/pdf_attachment_preview.dart';
+import '../../features/shared/meetings/data/progress_report.dart';
 import '../../translations/app_localizations.dart';
 
 class ReportDetailScreen extends StatefulWidget {
-  const ReportDetailScreen({super.key, required this.title});
+  const ReportDetailScreen({super.key, required this.title, this.report});
 
   final String title;
+  final ProgressReport? report;
 
   @override
   State<ReportDetailScreen> createState() => _ReportDetailScreenState();
@@ -66,9 +69,9 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
               ),
             ),
             const SizedBox(height: 14),
-            _MaffInfoSection(title: widget.title),
+            _MaffInfoSection(title: widget.title, report: widget.report),
             const SizedBox(height: 9),
-            const _CdcInfoSection(),
+            _CdcInfoSection(report: widget.report),
             const SizedBox(height: 6),
             _ReportDetailTabs(
               selectedIndex: _selectedTab,
@@ -86,15 +89,16 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
       0 => const _DescriptionTab(),
       1 => const _IssueListTab(status: _ReportIssueStatus.notAddressed),
       2 => const _IssueListTab(status: _ReportIssueStatus.solved),
-      _ => const _AttachmentTab(),
+      _ => _AttachmentTab(report: widget.report),
     };
   }
 }
 
 class _MaffInfoSection extends StatelessWidget {
-  const _MaffInfoSection({required this.title});
+  const _MaffInfoSection({required this.title, this.report});
 
   final String title;
+  final ProgressReport? report;
 
   @override
   Widget build(BuildContext context) {
@@ -125,14 +129,19 @@ class _MaffInfoSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 13),
-        const _DocumentInfoBlock(label: 'Approval Report'),
+        _DocumentInfoBlock(
+          label: 'Approval Report',
+          path: report?.attachmentPaths?.firstOrNull,
+        ),
       ],
     );
   }
 }
 
 class _CdcInfoSection extends StatelessWidget {
-  const _CdcInfoSection();
+  const _CdcInfoSection({this.report});
+
+  final ProgressReport? report;
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +173,7 @@ class _CdcInfoSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 14),
-        const Row(
+        Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
@@ -172,7 +181,10 @@ class _CdcInfoSection extends StatelessWidget {
             ),
             SizedBox(width: 18),
             Expanded(
-              child: _DocumentInfoBlock(label: 'Meeting Request Document:'),
+              child: _DocumentInfoBlock(
+                label: 'Meeting Request Document:',
+                path: report?.attachmentPaths?.elementAtOrNull(1),
+              ),
             ),
           ],
         ),
@@ -313,57 +325,62 @@ class _PersonInfoBlock extends StatelessWidget {
 }
 
 class _DocumentInfoBlock extends StatelessWidget {
-  const _DocumentInfoBlock({required this.label});
+  const _DocumentInfoBlock({required this.label, this.path});
 
   final String label;
+  final String? path;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: AppColors.mutedText,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 7),
-        Row(
-          children: [
-            Icon(Icons.picture_as_pdf, color: Color(0xFFE53935), size: 18),
-            const SizedBox(width: 7),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Request Doc',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: AppColors.primaryText(context),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 1),
-                  const Text(
-                    '200 KB',
-                    style: TextStyle(
-                      color: AppColors.mutedText,
-                      fontSize: 7,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+    return PdfAttachmentPreview(
+      path: path ?? '',
+      name: path == null ? null : pdfAttachmentName(path!),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.mutedText,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
-          ],
-        ),
-      ],
+          ),
+          const SizedBox(height: 7),
+          Row(
+            children: [
+              Icon(Icons.picture_as_pdf, color: Color(0xFFE53935), size: 18),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Request Doc',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: AppColors.primaryText(context),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    const Text(
+                      '200 KB',
+                      style: TextStyle(
+                        color: AppColors.mutedText,
+                        fontSize: 7,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -597,60 +614,76 @@ class _SmallStatusBadge extends StatelessWidget {
 }
 
 class _AttachmentTab extends StatelessWidget {
-  const _AttachmentTab();
+  const _AttachmentTab({this.report});
+
+  final ProgressReport? report;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
-        children: const [
-          _AttachmentCard(title: 'Request Doc'),
-          SizedBox(height: 10),
-          _AttachmentCard(title: 'Approval Report'),
-        ],
+        children: report?.attachmentPaths?.isNotEmpty == true
+            ? [
+                for (final path in report!.attachmentPaths!)
+                  _AttachmentCard(title: pdfAttachmentName(path), path: path),
+              ]
+            : const [
+                _AttachmentCard(title: 'Request Doc'),
+                SizedBox(height: 10),
+                _AttachmentCard(title: 'Approval Report'),
+              ],
       ),
     );
   }
 }
 
 class _AttachmentCard extends StatelessWidget {
-  const _AttachmentCard({required this.title});
+  const _AttachmentCard({required this.title, this.path});
 
   final String title;
+  final String? path;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground(context),
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: AppColors.border(context)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.picture_as_pdf, color: Color(0xFFE53935), size: 18),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                color: AppColors.primaryText(context),
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
+    return PdfAttachmentPreview(
+      path: path ?? '',
+      name: title,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground(context),
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(color: AppColors.border(context)),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.picture_as_pdf,
+              color: Color(0xFFE53935),
+              size: 18,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: AppColors.primaryText(context),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
-          ),
-          const Text(
-            '200 KB',
-            style: TextStyle(
-              color: AppColors.mutedText,
-              fontSize: 9,
-              fontWeight: FontWeight.w500,
+            const Text(
+              'PDF',
+              style: TextStyle(
+                color: AppColors.mutedText,
+                fontSize: 9,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

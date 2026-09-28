@@ -1,7 +1,13 @@
+import '../../shared/issues/data/working_group_issue.dart';
+import '../../shared/issues/widgets/wg_issues_list.dart';
+import '../../shared/issues/widgets/issue_display.dart';
+import '../../shared/issues/data/wg_issue_summary.dart';
+import '../../shared/issues/widgets/wg_issue_summary_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/app_colors.dart';
+import '../../../core/widgets/pdf_attachment_preview.dart';
 import '../../../screens/issues/issue_detail_screen.dart';
 import '../../../translations/app_localizations.dart';
 
@@ -73,7 +79,12 @@ class _LineMinistryIssuesScreenViewState
           // STICKY HEADER
           Container(
             color: headerBackground,
-            padding: EdgeInsets.fromLTRB(14, topPadding > 0 ? topPadding + 12 : 34, 14, 12),
+            padding: EdgeInsets.fromLTRB(
+              14,
+              topPadding > 0 ? topPadding + 12 : 34,
+              14,
+              12,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -108,9 +119,18 @@ class _LineMinistryIssuesScreenViewState
             child: ListView(
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 96),
               children: [
-                const _LineMinistryMetricGrid(),
-                const SizedBox(height: 12),
-                const _TotalPrimaryAgenciesCard(value: '14'),
+                WgIssueSummaryLoader(
+                  matrix: _selectedTab == 1,
+                  builder: (summary) => Column(
+                    children: [
+                      _LineMinistryMetricGrid(summary: summary),
+                      const SizedBox(height: 12),
+                      _TotalPrimaryAgenciesCard(
+                        value: '${summary.totalPrimaryAgencies}',
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 16),
                 Text(
                   l10n.text('allIssues'),
@@ -121,7 +141,42 @@ class _LineMinistryIssuesScreenViewState
                   ),
                 ),
                 const SizedBox(height: 12),
-                const _LineMinistryIssuesList(),
+                _selectedTab == 0
+                    ? WgIssuesList(
+                        itemBuilder: (issue) => _LineMinistryIssueListCard(
+                          title: issue.title,
+                          category: issue.category.isEmpty
+                              ? '—'
+                              : issue.category,
+                          status: issueStatusLabel(context, issue),
+                          submissionDate: issueDate(context, issue.createdAt),
+                          submittedBy: issue.submittedBy.isEmpty
+                              ? '—'
+                              : issue.submittedBy,
+                          description: issue.description,
+                          attachmentCount:
+                              '${issue.attachmentCount} ${l10n.text('attachmentsLabel')}',
+                          issue: issue,
+                        ),
+                      )
+                    : WgIssuesList(
+                        matrix: true,
+                        itemBuilder: (issue) => _LineMinistryIssueListCard(
+                          title: issue.title,
+                          category: issue.category.isEmpty
+                              ? '—'
+                              : issue.category,
+                          status: issueStatusLabel(context, issue),
+                          submissionDate: issueDate(context, issue.createdAt),
+                          submittedBy: issue.submittedBy.isEmpty
+                              ? '—'
+                              : issue.submittedBy,
+                          description: issue.description,
+                          attachmentCount:
+                              '${issue.attachmentCount} ${l10n.text('attachmentsLabel')}',
+                          issue: issue,
+                        ),
+                      ),
               ],
             ),
           ),
@@ -132,7 +187,9 @@ class _LineMinistryIssuesScreenViewState
 }
 
 class _LineMinistryMetricGrid extends StatelessWidget {
-  const _LineMinistryMetricGrid();
+  const _LineMinistryMetricGrid({this.summary});
+
+  final WgIssueSummary? summary;
 
   @override
   Widget build(BuildContext context) {
@@ -149,25 +206,31 @@ class _LineMinistryMetricGrid extends StatelessWidget {
       children: [
         _MetricCard(
           label: l10n.text('totalIssues'),
-          value: '56',
+          value: summary == null ? '56' : '${summary!.totalIssues}',
           background: const Color(0xFFDDEEFF),
           icon: Icons.library_books_outlined,
         ),
         _MetricCard(
           label: l10n.text('solved'),
-          value: '30/56',
+          value: summary == null
+              ? '30/56'
+              : '${summary!.solved}/${summary!.totalIssues}',
           background: const Color(0xFFE5FAEF),
           icon: Icons.fact_check_outlined,
         ),
         _MetricCard(
           label: l10n.text('inProgress'),
-          value: '16/56',
+          value: summary == null
+              ? '16/56'
+              : '${summary!.inProgress}/${summary!.totalIssues}',
           background: const Color(0xFFFFF8DC),
           icon: Icons.add_box_outlined,
         ),
         _MetricCard(
           label: l10n.text('notAddressed'),
-          value: '10/56',
+          value: summary == null
+              ? '10/56'
+              : '${summary!.notAddressed}/${summary!.totalIssues}',
           background: const Color(0xFFFFEEEE),
           icon: Icons.assignment_late_outlined,
         ),
@@ -323,51 +386,10 @@ class _TotalPrimaryAgenciesCard extends StatelessWidget {
   }
 }
 
-class _LineMinistryIssuesList extends StatelessWidget {
-  const _LineMinistryIssuesList();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        _LineMinistryIssueListCard(
-          title: 'Joint Inspection',
-          category: 'Procedure',
-          status: 'Solved',
-          submissionDate: 'July 24, 2025',
-          submittedBy: 'Agriculture and Agro..',
-          description:
-              'The private sector said that the Economic Land Concession (ELCs), which invest in rubber, cashew, plantations, etc., are now fully developed and some...',
-          attachmentCount: '2 Attachement',
-        ),
-        _LineMinistryIssueListCard(
-          title: 'ពន្ធដារលើការនាំចូលផលិតផលកសិកម្ម...',
-          category: 'Taxation & Custom',
-          status: 'In Progress',
-          submissionDate: 'July 24, 2025',
-          submittedBy: 'Agriculture and Agro..',
-          description:
-              'ក្រុមហ៊ុនក្នុងវិស័យឯកជនបានស្វែងរកការអនុគ្រោះពន្ធ និងសម្រួលនីតិវិធីគយសម្រាប់ការនាំចូលថ្នាំកសិកម្ម និងជី...',
-          attachmentCount: '2 Attachement',
-        ),
-        _LineMinistryIssueListCard(
-          title: 'បញ្ហាប្រឈមនៃថ្លៃអគ្គិសនីសម្រាប់រោងចក្រ...',
-          category: 'Energy & Mining',
-          status: 'Not Addressed',
-          submissionDate: 'July 24, 2025',
-          submittedBy: 'Agriculture and Agro..',
-          description:
-              'ការចំណាយលើថាមពលអគ្គិសនីនៅតែជាបន្ទុកធ្ងន់ធ្ងរសម្រាប់សហគ្រាសផលិតកម្មក្នុងស្រុក...',
-          attachmentCount: '2 Attachement',
-        ),
-      ],
-    );
-  }
-}
-
 class _LineMinistryIssueListCard extends StatelessWidget {
   const _LineMinistryIssueListCard({
     required this.title,
+    this.issue,
     required this.category,
     required this.status,
     required this.submissionDate,
@@ -376,6 +398,7 @@ class _LineMinistryIssueListCard extends StatelessWidget {
     required this.attachmentCount,
   });
 
+  final WorkingGroupIssue? issue;
   final String title;
   final String category;
   final String status;
@@ -388,29 +411,37 @@ class _LineMinistryIssueListCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final isSolved = status == 'Solved';
-    final isProgress = status == 'In Progress';
+    final isSolved = issue == null
+        ? status == 'Solved'
+        : issue!.statusCode == 'SOLVED';
+    final isProgress = issue == null
+        ? status == 'In Progress'
+        : issue!.statusCode == 'IN_PROGRESS';
     final statusColor = isSolved
         ? (isDark ? const Color(0xFF86EFAC) : const Color(0xFF16A34A))
         : (isProgress
-            ? (isDark ? const Color(0xFFFBBF24) : const Color(0xFFFF8A00))
-            : (isDark ? const Color(0xFFFCA5A5) : const Color(0xFFFF4842)));
+              ? (isDark ? const Color(0xFFFBBF24) : const Color(0xFFFF8A00))
+              : (isDark ? const Color(0xFFFCA5A5) : const Color(0xFFFF4842)));
     final statusBg = isSolved
         ? (isDark ? const Color(0xFF123B2A) : const Color(0xFFEAFBF0))
         : (isProgress
-            ? (isDark ? const Color(0xFF423415) : const Color(0xFFFFF6E8))
-            : (isDark ? const Color(0xFF3B1212) : const Color(0xFFFFEEEE)));
+              ? (isDark ? const Color(0xFF423415) : const Color(0xFFFFF6E8))
+              : (isDark ? const Color(0xFF3B1212) : const Color(0xFFFFEEEE)));
     final statusBorder = isSolved
         ? (isDark ? const Color(0xFF166534) : const Color(0xFF9BE2B4))
         : (isProgress
-            ? (isDark ? const Color(0xFF92400E) : const Color(0xFFFFC166))
-            : (isDark ? const Color(0xFF991B1B) : const Color(0xFFFFB3B3)));
+              ? (isDark ? const Color(0xFF92400E) : const Color(0xFFFFC166))
+              : (isDark ? const Color(0xFF991B1B) : const Color(0xFFFFB3B3)));
 
     return InkWell(
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (_) => IssueDetailScreen(title: title, category: category),
+            builder: (_) => IssueDetailScreen(
+              title: title,
+              category: category,
+              issue: issue,
+            ),
           ),
         );
       },
@@ -472,8 +503,10 @@ class _LineMinistryIssueListCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusBg,
                     borderRadius: BorderRadius.circular(6),
@@ -527,29 +560,40 @@ class _LineMinistryIssueListCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.darkCard : const Color(0xFFFAFAFA),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
+            PdfAttachmentPreview(
+              path: issue?.attachmentPath ?? '',
+              name: issue?.attachmentPath.isNotEmpty == true
+                  ? pdfAttachmentName(issue!.attachmentPath)
+                  : null,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
                 ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
-                  const SizedBox(width: 6),
-                  Text(
-                    attachmentCount,
-                    style: const TextStyle(
-                      color: Color(0xFF4C5563),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.darkCard : const Color(0xFFFAFAFA),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : const Color(0xFFE5E8ED),
                   ),
-                ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
+                    const SizedBox(width: 6),
+                    Text(
+                      attachmentCount,
+                      style: const TextStyle(
+                        color: Color(0xFF4C5563),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -626,10 +670,7 @@ class _MetaInfo extends StatelessWidget {
 }
 
 class _FilterButton extends StatelessWidget {
-  const _FilterButton({
-    required this.activeCount,
-    required this.onTap,
-  });
+  const _FilterButton({required this.activeCount, required this.onTap});
 
   final int activeCount;
   final VoidCallback onTap;
@@ -746,16 +787,20 @@ class _IssueTabs extends StatelessWidget {
                       size: 15,
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      tabs[index],
-                      style: TextStyle(
-                        color: selectedIndex == index
-                            ? Colors.white
-                            : AppColors.mutedText,
-                        fontSize: 12,
-                        fontWeight: selectedIndex == index
-                            ? FontWeight.w700
-                            : FontWeight.w600,
+                    Flexible(
+                      child: Text(
+                        tabs[index],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: selectedIndex == index
+                              ? Colors.white
+                              : AppColors.mutedText,
+                          fontSize: 12,
+                          fontWeight: selectedIndex == index
+                              ? FontWeight.w700
+                              : FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
@@ -833,17 +878,13 @@ class _InlineCheckbox extends StatelessWidget {
                   color: checked
                       ? AppColors.accent(context)
                       : (isDark
-                          ? AppColors.darkBorder
-                          : AppColors.filterOutline),
+                            ? AppColors.darkBorder
+                            : AppColors.filterOutline),
                   width: 1,
                 ),
               ),
               child: checked
-                  ? const Icon(
-                      Icons.check,
-                      size: 11,
-                      color: Colors.white,
-                    )
+                  ? const Icon(Icons.check, size: 11, color: Colors.white)
                   : null,
             ),
             const SizedBox(width: 8),
@@ -1031,8 +1072,8 @@ class _LineMinistryIssuesFilterSheetState
                                       color: _categories.contains(item)
                                           ? AppColors.accent(context)
                                           : (isDark
-                                              ? AppColors.darkBorder
-                                              : const Color(0xFFCED7E1)),
+                                                ? AppColors.darkBorder
+                                                : const Color(0xFFCED7E1)),
                                       width: 1,
                                     ),
                                   ),
@@ -1049,9 +1090,9 @@ class _LineMinistryIssuesFilterSheetState
                                   child: Text(
                                     item,
                                     style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
                                     ),
@@ -1073,7 +1114,9 @@ class _LineMinistryIssuesFilterSheetState
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [

@@ -4,21 +4,12 @@ A modern, multi-module Flutter mobile application for the Government-Private Sec
 
 ---
 
-## 🔑 Demo Accounts for Login (គណនីគំរូសម្រាប់ចូលប្រើប្រាស់)
+## API authentication
 
-All accounts share the same default password: **`12345678`**
-
-| Module / ផ្នែក | Email (Gmail) | Password | Description / ការពិពណ៌នា |
-| :--- | :--- | :--- | :--- |
-| **Line Ministry (ក្រសួងស្ថាប័ន)** | `ministry@gmail.com` | `12345678` | Line Ministry portal for managing issues, meeting requests, and progress reports. |
-| **Private Sector (វិស័យឯកជន)** | `privatesector@gmail.com` | `12345678` | Private Sector Working Group portal for submitting and tracking issues. |
-| **CDC Section** | `cdc@gmail.com` | `12345678` | Council for the Development of Cambodia (CDC) section dashboard & reviews. |
-| **CDC Secretariat** | `secretariat@gmail.com` | `12345678` | CDC Secretariat coordination and reporting portal. |
-| **CEFP** | `cefp@gmail.com` | `12345678` | Committee for Economic and Financial Policy (CEFP) monitoring view. |
-
-> **Note**: You can also log in with any valid custom email address.
-
----
+Login uses `POST /auth/login`, followed by `GET /auth/me`. Use an account
+registered on the configured backend; local demo credentials are no longer accepted.
+See [API coding standard](docs/api_standard.md) for structure, configuration,
+session handling, and remaining backend integration details.
 
 ## ✨ Features (លក្ខណៈពិសេស)
 

@@ -1,3 +1,6 @@
+import '../../shared/dashboard/data/dashboard_repository.dart';
+import '../../shared/dashboard/widgets/pswg_live_dashboard.dart';
+import '../../shared/dashboard/data/working_group_summary.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
@@ -16,7 +19,8 @@ class CdcSectionDashboardScreenView extends StatefulWidget {
 class _CdcSectionDashboardScreenViewState
     extends State<CdcSectionDashboardScreenView> {
   int _mainTab = 0; // 0: Plenary, 1: Working Group
-  int _subFilter = 0; // 0: Over All, 1: Agencies, 2: Working Group, 3: Categories
+  int _subFilter =
+      0; // 0: Over All, 1: Agencies, 2: Working Group, 3: Categories
 
   static const _agenciesItems = [
     '1. Adjusting business and investment climate',
@@ -44,6 +48,22 @@ class _CdcSectionDashboardScreenViewState
 
   @override
   Widget build(BuildContext context) {
+    return PswgDataLoader(
+      scope: _mainTab == 0 ? DashboardScope.plenary : DashboardScope.pswg,
+      builder: _buildContent,
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    final data = PswgDataScope.maybeOf(context);
+    final cards = data?.cards;
+    final total = cards?['totalIssues'] ?? 179;
+    double share(String key, double fallback) => cards == null
+        ? fallback
+        : total == 0
+        ? 0
+        : (cards[key] ?? 0) / total;
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context);
     final topPadding = MediaQuery.of(context).viewPadding.top;
@@ -60,7 +80,12 @@ class _CdcSectionDashboardScreenViewState
           // HEADER WITH LOGO AND NOTIFICATION BELL
           Container(
             color: headerBackground,
-            padding: EdgeInsets.fromLTRB(16, topPadding > 0 ? topPadding + 10 : 32, 16, 12),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              topPadding > 0 ? topPadding + 10 : 32,
+              16,
+              12,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -98,52 +123,72 @@ class _CdcSectionDashboardScreenViewState
                 // MAIN TABS (Plenary / Working Group) AND FILTER
                 Row(
                   children: [
-                    InkWell(
-                      onTap: () => setState(() => _mainTab = 0),
-                      borderRadius: BorderRadius.circular(20),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
-                        decoration: BoxDecoration(
-                          color: _mainTab == 0
-                              ? AppColors.accent(context)
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          l10n.text('plenary'),
-                          style: TextStyle(
-                            color: _mainTab == 0
-                                ? Colors.white
-                                : (isDark ? Colors.white70 : const Color(0xFF4C5563)),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    InkWell(
-                      onTap: () => setState(() => _mainTab = 1),
-                      borderRadius: BorderRadius.circular(20),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
-                        decoration: BoxDecoration(
-                          color: _mainTab == 1
-                              ? AppColors.accent(context)
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          l10n.text('workingGroup'),
-                          style: TextStyle(
-                            color: _mainTab == 1
-                                ? Colors.white
-                                : (isDark ? Colors.white70 : const Color(0xFF4C5563)),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
+                    Flexible(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            InkWell(
+                              onTap: () => setState(() => _mainTab = 0),
+                              borderRadius: BorderRadius.circular(20),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 7,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _mainTab == 0
+                                      ? AppColors.accent(context)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  l10n.text('plenary'),
+                                  style: TextStyle(
+                                    color: _mainTab == 0
+                                        ? Colors.white
+                                        : (isDark
+                                              ? Colors.white70
+                                              : const Color(0xFF4C5563)),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            InkWell(
+                              onTap: () => setState(() => _mainTab = 1),
+                              borderRadius: BorderRadius.circular(20),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 7,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _mainTab == 1
+                                      ? AppColors.accent(context)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  l10n.text('workingGroup'),
+                                  style: TextStyle(
+                                    color: _mainTab == 1
+                                        ? Colors.white
+                                        : (isDark
+                                              ? Colors.white70
+                                              : const Color(0xFF4C5563)),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -185,32 +230,34 @@ class _CdcSectionDashboardScreenViewState
                   children: [
                     _MetricCard(
                       label: l10n.text('totalIssues'),
-                      value: '179',
+                      value: '$total',
                       background: const Color(0xFFDDEEFF),
                       icon: Icons.library_books_outlined,
                     ),
                     _MetricCard(
                       label: l10n.text('solved'),
-                      value: '166/179',
+                      value: '${cards?['solved'] ?? 166}/$total',
                       background: const Color(0xFFE5FAEF),
                       icon: Icons.fact_check_outlined,
                     ),
                     _MetricCard(
                       label: l10n.text('inProgress'),
-                      value: '13/179',
+                      value: '${cards?['inProgress'] ?? 13}/$total',
                       background: const Color(0xFFFFF8DC),
                       icon: Icons.add_box_outlined,
                     ),
                     _MetricCard(
                       label: l10n.text('notAddressed'),
-                      value: '0/179',
+                      value: '${cards?['notAddressed'] ?? 0}/$total',
                       background: const Color(0xFFFFEEEE),
                       icon: Icons.assignment_late_outlined,
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                const _TotalPrimaryAgenciesCard(value: '14'),
+                _TotalPrimaryAgenciesCard(
+                  value: '${cards?['totalPrimaryAgencies'] ?? 14}',
+                ),
                 const SizedBox(height: 16),
 
                 // SUB FILTER CHIPS
@@ -252,7 +299,10 @@ class _CdcSectionDashboardScreenViewState
                 ] else if (_subFilter == 2) ...[
                   _AgenciesListCard(
                     title: l10n.text('workingGroup'),
-                    items: _workingGroupItems,
+                    items:
+                        data?.workingGroups.map((row) => row.name).toList() ??
+                        _workingGroupItems,
+                    rows: data?.workingGroups,
                   ),
                 ] else if (_subFilter == 3) ...const [
                   _PlenaryCategoriesListCard(),
@@ -273,23 +323,31 @@ class _CdcSectionDashboardScreenViewState
                     child: Column(
                       children: [
                         DonutChartWidget(
-                          slices: const [
+                          slices: [
                             DonutChartData(
-                              percentage: 0.9273,
+                              percentage: share('solved', 0.9273),
                               color: Color(0xFF10B981),
                               label: 'Solved',
                             ),
                             DonutChartData(
-                              percentage: 0.0727,
+                              percentage: share('inProgress', 0.0727),
                               color: Color(0xFFF59E0B),
                               label: 'In Progress',
                             ),
+                            if (cards != null && cards['notAddressed']! > 0)
+                              DonutChartData(
+                                percentage: share('notAddressed', 0),
+                                color: const Color(0xFFFF3B30),
+                                label: 'Not Addressed',
+                              ),
                           ],
                           centerTitle: l10n.text('totalIssues'),
-                          centerValue: '179',
-                          badge1Text: '92.73%',
+                          centerValue: '$total',
+                          badge1Text:
+                              '${(share('solved', 0.9273) * 100).toStringAsFixed(2)}%',
                           badge1DotColor: const Color(0xFF10B981),
-                          badge2Text: '7.27%',
+                          badge2Text:
+                              '${(share('inProgress', 0.0727) * 100).toStringAsFixed(2)}%',
                           badge2DotColor: const Color(0xFFF59E0B),
                         ),
                         const SizedBox(height: 16),
@@ -298,16 +356,25 @@ class _CdcSectionDashboardScreenViewState
                           children: [
                             Row(
                               children: [
-                                const Icon(Icons.square,
-                                    color: Color(0xFF10B981), size: 10),
+                                const Icon(
+                                  Icons.square,
+                                  color: Color(0xFF10B981),
+                                  size: 10,
+                                ),
                                 const SizedBox(width: 6),
-                                Text(l10n.text('solved'),
-                                    style: const TextStyle(fontSize: 12)),
+                                Text(
+                                  l10n.text('solved'),
+                                  style: const TextStyle(fontSize: 12),
+                                ),
                               ],
                             ),
-                            const Text('(166)',
-                                style: TextStyle(
-                                    fontSize: 12, fontWeight: FontWeight.w700)),
+                            Text(
+                              '(${cards?['solved'] ?? 166})',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -316,106 +383,137 @@ class _CdcSectionDashboardScreenViewState
                           children: [
                             Row(
                               children: [
-                                const Icon(Icons.square,
-                                    color: Color(0xFFF59E0B), size: 10),
+                                const Icon(
+                                  Icons.square,
+                                  color: Color(0xFFF59E0B),
+                                  size: 10,
+                                ),
                                 const SizedBox(width: 6),
-                                Text(l10n.text('inProgress'),
-                                    style: const TextStyle(fontSize: 12)),
+                                Text(
+                                  l10n.text('inProgress'),
+                                  style: const TextStyle(fontSize: 12),
+                                ),
                               ],
                             ),
-                            const Text('(13)',
-                                style: TextStyle(
-                                    fontSize: 12, fontWeight: FontWeight.w700)),
+                            Text(
+                              '(${cards?['inProgress'] ?? 13})',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ],
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.text('overallStatus'),
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // OVER ALL DONUT CHART 2
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkCard : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isDark
-                            ? AppColors.darkBorder
-                            : const Color(0xFFE5E8ED),
+                  ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.text('overallStatus'),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    child: Column(
-                      children: [
-                        DonutChartWidget(
-                          slices: const [
-                            DonutChartData(
-                              percentage: 0.923,
-                              color: Color(0xFFF97316),
-                              label: 'Mid Progress',
-                            ),
-                            DonutChartData(
-                              percentage: 0.077,
-                              color: Color(0xFFFDE68A),
-                              label: 'Early Progress',
-                            ),
-                          ],
-                          centerTitle: l10n.text('inProgress'),
-                          centerValue: '179',
-                          badge1Text: '7.7%',
-                          badge1DotColor: const Color(0xFF10B981),
-                          badge2Text: '92.3%',
-                          badge2DotColor: const Color(0xFFF59E0B),
+                    const SizedBox(height: 12),
+
+                    // OVER ALL DONUT CHART 2
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.darkCard : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : const Color(0xFFE5E8ED),
                         ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
-                            Row(
-                              children: [
-                                Icon(Icons.square,
-                                    color: Color(0xFFF97316), size: 10),
-                                SizedBox(width: 6),
-                                Text('Mid Progress',
-                                    style: TextStyle(fontSize: 12)),
-                              ],
-                            ),
-                            Text('(165)',
+                      ),
+                      child: Column(
+                        children: [
+                          DonutChartWidget(
+                            slices: [
+                              DonutChartData(
+                                percentage: share('midProgress', 0.923),
+                                color: Color(0xFFF97316),
+                                label: 'Mid Progress',
+                              ),
+                              DonutChartData(
+                                percentage: share('earlyProgress', 0.077),
+                                color: Color(0xFFFDE68A),
+                                label: 'Early Progress',
+                              ),
+                            ],
+                            centerTitle: l10n.text('inProgress'),
+                            centerValue: '$total',
+                            badge1Text:
+                                '${(share('earlyProgress', 0.077) * 100).toStringAsFixed(1)}%',
+                            badge1DotColor: const Color(0xFF10B981),
+                            badge2Text:
+                                '${(share('midProgress', 0.923) * 100).toStringAsFixed(1)}%',
+                            badge2DotColor: const Color(0xFFF59E0B),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.square,
+                                    color: Color(0xFFF97316),
+                                    size: 10,
+                                  ),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'Mid Progress',
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                '(${cards == null ? 165 : cards['midProgress'] ?? '—'})',
                                 style: TextStyle(
-                                    fontSize: 12, fontWeight: FontWeight.w700)),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
-                            Row(
-                              children: [
-                                Icon(Icons.square,
-                                    color: Color(0xFFFDE68A), size: 10),
-                                SizedBox(width: 6),
-                                Text('Early Progress',
-                                    style: TextStyle(fontSize: 12)),
-                              ],
-                            ),
-                            Text('(14)',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.square,
+                                    color: Color(0xFFFDE68A),
+                                    size: 10,
+                                  ),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'Early Progress',
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                '(${cards == null ? 14 : cards['earlyProgress'] ?? '—'})',
                                 style: TextStyle(
-                                    fontSize: 12, fontWeight: FontWeight.w700)),
-                          ],
-                        ),
-                      ],
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ],
             ),
@@ -443,6 +541,15 @@ class _AgenciesHorizontalBarChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rows = PswgDataScope.maybeOf(context)?.agencies;
+    final bars =
+        rows
+            ?.map((row) => (name: row.name, value: row.total.toDouble()))
+            .toList() ??
+        _agencyBars;
+    final maximum = rows == null
+        ? 10.0
+        : bars.fold<double>(1, (max, row) => row.value > max ? row.value : max);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
@@ -469,7 +576,7 @@ class _AgenciesHorizontalBarChartCard extends StatelessWidget {
           ),
           child: Column(
             children: [
-              ..._agencyBars.map((item) {
+              ...bars.map((item) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Row(
@@ -499,7 +606,10 @@ class _AgenciesHorizontalBarChartCard extends StatelessWidget {
                               ),
                             ),
                             FractionallySizedBox(
-                              widthFactor: (item.value / 10).clamp(0.05, 1.0),
+                              widthFactor: (item.value / maximum).clamp(
+                                0.0,
+                                1.0,
+                              ),
                               child: Container(
                                 height: 8,
                                 decoration: BoxDecoration(
@@ -520,21 +630,26 @@ class _AgenciesHorizontalBarChartCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [
                   SizedBox(width: 72),
-                  Text('3',
-                      style:
-                          TextStyle(color: AppColors.mutedText, fontSize: 10)),
-                  Text('2',
-                      style:
-                          TextStyle(color: AppColors.mutedText, fontSize: 10)),
-                  Text('4',
-                      style:
-                          TextStyle(color: AppColors.mutedText, fontSize: 10)),
-                  Text('6',
-                      style:
-                          TextStyle(color: AppColors.mutedText, fontSize: 10)),
-                  Text('7',
-                      style:
-                          TextStyle(color: AppColors.mutedText, fontSize: 10)),
+                  Text(
+                    '3',
+                    style: TextStyle(color: AppColors.mutedText, fontSize: 10),
+                  ),
+                  Text(
+                    '2',
+                    style: TextStyle(color: AppColors.mutedText, fontSize: 10),
+                  ),
+                  Text(
+                    '4',
+                    style: TextStyle(color: AppColors.mutedText, fontSize: 10),
+                  ),
+                  Text(
+                    '6',
+                    style: TextStyle(color: AppColors.mutedText, fontSize: 10),
+                  ),
+                  Text(
+                    '7',
+                    style: TextStyle(color: AppColors.mutedText, fontSize: 10),
+                  ),
                 ],
               ),
             ],
@@ -564,6 +679,8 @@ class _PlenaryCategoriesListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rows = PswgDataScope.maybeOf(context)?.categories;
+    final items = rows?.map((row) => row.name).toList() ?? _items;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
@@ -591,7 +708,7 @@ class _PlenaryCategoriesListCard extends StatelessWidget {
             shrinkWrap: true,
             padding: const EdgeInsets.all(16),
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: _items.length,
+            itemCount: items.length,
             separatorBuilder: (_, _) => const SizedBox(height: 14),
             itemBuilder: (context, index) {
               return Column(
@@ -602,7 +719,7 @@ class _PlenaryCategoriesListCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          _items[index],
+                          items[index],
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 12,
@@ -611,8 +728,8 @@ class _PlenaryCategoriesListCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Text(
-                        '3',
+                      Text(
+                        '${rows?[index].total ?? 3}',
                         style: TextStyle(
                           color: AppColors.mutedText,
                           fontSize: 12,
@@ -629,15 +746,22 @@ class _PlenaryCategoriesListCard extends StatelessWidget {
                       width: double.infinity,
                       child: Row(
                         children: [
-                          Expanded(
-                            flex: 7,
-                            child: Container(color: const Color(0xFF10B981)),
-                          ),
+                          if (rows != null && rows[index].notAddressed > 0)
+                            Expanded(
+                              flex: rows[index].notAddressed,
+                              child: Container(color: const Color(0xFFFF3B30)),
+                            ),
+                          if (rows == null || rows[index].solved > 0)
+                            Expanded(
+                              flex: rows?[index].solved ?? 7,
+                              child: Container(color: const Color(0xFF10B981)),
+                            ),
                           const SizedBox(width: 2),
-                          Expanded(
-                            flex: 3,
-                            child: Container(color: const Color(0xFFF97316)),
-                          ),
+                          if (rows == null || rows[index].inProgress > 0)
+                            Expanded(
+                              flex: rows?[index].inProgress ?? 3,
+                              child: Container(color: const Color(0xFFF97316)),
+                            ),
                         ],
                       ),
                     ),
@@ -653,10 +777,7 @@ class _PlenaryCategoriesListCard extends StatelessWidget {
 }
 
 class _FilterButton extends StatelessWidget {
-  const _FilterButton({
-    required this.activeCount,
-    required this.onTap,
-  });
+  const _FilterButton({required this.activeCount, required this.onTap});
 
   final int activeCount;
   final VoidCallback onTap;
@@ -887,8 +1008,8 @@ class _SubFilterChip extends StatelessWidget {
             color: selected
                 ? Colors.white
                 : (isDark
-                    ? AppColors.secondaryText(context)
-                    : const Color(0xFF4C5563)),
+                      ? AppColors.secondaryText(context)
+                      : const Color(0xFF4C5563)),
             fontSize: 12,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
           ),
@@ -902,8 +1023,10 @@ class _AgenciesListCard extends StatelessWidget {
   const _AgenciesListCard({
     required this.title,
     required this.items,
+    this.rows,
   });
 
+  final List<WorkingGroupSummary>? rows;
   final String title;
   final List<String> items;
 
@@ -960,7 +1083,7 @@ class _AgenciesListCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const _MiniBarChart(),
+                    _MiniBarChart(data: rows?[index]),
                   ],
                 ),
               );
@@ -973,7 +1096,9 @@ class _AgenciesListCard extends StatelessWidget {
 }
 
 class _MiniBarChart extends StatelessWidget {
-  const _MiniBarChart();
+  const _MiniBarChart({this.data});
+
+  final WorkingGroupSummary? data;
 
   @override
   Widget build(BuildContext context) {
@@ -985,7 +1110,11 @@ class _MiniBarChart extends StatelessWidget {
         children: [
           Container(
             width: 3.5,
-            height: 8,
+            height: data == null
+                ? 8
+                : data!.total == 0
+                ? 0
+                : 18 * data!.inProgress / data!.total,
             decoration: BoxDecoration(
               color: const Color(0xFFF97316),
               borderRadius: BorderRadius.circular(2),
@@ -994,7 +1123,11 @@ class _MiniBarChart extends StatelessWidget {
           const SizedBox(width: 3),
           Container(
             width: 3.5,
-            height: 11,
+            height: data == null
+                ? 11
+                : data!.total == 0
+                ? 0
+                : 18 * data!.notAddressed / data!.total,
             decoration: BoxDecoration(
               color: const Color(0xFFEF4444),
               borderRadius: BorderRadius.circular(2),
@@ -1003,7 +1136,11 @@ class _MiniBarChart extends StatelessWidget {
           const SizedBox(width: 3),
           Container(
             width: 3.5,
-            height: 16,
+            height: data == null
+                ? 16
+                : data!.total == 0
+                ? 0
+                : 18 * data!.solved / data!.total,
             decoration: BoxDecoration(
               color: const Color(0xFF10B981),
               borderRadius: BorderRadius.circular(2),

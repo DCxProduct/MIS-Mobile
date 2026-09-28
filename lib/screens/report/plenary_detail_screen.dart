@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 
 class PlenaryDetailScreen extends StatelessWidget {
-  const PlenaryDetailScreen({
-    super.key,
-    required this.title,
-  });
+  const PlenaryDetailScreen({super.key, required this.title});
 
   final String title;
 
@@ -95,7 +92,11 @@ class PlenaryDetailScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.picture_as_pdf, color: Color(0xFFE53935), size: 18),
+                const Icon(
+                  Icons.picture_as_pdf,
+                  color: Color(0xFFE53935),
+                  size: 18,
+                ),
                 const SizedBox(width: 6),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -282,10 +283,7 @@ class _PlenaryIssueItemCard extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: const Color(0xFF16A34A),
-                  width: 1,
-                ),
+                border: Border.all(color: const Color(0xFF16A34A), width: 1),
               ),
               child: const Text(
                 'Solved',
@@ -407,10 +405,14 @@ class _RgcDecisionBottomSheet extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkBackground : const Color(0xFFF8FAFC),
+                        color: isDark
+                            ? AppColors.darkBackground
+                            : const Color(0xFFF8FAFC),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: isDark ? AppColors.darkBorder : const Color(0xFFE2E8F0),
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : const Color(0xFFE2E8F0),
                         ),
                       ),
                       child: Text(
@@ -436,10 +438,14 @@ class _RgcDecisionBottomSheet extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkBackground : const Color(0xFFF8FAFC),
+                        color: isDark
+                            ? AppColors.darkBackground
+                            : const Color(0xFFF8FAFC),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: isDark ? AppColors.darkBorder : const Color(0xFFE2E8F0),
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : const Color(0xFFE2E8F0),
                         ),
                       ),
                       child: const SelectableText(

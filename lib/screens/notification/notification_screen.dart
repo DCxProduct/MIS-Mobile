@@ -215,7 +215,8 @@ class _NotificationCard extends StatelessWidget {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => MeetingRequestDetailScreen(
-                    title: 'សំណើប្រជុំពិភាក្សាដោះស្រាយបញ្ហាចំនួន ៣ ដែលបានដាក់ជូនក្រសួងខាងក្រោម ។',
+                    title:
+                        'សំណើប្រជុំពិភាក្សាដោះស្រាយបញ្ហាចំនួន ៣ ដែលបានដាក់ជូនក្រសួងខាងក្រោម ។',
                   ),
                 ),
               );
@@ -232,10 +233,7 @@ class _NotificationCard extends StatelessWidget {
             ),
             child: const Text(
               'View Detail',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),
         ),
@@ -258,11 +256,7 @@ class _MinistryEmblemAvatar extends StatelessWidget {
           colors: [Color(0xFF216AAA), Color(0xFF1EA45B)],
         ),
       ),
-      child: const Icon(
-        Icons.account_balance,
-        color: Colors.white,
-        size: 20,
-      ),
+      child: const Icon(Icons.account_balance, color: Colors.white, size: 20),
     );
   }
 }

@@ -1,3 +1,5 @@
+import '../../../shared/dashboard/widgets/pswg_live_dashboard.dart';
+import '../../../shared/dashboard/data/working_group_summary.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_colors.dart';
@@ -20,13 +22,19 @@ class AgenciesTab extends StatelessWidget {
           color: isDark ? AppColors.darkBorder : const Color(0xFFE9EDF2),
         ),
       ),
-      child: const CustomPaint(painter: _AgenciesBarChartPainter()),
+      child: CustomPaint(
+        painter: _AgenciesBarChartPainter(
+          rows: PswgDataScope.maybeOf(context)?.agencies,
+        ),
+      ),
     );
   }
 }
 
 class _AgenciesBarChartPainter extends CustomPainter {
-  const _AgenciesBarChartPainter();
+  const _AgenciesBarChartPainter({this.rows});
+
+  final List<WorkingGroupSummary>? rows;
 
   static const _labels = [
     'CDC',
@@ -44,6 +52,9 @@ class _AgenciesBarChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final labels = rows?.map((row) => row.name).toList() ?? _labels;
+    final values = rows?.map((row) => row.total.toDouble()).toList() ?? _values;
+    if (labels.isEmpty) return;
     const labelWidth = 50.0;
     const rightPadding = 4.0;
     const bottomAxisHeight = 28.0;
@@ -52,9 +63,11 @@ class _AgenciesBarChartPainter extends CustomPainter {
     final chartTop = 8.0;
     final chartRight = size.width - rightPadding;
     final chartBottom = size.height - bottomAxisHeight;
-    final rowHeight = (chartBottom - chartTop) / _labels.length;
+    final rowHeight = (chartBottom - chartTop) / labels.length;
 
-    const maxValue = 9.0;
+    final maxValue = rows == null
+        ? 9.0
+        : values.fold<double>(1, (max, value) => value > max ? value : max);
 
     final labelStyle = const TextStyle(
       color: Color(0xFF3D4652),
@@ -77,12 +90,12 @@ class _AgenciesBarChartPainter extends CustomPainter {
       ..style = PaintingStyle.fill
       ..isAntiAlias = true;
 
-    for (var i = 0; i < _labels.length; i++) {
+    for (var i = 0; i < labels.length; i++) {
       final centerY = chartTop + rowHeight * i + rowHeight / 2;
 
       _paintText(
         canvas,
-        _labels[i],
+        labels[i],
         Offset(0, centerY),
         labelStyle,
         verticalCenter: true,
@@ -94,10 +107,11 @@ class _AgenciesBarChartPainter extends CustomPainter {
         gridPaint,
       );
 
-      final barWidth = (_values[i] / maxValue) * (chartRight - chartLeft);
+      final barWidth = (values[i] / maxValue) * (chartRight - chartLeft);
 
       final barRect = Rect.fromLTWH(chartLeft, centerY - 5, barWidth, 10);
 
+      if (barWidth <= 0) continue;
       final barPath = Path()
         ..moveTo(barRect.left, barRect.top)
         ..lineTo(barRect.right - 6, barRect.top)
@@ -132,7 +146,13 @@ class _AgenciesBarChartPainter extends CustomPainter {
       gridPaint,
     );
 
-    const ticks = ['2', '3', '4', '6', '7'];
+    final ticks = rows == null
+        ? ['2', '3', '4', '6', '7']
+        : List.generate(
+            5,
+            (index) =>
+                (maxValue * index / 4).toStringAsFixed(maxValue < 4 ? 1 : 0),
+          );
 
     final spacing = (chartRight - chartLeft) / (ticks.length - 1);
 
@@ -178,5 +198,6 @@ class _AgenciesBarChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) =>
+      oldDelegate is! _AgenciesBarChartPainter || oldDelegate.rows != rows;
 }

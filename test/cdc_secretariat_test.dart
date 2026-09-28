@@ -1,3 +1,10 @@
+import 'dart:io';
+import 'package:gpsf_app/translations/app_language.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:gpsf_app/core/network/api_client.dart';
+import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gpsf_app/core/app_settings.dart';
@@ -16,7 +23,53 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    final settings = AppSettingsController();
+    final settings = AppSettingsController(
+      authRepository: AuthRepository(
+        ApiClient(
+          client: MockClient(
+            (request) async => http.Response(
+              request.url.path == '/api/v1/meeting-requests'
+                  ? File(
+                      'test/fixtures/meeting_requests.json',
+                    ).readAsStringSync()
+                  : request.url.path == '/api/v1/working-group-issues/my'
+                  ? File('test/fixtures/wg_issues.json').readAsStringSync()
+                  : request.url.path ==
+                        '/api/v1/working-group-issues/summary/my'
+                  ? File(
+                      'test/fixtures/wg_issue_summary.json',
+                    ).readAsStringSync()
+                  : request.url.path ==
+                        '/api/v1/working-group-issues/issue-matrix'
+                  ? File('test/fixtures/wg_issues.json').readAsStringSync()
+                  : request.url.path ==
+                        '/api/v1/working-group-issues/issue-matrix/summary'
+                  ? File(
+                      'test/fixtures/wg_issue_summary.json',
+                    ).readAsStringSync()
+                  : request.url.path == '/api/v1/dashboards/pswg/live'
+                  ? File('test/fixtures/working_groups.json').readAsStringSync()
+                  : jsonEncode({
+                      'success': true,
+                      'data': {
+                        'user': {
+                          'id': 1,
+                          'email': 'cdcgpsf@gmail.com',
+                          'name': 'CDC Secretariat',
+                          'isActive': true,
+                          'roles': [
+                            {'name': 'cdc_secretariat'},
+                          ],
+                        },
+                      },
+                    }),
+              200,
+            ),
+          ),
+        ),
+      ),
+    );
+    settings.setLanguage(AppLanguage.english);
     addTearDown(settings.dispose);
     await tester.pumpWidget(
       AppSettings(
@@ -49,11 +102,8 @@ void main() {
 
     await tester.tap(find.text('Working Group'));
     await tester.pumpAndSettle();
-    expect(find.text('(I) Rice and Paddy'), findsOneWidget);
-    expect(
-      find.text('(N) Non-Bank Financial Services Other issues'),
-      findsOneWidget,
-    );
+    expect(find.text('Rice and Paddy'), findsOneWidget);
+    expect(find.text('Non-Bank Financial Services'), findsOneWidget);
 
     await tester.tap(find.text('Categories'));
     await tester.pumpAndSettle();
@@ -64,9 +114,9 @@ void main() {
 
     await tester.tap(find.text('Meeting'));
     await tester.pumpAndSettle();
-    expect(find.text('10 Aug, 2025'), findsOneWidget);
-    expect(find.text('12 Aug, 2025'), findsNWidgets(2));
-    expect(find.text('Submitted'), findsNWidgets(2));
+    expect(find.text('Scheduled'), findsOneWidget);
+    expect(find.text('Another meeting request'), findsOneWidget);
+    expect(find.text('Submitted'), findsNothing);
     expect(find.text('Under Review'), findsOneWidget);
     expect(find.text('WG.Meeting'), findsOneWidget);
     expect(find.byType(AppBottomNavBar), findsOneWidget);
@@ -82,11 +132,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Issues Matrix'));
     await tester.pumpAndSettle();
-    expect(
-      find.text('Law on Contract Farming & Agricultural Production'),
-      findsOneWidget,
-    );
-    expect(find.text('July 24, 2025'), findsNWidgets(2));
+    expect(find.text('Second API issue'), findsOneWidget);
     await tester.tap(find.text('Filter'));
     await tester.pumpAndSettle();
     expect(find.text('Filters'), findsOneWidget);

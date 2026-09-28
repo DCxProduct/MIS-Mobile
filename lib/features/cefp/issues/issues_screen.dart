@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../screens/issues/issues_screen.dart';
+import '../../private_sector/issues/issues_screen.dart';
 
 class CefpIssuesScreenView extends StatelessWidget {
   const CefpIssuesScreenView({super.key});

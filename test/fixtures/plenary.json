@@ -1,0 +1,159 @@
+{
+  "success": true,
+  "data": {
+    "byWorkingGroup": [
+      {
+        "workingGroupId": 14,
+        "workingGroupName": "Agriculture & Agro-Industry",
+        "total": 1,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 1
+      },
+      {
+        "workingGroupId": 18,
+        "workingGroupName": "Banking and Financial Services",
+        "total": 0,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 0
+      },
+      {
+        "workingGroupId": 26,
+        "workingGroupName": "Construction and Real Estate",
+        "total": 0,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 0
+      },
+      {
+        "workingGroupId": 24,
+        "workingGroupName": "Education",
+        "total": 0,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 0
+      },
+      {
+        "workingGroupId": 23,
+        "workingGroupName": "Energy and Mineral Resources",
+        "total": 0,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 0
+      },
+      {
+        "workingGroupId": 20,
+        "workingGroupName": "Export Processing and Trade Facilitation",
+        "total": 0,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 0
+      },
+      {
+        "workingGroupId": 25,
+        "workingGroupName": "Health",
+        "total": 0,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 0
+      },
+      {
+        "workingGroupId": 21,
+        "workingGroupName": "Industrial Relations",
+        "total": 0,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 0
+      },
+      {
+        "workingGroupId": 17,
+        "workingGroupName": "Law, Tax, and Governance",
+        "total": 0,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 0
+      },
+      {
+        "workingGroupId": 16,
+        "workingGroupName": "Manufacturing & SMEs",
+        "total": 0,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 0
+      },
+      {
+        "workingGroupId": 27,
+        "workingGroupName": "Non-Bank Financial Services",
+        "total": 0,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 0
+      },
+      {
+        "workingGroupId": 22,
+        "workingGroupName": "Rice and Paddy",
+        "total": 0,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 0
+      },
+      {
+        "workingGroupId": 15,
+        "workingGroupName": "Tourism",
+        "total": 0,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 0
+      },
+      {
+        "workingGroupId": 19,
+        "workingGroupName": "Transport and Infrastructure",
+        "total": 0,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 0
+      }
+    ],
+    "cards": {
+      "totalIssues": 1,
+      "solved": 0,
+      "inProgress": 0,
+      "notAddressed": 1,
+      "totalPrimaryAgencies": 1,
+      "totalMinistries": 13,
+      "midProgress": 0,
+      "earlyProgress": 0
+    },
+    "byPrimaryAgency": [
+      {
+        "agencyId": 1,
+        "agencyName": "MAFF",
+        "total": 1,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 1
+      }
+    ],
+    "byCategory": [
+      {
+        "categoryId": 1,
+        "categoryName": "General",
+        "total": 1,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 1
+      },
+      {
+        "categoryId": 7,
+        "categoryName": "Market Access",
+        "total": 0,
+        "solved": 0,
+        "inProgress": 0,
+        "notAddressed": 0
+      }
+    ],
+    "type": "PLENARY",
+    "status": "LIVE"
+  }
+}

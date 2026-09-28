@@ -1,12 +1,15 @@
+import '../../shared/dashboard/widgets/pswg_live_dashboard.dart';
+import '../../shared/dashboard/data/dashboard_repository.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/app_colors.dart';
-import '../../../screens/dashboard/tabs/agencies_tab.dart';
-import '../../../screens/dashboard/tabs/categories_tab.dart';
-import '../../../screens/dashboard/tabs/working_group_tab.dart';
+import '../../private_sector/dashboard/tabs/agencies_tab.dart';
+import '../../private_sector/dashboard/tabs/categories_tab.dart';
+import '../../private_sector/dashboard/tabs/working_group_tab.dart';
+import '../../private_sector/dashboard/tabs/overall_tab.dart';
 import '../../../translations/app_localizations.dart';
 import '../../../widgets/app_header.dart';
 
@@ -62,6 +65,10 @@ class _LineMinistryDashboardScreenState
 
   @override
   Widget build(BuildContext context) {
+    return PswgDataLoader(scope: DashboardScope.pswg, builder: _buildContent);
+  }
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -139,15 +146,8 @@ class _LineMinistryDashboardScreenState
   }
 }
 
-
-
-
-
 class _FilterButton extends StatelessWidget {
-  const _FilterButton({
-    required this.activeCount,
-    required this.onTap,
-  });
+  const _FilterButton({required this.activeCount, required this.onTap});
 
   final int activeCount;
   final VoidCallback onTap;
@@ -222,10 +222,19 @@ class _MetricGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final totalIssues = isWorkingGroup ? '20' : '56';
-    final solved = isWorkingGroup ? '15/20' : '30/56';
-    final inProgress = isWorkingGroup ? '4/20' : '16/56';
-    final notAddressed = isWorkingGroup ? '1/20' : '10/56';
+    final cards = PswgDataScope.maybeOf(context)?.cards;
+    final totalIssues = cards == null
+        ? (isWorkingGroup ? '20' : '56')
+        : '${cards['totalIssues']}';
+    final solved = cards == null
+        ? (isWorkingGroup ? '15/20' : '30/56')
+        : '${cards['solved']}/$totalIssues';
+    final inProgress = cards == null
+        ? (isWorkingGroup ? '4/20' : '16/56')
+        : '${cards['inProgress']}/$totalIssues';
+    final notAddressed = cards == null
+        ? (isWorkingGroup ? '1/20' : '10/56')
+        : '${cards['notAddressed']}/$totalIssues';
 
     return GridView.count(
       crossAxisCount: 2,
@@ -380,7 +389,7 @@ class _WideMetricCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '14',
+                  '${PswgDataScope.maybeOf(context)?.cards['totalPrimaryAgencies'] ?? 14}',
                   style: TextStyle(
                     color: isDark ? Colors.white : const Color(0xFF27364A),
                     fontSize: 20,
@@ -410,10 +419,7 @@ class _WideMetricCard extends StatelessWidget {
 }
 
 class _DashboardTabs extends StatelessWidget {
-  const _DashboardTabs({
-    required this.selectedIndex,
-    required this.onSelected,
-  });
+  const _DashboardTabs({required this.selectedIndex, required this.onSelected});
 
   final int selectedIndex;
   final ValueChanged<int> onSelected;
@@ -486,7 +492,7 @@ class _StatusTabContent extends StatelessWidget {
       1 => const AgenciesTab(),
       2 => const WorkingGroupTab(),
       3 => const CategoriesTab(),
-      _ => const LineMinistryOverallTab(),
+      _ => const OverallTab(),
     };
   }
 }
@@ -792,8 +798,7 @@ class _LineMinistryFilterSheet extends StatefulWidget {
       _LineMinistryFilterSheetState();
 }
 
-class _LineMinistryFilterSheetState
-    extends State<_LineMinistryFilterSheet> {
+class _LineMinistryFilterSheetState extends State<_LineMinistryFilterSheet> {
   late Set<String> _workingGroups;
   late Set<String> _statuses;
   late Set<String> _agencies;
@@ -841,11 +846,7 @@ class _LineMinistryFilterSheetState
     'MOC',
   ];
 
-  static const _progressItems = [
-    'Both',
-    'S1',
-    'S2',
-  ];
+  static const _progressItems = ['Both', 'S1', 'S2'];
 
   @override
   void initState() {
@@ -871,8 +872,7 @@ class _LineMinistryFilterSheetState
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
-    final borderColor =
-        isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
+    final borderColor = isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
 
     final viewPadding = MediaQuery.of(context).viewPadding;
     final topInset = viewPadding.top > 48.0 ? viewPadding.top : 48.0;
@@ -887,19 +887,12 @@ class _LineMinistryFilterSheetState
       child: FractionallySizedBox(
         heightFactor: 1.0,
         child: Container(
-          decoration: BoxDecoration(
-            color: background,
-          ),
+          decoration: BoxDecoration(color: background),
           child: Column(
             children: [
               // ================= FILTER HEADER =================
               Container(
-                padding: EdgeInsets.fromLTRB(
-                  22,
-                  topInset + 24,
-                  22,
-                  12,
-                ),
+                padding: EdgeInsets.fromLTRB(22, topInset + 24, 22, 12),
                 child: Row(
                   children: [
                     const SizedBox(width: 28),
@@ -922,10 +915,7 @@ class _LineMinistryFilterSheetState
                       child: const SizedBox(
                         width: 28,
                         height: 28,
-                        child: Icon(
-                          Icons.close,
-                          size: 25,
-                        ),
+                        child: Icon(Icons.close, size: 25),
                       ),
                     ),
                   ],
@@ -935,12 +925,7 @@ class _LineMinistryFilterSheetState
               // ================= FILTER CONTENT =================
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    25,
-                    20,
-                    25,
-                    22,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(25, 20, 25, 22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1082,8 +1067,7 @@ class _LineMinistryFilterSheetState
                         items: _progressItems,
                         columns: 3,
                         selectedItems: _progressReports,
-                        onChanged: (value) =>
-                            _toggle(_progressReports, value),
+                        onChanged: (value) => _toggle(_progressReports, value),
                       ),
                     ],
                   ),
@@ -1100,11 +1084,7 @@ class _LineMinistryFilterSheetState
                 ),
                 decoration: BoxDecoration(
                   color: background,
-                  border: Border(
-                    top: BorderSide(
-                      color: borderColor,
-                    ),
-                  ),
+                  border: Border(top: BorderSide(color: borderColor)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.03),
@@ -1132,9 +1112,7 @@ class _LineMinistryFilterSheetState
                           workingGroups: {..._workingGroups},
                           statuses: {..._statuses},
                           agencies: {..._agencies},
-                          progressReports: {
-                            ..._progressReports,
-                          },
+                          progressReports: {..._progressReports},
                         ),
                       );
                     },
@@ -1332,11 +1310,7 @@ class _CheckTileBox extends StatelessWidget {
         ),
       ),
       child: selected
-          ? const Icon(
-              Icons.check,
-              size: 11,
-              color: Colors.white,
-            )
+          ? const Icon(Icons.check, size: 11, color: Colors.white)
           : null,
     );
   }

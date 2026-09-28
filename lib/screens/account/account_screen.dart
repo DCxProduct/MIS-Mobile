@@ -20,7 +20,12 @@ class AccountScreen extends StatelessWidget {
     final topPadding = MediaQuery.of(context).viewPadding.top;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, topPadding > 0 ? topPadding + 12 : 34, 20, 96),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        topPadding > 0 ? topPadding + 12 : 34,
+        20,
+        96,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

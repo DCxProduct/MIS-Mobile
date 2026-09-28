@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
+import 'data/filter_options.dart';
 import '../../../translations/app_localizations.dart';
 
 /// A separate draft is edited until the user applies the filters.
@@ -37,61 +38,8 @@ class _CdcDashboardFilterSheetState extends State<CdcDashboardFilterSheet> {
   );
   final Set<String> _expanded = {};
 
-  static const _groups = <String, List<String>>{
-    'status': ['Solved', 'In Progress', 'Not Addressed'],
-    'primaryAgency': [
-      'GDT',
-      'MFF',
-      'GDCE',
-      'MLVT',
-      'MPTC',
-      'MAFF',
-      'MoH',
-      'NBC',
-      'MoC',
-      'MoT',
-      'MLMUPC',
-      'MoI',
-      'CDC',
-      'MPWT',
-      'MISTI',
-      'MME',
-      'SHV Admin',
-      'MOC',
-    ],
-    'workingGroup': [
-      'Agriculture and Agro-Industry',
-      'Tourism',
-      'SMEs, Manufacturing and Services',
-      'Law, Tax, and Governance',
-      'Banking and Financial Services',
-      'Transportation and Infrastructure',
-      'Export Processing and Trade Facilitation',
-      'Industrial Relations',
-      'Rice and Paddy',
-      'Energy and Mineral Resources',
-      'Education',
-      'Construction and Real Estate',
-      'Non-Bank Financial Services Other issues',
-      'Digital Economy, Society and Telecommunication',
-      'Land Administration, Security, Public Order',
-    ],
-    'categories': [
-      'Governance',
-      'Human Resource',
-      'Legislation',
-      'Procedure',
-      'Taxation',
-      'Strategy',
-      'Trade',
-      'Policy',
-      'Market',
-    ],
-    'year': ['2026', '2025', '2024', '2023'],
-    'progressReport': ['Both', 'S1', 'S2'],
-  };
-
-  Map<String, List<String>> get _visibleGroups => widget.groups ?? _groups;
+  Map<String, List<String>> get _visibleGroups =>
+      widget.groups ?? cdcDashboardFilterGroups;
 
   void _toggle(String group, String value) {
     setState(() {

@@ -1,7 +1,13 @@
+import '../../shared/issues/data/working_group_issue.dart';
+import '../../shared/issues/widgets/wg_issues_list.dart';
+import '../../shared/issues/widgets/issue_display.dart';
+import '../../shared/issues/data/wg_issue_summary.dart';
+import '../../shared/issues/widgets/wg_issue_summary_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/app_colors.dart';
+import '../../../core/widgets/pdf_attachment_preview.dart';
 import '../../../translations/app_localizations.dart';
 import 'issue_detail_screen.dart';
 
@@ -63,8 +69,9 @@ class _IssuesScreenState extends State<IssuesScreen> {
         : const Color(0xFFF7F7F8);
     final headerBackground = isDark ? AppColors.darkBackground : Colors.white;
 
-    final title =
-        _selectedTab == 0 ? l10n.text('wgIssues') : l10n.text('issuesMatrix');
+    final title = _selectedTab == 0
+        ? l10n.text('wgIssues')
+        : l10n.text('issuesMatrix');
 
     final topPadding = MediaQuery.of(context).viewPadding.top;
 
@@ -75,7 +82,12 @@ class _IssuesScreenState extends State<IssuesScreen> {
         children: [
           Container(
             color: headerBackground,
-            padding: EdgeInsets.fromLTRB(14, topPadding > 0 ? topPadding + 12 : 34, 14, 12),
+            padding: EdgeInsets.fromLTRB(
+              14,
+              topPadding > 0 ? topPadding + 12 : 34,
+              14,
+              12,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -157,11 +169,20 @@ class _IssuesScreenState extends State<IssuesScreen> {
                   ],
                 ),
                 const SizedBox(height: 14),
-                const _IssueMetricGrid(),
+                _selectedTab == 0
+                    ? WgIssueSummaryLoader(
+                        builder: (summary) =>
+                            _IssueMetricGrid(summary: summary),
+                      )
+                    : WgIssueSummaryLoader(
+                        matrix: true,
+                        builder: (summary) =>
+                            _IssueMetricGrid(summary: summary),
+                      ),
                 const SizedBox(height: 14),
                 _selectedTab == 0
-                    ? const _WgIssuesList()
-                    : const _IssuesMatrixList(),
+                    ? _WgIssuesList(query: _searchQuery)
+                    : _IssuesMatrixList(query: _searchQuery),
               ],
             ),
           ),
@@ -172,10 +193,7 @@ class _IssuesScreenState extends State<IssuesScreen> {
 }
 
 class _FilterButton extends StatelessWidget {
-  const _FilterButton({
-    required this.activeCount,
-    required this.onTap,
-  });
+  const _FilterButton({required this.activeCount, required this.onTap});
 
   final int activeCount;
   final VoidCallback onTap;
@@ -320,7 +338,9 @@ class _IssueTabs extends StatelessWidget {
 }
 
 class _IssueMetricGrid extends StatelessWidget {
-  const _IssueMetricGrid();
+  const _IssueMetricGrid({this.summary});
+
+  final WgIssueSummary? summary;
 
   @override
   Widget build(BuildContext context) {
@@ -337,25 +357,31 @@ class _IssueMetricGrid extends StatelessWidget {
       children: [
         _IssueMetricCard(
           label: l10n.text('totalIssues'),
-          value: '20',
+          value: summary == null ? '20' : '${summary!.totalIssues}',
           background: const Color(0xFFDDEEFF),
           icon: Icons.library_books_outlined,
         ),
         _IssueMetricCard(
           label: l10n.text('solved'),
-          value: '15/20',
+          value: summary == null
+              ? '15/20'
+              : '${summary!.solved}/${summary!.totalIssues}',
           background: const Color(0xFFE5FAEF),
           icon: Icons.fact_check_outlined,
         ),
         _IssueMetricCard(
           label: l10n.text('inProgress'),
-          value: '4/20',
+          value: summary == null
+              ? '4/20'
+              : '${summary!.inProgress}/${summary!.totalIssues}',
           background: const Color(0xFFFFF8DC),
           icon: Icons.add_box_outlined,
         ),
         _IssueMetricCard(
           label: l10n.text('notAddressed'),
-          value: '1/20',
+          value: summary == null
+              ? '1/20'
+              : '${summary!.notAddressed}/${summary!.totalIssues}',
           background: const Color(0xFFFFEEEE),
           icon: Icons.assignment_late_outlined,
         ),
@@ -446,52 +472,43 @@ class _IssueMetricCard extends StatelessWidget {
 }
 
 class _WgIssuesList extends StatelessWidget {
-  const _WgIssuesList();
-
+  const _WgIssuesList({this.query = ''});
+  final String query;
   @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        _IssueCard(
-          title: 'Joint Inspection',
-          category: 'Procedure',
-          status: _IssueCardStatus.solved,
-        ),
-        _IssueCard(
-          title: 'Issues for local aquaculture and agriculture...',
-          category: 'Governance',
-          status: _IssueCardStatus.inProgress,
-        ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => WgIssuesList(
+    query: query,
+    itemBuilder: (issue) => _IssueCard(
+      title: issue.title,
+      category: issue.category.isEmpty ? '—' : issue.category,
+      status: _statusForIssue(issue),
+      issue: issue,
+    ),
+  );
 }
 
+_IssueCardStatus _statusForIssue(WorkingGroupIssue issue) =>
+    switch (issue.statusCode.toUpperCase()) {
+      'SOLVED' => _IssueCardStatus.solved,
+      'IN_PROGRESS' => _IssueCardStatus.inProgress,
+      _ => _IssueCardStatus.notAddressed,
+    };
+
 class _IssuesMatrixList extends StatelessWidget {
-  const _IssuesMatrixList();
+  const _IssuesMatrixList({this.query = ''});
+
+  final String query;
 
   @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        _IssueCard(
-          title: 'Joint Inspection',
-          category: 'Procedure',
-          status: _IssueCardStatus.solved,
-        ),
-        _IssueCard(
-          title: 'Issues for local aquaculture and agriculture...',
-          category: 'Governance',
-          status: _IssueCardStatus.inProgress,
-        ),
-        _IssueCard(
-          title: 'Climate resilience and water supply concern...',
-          category: 'Governance',
-          status: _IssueCardStatus.notAddressed,
-        ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => WgIssuesList(
+    matrix: true,
+    query: query,
+    itemBuilder: (issue) => _IssueCard(
+      title: issue.title,
+      category: issue.category.isEmpty ? '—' : issue.category,
+      status: _statusForIssue(issue),
+      issue: issue,
+    ),
+  );
 }
 
 enum _IssueCardStatus { solved, inProgress, notAddressed }
@@ -501,8 +518,10 @@ class _IssueCard extends StatelessWidget {
     required this.title,
     required this.category,
     required this.status,
+    this.issue,
   });
 
+  final WorkingGroupIssue? issue;
   final String title;
   final String category;
   final _IssueCardStatus status;
@@ -515,7 +534,11 @@ class _IssueCard extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (_) => IssueDetailScreen(title: title, category: category),
+            builder: (_) => IssueDetailScreen(
+              title: title,
+              category: category,
+              issue: issue,
+            ),
           ),
         );
       },
@@ -578,7 +601,12 @@ class _IssueCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                _IssueStatusBadge(status: status),
+                _IssueStatusBadge(
+                  status: status,
+                  label: issue == null
+                      ? null
+                      : issueStatusLabel(context, issue!),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -588,7 +616,9 @@ class _IssueCard extends StatelessWidget {
                   child: _IssueMeta(
                     icon: Icons.calendar_month_outlined,
                     label: AppLocalizations.of(context).text('submissionDate'),
-                    value: 'July 24, 2025',
+                    value: issue == null
+                        ? 'July 24, 2025'
+                        : issueDate(context, issue!.createdAt),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -596,7 +626,11 @@ class _IssueCard extends StatelessWidget {
                   child: _IssueMeta(
                     icon: Icons.person_outline,
                     label: AppLocalizations.of(context).text('submittedBy'),
-                    value: 'Agriculture and Agro...',
+                    value: issue == null
+                        ? 'Agriculture and Agro...'
+                        : (issue!.submittedBy.isEmpty
+                              ? '—'
+                              : issue!.submittedBy),
                     iconColor: const Color(0xFFB642FF),
                     iconBackground: const Color(0xFFF2DDFF),
                   ),
@@ -605,7 +639,9 @@ class _IssueCard extends StatelessWidget {
             ),
             const Divider(height: 18),
             Text(
-              'The private sector said that the Economic Land Concession (ELCs), which invest in rubber, cashew, plantations, etc., are now fully developed and som...',
+              issue == null
+                  ? 'The private sector said that the Economic Land Concession (ELCs), which invest in rubber, cashew, plantations, etc., are now fully developed and som...'
+                  : issue!.description,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -616,31 +652,42 @@ class _IssueCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.darkCard : Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: isDark
-                      ? AppColors.darkBorder
-                      : const Color(0xFFE5E8ED),
+            PdfAttachmentPreview(
+              path: issue?.attachmentPath ?? '',
+              name: issue?.attachmentPath.isNotEmpty == true
+                  ? pdfAttachmentName(issue!.attachmentPath)
+                  : null,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
                 ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
-                  const SizedBox(width: 6),
-                  Text(
-                    AppLocalizations.of(context).text('twoAttachments'),
-                    style: const TextStyle(
-                      color: Color(0xFF4C5563),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.darkCard : Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : const Color(0xFFE5E8ED),
                   ),
-                ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
+                    const SizedBox(width: 6),
+                    Text(
+                      issue == null
+                          ? AppLocalizations.of(context).text('twoAttachments')
+                          : '${issue!.attachmentCount} ${AppLocalizations.of(context).text('attachmentsLabel')}',
+                      style: const TextStyle(
+                        color: Color(0xFF4C5563),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -716,9 +763,10 @@ class _IssueMeta extends StatelessWidget {
 }
 
 class _IssueStatusBadge extends StatelessWidget {
-  const _IssueStatusBadge({required this.status});
+  const _IssueStatusBadge({required this.status, this.label});
 
   final _IssueCardStatus status;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -765,7 +813,7 @@ class _IssueStatusBadge extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            config.label,
+            label ?? config.label,
             style: TextStyle(
               color: config.color,
               fontSize: 11,
@@ -862,8 +910,7 @@ class _IssuesFilterSheetState extends State<_IssuesFilterSheet> {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
-    final borderColor =
-        isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
+    final borderColor = isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
 
     final viewPadding = MediaQuery.of(context).viewPadding;
     final topInset = viewPadding.top > 48.0 ? viewPadding.top : 48.0;
@@ -878,19 +925,12 @@ class _IssuesFilterSheetState extends State<_IssuesFilterSheet> {
       child: FractionallySizedBox(
         heightFactor: 1.0,
         child: Container(
-          decoration: BoxDecoration(
-            color: background,
-          ),
+          decoration: BoxDecoration(color: background),
           child: Column(
             children: [
               // ================= FILTER HEADER =================
               Container(
-                padding: EdgeInsets.fromLTRB(
-                  22,
-                  topInset + 24,
-                  22,
-                  12,
-                ),
+                padding: EdgeInsets.fromLTRB(22, topInset + 24, 22, 12),
                 child: Row(
                   children: [
                     const SizedBox(width: 28),
@@ -913,10 +953,7 @@ class _IssuesFilterSheetState extends State<_IssuesFilterSheet> {
                       child: const SizedBox(
                         width: 28,
                         height: 28,
-                        child: Icon(
-                          Icons.close,
-                          size: 25,
-                        ),
+                        child: Icon(Icons.close, size: 25),
                       ),
                     ),
                   ],
@@ -926,12 +963,7 @@ class _IssuesFilterSheetState extends State<_IssuesFilterSheet> {
               // ================= FILTER CONTENT =================
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    25,
-                    20,
-                    25,
-                    22,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(25, 20, 25, 22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1041,11 +1073,7 @@ class _IssuesFilterSheetState extends State<_IssuesFilterSheet> {
                 ),
                 decoration: BoxDecoration(
                   color: background,
-                  border: Border(
-                    top: BorderSide(
-                      color: borderColor,
-                    ),
-                  ),
+                  border: Border(top: BorderSide(color: borderColor)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.03),
@@ -1260,11 +1288,7 @@ class _CheckTileBox extends StatelessWidget {
         ),
       ),
       child: selected
-          ? const Icon(
-              Icons.check,
-              size: 11,
-              color: Colors.white,
-            )
+          ? const Icon(Icons.check, size: 11, color: Colors.white)
           : null,
     );
   }

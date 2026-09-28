@@ -1,3 +1,4 @@
+import 'package:gpsf_app/translations/app_language.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gpsf_app/core/app_settings.dart';
@@ -11,7 +12,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    final settings = AppSettingsController();
+    final settings = AppSettingsController()..setLanguage(AppLanguage.english);
     addTearDown(settings.dispose);
     var filters = CdcDashboardFilters();
     await tester.pumpWidget(

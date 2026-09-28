@@ -76,10 +76,7 @@ class _MeetingRequestDetailScreenState
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: const [
-                        _PersonChip(
-                          label: 'Submitted By',
-                          name: 'Sabada',
-                        ),
+                        _PersonChip(label: 'Submitted By', name: 'Sabada'),
                         SizedBox(width: 10),
                         _PersonChip(
                           label: 'Submitted Date',
@@ -145,9 +142,7 @@ class _FigmaInfoGrid extends StatelessWidget {
               ),
             ),
             SizedBox(width: 16),
-            Expanded(
-              child: _PdfBlock(label: 'Meeting Request Document:'),
-            ),
+            Expanded(child: _PdfBlock(label: 'Meeting Request Document:')),
           ],
         ),
       ],
@@ -214,7 +209,11 @@ class _PdfBlock extends StatelessWidget {
         const SizedBox(height: 6),
         Row(
           children: [
-            const Icon(Icons.picture_as_pdf, color: Color(0xFFE53935), size: 18),
+            const Icon(
+              Icons.picture_as_pdf,
+              color: Color(0xFFE53935),
+              size: 18,
+            ),
             const SizedBox(width: 6),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -440,7 +439,7 @@ class _IssueCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Text(
@@ -453,8 +452,10 @@ class _IssueCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusBg,
                     borderRadius: BorderRadius.circular(6),
@@ -657,8 +658,11 @@ void _showIssueDetailsSheet(
                         const SizedBox(height: 4),
                         Row(
                           children: const [
-                            Icon(Icons.picture_as_pdf,
-                                color: Color(0xFFE53935), size: 16),
+                            Icon(
+                              Icons.picture_as_pdf,
+                              color: Color(0xFFE53935),
+                              size: 16,
+                            ),
                             SizedBox(width: 6),
                             Text(
                               'Request Doc',
@@ -681,16 +685,19 @@ void _showIssueDetailsSheet(
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: isDark
                             ? AppColors.darkBackground
                             : const Color(0xFFF8FAFC),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                            color: isDark
-                                ? AppColors.darkBorder
-                                : const Color(0xFFE2E8F0)),
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : const Color(0xFFE2E8F0),
+                        ),
                       ),
                       child: const Text.rich(
                         TextSpan(
@@ -711,16 +718,19 @@ void _showIssueDetailsSheet(
                     const SizedBox(width: 10),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: isDark
                             ? AppColors.darkBackground
                             : const Color(0xFFF8FAFC),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                            color: isDark
-                                ? AppColors.darkBorder
-                                : const Color(0xFFE2E8F0)),
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : const Color(0xFFE2E8F0),
+                        ),
                       ),
                       child: const Text.rich(
                         TextSpan(
@@ -744,10 +754,7 @@ void _showIssueDetailsSheet(
               const SizedBox(height: 20),
               const Text(
                 'Issues Descriptions',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
               RichText(
@@ -776,10 +783,7 @@ void _showIssueDetailsSheet(
               const SizedBox(height: 18),
               const Text(
                 'Recommendations',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
               RichText(

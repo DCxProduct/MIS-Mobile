@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/app_settings.dart';
+import '../../core/network/api_client.dart';
+import '../../core/config/role_modules.dart';
+import 'password_recovery_screen.dart';
 import '../../translations/app_localizations.dart';
 import '../../widgets/app_logo.dart';
 import '../../widgets/primary_button.dart';
@@ -21,33 +24,58 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   String? _errorMessage;
 
-  void _submit() {
+  bool _isLoading = false;
+
+  Future<void> _submit() async {
+    if (_isLoading) return;
     setState(() => _errorMessage = null);
     if (!(_formKey.currentState?.validate() ?? false)) return;
-
-    final email = _emailController.text.trim().toLowerCase();
-    final password = _passwordController.text;
-
-    const allowedAccounts = {
-      'ministry@gmail.com',
-      'privatesector@gmail.com',
-      'cdc@gmail.com',
-      'cdcgpsf@gmail.com',
-      'cefp@gmail.com',
-    };
-    const requiredPassword = '12345678';
-
-    if (!allowedAccounts.contains(email) || password != requiredPassword) {
-      setState(() {
-        _errorMessage = AppLocalizations.of(context).text('invalidCredentials');
-      });
-      return;
-    }
-
-    AppSettings.of(context).setUserEmail(email);
-    Navigator.of(
+    final settings = AppSettings.of(context);
+    final invalidCredentials = AppLocalizations.of(
       context,
-    ).push(MaterialPageRoute<void>(builder: (_) => const LoadingScreen()));
+    ).text('invalidCredentials');
+    setState(() => _isLoading = true);
+    try {
+      final user = await settings.auth.login(
+        _emailController.text.trim().toLowerCase(),
+        _passwordController.text,
+      );
+      if (!mounted) return;
+      settings.setCurrentUser(user);
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(builder: (_) => const LoadingScreen()),
+      );
+    } on UnsupportedRoleException {
+      if (!mounted) return;
+      setState(
+        () => _errorMessage = AppLocalizations.of(
+          context,
+        ).text('unsupportedRole'),
+      );
+      settings.clearSession();
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      setState(
+        () => _errorMessage =
+            error.statusCode == 401 && error.endpoint == 'auth/login'
+            ? invalidCredentials
+            : error.statusCode == 401 && error.endpoint == 'auth/me'
+            ? 'Login succeeded, but the session could not be verified. Please try again.'
+            : error.message,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _errorMessage = 'Unable to sign in. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -154,12 +182,33 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
                 PrimaryButton(
                   label: l10n.text('signAccount'),
+                  isLoading: _isLoading,
                   onPressed: _submit,
                 ),
                 const SizedBox(height: 24),
                 Center(
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: _isLoading
+                        ? null
+                        : () async {
+                            final done = await Navigator.of(context).push<bool>(
+                              MaterialPageRoute(
+                                builder: (_) => const PasswordRecoveryScreen(),
+                              ),
+                            );
+                            if (!context.mounted || done != true) return;
+                            _passwordController.clear();
+                            setState(() => _errorMessage = null);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  ).text('passwordResetSuccess'),
+                                ),
+                              ),
+                            );
+                          },
                     child: Text(
                       l10n.text('forgotPassword'),
                       style: const TextStyle(

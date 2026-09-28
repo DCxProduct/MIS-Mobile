@@ -1,27 +1,25 @@
+import '../../shared/dashboard/widgets/working_group_live_tab.dart';
+import '../../shared/dashboard/widgets/pswg_live_dashboard.dart';
+import '../../shared/dashboard/data/working_group_summary.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
 
 class CdcSecretariatWorkingGroupTab extends StatelessWidget {
-  const CdcSecretariatWorkingGroupTab({super.key});
+  const CdcSecretariatWorkingGroupTab({super.key, this.groups});
 
-  static const _items = [
-    '(A) Agriculture and Agro-industry',
-    '(B) Tourism',
-    '(D) Law, Tax, and Governance',
-    '(C) SMEs, Manufacturing, and Services',
-    '(E) Banking and Financial Services',
-    '(F) Transportation and Infrastructure',
-    '(G) Export Processing and Trade Facilitation',
-    '(H) Industrial Relations',
-    '(I) Rice and Paddy',
-    '(J) Energy and Mineral Resources',
-    '(M) Construction and Real Estate',
-    '(N) Non-Bank Financial Services Other issues',
-  ];
+  final List<WorkingGroupSummary>? groups;
 
   @override
   Widget build(BuildContext context) {
+    final data = groups ?? PswgDataScope.maybeOf(context)?.workingGroups;
+    if (data == null) {
+      return WorkingGroupLiveTab(
+        builder: (groups) => CdcSecretariatWorkingGroupTab(groups: groups),
+      );
+    }
+    final items = data.map((group) => group.name).toList();
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -36,10 +34,11 @@ class CdcSecretariatWorkingGroupTab extends StatelessWidget {
       ),
       child: Column(
         children: List.generate(
-          _items.length,
+          items.length,
           (index) => _WorkingGroupRow(
-            label: _items[index],
-            showDivider: index != _items.length - 1,
+            label: items[index],
+            group: data[index],
+            showDivider: index != items.length - 1,
           ),
         ),
       ),
@@ -48,8 +47,13 @@ class CdcSecretariatWorkingGroupTab extends StatelessWidget {
 }
 
 class _WorkingGroupRow extends StatelessWidget {
-  const _WorkingGroupRow({required this.label, required this.showDivider});
+  const _WorkingGroupRow({
+    required this.label,
+    required this.showDivider,
+    required this.group,
+  });
 
+  final WorkingGroupSummary group;
   final String label;
   final bool showDivider;
 
@@ -83,7 +87,7 @@ class _WorkingGroupRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          const _MiniStatusBars(),
+          _MiniStatusBars(group: group),
           const SizedBox(width: 12),
         ],
       ),
@@ -92,7 +96,9 @@ class _WorkingGroupRow extends StatelessWidget {
 }
 
 class _MiniStatusBars extends StatelessWidget {
-  const _MiniStatusBars();
+  const _MiniStatusBars({required this.group});
+
+  final WorkingGroupSummary group;
 
   @override
   Widget build(BuildContext context) {
@@ -102,11 +108,22 @@ class _MiniStatusBars extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          _MiniBar(color: const Color(0xFFE68225), height: 9),
+          _MiniBar(
+            color: const Color(0xFFE68225),
+            height: group.total == 0 ? 0 : 18 * group.inProgress / group.total,
+          ),
           const SizedBox(width: 4),
-          _MiniBar(color: const Color(0xFFFF3B30), height: 5),
+          _MiniBar(
+            color: const Color(0xFFFF3B30),
+            height: group.total == 0
+                ? 0
+                : 18 * group.notAddressed / group.total,
+          ),
           const SizedBox(width: 4),
-          _MiniBar(color: const Color(0xFF24A36A), height: 16),
+          _MiniBar(
+            color: const Color(0xFF24A36A),
+            height: group.total == 0 ? 0 : 18 * group.solved / group.total,
+          ),
         ],
       ),
     );

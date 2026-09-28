@@ -411,20 +411,14 @@ class _IssueDetailsSheet extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: const [
-                        _DatePill(
-                          label: 'Submitted By',
-                          value: 'Sabada',
-                        ),
+                        _DatePill(label: 'Submitted By', value: 'Sabada'),
                         SizedBox(width: 10),
                         _DatePill(
                           label: 'Submitted Date',
                           value: 'Jun 24 2025',
                         ),
                         SizedBox(width: 10),
-                        _DatePill(
-                          label: 'Government Agency',
-                          value: 'MAFF',
-                        ),
+                        _DatePill(label: 'Government Agency', value: 'MAFF'),
                         SizedBox(width: 10),
                         _DatePill(
                           label: "Gov't Second Agency",

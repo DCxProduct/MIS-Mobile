@@ -1,3 +1,5 @@
+import '../../shared/dashboard/data/dashboard_repository.dart';
+import '../../shared/dashboard/widgets/pswg_live_dashboard.dart';
 import '../../cdc_secretariat/dashboard/filter_sheet.dart';
 import '../../cdc_secretariat/dashboard/categories_tab.dart';
 import '../../cdc_secretariat/dashboard/working_group_tab.dart';
@@ -15,30 +17,30 @@ import '../../../widgets/app_header.dart';
 
 import '../../cdc_secretariat/dashboard/dashboard_screen.dart';
 import '../../cdc_secretariat/issues/issues_screen.dart';
-import '../../cdc_secretariat/meeting/meeting_screen.dart';
+import '../../cdc_secretariat/meetings/meeting_screen.dart';
 import '../../cdc_secretariat/profile/profile_screen.dart';
 import '../../cdc_secretariat/reports/reports_screen.dart';
 
 import '../../cdc_section/dashboard/dashboard_screen.dart';
 import '../../cdc_section/issues/issues_screen.dart';
-import '../../cdc_section/meeting/meeting_screen.dart';
+import '../../cdc_section/meetings/meeting_screen.dart';
 import '../../cdc_section/profile/profile_screen.dart';
 import '../../cdc_section/reports/reports_screen.dart';
 
 import '../../cefp/dashboard/dashboard_screen.dart';
 import '../../cefp/issues/issues_screen.dart';
-import '../../cefp/meeting/meeting_screen.dart';
+import '../../cefp/meetings/meeting_screen.dart';
 import '../../cefp/profile/profile_screen.dart';
 import '../../cefp/reports/reports_screen.dart';
 
 import '../../line_ministry/dashboard/dashboard_screen.dart';
 import '../../line_ministry/issues/issues_screen.dart';
-import '../../line_ministry/meeting/meeting_screen.dart';
+import '../../line_ministry/meetings/meeting_screen.dart';
 import '../../line_ministry/profile/profile_screen.dart';
 import '../../line_ministry/reports/reports_screen.dart';
 
 import '../issues/issues_screen.dart';
-import '../meeting/meeting_screen.dart';
+import '../meetings/meeting_screen.dart';
 import '../reports/reports_screen.dart';
 import 'tabs/agencies_tab.dart';
 import 'tabs/categories_tab.dart';
@@ -200,6 +202,22 @@ class DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final module = AppSettings.of(context).moduleType;
+    if (module == AppModuleType.privateSector || module == AppModuleType.cefp) {
+      return PswgDataLoader(
+        scope: _selectedScopeTab == 0
+            ? DashboardScope.plenary
+            : DashboardScope.pswg,
+        builder: _buildContent,
+      );
+    }
+    if (_selectedStatusTab == 2) {
+      return PswgDataLoader(builder: _buildContent);
+    }
+    return _buildContent(context);
+  }
+
+  Widget _buildContent(BuildContext context) {
     final moduleType = AppSettings.of(context).moduleType;
     if (moduleType == AppModuleType.lineMinistry) {
       return const LineMinistryDashboardScreen();
@@ -226,9 +244,29 @@ class DashboardPageState extends State<DashboardPage> {
                     if (moduleType != AppModuleType.cdcSecretariat)
                       _ScopeTitle(selectedIndex: _selectedScopeTab),
                     const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        if (moduleType == AppModuleType.cdcSecretariat)
+                    if (moduleType == AppModuleType.privateSector)
+                      Row(
+                        children: [
+                          _ScopeSelector(
+                            selectedIndex: _selectedScopeTab,
+                            onSelected: (index) {
+                              setState(() => _selectedScopeTab = index);
+                            },
+                          ),
+                          const Spacer(),
+                          _FilterBar(
+                            onTap: () => _openFilterSheet(context),
+                            activeCount:
+                                _selectedYears.length +
+                                _selectedStatuses.length +
+                                _selectedAgencies.length +
+                                _selectedProgressReports.length,
+                          ),
+                        ],
+                      )
+                    else if (moduleType == AppModuleType.cdcSecretariat)
+                      Row(
+                        children: [
                           Text(
                             l10n.text('dashboard'),
                             style: TextStyle(
@@ -236,27 +274,36 @@ class DashboardPageState extends State<DashboardPage> {
                               fontSize: 20,
                               fontWeight: FontWeight.w600,
                             ),
-                          )
-                        else
+                          ),
+                          const Spacer(),
+                          _FilterBar(
+                            onTap: () => _openFilterSheet(context),
+                            activeCount: _cdcFilters.count,
+                          ),
+                        ],
+                      )
+                    else
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
                           _ScopeSelector(
                             selectedIndex: _selectedScopeTab,
                             onSelected: (index) {
                               setState(() => _selectedScopeTab = index);
                             },
                           ),
-                        const Spacer(),
-                        _FilterBar(
-                          onTap: () => _openFilterSheet(context),
-                          activeCount:
-                              moduleType == AppModuleType.cdcSecretariat
-                              ? _cdcFilters.count
-                              : _selectedYears.length +
-                                    _selectedStatuses.length +
-                                    _selectedAgencies.length +
-                                    _selectedProgressReports.length,
-                        ),
-                      ],
-                    ),
+                          _FilterBar(
+                            onTap: () => _openFilterSheet(context),
+                            activeCount:
+                                _selectedYears.length +
+                                _selectedStatuses.length +
+                                _selectedAgencies.length +
+                                _selectedProgressReports.length,
+                          ),
+                        ],
+                      ),
                     const SizedBox(height: 14),
                     _MetricGrid(isWorkingGroup: _selectedScopeTab == 1),
                     const SizedBox(height: 8),
@@ -1144,26 +1191,40 @@ class _MetricGrid extends StatelessWidget {
     final isLineMinistry = moduleType == AppModuleType.lineMinistry;
 
     final isSecretariat = moduleType == AppModuleType.cdcSecretariat;
-    final totalIssues = isSecretariat
+    final demoTotalIssues = isSecretariat
         ? '179'
         : isWorkingGroup
         ? '20'
         : (isLineMinistry ? '56' : '20');
-    final solved = isSecretariat
+    final demoSolved = isSecretariat
         ? '166/179'
         : isWorkingGroup
         ? '15/20'
         : (isLineMinistry ? '30/56' : '15/20');
-    final inProgress = isSecretariat
+    final demoInProgress = isSecretariat
         ? '13/179'
         : isWorkingGroup
         ? '4/20'
         : (isLineMinistry ? '16/56' : '4/20');
-    final notAddressed = isSecretariat
+    final demoNotAddressed = isSecretariat
         ? '0/179'
         : isWorkingGroup
         ? '1/20'
         : (isLineMinistry ? '10/56' : '1/20');
+
+    final cards = PswgDataScope.maybeOf(context)?.cards;
+    final totalIssues = cards == null
+        ? demoTotalIssues
+        : '${cards['totalIssues']}';
+    final solved = cards == null
+        ? demoSolved
+        : '${cards['solved']}/$totalIssues';
+    final inProgress = cards == null
+        ? demoInProgress
+        : '${cards['inProgress']}/$totalIssues';
+    final notAddressed = cards == null
+        ? demoNotAddressed
+        : '${cards['notAddressed']}/$totalIssues';
 
     return GridView.count(
       crossAxisCount: 2,
@@ -1318,7 +1379,7 @@ class _WideMetricCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '14',
+                  '${PswgDataScope.maybeOf(context)?.cards['totalPrimaryAgencies'] ?? 14}',
                   style: TextStyle(
                     color: isDark ? Colors.white : const Color(0xFF27364A),
                     fontSize: 20,

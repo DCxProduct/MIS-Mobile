@@ -4,10 +4,7 @@ import '../../../../core/app_colors.dart';
 import '../../../../translations/app_localizations.dart';
 
 class PrivateSectorSummaryCard extends StatelessWidget {
-  const PrivateSectorSummaryCard({
-    super.key,
-    this.value = '14',
-  });
+  const PrivateSectorSummaryCard({super.key, this.value = '14'});
 
   final String value;
 

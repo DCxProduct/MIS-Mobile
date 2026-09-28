@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 
 class RgcDecisionDetailScreen extends StatelessWidget {
-  const RgcDecisionDetailScreen({
-    super.key,
-    required this.agencyName,
-  });
+  const RgcDecisionDetailScreen({super.key, required this.agencyName});
 
   final String agencyName;
 
@@ -92,7 +89,11 @@ class RgcDecisionDetailScreen extends StatelessWidget {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          const Icon(Icons.picture_as_pdf, color: Color(0xFFE53935), size: 18),
+                          const Icon(
+                            Icons.picture_as_pdf,
+                            color: Color(0xFFE53935),
+                            size: 18,
+                          ),
                           const SizedBox(width: 6),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,17 +181,9 @@ class RgcDecisionDetailScreen extends StatelessWidget {
               minHeight: 50,
             ),
             const SizedBox(height: 16),
-            const _SectionBlock(
-              title: 'Request',
-              content: '',
-              minHeight: 50,
-            ),
+            const _SectionBlock(title: 'Request', content: '', minHeight: 50),
             const SizedBox(height: 16),
-            const _SectionBlock(
-              title: 'Next Step',
-              content: '',
-              minHeight: 50,
-            ),
+            const _SectionBlock(title: 'Next Step', content: '', minHeight: 50),
             const SizedBox(height: 16),
             const _SectionBlock(
               title: 'Source of Verification',
@@ -213,7 +206,9 @@ class RgcDecisionDetailScreen extends StatelessWidget {
                 color: isDark ? AppColors.darkCard : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: isDark ? AppColors.darkBorder : const Color(0xFFE2E8F0),
+                  color: isDark
+                      ? AppColors.darkBorder
+                      : const Color(0xFFE2E8F0),
                 ),
               ),
               child: const SelectableText(

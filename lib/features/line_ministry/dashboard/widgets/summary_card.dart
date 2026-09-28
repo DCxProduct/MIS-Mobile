@@ -4,10 +4,7 @@ import '../../../../core/app_colors.dart';
 import '../../../../translations/app_localizations.dart';
 
 class SummaryCard extends StatelessWidget {
-  const SummaryCard({
-    super.key,
-    this.value = '14',
-  });
+  const SummaryCard({super.key, this.value = '14'});
 
   final String value;
 

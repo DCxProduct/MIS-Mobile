@@ -142,10 +142,7 @@ class _ProgressReportCard extends StatelessWidget {
                 children: const [
                   Text(
                     'View Details',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                   SizedBox(width: 4),
                   Icon(Icons.chevron_right, size: 16),

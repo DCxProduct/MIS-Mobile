@@ -1,3 +1,4 @@
+import '../../shared/issues/data/working_group_issue.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
@@ -10,8 +11,10 @@ class IssueDetailScreen extends StatefulWidget {
     super.key,
     required this.title,
     required this.category,
+    this.issue,
   });
 
+  final WorkingGroupIssue? issue;
   final String title;
   final String category;
 
@@ -24,8 +27,6 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
     return Scaffold(
       backgroundColor: AppColors.pageBackground(context),
       appBar: AppBar(
@@ -63,8 +64,16 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
             ),
             Expanded(
               child: _selectedTab == 0
-                  ? const IssueDescriptionsTab()
-                  : const IssueProgressReportTab(),
+                  ? IssueDescriptionsTab(issue: widget.issue)
+                  : widget.issue == null
+                  ? const IssueProgressReportTab()
+                  : Center(
+                      child: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).text('noIssueProgressData'),
+                      ),
+                    ),
             ),
           ],
         ),

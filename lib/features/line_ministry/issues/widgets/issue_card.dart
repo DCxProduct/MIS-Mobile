@@ -23,10 +23,8 @@ class LineMinistryIssueCard extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (_) => LineMinistryIssueDetailScreen(
-              title: title,
-              category: category,
-            ),
+            builder: (_) =>
+                LineMinistryIssueDetailScreen(title: title, category: category),
           ),
         );
       },

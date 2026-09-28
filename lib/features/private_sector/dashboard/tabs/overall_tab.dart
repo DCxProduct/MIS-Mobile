@@ -1,3 +1,4 @@
+import '../../../shared/dashboard/widgets/pswg_live_dashboard.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ class OverallTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cards = PswgDataScope.maybeOf(context)?.cards;
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
@@ -27,28 +29,30 @@ class OverallTab extends StatelessWidget {
           SizedBox(
             width: 320,
             height: 195,
-            child: CustomPaint(painter: _DonutChartPainter(isDark: isDark)),
+            child: CustomPaint(
+              painter: _DonutChartPainter(isDark: isDark, cards: cards),
+            ),
           ),
           const SizedBox(height: 2),
           _ChartLegendRow(
             color: isDark ? AppColors.darkPrimary : const Color(0xFF2D7DBF),
             label: l10n.text('totalIssues'),
-            value: '(20)',
+            value: '(${cards?['totalIssues'] ?? 20})',
           ),
           _ChartLegendRow(
             color: const Color(0xFF009F5C),
             label: l10n.text('solved'),
-            value: '(15)',
+            value: '(${cards?['solved'] ?? 15})',
           ),
           _ChartLegendRow(
             color: const Color(0xFFE8A61A),
             label: l10n.text('inProgress'),
-            value: '(4)',
+            value: '(${cards?['inProgress'] ?? 4})',
           ),
           _ChartLegendRow(
             color: const Color(0xFFFF3B30),
             label: l10n.text('notAddressed'),
-            value: '(1)',
+            value: '(${cards?['notAddressed'] ?? 1})',
           ),
         ],
       ),
@@ -57,7 +61,9 @@ class OverallTab extends StatelessWidget {
 }
 
 class _DonutChartPainter extends CustomPainter {
-  const _DonutChartPainter({required this.isDark});
+  const _DonutChartPainter({required this.isDark, this.cards});
+
+  final Map<String, int?>? cards;
 
   final bool isDark;
 
@@ -72,7 +78,7 @@ class _DonutChartPainter extends CustomPainter {
 
     var startAngle = -math.pi / 2;
 
-    final segments = [
+    final demoSegments = [
       (
         percent: 0.3154,
         color: isDark ? AppColors.darkPrimary : const Color(0xFF216AAA),
@@ -99,6 +105,36 @@ class _DonutChartPainter extends CustomPainter {
       ),
     ];
 
+    final total = cards?['totalIssues'] ?? 0;
+    final segments = cards == null
+        ? demoSegments
+        : [
+            for (final item in [
+              (
+                key: 'solved',
+                color: const Color(0xFF009F5C),
+                offset: const Offset(78, 58),
+              ),
+              (
+                key: 'inProgress',
+                color: const Color(0xFFF7B51D),
+                offset: const Offset(-78, -50),
+              ),
+              (
+                key: 'notAddressed',
+                color: const Color(0xFFFF3B30),
+                offset: const Offset(-92, 34),
+              ),
+            ])
+              if (total > 0 && (cards![item.key] ?? 0) > 0)
+                (
+                  percent: cards![item.key]! / total,
+                  color: item.color,
+                  label:
+                      '${(100 * cards![item.key]! / total).toStringAsFixed(1)}%',
+                  offset: item.offset,
+                ),
+          ];
     for (final segment in segments) {
       final sweep = segment.percent * math.pi * 2;
 
@@ -282,7 +318,7 @@ class _DonutChartPainter extends CustomPainter {
             ),
           ),
           TextSpan(
-            text: '20',
+            text: '${cards?['totalIssues'] ?? 20}',
             style: TextStyle(
               color: isDark ? Colors.white : AppColors.text,
               fontSize: 16,
@@ -303,7 +339,7 @@ class _DonutChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DonutChartPainter oldDelegate) =>
-      oldDelegate.isDark != isDark;
+      oldDelegate.isDark != isDark || oldDelegate.cards != cards;
 }
 
 class _ChartLegendRow extends StatelessWidget {

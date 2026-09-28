@@ -23,10 +23,7 @@ class PrivateSectorIssueCard extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (_) => IssueDetailScreen(
-              title: title,
-              category: category,
-            ),
+            builder: (_) => IssueDetailScreen(title: title, category: category),
           ),
         );
       },

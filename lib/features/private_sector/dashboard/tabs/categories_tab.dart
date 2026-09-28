@@ -1,3 +1,5 @@
+import '../../../shared/dashboard/widgets/pswg_live_dashboard.dart';
+import '../../../shared/dashboard/data/working_group_summary.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_colors.dart';
@@ -17,6 +19,8 @@ class CategoriesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rows = PswgDataScope.maybeOf(context)?.categories;
+    final items = rows?.map((row) => row.name).toList() ?? _items;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -31,10 +35,11 @@ class CategoriesTab extends StatelessWidget {
       ),
       child: Column(
         children: List.generate(
-          _items.length,
+          items.length,
           (index) => _CategoryIssueRow(
-            label: _items[index],
-            bottomPadding: index == _items.length - 1 ? 0 : 13,
+            label: items[index],
+            data: rows?[index],
+            bottomPadding: index == items.length - 1 ? 0 : 13,
           ),
         ),
       ),
@@ -43,8 +48,13 @@ class CategoriesTab extends StatelessWidget {
 }
 
 class _CategoryIssueRow extends StatelessWidget {
-  const _CategoryIssueRow({required this.label, required this.bottomPadding});
+  const _CategoryIssueRow({
+    required this.label,
+    required this.bottomPadding,
+    this.data,
+  });
 
+  final WorkingGroupSummary? data;
   final String label;
   final double bottomPadding;
 
@@ -70,7 +80,7 @@ class _CategoryIssueRow extends StatelessWidget {
                 ),
               ),
               Text(
-                '3',
+                '${data?.total ?? 3}',
                 style: TextStyle(
                   color: colors.onSurfaceVariant,
                   fontSize: 12,
@@ -84,15 +94,24 @@ class _CategoryIssueRow extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child: Row(
               children: [
-                Expanded(
-                  flex: 75,
-                  child: Container(height: 6, color: const Color(0xFF009F5C)),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  flex: 25,
-                  child: Container(height: 6, color: const Color(0xFFFF8A00)),
-                ),
+                if (data == null || data!.solved > 0)
+                  Expanded(
+                    flex: data?.solved ?? 75,
+                    child: Container(height: 6, color: const Color(0xFF009F5C)),
+                  ),
+                if (data == null || (data!.solved > 0 && data!.inProgress > 0))
+                  const SizedBox(width: 4),
+                if (data == null || data!.inProgress > 0)
+                  Expanded(
+                    flex: data?.inProgress ?? 25,
+                    child: Container(height: 6, color: const Color(0xFFFF8A00)),
+                  ),
+                if (data != null && data!.notAddressed > 0)
+                  Expanded(
+                    flex: data!.notAddressed,
+                    child: Container(height: 6, color: const Color(0xFFFF3B30)),
+                  ),
+                if (data != null && data!.total == 0) const SizedBox(height: 6),
               ],
             ),
           ),

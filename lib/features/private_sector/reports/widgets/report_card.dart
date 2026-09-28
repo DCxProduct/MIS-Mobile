@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/app_colors.dart';
 
 class PrivateSectorReportCard extends StatelessWidget {
-  const PrivateSectorReportCard({
-    super.key,
-    required this.title,
-  });
+  const PrivateSectorReportCard({super.key, required this.title});
 
   final String title;
 
