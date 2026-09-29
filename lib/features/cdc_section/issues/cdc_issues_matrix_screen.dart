@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_settings.dart';
+import '../../../core/config/module_config.dart';
 import '../../line_ministry/issues/issues_screen.dart';
 import 'issue_detail_screen.dart';
+import 'issue_detail_loader.dart';
 
 class CdcSectionIssuesMatrixScreen extends StatelessWidget {
   const CdcSectionIssuesMatrixScreen({
@@ -17,13 +19,17 @@ class CdcSectionIssuesMatrixScreen extends StatelessWidget {
     return LineMinistryIssuesScreenView(
       titleKey: titleKey,
       showTabs: false,
+      cdcMatrix: AppSettings.of(context).moduleType == AppModuleType.cdcSection,
       staticPreview: AppSettings.of(context).auth.isStaticSession,
       issueDetailBuilder: (title, category, issue) =>
-          CdcSectionIssueDetailScreen(
-            title: title,
-            category: category,
-            issue: issue,
-          ),
+          AppSettings.of(context).moduleType == AppModuleType.cdcSection &&
+              issue != null
+          ? CdcIssueDetailLoader(issueId: issue.id)
+          : CdcSectionIssueDetailScreen(
+              title: title,
+              category: category,
+              issue: issue,
+            ),
     );
   }
 }

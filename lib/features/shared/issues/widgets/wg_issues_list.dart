@@ -9,11 +9,13 @@ class WgIssuesList extends StatefulWidget {
     required this.itemBuilder,
     this.query = '',
     this.matrix = false,
+    this.cdcMatrix = false,
     this.filter,
   });
   final Widget Function(WorkingGroupIssue) itemBuilder;
   final String query;
   final bool matrix;
+  final bool cdcMatrix;
   final bool Function(WorkingGroupIssue issue)? filter;
   @override
   State<WgIssuesList> createState() => _WgIssuesListState();
@@ -21,21 +23,26 @@ class WgIssuesList extends StatefulWidget {
 
 class _WgIssuesListState extends State<WgIssuesList> {
   Future<List<WorkingGroupIssue>>? _request;
+  Future<List<WorkingGroupIssue>> _load() {
+    final settings = AppSettings.of(context);
+    if (widget.cdcMatrix) return settings.cdcIssueMatrix.getDisplayIssues();
+    return widget.matrix
+        ? settings.issues.getIssueMatrix()
+        : settings.issues.getMyWorkingGroupIssues();
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _request ??= widget.matrix
-        ? AppSettings.of(context).issues.getIssueMatrix()
-        : AppSettings.of(context).issues.getMyWorkingGroupIssues();
+    _request ??= _load();
   }
 
   @override
   void didUpdateWidget(covariant WgIssuesList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.matrix != widget.matrix) {
-      _request = widget.matrix
-          ? AppSettings.of(context).issues.getIssueMatrix()
-          : AppSettings.of(context).issues.getMyWorkingGroupIssues();
+    if (oldWidget.matrix != widget.matrix ||
+        oldWidget.cdcMatrix != widget.cdcMatrix) {
+      _request = _load();
     }
   }
 
@@ -56,9 +63,7 @@ class _WgIssuesListState extends State<WgIssuesList> {
             Text(l10n.text('issuesListLoadError')),
             TextButton(
               onPressed: () => setState(() {
-                _request = widget.matrix
-                    ? AppSettings.of(context).issues.getIssueMatrix()
-                    : AppSettings.of(context).issues.getMyWorkingGroupIssues();
+                _request = _load();
               }),
               child: Text(l10n.text('retry')),
             ),

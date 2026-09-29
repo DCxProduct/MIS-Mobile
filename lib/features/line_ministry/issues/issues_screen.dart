@@ -1,6 +1,7 @@
 import '../../shared/issues/data/working_group_issue.dart';
 import '../../shared/issues/widgets/wg_issues_list.dart';
 import '../../shared/issues/widgets/issue_display.dart';
+import '../../shared/issues/widgets/issue_agency_logo.dart';
 import '../../shared/issues/data/wg_issue_summary.dart';
 import '../../shared/issues/widgets/wg_issue_summary_loader.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ class LineMinistryIssuesScreenView extends StatefulWidget {
     this.titleKey = 'issuesMatrix',
     this.showTabs = true,
     this.staticPreview = false,
+    this.cdcMatrix = false,
     this.issueDetailBuilder,
     this.previewStatus = 'In Progress',
   });
@@ -27,6 +29,7 @@ class LineMinistryIssuesScreenView extends StatefulWidget {
   final String titleKey;
   final bool showTabs;
   final bool staticPreview;
+  final bool cdcMatrix;
   final String previewStatus;
   final Widget Function(
     String title,
@@ -200,6 +203,7 @@ class _LineMinistryIssuesScreenViewState
                     ),
                 ] else ...[
                   WgIssueSummaryLoader(
+                    cdcMatrix: widget.cdcMatrix,
                     matrix: !widget.showTabs || _selectedTab == 1,
                     builder: (summary) => Column(
                       children: [
@@ -241,6 +245,7 @@ class _LineMinistryIssuesScreenViewState
                           ),
                         )
                       : WgIssuesList(
+                          cdcMatrix: widget.cdcMatrix,
                           matrix: true,
                           itemBuilder: (issue) => _LineMinistryIssueListCard(
                             title: issue.title,
@@ -566,21 +571,7 @@ class _LineMinistryIssueListCard extends StatelessWidget {
                     ),
                   )
                 else
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [Color(0xFF216AAA), Color(0xFF1EA45B)],
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.account_balance,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                  ),
+                  IssueAgencyLogo(path: issue?.agencyLogo ?? ''),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -588,8 +579,8 @@ class _LineMinistryIssueListCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        maxLines: matrixPreview ? 1 : null,
-                        overflow: matrixPreview ? TextOverflow.ellipsis : null,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: matrixPreview ? 13 : 14,

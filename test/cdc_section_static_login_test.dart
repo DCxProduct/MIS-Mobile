@@ -31,6 +31,7 @@ void main() {
           throw StateError('Static login must not contact the backend');
         }),
       ),
+      enableDemoLogin: true,
     );
   });
   tearDown(() => auth.dispose());

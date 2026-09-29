@@ -10,6 +10,7 @@ import '../features/auth/data/auth_repository.dart';
 import '../features/auth/data/auth_user.dart';
 import '../features/shared/dashboard/data/dashboard_repository.dart';
 import '../features/shared/issues/data/issues_repository.dart';
+import '../features/shared/issues/data/cdc_issue_matrix_repository.dart';
 import '../features/shared/meetings/data/meeting_requests_repository.dart';
 import '../features/shared/meetings/data/meeting_summaries_repository.dart';
 import '../features/shared/meetings/data/progress_reports_repository.dart';
@@ -33,6 +34,9 @@ class AppSettingsController extends ChangeNotifier {
 
   DashboardRepository get dashboard => _repositories.dashboard;
   IssuesRepository get issues => _repositories.issues;
+  late final CdcIssueMatrixRepository cdcIssueMatrix = CdcIssueMatrixRepository(
+    auth.apiClient,
+  );
   MeetingRequestsRepository get meetingRequests =>
       _repositories.meetingRequests;
   MeetingsRepository get meetings => _repositories.meetings;

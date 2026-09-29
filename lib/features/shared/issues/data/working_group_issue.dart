@@ -17,6 +17,10 @@ class WorkingGroupIssue {
     required this.attachmentPath,
     required this.meetingRequestDocumentPath,
     required this.linkCount,
+    this.attachmentName = '',
+    this.attachmentSize,
+    this.agencyLogo = '',
+    this.meetingRequestDocumentName = '',
   });
   final int id;
   final String title,
@@ -26,10 +30,14 @@ class WorkingGroupIssue {
       description,
       recommendation;
   final String submittedBy, agency;
+  final String agencyLogo;
   final DateTime? createdAt, meetingDate;
   final int attachmentCount, linkCount;
   final String attachmentPath;
+  final String attachmentName;
+  final int? attachmentSize;
   final String? meetingRequestDocumentPath;
+  final String meetingRequestDocumentName;
 
   factory WorkingGroupIssue.fromJson(Map<String, dynamic> json) {
     Map<String, dynamic> object(Object? value) {
@@ -87,12 +95,15 @@ class WorkingGroupIssue {
       return string(object(value)['path']);
     }
 
-    var meetingRequestDocumentPath = path(request['meetingRequestLetter']);
+    var meetingDocument = request['meetingRequestLetter'];
+    var meetingRequestDocumentPath = path(meetingDocument);
     if (meetingRequestDocumentPath.isEmpty) {
-      meetingRequestDocumentPath = path(request['documentReference']);
+      meetingDocument = request['documentReference'];
+      meetingRequestDocumentPath = path(meetingDocument);
     }
     if (meetingRequestDocumentPath.isEmpty && meetings.isNotEmpty) {
-      meetingRequestDocumentPath = path(meetings.first['documentReference']);
+      meetingDocument = meetings.first['documentReference'];
+      meetingRequestDocumentPath = path(meetingDocument);
     }
     addLink(attachment['path']);
     addLink(json['documentReference']);
@@ -123,13 +134,23 @@ class WorkingGroupIssue {
       agency: agencies.isEmpty
           ? ''
           : string(object(agencies.first['stakeholder'])['name']),
+      agencyLogo: agencies.isEmpty
+          ? ''
+          : string(object(agencies.first['stakeholder'])['logo']),
       createdAt: date(json['createdAt']),
       meetingDate: meetings.isEmpty
           ? null
           : date(meetings.first['meetingDate']),
       attachmentCount: string(attachment['path']).isEmpty ? 0 : 1,
       attachmentPath: string(attachment['path']),
+      attachmentName: string(attachment['originalName'] ?? attachment['name']),
+      attachmentSize: attachment['size'] is int
+          ? attachment['size'] as int
+          : null,
       meetingRequestDocumentPath: meetingRequestDocumentPath,
+      meetingRequestDocumentName: meetingDocument is Map<String, dynamic>
+          ? string(meetingDocument['originalName'] ?? meetingDocument['name'])
+          : '',
       linkCount: links.length,
     );
   }

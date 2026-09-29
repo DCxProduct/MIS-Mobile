@@ -13,7 +13,13 @@ String pdfAttachmentUrl(String path) {
 
 String pdfAttachmentName(String path) {
   final value = path.split('?').first;
-  final name = value.split('/').last.trim();
+  var name = value.split('/').last.trim();
+  try {
+    name = Uri.decodeComponent(name);
+  } on ArgumentError {
+    // Keep filenames containing a literal percent sign.
+  }
+  name = name.replaceFirst(RegExp(r'^\d{13}[-_]'), '');
   return name.isEmpty ? 'PDF Preview' : name;
 }
 

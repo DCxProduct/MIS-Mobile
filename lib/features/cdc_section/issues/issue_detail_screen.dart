@@ -29,20 +29,31 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
   static const _decision =
       'The Ministry of Agriculture, Forestry and Fisheries (MAFF) agreed to have joint inspections and not multiple inspections. Inspections are only conducted by the relevant institutions together to coordinate their work and avoid repeated visits.';
 
+  String _fileSize(int bytes) => bytes >= 1024 * 1024
+      ? '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB'
+      : bytes >= 1024
+      ? '${(bytes / 1024).toStringAsFixed(1)} KB'
+      : '$bytes B';
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final documentPath = generalIssue
         ? issue?.meetingRequestDocumentPath ?? ''
         : issue?.attachmentPath ?? '';
+    final documentName = generalIssue
+        ? issue?.meetingRequestDocumentName ?? ''
+        : issue?.attachmentName ?? '';
     final status = issue == null
         ? l10n.text(generalIssue ? 'complete' : 'inProgress')
         : issueStatusLabel(context, issue!);
-    final statusColor = generalIssue && issue == null ? AppColors.accent(context) : switch (issue?.statusCode) {
-      'SOLVED' => const Color(0xFF16A34A),
-      'NOT_ADDRESSED' => const Color(0xFFEF4444),
-      _ => const Color(0xFFFF8A00),
-    };
+    final statusColor = generalIssue && issue == null
+        ? AppColors.accent(context)
+        : switch (issue?.statusCode) {
+            'SOLVED' => const Color(0xFF16A34A),
+            'NOT_ADDRESSED' => const Color(0xFFEF4444),
+            _ => const Color(0xFFFF8A00),
+          };
     return Scaffold(
       backgroundColor: AppColors.pageBackground(context),
       appBar: AppBar(
@@ -77,7 +88,9 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                generalIssue ? issue?.title ?? 'Climate Issue' : l10n.text('submitDetail'),
+                generalIssue
+                    ? issue?.title ?? 'Climate Issue'
+                    : l10n.text('submitDetail'),
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -115,7 +128,11 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          l10n.text(generalIssue ? 'meetingReferenceDocument' : 'issueDocument'),
+                          l10n.text(
+                            generalIssue
+                                ? 'meetingReferenceDocument'
+                                : 'issueDocument',
+                          ),
                           style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.mutedText,
@@ -124,6 +141,7 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                         const SizedBox(height: 8),
                         PdfAttachmentPreview(
                           path: documentPath,
+                          name: documentName,
                           child: Row(
                             children: [
                               const Icon(
@@ -141,6 +159,8 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                                           ? 'Request Doc'
                                           : documentPath.isEmpty
                                           ? '—'
+                                          : documentName.isNotEmpty
+                                          ? documentName
                                           : pdfAttachmentName(documentPath),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -151,6 +171,16 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                                         '200 KB',
                                         style: TextStyle(
                                           fontSize: 7,
+                                          color: AppColors.mutedText,
+                                        ),
+                                      ),
+                                    if (!generalIssue &&
+                                        issue?.attachmentSize != null &&
+                                        documentPath.isNotEmpty)
+                                      Text(
+                                        _fileSize(issue!.attachmentSize!),
+                                        style: const TextStyle(
+                                          fontSize: 9,
                                           color: AppColors.mutedText,
                                         ),
                                       ),
@@ -175,6 +205,7 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               SingleChildScrollView(
+                key: const ValueKey('cdc-detail-dates-scroll'),
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
@@ -182,14 +213,14 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                       label: l10n.text('meetingDate'),
                       value: issue == null
                           ? 'Jun 29 2025'
-                          : issueDate(context, issue!.meetingDate),
+                          : issueDateWithYear(context, issue!.meetingDate),
                     ),
                     const SizedBox(width: 16),
                     CdcDetailDateChip(
                       label: l10n.text('submittedDate'),
                       value: issue == null
                           ? 'Jun 24 2025'
-                          : issueDate(context, issue!.createdAt),
+                          : issueDateWithYear(context, issue!.createdAt),
                     ),
                   ],
                 ),
@@ -203,9 +234,11 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
               const SizedBox(height: 16),
               CdcDetailTextPanel(
                 label: l10n.text('recommendations'),
-                body: issue?.recommendation ?? (generalIssue
-                    ? 'The private sector, through the Ministry of Agriculture, Forestry and Fisheries, has requested the Ministry of Water Resources and Meteorology to consider establishing meteorological stations in every province and city to provide farmers with accurate weather information.'
-                    : _recommendation),
+                body:
+                    issue?.recommendation ??
+                    (generalIssue
+                        ? 'The private sector, through the Ministry of Agriculture, Forestry and Fisheries, has requested the Ministry of Water Resources and Meteorology to consider establishing meteorological stations in every province and city to provide farmers with accurate weather information.'
+                        : _recommendation),
                 collapsedLines: 3,
                 inlineLink: !generalIssue,
               ),
@@ -215,38 +248,38 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                     ? const CdcIssueProgressReportCard()
                     : Text(l10n.text('noIssueProgressData'))
               else ...[
-              CdcDetailTextPanel(
-                label: l10n.text('rgcDecision'),
-                body: issue == null ? _decision : '',
-                collapsedLines: 3,
-              ),
-              for (final key in [
-                'indicators',
-                'progressSolution',
-                'implementationChallenges',
-                'request',
-                'nextStep',
-                'sourceOfVerification',
-                'linkToVerificationSource',
-              ]) ...[
-                const SizedBox(height: 16),
-                Text(l10n.text(key), style: const TextStyle(fontSize: 13)),
-                const SizedBox(height: 10),
-                Container(
-                  key: ValueKey('cdc-detail-$key'),
-                  width: double.infinity,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: AppColors.pageBackground(context),
-                    borderRadius: BorderRadius.circular(7),
-                    border: Border.all(
-                      color: AppColors.fieldBorder.withValues(
-                        alpha: AppColors.isDark(context) ? 0.15 : 1,
+                CdcDetailTextPanel(
+                  label: l10n.text('rgcDecision'),
+                  body: issue == null ? _decision : '',
+                  collapsedLines: 3,
+                ),
+                for (final key in [
+                  'indicators',
+                  'progressSolution',
+                  'implementationChallenges',
+                  'request',
+                  'nextStep',
+                  'sourceOfVerification',
+                  'linkToVerificationSource',
+                ]) ...[
+                  const SizedBox(height: 16),
+                  Text(l10n.text(key), style: const TextStyle(fontSize: 13)),
+                  const SizedBox(height: 10),
+                  Container(
+                    key: ValueKey('cdc-detail-$key'),
+                    width: double.infinity,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: AppColors.pageBackground(context),
+                      borderRadius: BorderRadius.circular(7),
+                      border: Border.all(
+                        color: AppColors.fieldBorder.withValues(
+                          alpha: AppColors.isDark(context) ? 0.15 : 1,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
               ],
             ],
           ),

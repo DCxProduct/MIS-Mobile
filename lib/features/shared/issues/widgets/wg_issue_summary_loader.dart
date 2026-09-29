@@ -9,10 +9,12 @@ class WgIssueSummaryLoader extends StatefulWidget {
     super.key,
     required this.builder,
     this.matrix = false,
+    this.cdcMatrix = false,
   });
 
   final Widget Function(WgIssueSummary) builder;
   final bool matrix;
+  final bool cdcMatrix;
 
   @override
   State<WgIssueSummaryLoader> createState() => _WgIssueSummaryLoaderState();
@@ -20,22 +22,26 @@ class WgIssueSummaryLoader extends StatefulWidget {
 
 class _WgIssueSummaryLoaderState extends State<WgIssueSummaryLoader> {
   Future<WgIssueSummary>? _request;
+  Future<WgIssueSummary> _load() {
+    final settings = AppSettings.of(context);
+    if (widget.cdcMatrix) return settings.cdcIssueMatrix.getSummary();
+    return widget.matrix
+        ? settings.issues.getIssueMatrixSummary()
+        : settings.issues.getMyWorkingGroupSummary();
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _request ??= widget.matrix
-        ? AppSettings.of(context).issues.getIssueMatrixSummary()
-        : AppSettings.of(context).issues.getMyWorkingGroupSummary();
+    _request ??= _load();
   }
 
   @override
   void didUpdateWidget(covariant WgIssueSummaryLoader oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.matrix != widget.matrix) {
-      _request = widget.matrix
-          ? AppSettings.of(context).issues.getIssueMatrixSummary()
-          : AppSettings.of(context).issues.getMyWorkingGroupSummary();
+    if (oldWidget.matrix != widget.matrix ||
+        oldWidget.cdcMatrix != widget.cdcMatrix) {
+      _request = _load();
     }
   }
 
@@ -56,9 +62,7 @@ class _WgIssueSummaryLoaderState extends State<WgIssueSummaryLoader> {
             Text(l10n.text('issuesSummaryLoadError')),
             TextButton(
               onPressed: () => setState(() {
-                _request = widget.matrix
-                    ? AppSettings.of(context).issues.getIssueMatrixSummary()
-                    : AppSettings.of(context).issues.getMyWorkingGroupSummary();
+                _request = _load();
               }),
               child: Text(l10n.text('retry')),
             ),

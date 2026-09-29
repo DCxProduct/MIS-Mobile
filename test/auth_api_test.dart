@@ -7,6 +7,59 @@ import 'package:gpsf_app/core/network/api_client.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 
 void main() {
+  for (final role in ['cdc', 'cefp']) {
+    test('$role credentials use API login and roles from auth/me', () async {
+      final requests = <String>[];
+      final api = ApiClient(
+        client: MockClient((request) async {
+          requests.add('${request.method} ${request.url.path}');
+          if (request.method == 'POST') {
+            expect(jsonDecode(request.body), {
+              'email': '$role@gmail.com',
+              'password': '12345678',
+            });
+            return http.Response(
+              '{"success":true,"data":{"user":{"id":3}}}',
+              200,
+            );
+          }
+          return http.Response(
+            jsonEncode({
+              'success': true,
+              'data': {
+                'user': {
+                  'id': role == 'cdc' ? 3 : 4,
+                  'email': '$role@gmail.com',
+                  'name': role.toUpperCase(),
+                  'position': '${role.toUpperCase()} Secretariat',
+                  'isActive': true,
+                  'roles': [
+                    {'id': 4, 'name': role},
+                  ],
+                  'permissions': [
+                    {
+                      'action': 'read',
+                      'subject': role == 'cdc'
+                          ? 'CdcIssueMatrix'
+                          : 'CefpIssueMatrix',
+                    },
+                  ],
+                },
+              },
+            }),
+            200,
+          );
+        }),
+      );
+      final auth = AuthRepository(api);
+      addTearDown(auth.dispose);
+      final user = await auth.login(' $role@gmail.com ', '12345678');
+      expect(auth.isStaticSession, isFalse);
+      expect(user.roles, [role]);
+      expect(user.id, role == 'cdc' ? 3 : 4);
+      expect(requests, ['POST /api/v1/auth/login', 'GET /api/v1/auth/me']);
+    });
+  }
   test(
     'login posts credentials then fetches the verified current user',
     () async {

@@ -2,8 +2,11 @@ import '../../../core/network/api_client.dart';
 import 'auth_user.dart';
 
 class AuthRepository {
-  AuthRepository(this._api);
+  AuthRepository(this._api, {this.enableDemoLogin = false});
   final ApiClient _api;
+
+  /// Explicit opt-in for fixture previews/tests. Normal app logins use the API.
+  final bool enableDemoLogin;
   AuthUser? _staticUser;
 
   bool get isStaticSession => _staticUser != null;
@@ -13,7 +16,8 @@ class AuthRepository {
 
   Future<AuthUser> login(String email, String password) async {
     final demoEmail = email.trim().toLowerCase();
-    if (demoEmail == 'cdc@gmail.com' || demoEmail == 'cefp@gmail.com') {
+    if (enableDemoLogin &&
+        (demoEmail == 'cdc@gmail.com' || demoEmail == 'cefp@gmail.com')) {
       clearSession();
       if (password != '12345678') {
         throw const ApiException(
@@ -35,7 +39,7 @@ class AuthRepository {
     try {
       await _api.post(
         'auth/login',
-        body: {'email': email, 'password': password},
+        body: {'email': demoEmail, 'password': password},
       );
       return await getCurrentUser();
     } catch (_) {

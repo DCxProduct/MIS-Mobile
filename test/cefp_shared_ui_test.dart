@@ -30,6 +30,7 @@ void main() {
             throw StateError('Sample navigation must not request API data');
           }),
         ),
+        enableDemoLogin: true,
       );
       final user = await auth.login('cefp@gmail.com', '12345678');
       final settings = AppSettingsController(authRepository: auth)

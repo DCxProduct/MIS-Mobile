@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'session_client.dart';
 
@@ -41,9 +42,33 @@ class ApiClient {
   Future<List<dynamic>> getList(String path) async =>
       await _request('GET', path, expectList: true) as List<dynamic>;
 
+  /// Retains top-level pagination metadata alongside an array of data.
+  Future<Map<String, dynamic>> getListPage(
+    String path, {
+    Map<String, String>? query,
+  }) async =>
+      await _request(
+            'GET',
+            path,
+            query: query,
+            expectList: true,
+            preserveEnvelope: true,
+          )
+          as Map<String, dynamic>;
+
   Future<void> postAction(String path, {Map<String, dynamic>? body}) async {
     await _request('POST', path, body: body, expectData: false);
   }
+
+  Future<Map<String, dynamic>> getObjectPage(
+    String path, {
+    Map<String, String>? query,
+  }) async =>
+      await _request('GET', path, query: query, preserveEnvelope: true)
+          as Map<String, dynamic>;
+
+  Future<Uint8List> getBytes(String path, {Map<String, String>? query}) async =>
+      await _request('GET', path, query: query, expectBytes: true) as Uint8List;
 
   Future<Object> _request(
     String method,
@@ -52,6 +77,8 @@ class ApiClient {
     Map<String, dynamic>? body,
     bool expectData = true,
     bool expectList = false,
+    bool preserveEnvelope = false,
+    bool expectBytes = false,
   }) async {
     if (path.startsWith('/') ||
         path.contains('..') ||
@@ -62,7 +89,9 @@ class ApiClient {
       method,
       _baseUri.resolve(path).replace(queryParameters: query),
     );
-    request.headers['Accept'] = 'application/json';
+    request.headers['Accept'] = expectBytes
+        ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        : 'application/json';
     if (body != null) {
       request.headers['Content-Type'] = 'application/json';
       request.body = jsonEncode(body);
@@ -93,6 +122,12 @@ class ApiClient {
           endpoint: path,
         );
       }
+      if (expectBytes) {
+        if (decoded != null || response.bodyBytes.isEmpty) {
+          throw const FormatException();
+        }
+        return response.bodyBytes;
+      }
       if (decoded == null || decoded['success'] != true) {
         throw const FormatException();
       }
@@ -100,10 +135,10 @@ class ApiClient {
       final data = decoded['data'];
       if (expectList) {
         if (data is! List) throw const FormatException();
-        return data;
+        return preserveEnvelope ? decoded : data;
       }
       if (data is! Map<String, dynamic>) throw const FormatException();
-      return data;
+      return preserveEnvelope ? decoded : data;
     } on TimeoutException {
       throw const ApiException('The request timed out. Please try again.');
     } on http.ClientException {
