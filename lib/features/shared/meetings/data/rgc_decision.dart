@@ -43,3 +43,48 @@ class RgcDecision {
     return links;
   }
 }
+
+class RgcDecisionScorecard {
+  const RgcDecisionScorecard({
+    required this.total,
+    required this.solved,
+    required this.inProgress,
+    required this.notAddressed,
+  });
+
+  final int total;
+  final int solved;
+  final int inProgress;
+  final int notAddressed;
+
+  factory RgcDecisionScorecard.fromJson(Map<String, dynamic> json) {
+    final total = _count(json['total']);
+    final statuses = json['byStatus'];
+    if (statuses is! List) throw const FormatException();
+
+    var solved = 0;
+    var inProgress = 0;
+    var notAddressed = 0;
+    for (final value in statuses) {
+      if (value is! Map<String, dynamic>) throw const FormatException();
+      final status = value['status'];
+      final count = _count(value['count']);
+      if (status == 'Solved') {
+        solved = count;
+      } else if (status == 'In Progress') {
+        inProgress = count;
+      } else if (status == 'Not Addressed') {
+        notAddressed = count;
+      }
+    }
+    return RgcDecisionScorecard(
+      total: total,
+      solved: solved,
+      inProgress: inProgress,
+      notAddressed: notAddressed,
+    );
+  }
+
+  static int _count(Object? value) =>
+      value is int && value >= 0 ? value : (throw const FormatException());
+}

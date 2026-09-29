@@ -49,6 +49,36 @@ void main() {
                     ).readAsStringSync()
                   : request.url.path == '/api/v1/dashboards/pswg/live'
                   ? File('test/fixtures/working_groups.json').readAsStringSync()
+                  : request.url.path == '/api/v1/rgc-decisions/scorecard'
+                  ? jsonEncode({
+                      'success': true,
+                      'data': {
+                        'total': 1,
+                        'byStatus': [
+                          {'status': 'Not Addressed', 'count': 1},
+                          {'status': 'In Progress', 'count': 0},
+                          {'status': 'Solved', 'count': 0},
+                        ],
+                      },
+                    })
+                  : request.url.path == '/api/v1/rgc-decisions'
+                  ? jsonEncode({
+                      'success': true,
+                      'data': {
+                        'items': [
+                          {
+                            'id': 1,
+                            'stakeholder': {'name': 'MAFF'},
+                            'category': 'Climate',
+                            'meetingDate': '2026-09-14T00:00:00.000Z',
+                            'status': 'Not Addressed',
+                            'statusCode': 'NOT_ADDRESSED',
+                            'focalPerson': 'H.E. Mr. DITH TINA',
+                            'verificationLink': 'https://example.com/verify',
+                          },
+                        ],
+                      },
+                    })
                   : jsonEncode({
                       'success': true,
                       'data': {
@@ -90,9 +120,9 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
     expect(settings.moduleType, AppModuleType.cdcSecretariat);
-    expect(find.text('179'), findsOneWidget);
-    expect(find.text('166/179'), findsOneWidget);
-    expect(find.text('(100)'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('1/2'), findsNWidgets(2));
+    expect(find.text('(2)'), findsOneWidget);
     expect(find.byType(AppBottomNavBar), findsOneWidget);
 
     await tester.tap(find.text('Agencies'));
@@ -107,9 +137,9 @@ void main() {
 
     await tester.tap(find.text('Categories'));
     await tester.pumpAndSettle();
-    expect(find.text('Human Resource'), findsOneWidget);
-    expect(find.text('Strategy'), findsOneWidget);
-    await tester.ensureVisible(find.text('Strategy'));
+    expect(find.text('General'), findsOneWidget);
+    expect(find.text('Market Access'), findsOneWidget);
+    await tester.ensureVisible(find.text('Market Access'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Meeting'));
@@ -124,8 +154,8 @@ void main() {
     await tester.tap(find.text('Issues'));
     await tester.pumpAndSettle();
     expect(find.text('WG Issues'), findsOneWidget);
-    expect(find.text('MPWT'), findsNWidgets(2));
-    expect(find.text('15/20'), findsOneWidget);
+    expect(find.text('MAFF'), findsOneWidget);
+    expect(find.text('0/1'), findsNWidgets(2));
     await tester.tap(find.text('View Details').first);
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.arrow_back));

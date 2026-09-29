@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
 import '../../../translations/app_localizations.dart';
+import '../../shared/dashboard/widgets/pswg_live_dashboard.dart';
 
 class CdcSecretariatOverallTab extends StatelessWidget {
   const CdcSecretariatOverallTab({super.key});
@@ -12,6 +13,7 @@ class CdcSecretariatOverallTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cards = PswgDataScope.maybeOf(context)?.cards;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 5, 18, 16),
@@ -27,28 +29,30 @@ class CdcSecretariatOverallTab extends StatelessWidget {
           SizedBox(
             width: 320,
             height: 195,
-            child: CustomPaint(painter: _DonutChartPainter(isDark: isDark)),
+            child: CustomPaint(
+              painter: _DonutChartPainter(isDark: isDark, cards: cards),
+            ),
           ),
           const SizedBox(height: 2),
           _ChartLegendRow(
             color: isDark ? AppColors.darkPrimary : const Color(0xFF2D7DBF),
             label: l10n.text('totalIssues'),
-            value: '(100)',
+            value: '(${cards?['totalIssues'] ?? 100})',
           ),
           _ChartLegendRow(
             color: const Color(0xFF009F5C),
             label: l10n.text('solved'),
-            value: '(67)',
+            value: '(${cards?['solved'] ?? 67})',
           ),
           _ChartLegendRow(
             color: const Color(0xFFE8A61A),
             label: l10n.text('inProgress'),
-            value: '(23)',
+            value: '(${cards?['inProgress'] ?? 23})',
           ),
           _ChartLegendRow(
             color: const Color(0xFFFF3B30),
             label: l10n.text('notAddressed'),
-            value: '(10)',
+            value: '(${cards?['notAddressed'] ?? 10})',
           ),
         ],
       ),
@@ -57,9 +61,10 @@ class CdcSecretariatOverallTab extends StatelessWidget {
 }
 
 class _DonutChartPainter extends CustomPainter {
-  const _DonutChartPainter({required this.isDark});
+  const _DonutChartPainter({required this.isDark, this.cards});
 
   final bool isDark;
+  final Map<String, int?>? cards;
 
   static const double _cornerRadius = 6;
 
@@ -72,26 +77,55 @@ class _DonutChartPainter extends CustomPainter {
 
     var startAngle = -math.pi * 0.15;
 
-    final segments = [
-      (
-        percent: 0.67,
-        color: const Color(0xFF009F5C),
-        label: '67%',
-        offset: const Offset(90, 52),
-      ),
-      (
-        percent: 0.10,
-        color: const Color(0xFFFF3B30),
-        label: '10%',
-        offset: const Offset(-100, 0),
-      ),
-      (
-        percent: 0.23,
-        color: const Color(0xFFE8A61A),
-        label: '23%',
-        offset: const Offset(60, -78),
-      ),
-    ];
+    final total = cards?['totalIssues'] ?? 0;
+    final segments = cards == null
+        ? [
+            (
+              percent: 0.67,
+              color: const Color(0xFF009F5C),
+              label: '67%',
+              offset: const Offset(90, 52),
+            ),
+            (
+              percent: 0.10,
+              color: const Color(0xFFFF3B30),
+              label: '10%',
+              offset: const Offset(-100, 0),
+            ),
+            (
+              percent: 0.23,
+              color: const Color(0xFFE8A61A),
+              label: '23%',
+              offset: const Offset(60, -78),
+            ),
+          ]
+        : [
+            for (final item in [
+              (
+                key: 'solved',
+                color: const Color(0xFF009F5C),
+                offset: const Offset(90, 52),
+              ),
+              (
+                key: 'notAddressed',
+                color: const Color(0xFFFF3B30),
+                offset: const Offset(-100, 0),
+              ),
+              (
+                key: 'inProgress',
+                color: const Color(0xFFE8A61A),
+                offset: const Offset(60, -78),
+              ),
+            ])
+              if (total > 0 && (cards![item.key] ?? 0) > 0)
+                (
+                  percent: cards![item.key]! / total,
+                  color: item.color,
+                  label:
+                      '${(100 * cards![item.key]! / total).toStringAsFixed(1)}%',
+                  offset: item.offset,
+                ),
+          ];
 
     for (final segment in segments) {
       final sweep = segment.percent * math.pi * 2;
@@ -116,7 +150,7 @@ class _DonutChartPainter extends CustomPainter {
       startAngle += sweep;
     }
 
-    _drawCenterLabel(canvas, center);
+    _drawCenterLabel(canvas, center, total == 0 ? 100 : total);
 
     for (final segment in segments) {
       _drawPercentChip(
@@ -261,7 +295,7 @@ class _DonutChartPainter extends CustomPainter {
     );
   }
 
-  void _drawCenterLabel(Canvas canvas, Offset center) {
+  void _drawCenterLabel(Canvas canvas, Offset center, int total) {
     final painter = TextPainter(
       textAlign: TextAlign.center,
       text: TextSpan(
@@ -276,7 +310,7 @@ class _DonutChartPainter extends CustomPainter {
             ),
           ),
           TextSpan(
-            text: '100',
+            text: '$total',
             style: TextStyle(
               color: isDark ? Colors.white : AppColors.text,
               fontSize: 16,
@@ -297,7 +331,7 @@ class _DonutChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DonutChartPainter oldDelegate) =>
-      oldDelegate.isDark != isDark;
+      oldDelegate.isDark != isDark || oldDelegate.cards != cards;
 }
 
 class _ChartLegendRow extends StatelessWidget {

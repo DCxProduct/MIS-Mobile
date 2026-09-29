@@ -214,6 +214,9 @@ class DashboardPageState extends State<DashboardPage> {
         builder: _buildContent,
       );
     }
+    if (module == AppModuleType.cdcSecretariat) {
+      return PswgDataLoader(builder: _buildContent);
+    }
     if (_selectedStatusTab == 2) {
       return PswgDataLoader(builder: _buildContent);
     }

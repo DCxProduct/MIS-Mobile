@@ -6,6 +6,17 @@ class RgcDecisionsRepository {
 
   final ApiClient _api;
 
+  Future<RgcDecisionScorecard> getScorecard() async {
+    final data = await _api.get('rgc-decisions/scorecard');
+    try {
+      return RgcDecisionScorecard.fromJson(data);
+    } on FormatException {
+      throw const ApiException(
+        'The server returned invalid RGC scorecard data.',
+      );
+    }
+  }
+
   Future<List<RgcDecision>> getDecisions() async {
     final data = await _api.get('rgc-decisions');
     try {

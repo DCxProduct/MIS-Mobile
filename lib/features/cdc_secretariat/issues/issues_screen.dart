@@ -3,6 +3,8 @@ import '../../shared/issues/widgets/wg_issues_list.dart';
 import '../../shared/issues/widgets/issue_display.dart';
 import '../../shared/issues/data/wg_issue_summary.dart';
 import '../../shared/issues/widgets/wg_issue_summary_loader.dart';
+import '../../shared/meetings/data/rgc_decision.dart';
+import '../../shared/meetings/widgets/rgc_decisions_loader.dart';
 import 'package:flutter/material.dart';
 import '../../../core/app_colors.dart';
 import '../../../translations/app_localizations.dart';
@@ -122,7 +124,10 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
               children: [
                 _tab == 0
-                    ? const _IssueMetricGrid()
+                    ? RgcDecisionScorecardLoader(
+                        builder: (scorecard) =>
+                            _IssueMetricGrid(scorecard: scorecard),
+                      )
                     : WgIssueSummaryLoader(
                         matrix: true,
                         builder: (summary) =>
@@ -130,13 +135,13 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
                       ),
                 const SizedBox(height: 16),
                 if (_tab == 0) ...[
-                  const _DecisionCard(
-                    date: 'Nov 13, 2023',
-                    status: _IssueCardStatus.inProgress,
-                  ),
-                  const _DecisionCard(
-                    date: 'Apr 28, 2025',
-                    status: _IssueCardStatus.solved,
+                  RgcDecisionsLoader(
+                    builder: (decisions) => Column(
+                      children: [
+                        for (final decision in decisions)
+                          _DecisionCard(decision: decision),
+                      ],
+                    ),
                   ),
                 ] else ...[
                   WgIssuesList(
@@ -155,19 +160,24 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
 }
 
 class _DecisionCard extends StatelessWidget {
-  const _DecisionCard({required this.date, required this.status});
+  const _DecisionCard({required this.decision});
 
-  final String date;
-  final _IssueCardStatus status;
+  final RgcDecision decision;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     void openDetails() => Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => const RgcDecisionDetailScreen(agencyName: 'MPWT'),
+        builder: (_) =>
+            RgcDecisionDetailScreen(agencyName: decision.agencyName),
       ),
     );
+    final status = switch (decision.statusCode.toUpperCase()) {
+      'SOLVED' => _IssueCardStatus.solved,
+      'IN_PROGRESS' => _IssueCardStatus.inProgress,
+      _ => _IssueCardStatus.notAddressed,
+    };
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(15),
@@ -195,15 +205,24 @@ class _DecisionCard extends StatelessWidget {
               ),
               const SizedBox(width: 7),
               Expanded(
-                child: const Text('MPWT', style: TextStyle(fontSize: 13)),
+                child: Text(
+                  decision.agencyName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 13),
+                ),
               ),
               _IssueStatusBadge(status: status),
             ],
           ),
           const SizedBox(height: 12),
-          _row(context, l10n.text('meetingDate'), date),
-          _row(context, l10n.text('categories'), 'Legislation'),
-          _row(context, l10n.text('focalPersonHE'), 'Peng Ponea'),
+          _row(
+            context,
+            l10n.text('meetingDate'),
+            _formatDate(decision.meetingDate),
+          ),
+          _row(context, l10n.text('categories'), decision.category),
+          _row(context, l10n.text('focalPersonHE'), decision.focalPerson),
           Align(
             alignment: Alignment.centerLeft,
             child: Container(
@@ -218,7 +237,7 @@ class _DecisionCard extends StatelessWidget {
                   const Icon(Icons.link, size: 14),
                   const SizedBox(width: 5),
                   Text(
-                    l10n.text('twoLinks'),
+                    '${decision.linkCount} ${l10n.text('linksLabel')}',
                     style: const TextStyle(fontSize: 12),
                   ),
                 ],
@@ -281,6 +300,11 @@ class _DecisionCard extends StatelessWidget {
       ],
     ),
   );
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return '—';
+    return '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}/${date.year}';
+  }
 }
 
 class _IssueTabs extends StatelessWidget {
@@ -361,9 +385,10 @@ class _IssueTabs extends StatelessWidget {
 }
 
 class _IssueMetricGrid extends StatelessWidget {
-  const _IssueMetricGrid({this.summary});
+  const _IssueMetricGrid({this.summary, this.scorecard});
 
   final WgIssueSummary? summary;
+  final RgcDecisionScorecard? scorecard;
 
   @override
   Widget build(BuildContext context) {
@@ -380,31 +405,39 @@ class _IssueMetricGrid extends StatelessWidget {
       children: [
         _IssueMetricCard(
           label: l10n.text('totalIssues'),
-          value: summary == null ? '20' : '${summary!.totalIssues}',
+          value: scorecard == null
+              ? (summary == null ? '20' : '${summary!.totalIssues}')
+              : '${scorecard!.total}',
           background: const Color(0xFFDDEEFF),
           icon: Icons.library_books_outlined,
         ),
         _IssueMetricCard(
           label: l10n.text('solved'),
-          value: summary == null
-              ? '15/20'
-              : '${summary!.solved}/${summary!.totalIssues}',
+          value: scorecard == null
+              ? (summary == null
+                    ? '15/20'
+                    : '${summary!.solved}/${summary!.totalIssues}')
+              : '${scorecard!.solved}/${scorecard!.total}',
           background: const Color(0xFFE5FAEF),
           icon: Icons.fact_check_outlined,
         ),
         _IssueMetricCard(
           label: l10n.text('inProgress'),
-          value: summary == null
-              ? '4/20'
-              : '${summary!.inProgress}/${summary!.totalIssues}',
+          value: scorecard == null
+              ? (summary == null
+                    ? '4/20'
+                    : '${summary!.inProgress}/${summary!.totalIssues}')
+              : '${scorecard!.inProgress}/${scorecard!.total}',
           background: const Color(0xFFFFF8DC),
           icon: Icons.add_box_outlined,
         ),
         _IssueMetricCard(
           label: l10n.text('notAddressed'),
-          value: summary == null
-              ? '1/20'
-              : '${summary!.notAddressed}/${summary!.totalIssues}',
+          value: scorecard == null
+              ? (summary == null
+                    ? '1/20'
+                    : '${summary!.notAddressed}/${summary!.totalIssues}')
+              : '${scorecard!.notAddressed}/${scorecard!.total}',
           background: const Color(0xFFFFEEEE),
           icon: Icons.assignment_late_outlined,
         ),
