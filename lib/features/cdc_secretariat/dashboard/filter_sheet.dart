@@ -22,10 +22,14 @@ class CdcDashboardFilterSheet extends StatefulWidget {
     super.key,
     required this.initial,
     this.groups,
+    this.reportLayout = false,
+    this.issueLayout = false,
   });
 
   final CdcDashboardFilters initial;
   final Map<String, List<String>>? groups;
+  final bool reportLayout;
+  final bool issueLayout;
 
   @override
   State<CdcDashboardFilterSheet> createState() =>
@@ -119,7 +123,8 @@ class _CdcDashboardFilterSheetState extends State<CdcDashboardFilterSheet> {
                 child: ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                   itemCount: _visibleGroups.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 18),
+                  separatorBuilder: (_, _) =>
+                      SizedBox(height: widget.issueLayout ? 14 : 18),
                   itemBuilder: (context, index) =>
                       _section(_visibleGroups.keys.elementAt(index)),
                 ),
@@ -141,7 +146,7 @@ class _CdcDashboardFilterSheetState extends State<CdcDashboardFilterSheet> {
                 ),
                 child: SizedBox(
                   width: double.infinity,
-                  height: 50,
+                  height: widget.issueLayout ? 46 : 50,
                   child: FilledButton(
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF2167AA),
@@ -174,6 +179,8 @@ class _CdcDashboardFilterSheetState extends State<CdcDashboardFilterSheet> {
     final limit = switch (group) {
       'primaryAgency' => 10,
       'workingGroup' => 5,
+      'measureCategory' => 5,
+      'dateOfDecision' => 4,
       'categories' => 4,
       _ => items.length,
     };
@@ -181,9 +188,13 @@ class _CdcDashboardFilterSheetState extends State<CdcDashboardFilterSheet> {
     final visible = (expanded ? items : items.take(limit)).toList();
     final columns = switch (group) {
       'workingGroup' => 1,
+      'measureCategory' => 1,
+      'plenary' || 'dateOfDecision' => 2,
       'categories' => 2,
-      'year' || 'progressReport' => 4,
-      'primaryAgency' => 5,
+      'year' => 4,
+      'progressReport' => items.length == 2 ? 3 : 4,
+      'primaryAgency' || 'allPswgs' => 5,
+      'plenaryEscalation' => 2,
       _ => 3,
     };
     return Column(
@@ -195,7 +206,7 @@ class _CdcDashboardFilterSheetState extends State<CdcDashboardFilterSheet> {
             color: Theme.of(context).brightness == Brightness.dark
                 ? AppColors.primaryText(context)
                 : const Color(0xFF141519),
-            fontSize: 14,
+            fontSize: widget.issueLayout ? 13 : 14,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -206,7 +217,9 @@ class _CdcDashboardFilterSheetState extends State<CdcDashboardFilterSheet> {
               children: [
                 for (final item in visible)
                   SizedBox(
-                    width: constraints.maxWidth / columns,
+                    width: widget.issueLayout && group == 'plenaryEscalation'
+                        ? constraints.maxWidth / 4.4
+                        : constraints.maxWidth / columns,
                     child: _option(group, item),
                   ),
               ],
@@ -216,6 +229,7 @@ class _CdcDashboardFilterSheetState extends State<CdcDashboardFilterSheet> {
         if (items.length > limit)
           Center(
             child: TextButton(
+              key: ValueKey('filter-expand-$group'),
               style: TextButton.styleFrom(
                 foregroundColor: Theme.of(context).brightness == Brightness.dark
                     ? AppColors.accent(context)
@@ -269,8 +283,8 @@ class _CdcDashboardFilterSheetState extends State<CdcDashboardFilterSheet> {
             child: Row(
               children: [
                 Container(
-                  width: 16,
-                  height: 16,
+                  width: widget.issueLayout ? 15 : 16,
+                  height: widget.issueLayout ? 15 : 16,
                   decoration: BoxDecoration(
                     color: selected
                         ? const Color(0xFF2167AA)
@@ -288,15 +302,19 @@ class _CdcDashboardFilterSheetState extends State<CdcDashboardFilterSheet> {
                       ? const Icon(Icons.check, size: 12, color: Colors.white)
                       : null,
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: widget.issueLayout ? 8 : 10),
                 Expanded(
                   child: Text(
                     _label(item),
                     style: TextStyle(
                       color: isDark
                           ? AppColors.secondaryText(context)
+                          : widget.reportLayout || widget.issueLayout
+                          ? const Color(0xFF707887)
                           : const Color(0xFF1D1D1E),
-                      fontSize: 13,
+                      fontSize: widget.reportLayout || widget.issueLayout
+                          ? 12
+                          : 13,
                       height: 1.3,
                       fontWeight: FontWeight.w400,
                     ),

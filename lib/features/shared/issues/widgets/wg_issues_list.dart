@@ -9,10 +9,12 @@ class WgIssuesList extends StatefulWidget {
     required this.itemBuilder,
     this.query = '',
     this.matrix = false,
+    this.filter,
   });
   final Widget Function(WorkingGroupIssue) itemBuilder;
   final String query;
   final bool matrix;
+  final bool Function(WorkingGroupIssue issue)? filter;
   @override
   State<WgIssuesList> createState() => _WgIssuesListState();
 }
@@ -67,10 +69,11 @@ class _WgIssuesListState extends State<WgIssuesList> {
       final items = snapshot.data!
           .where(
             (issue) =>
-                query.isEmpty ||
-                '${issue.title} ${issue.category} ${issue.description}'
-                    .toLowerCase()
-                    .contains(query),
+                (widget.filter?.call(issue) ?? true) &&
+                (query.isEmpty ||
+                    '${issue.title} ${issue.category} ${issue.description}'
+                        .toLowerCase()
+                        .contains(query)),
           )
           .toList();
       if (items.isEmpty) {

@@ -7,6 +7,7 @@ import '../../../translations/app_localizations.dart';
 import '../dashboard/filter_sheet.dart';
 import 'agencies_tab.dart';
 import 'categories_tab.dart';
+import 'report_filter_sheet.dart';
 
 class CdcSecretariatReportsScreenView extends StatefulWidget {
   const CdcSecretariatReportsScreenView({super.key});
@@ -22,15 +23,17 @@ class _CdcReportsState extends State<CdcSecretariatReportsScreenView> {
     final result = await Navigator.of(context).push<CdcDashboardFilters>(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (_) => CdcDashboardFilterSheet(
-          initial: _filters[tab],
-          groups: tab == 1
-              ? const {
-                  'status': ['Sent', 'Draft'],
-                  'year': ['2026', '2025', '2024', '2023'],
-                }
-              : null,
-        ),
+        builder: (_) => tab != 1
+            ? CdcReportFilterSheet(initial: _filters[tab])
+            : CdcDashboardFilterSheet(
+                initial: _filters[tab],
+                groups: tab == 1
+                    ? const {
+                        'status': ['Sent', 'Draft'],
+                        'year': ['2026', '2025', '2024', '2023'],
+                      }
+                    : null,
+              ),
       ),
     );
     if (!mounted || result == null) return;

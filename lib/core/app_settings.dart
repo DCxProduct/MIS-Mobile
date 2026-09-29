@@ -1,3 +1,4 @@
+import 'config/module_repositories.dart';
 import 'package:flutter/material.dart';
 import '../features/shared/meetings/data/meetings_repository.dart';
 
@@ -16,27 +17,31 @@ import '../features/shared/meetings/data/plenaries_repository.dart';
 import '../features/shared/meetings/data/rgc_decisions_repository.dart';
 
 class AppSettingsController extends ChangeNotifier {
-  AppSettingsController({AuthRepository? authRepository})
-    : auth = authRepository ?? AuthRepository(ApiClient());
+  AppSettingsController({
+    AuthRepository? authRepository,
+    Map<AppModuleType, ModuleRepositories> moduleRepositories = const {},
+  }) : auth = authRepository ?? AuthRepository(ApiClient()),
+       _moduleRepositories = Map.unmodifiable(moduleRepositories);
 
   final AuthRepository auth;
-  late final DashboardRepository dashboard = DashboardRepository(
-    auth.apiClient,
+  final Map<AppModuleType, ModuleRepositories> _moduleRepositories;
+  late final ModuleRepositories _defaultRepositories = ModuleRepositories(
+    apiClient: auth.apiClient,
   );
-  late final IssuesRepository issues = IssuesRepository(auth.apiClient);
-  late final MeetingRequestsRepository meetingRequests =
-      MeetingRequestsRepository(auth.apiClient);
-  late final MeetingsRepository meetings = MeetingsRepository(auth.apiClient);
-  late final MeetingSummariesRepository meetingSummaries =
-      MeetingSummariesRepository(auth.apiClient);
-  late final ProgressReportsRepository progressReports =
-      ProgressReportsRepository(auth.apiClient);
-  late final PlenariesRepository plenaries = PlenariesRepository(
-    auth.apiClient,
-  );
-  late final RgcDecisionsRepository rgcDecisions = RgcDecisionsRepository(
-    auth.apiClient,
-  );
+  ModuleRepositories get _repositories =>
+      _moduleRepositories[moduleType] ?? _defaultRepositories;
+
+  DashboardRepository get dashboard => _repositories.dashboard;
+  IssuesRepository get issues => _repositories.issues;
+  MeetingRequestsRepository get meetingRequests =>
+      _repositories.meetingRequests;
+  MeetingsRepository get meetings => _repositories.meetings;
+  MeetingSummariesRepository get meetingSummaries =>
+      _repositories.meetingSummaries;
+  ProgressReportsRepository get progressReports =>
+      _repositories.progressReports;
+  PlenariesRepository get plenaries => _repositories.plenaries;
+  RgcDecisionsRepository get rgcDecisions => _repositories.rgcDecisions;
   AuthUser? currentUser;
 
   void setCurrentUser(AuthUser user) {

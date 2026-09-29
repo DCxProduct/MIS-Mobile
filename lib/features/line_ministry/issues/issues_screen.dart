@@ -10,6 +10,9 @@ import '../../../core/app_colors.dart';
 import '../../../core/widgets/pdf_attachment_preview.dart';
 import '../../../screens/issues/issue_detail_screen.dart';
 import '../../../translations/app_localizations.dart';
+import '../../cdc_secretariat/dashboard/filter_sheet.dart';
+
+import '../../cdc_secretariat/issues/issue_filter_sheet.dart';
 
 class LineMinistryIssuesScreenView extends StatefulWidget {
   const LineMinistryIssuesScreenView({
@@ -47,7 +50,7 @@ class _LineMinistryIssuesScreenViewState
   Set<String> _selectedProgressReports = {};
 
   Future<void> _openFilterSheet(BuildContext context) async {
-    if (widget.staticPreview) {
+    if (widget.staticPreview || widget.issueDetailBuilder != null) {
       await _openPreviewFilters(context);
       return;
     }
@@ -77,87 +80,22 @@ class _LineMinistryIssuesScreenViewState
   }
 
   Future<void> _openPreviewFilters(BuildContext context) async {
-    final years = {..._selectedYears};
-    final statuses = {..._selectedStatuses};
-    final l10n = AppLocalizations.of(context);
-    final applied = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (sheetContext) => StatefulBuilder(
-        builder: (sheetContext, updateSheet) => Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.text('filter'),
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 16),
-              Text(l10n.text('year')),
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (final year in ['2025', '2024', '2023'])
-                    FilterChip(
-                      label: Text(year),
-                      selected: years.contains(year),
-                      onSelected: (selected) => updateSheet(() {
-                        selected ? years.add(year) : years.remove(year);
-                      }),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(l10n.text('status')),
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (final entry in {
-                    'In Progress': 'inProgress',
-                    'Solved': 'solved',
-                    'Not Addressed': 'notAddressed',
-                  }.entries)
-                    FilterChip(
-                      label: Text(l10n.text(entry.value)),
-                      selected: statuses.contains(entry.key),
-                      onSelected: (selected) => updateSheet(() {
-                        selected
-                            ? statuses.add(entry.key)
-                            : statuses.remove(entry.key);
-                      }),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => updateSheet(() {
-                      years.clear();
-                      statuses.clear();
-                    }),
-                    child: Text(l10n.text('resetFilters')),
-                  ),
-                  const SizedBox(width: 8),
-                  FilledButton(
-                    onPressed: () => Navigator.pop(sheetContext, true),
-                    child: Text(l10n.text('apply')),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+    final initial = CdcDashboardFilters({
+      'allPswgs': {..._selectedAgencies},
+      'year': {..._selectedYears},
+      'plenaryEscalation': {..._selectedProgressReports},
+    });
+    final result = await Navigator.of(context).push<CdcDashboardFilters>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => CdcIssueFilterSheet(initial: initial),
       ),
     );
-    if (!mounted || applied != true) return;
+    if (!mounted || result == null) return;
     setState(() {
-      _selectedYears = years;
-      _selectedStatuses = statuses;
+      _selectedAgencies = {...?result.values['allPswgs']};
+      _selectedYears = {...?result.values['year']};
+      _selectedProgressReports = {...?result.values['plenaryEscalation']};
     });
   }
 

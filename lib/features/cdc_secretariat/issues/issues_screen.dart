@@ -10,6 +10,8 @@ import '../../../screens/report/rgc_decision_detail_screen.dart';
 import '../../private_sector/issues/issue_detail_screen.dart';
 import '../dashboard/filter_sheet.dart';
 
+import 'issue_filter_sheet.dart';
+
 class CdcSecretariatIssuesScreenView extends StatefulWidget {
   const CdcSecretariatIssuesScreenView({super.key});
 
@@ -21,10 +23,28 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
   int _tab = 0;
   CdcDashboardFilters _filters = CdcDashboardFilters();
 
+  bool _matchesIssue(WorkingGroupIssue issue) {
+    bool includes(String group, String value) {
+      final selected = _filters.values[group];
+      return selected == null || selected.isEmpty || selected.contains(value);
+    }
+
+    final date = issue.meetingDate ?? issue.createdAt;
+    final year = date == null ? '' : '${date.year}';
+    final pswg = '${issue.agency} ${issue.submittedBy} ${issue.title}'
+        .toLowerCase();
+    final pswgSelected = _filters.values['allPswgs'];
+    final matchesPswg =
+        pswgSelected == null ||
+        pswgSelected.isEmpty ||
+        pswgSelected.any((value) => pswg.contains(value.toLowerCase()));
+    return matchesPswg && includes('year', year);
+  }
+
   Future<void> _openFilters() async {
     final result = await Navigator.of(context).push<CdcDashboardFilters>(
       MaterialPageRoute(
-        builder: (_) => CdcDashboardFilterSheet(initial: _filters),
+        builder: (_) => CdcIssueFilterSheet(initial: _filters),
         fullscreenDialog: true,
       ),
     );
@@ -121,6 +141,7 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
                 ] else ...[
                   WgIssuesList(
                     matrix: true,
+                    filter: _matchesIssue,
                     itemBuilder: (issue) => _IssueCard(issue: issue),
                   ),
                 ],

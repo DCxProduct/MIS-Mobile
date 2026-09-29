@@ -29,7 +29,7 @@ import '../../cdc_section/reports/reports_screen.dart';
 
 import '../../cefp/dashboard/dashboard_screen.dart';
 import '../../cefp/issues/issues_screen.dart';
-import '../../cefp/meetings/meeting_screen.dart';
+import '../../cefp/issues/cdc_issues_matrix_screen.dart';
 import '../../cefp/profile/profile_screen.dart';
 import '../../cefp/reports/reports_screen.dart';
 
@@ -88,7 +88,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       },
       AppModuleType.cefp => switch (index) {
         0 => const CefpDashboardScreenView(),
-        1 => const CefpMeetingScreenView(),
+        1 => const CefpIssuesMatrixScreen(),
         2 => const CefpIssuesScreenView(),
         3 => const CefpReportsScreenView(),
         _ => const CefpProfileScreenView(),
@@ -135,7 +135,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       child: Scaffold(
         backgroundColor: background,
-        extendBody: true,
+        extendBody:
+            !(_selectedIndex == 0 &&
+                (moduleType == AppModuleType.cdcSection ||
+                    moduleType == AppModuleType.cefp)),
         body: body,
         bottomNavigationBar: AppBottomNavBar(
           selectedIndex: _selectedIndex,
@@ -247,13 +250,17 @@ class DashboardPageState extends State<DashboardPage> {
                     if (moduleType == AppModuleType.privateSector)
                       Row(
                         children: [
-                          _ScopeSelector(
-                            selectedIndex: _selectedScopeTab,
-                            onSelected: (index) {
-                              setState(() => _selectedScopeTab = index);
-                            },
+                          Expanded(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: _ScopeSelector(
+                                selectedIndex: _selectedScopeTab,
+                                onSelected: (index) {
+                                  setState(() => _selectedScopeTab = index);
+                                },
+                              ),
+                            ),
                           ),
-                          const Spacer(),
                           _FilterBar(
                             onTap: () => _openFilterSheet(context),
                             activeCount:

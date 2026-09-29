@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../private_sector/meetings/meeting_screen.dart';
+import '../../cdc_section/meetings/meeting_screen.dart';
 
 class CefpMeetingScreenView extends StatelessWidget {
   const CefpMeetingScreenView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MeetingScreen();
+    return const CdcSectionMeetingScreenView();
   }
 }

@@ -88,6 +88,51 @@ void main() {
     await tester.pumpAndSettle();
     expect(settings.moduleType, AppModuleType.cdcSection);
     expect(find.byType(CdcSectionDashboardScreenView), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('cdc-dashboard-main-1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Filter'));
+    await tester.pumpAndSettle();
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(find.text('Progress Report'), findsOneWidget);
+    expect(find.text('S1 2025'), findsOneWidget);
+    expect(find.text('S2 2025'), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const ValueKey('filter-year-2026')));
+    await tester.tap(find.byKey(const ValueKey('filter-year-2026')));
+    await tester.tap(find.text('Apply Filters'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Filter (1)'));
+    await tester.pumpAndSettle();
+    final selectedYear = tester.widget<Semantics>(
+      find
+          .ancestor(
+            of: find.byKey(const ValueKey('filter-year-2026')),
+            matching: find.byType(Semantics),
+          )
+          .first,
+    );
+    expect(selectedYear.properties.checked, isTrue);
+    await tester.tap(find.byIcon(Icons.close_rounded));
+    await tester.pumpAndSettle();
+    final dashboardScroll = find
+        .descendant(
+          of: find.byKey(const ValueKey('cdc-dashboard-scroll')),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    await tester.scrollUntilVisible(
+      find.text('Categories'),
+      150,
+      scrollable: dashboardScroll,
+    );
+    await tester.tap(find.text('Categories'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Strategy'),
+      150,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Government'), findsOneWidget);
+    expect(tester.takeException(), isNull);
     await tester.tap(find.text('CDC Issues'));
     await tester.pumpAndSettle();
     expect(find.text('CDC Issues Matrix'), findsOneWidget);
@@ -129,15 +174,19 @@ void main() {
     expect(find.text('CDC Issues Matrix'), findsOneWidget);
     await tester.tap(find.text('Filter'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilterChip, 'Solved'));
-    await tester.tap(find.text('Apply'));
+    expect(find.text('All PSWGs'), findsOneWidget);
+    expect(find.text('Plenary Escalation'), findsOneWidget);
+    expect(find.byType(FilterChip), findsNothing);
+    expect(find.byType(BottomSheet), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('filter-year-2024')));
+    await tester.tap(find.text('Apply Filters'));
     await tester.pumpAndSettle();
     expect(find.text('Joint Inspection'), findsNothing);
     expect(find.text('No issues found.'), findsOneWidget);
     await tester.tap(find.text('Filter'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Reset'));
-    await tester.tap(find.text('Apply'));
+    await tester.tap(find.byKey(const ValueKey('filter-year-2024')));
+    await tester.tap(find.text('Apply Filters'));
     await tester.pumpAndSettle();
     expect(find.text('Joint Inspection'), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);

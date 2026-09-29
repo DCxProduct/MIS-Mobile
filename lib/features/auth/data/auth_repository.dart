@@ -12,7 +12,8 @@ class AuthRepository {
   ApiClient get apiClient => _api;
 
   Future<AuthUser> login(String email, String password) async {
-    if (email.trim().toLowerCase() == 'cdc@gmail.com') {
+    final demoEmail = email.trim().toLowerCase();
+    if (demoEmail == 'cdc@gmail.com' || demoEmail == 'cefp@gmail.com') {
       clearSession();
       if (password != '12345678') {
         throw const ApiException(
@@ -21,12 +22,13 @@ class AuthRepository {
           endpoint: 'auth/login',
         );
       }
-      return _staticUser = const AuthUser(
+      final isCefp = demoEmail == 'cefp@gmail.com';
+      return _staticUser = AuthUser(
         id: 0,
-        email: 'cdc@gmail.com',
-        name: 'CDC Section',
+        email: demoEmail,
+        name: isCefp ? 'CEFP' : 'CDC Section',
         isActive: true,
-        roles: ['cdc_section'],
+        roles: [isCefp ? 'cefp' : 'cdc_section'],
       );
     }
     _staticUser = null;

@@ -20,7 +20,9 @@ class AppBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final moduleType = AppSettings.of(context).moduleType;
-    final isCdcSection = moduleType == AppModuleType.cdcSection;
+    final isCdcSection =
+        moduleType == AppModuleType.cdcSection ||
+        moduleType == AppModuleType.cefp;
 
     final items = [
       (icon: Icons.grid_view_rounded, label: l10n.text('dashboard')),
@@ -28,7 +30,11 @@ class AppBottomNavBar extends StatelessWidget {
         icon: isCdcSection
             ? Icons.description_outlined
             : Icons.calendar_month_outlined,
-        label: isCdcSection ? l10n.text('cdcIssues') : l10n.text('meeting'),
+        label: isCdcSection
+            ? l10n.text(
+                moduleType == AppModuleType.cefp ? 'cefpIssues' : 'cdcIssues',
+              )
+            : l10n.text('meeting'),
       ),
       (icon: Icons.assignment_outlined, label: l10n.text('issues')),
       (icon: Icons.folder_outlined, label: l10n.text('report')),
