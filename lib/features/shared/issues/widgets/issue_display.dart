@@ -11,6 +11,17 @@ String issueDateWithYear(BuildContext context, DateTime? date) {
   final l10n = MaterialLocalizations.of(context);
   return '${l10n.formatMediumDate(date)} ${l10n.formatYear(date)}';
 }
+
+String issueDateWithTime(BuildContext context, DateTime? date) {
+  if (date == null) return '—';
+  final localizations = MaterialLocalizations.of(context);
+  final time = localizations.formatTimeOfDay(
+    TimeOfDay.fromDateTime(date),
+    alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+  );
+  return '${issueDateWithYear(context, date)} | $time';
+}
+
 String issueStatusLabel(BuildContext context, WorkingGroupIssue issue) {
   final key = switch (issue.statusCode.toUpperCase()) {
     'SOLVED' => 'solved',

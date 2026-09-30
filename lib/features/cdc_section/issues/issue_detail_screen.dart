@@ -5,6 +5,7 @@ import '../../../core/app_colors.dart';
 import '../../../core/widgets/pdf_attachment_preview.dart';
 import '../../../translations/app_localizations.dart';
 import '../../shared/issues/data/working_group_issue.dart';
+import '../../shared/issues/data/issue_progress_report.dart';
 import '../../shared/issues/widgets/issue_display.dart';
 import 'progress_report_card.dart';
 
@@ -15,12 +16,14 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
     required this.category,
     this.issue,
     this.generalIssue = false,
+    this.progressReportsFallback,
   });
 
   final String title;
   final String category;
   final WorkingGroupIssue? issue;
   final bool generalIssue;
+  final List<IssueProgressReport>? progressReportsFallback;
 
   static const _description =
       'The private sector said that the Economic Land Concession (ELCs), which invest in rubber, cashew, plantations, etc., are now fully developed and some are not yet fully developed due to some challenges that require resolutions. Most ELCs complain to the relevant authorities, especially about random inspections conducted by individual ministry/authority to their concession areas.';
@@ -38,6 +41,9 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final reports = issue?.reportsIncluded == true
+        ? issue!.progressReports
+        : progressReportsFallback ?? const <IssueProgressReport>[];
     final documentPath = generalIssue
         ? issue?.meetingRequestDocumentPath ?? ''
         : issue?.attachmentPath ?? '';
@@ -242,11 +248,28 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                 collapsedLines: 3,
                 inlineLink: !generalIssue,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: generalIssue ? 20 : 16),
               if (generalIssue)
                 issue == null
                     ? const CdcIssueProgressReportCard()
-                    : Text(l10n.text('noIssueProgressData'))
+                    : reports.isEmpty
+                    ? Text(l10n.text('noIssueProgressData'))
+                    : Column(
+                        children: [
+                          for (final report in reports) ...[
+                            CdcIssueProgressReportCard(
+                              report: report,
+                              issueTitle: issue!.title,
+                              issueStatus: issue!.statusName,
+                              meetingDocumentPath:
+                                  issue!.meetingRequestDocumentPath ?? '',
+                              meetingDocumentName:
+                                  issue!.meetingRequestDocumentName,
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                        ],
+                      )
               else ...[
                 CdcDetailTextPanel(
                   label: l10n.text('rgcDecision'),

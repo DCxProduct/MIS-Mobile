@@ -11,9 +11,11 @@ class CdcIssueDetailLoader extends StatefulWidget {
     super.key,
     required this.issueId,
     this.generalIssue = false,
+    this.initialIssue,
   });
   final int issueId;
   final bool generalIssue;
+  final WorkingGroupIssue? initialIssue;
 
   @override
   State<CdcIssueDetailLoader> createState() => _CdcIssueDetailLoaderState();
@@ -45,6 +47,7 @@ class _CdcIssueDetailLoaderState extends State<CdcIssueDetailLoader> {
           category: issue.category,
           issue: issue,
           generalIssue: widget.generalIssue,
+          progressReportsFallback: widget.initialIssue?.progressReports,
         );
       }
       final l10n = AppLocalizations.of(context);

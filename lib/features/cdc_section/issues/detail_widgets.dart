@@ -4,7 +4,12 @@ import '../../../core/app_colors.dart';
 import '../../../translations/app_localizations.dart';
 
 class CdcDetailInfoValue extends StatelessWidget {
-  const CdcDetailInfoValue({required this.label, required this.value, this.color});
+  const CdcDetailInfoValue({
+    super.key,
+    required this.label,
+    required this.value,
+    this.color,
+  });
   final String label;
   final String value;
   final Color? color;
@@ -30,7 +35,11 @@ class CdcDetailInfoValue extends StatelessWidget {
 }
 
 class CdcDetailDateChip extends StatelessWidget {
-  const CdcDetailDateChip({required this.label, required this.value});
+  const CdcDetailDateChip({
+    super.key,
+    required this.label,
+    required this.value,
+  });
   final String label;
   final String value;
 
@@ -59,6 +68,7 @@ class CdcDetailDateChip extends StatelessWidget {
 
 class CdcDetailTextPanel extends StatefulWidget {
   const CdcDetailTextPanel({
+    super.key,
     required this.label,
     required this.body,
     required this.collapsedLines,

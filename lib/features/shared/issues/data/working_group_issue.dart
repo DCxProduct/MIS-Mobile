@@ -1,4 +1,5 @@
 import '../../../../core/text/html_text.dart';
+import 'issue_progress_report.dart';
 
 class WorkingGroupIssue {
   WorkingGroupIssue({
@@ -21,6 +22,9 @@ class WorkingGroupIssue {
     this.attachmentSize,
     this.agencyLogo = '',
     this.meetingRequestDocumentName = '',
+    this.progressReports = const [],
+    this.reportsIncluded = false,
+    this.issueProgress,
   });
   final int id;
   final String title,
@@ -38,6 +42,9 @@ class WorkingGroupIssue {
   final int? attachmentSize;
   final String? meetingRequestDocumentPath;
   final String meetingRequestDocumentName;
+  final List<IssueProgressReport> progressReports;
+  final bool reportsIncluded;
+  final IssueProgressReport? issueProgress;
 
   factory WorkingGroupIssue.fromJson(Map<String, dynamic> json) {
     Map<String, dynamic> object(Object? value) {
@@ -118,6 +125,19 @@ class WorkingGroupIssue {
 
     agencies.sort((a, b) => order(a).compareTo(order(b)));
     final stakeholder = string(object(json['stakeholder'])['name']);
+    final rawReports = list(json['progressReports']);
+    final reports = rawReports.map((value) {
+      if (value is! Map<String, dynamic>) {
+        throw const FormatException('Invalid issue progress report');
+      }
+      return IssueProgressReport.fromJson(
+        value,
+        issueSourceOfVerification: rawReports.length == 1
+            ? string(json['sourceOfVerification'])
+            : '',
+      );
+    }).toList();
+    final issueProgress = IssueProgressReport.fromIssueFields(json);
     return WorkingGroupIssue(
       id: id,
       title: title,
@@ -151,6 +171,9 @@ class WorkingGroupIssue {
       meetingRequestDocumentName: meetingDocument is Map<String, dynamic>
           ? string(meetingDocument['originalName'] ?? meetingDocument['name'])
           : '',
+      progressReports: List.unmodifiable(reports),
+      reportsIncluded: json.containsKey('progressReports'),
+      issueProgress: issueProgress,
       linkCount: links.length,
     );
   }

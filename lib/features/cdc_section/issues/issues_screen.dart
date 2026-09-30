@@ -18,7 +18,11 @@ class CdcSectionIssuesScreenView extends StatelessWidget {
       issueDetailBuilder: (title, category, issue) =>
           issue != null &&
               AppSettings.of(context).moduleType == AppModuleType.cdcSection
-          ? CdcIssueDetailLoader(issueId: issue.id, generalIssue: true)
+          ? CdcIssueDetailLoader(
+              issueId: issue.id,
+              generalIssue: true,
+              initialIssue: issue,
+            )
           : CdcSectionIssueDetailScreen(
               title: title,
               category: category,
