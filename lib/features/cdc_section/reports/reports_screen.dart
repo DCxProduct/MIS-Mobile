@@ -1,108 +1,211 @@
 import 'package:flutter/material.dart';
+import '../../shared/widgets/list_screen_header.dart';
 
 import '../../../core/app_colors.dart';
+import '../../../core/app_settings.dart';
 import '../../../translations/app_localizations.dart';
+import '../../shared/meetings/data/rgc_decision.dart';
+import '../../shared/meetings/data/rgc_decisions_repository.dart';
+import '../../shared/issues/widgets/issue_agency_logo.dart';
 import '../../cdc_secretariat/dashboard/filter_sheet.dart';
 import '../../cdc_secretariat/reports/report_filter_sheet.dart';
 import 'rgc_decision_details.dart';
 
 class CdcSectionReportsScreenView extends StatefulWidget {
   const CdcSectionReportsScreenView({super.key});
-
   @override
   State<CdcSectionReportsScreenView> createState() => _ReportsState();
 }
 
 class _ReportsState extends State<CdcSectionReportsScreenView> {
   CdcDashboardFilters _filters = CdcDashboardFilters();
+  List<RgcMinistry>? _ministries;
+  List<RgcDecision> _decisions = [];
+  int? _stakeholderId;
+  int _page = 0;
+  int _totalPages = 0;
+  bool _loading = true;
+  bool _loadingMore = false;
+  String? _error;
+  late RgcDecisionsRepository _repository;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _repository = AppSettings.of(context).rgcDecisions;
+    if (_ministries == null) _loadMinistries();
+  }
+
+  Future<void> _loadMinistries() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final ministries = await _repository.getMinistries();
+      if (!mounted) return;
+      setState(() {
+        _ministries = ministries;
+        _stakeholderId = ministries.isEmpty ? null : ministries.first.id;
+        _loading = false;
+      });
+      if (_stakeholderId != null) await _loadPage(1);
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _error = 'load';
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadPage(int page) async {
+    final id = _stakeholderId;
+    if (id == null) return;
+    setState(() {
+      if (page == 1) {
+        _loading = true;
+        _decisions = [];
+        _page = 0;
+      } else {
+        _loadingMore = true;
+      }
+      _error = null;
+    });
+    try {
+      final result = await _repository.getDecisionsPage(
+        stakeholderId: id,
+        page: page,
+        limit: 20,
+      );
+      if (!mounted || id != _stakeholderId) return;
+      setState(() {
+        _decisions = page == 1
+            ? result.items
+            : [..._decisions, ...result.items];
+        _page = page;
+        _totalPages = result.totalPages;
+        _loading = false;
+        _loadingMore = false;
+      });
+    } catch (_) {
+      if (mounted && id == _stakeholderId) {
+        setState(() {
+          _error = 'load';
+          _loading = false;
+          _loadingMore = false;
+        });
+      }
+    }
+  }
 
   Future<void> _openFilters() async {
     final result = await Navigator.of(context).push<CdcDashboardFilters>(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (_) => CdcReportFilterSheet(initial: _filters),
+        builder: (_) => CdcReportFilterSheet(
+          initial: _filters,
+          groups: {
+            'status': ['Solved', 'In Progress', 'Not Addressed'],
+            'primaryAgency': [
+              for (final ministry in _ministries ?? const <RgcMinistry>[])
+                ministry.name,
+            ],
+          },
+        ),
       ),
     );
-    if (mounted && result != null) setState(() => _filters = result);
+    if (!mounted || result == null) return;
+    final selectedAgencies = result.values['primaryAgency'];
+    final selectedMinistry =
+        selectedAgencies == null || selectedAgencies.isEmpty
+        ? null
+        : _ministries
+              ?.where((ministry) => selectedAgencies.contains(ministry.name))
+              .firstOrNull;
+    final selectedId = selectedMinistry?.id;
+    if (selectedMinistry != null) {
+      result.values['primaryAgency'] = {selectedMinistry.name};
+    }
+    final changed = selectedId != null && selectedId != _stakeholderId;
+    setState(() {
+      _filters = result;
+      if (changed) _stakeholderId = selectedId;
+    });
+    if (changed) await _loadPage(1);
   }
 
-  bool _matches(CdcRgcReport report) {
+  bool _matches(RgcDecision decision) {
     bool includes(String group, String value) {
       final selected = _filters.values[group];
       return selected == null || selected.isEmpty || selected.contains(value);
     }
 
-    return includes('status', report.status) &&
-        includes('primaryAgency', report.agency) &&
-        includes('plenary', report.plenary) &&
-        includes('workingGroup', report.workingGroup) &&
-        includes('measureCategory', report.measureCategory) &&
-        includes('dateOfDecision', report.decisionDate);
+    return includes('status', decision.status) &&
+        includes('primaryAgency', decision.agencyName);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final reports = cdcRgcReports.where(_matches).toList();
+    final reports = _decisions.where(_matches).toList();
     return ColoredBox(
-      color: cdcReportBackground(context),
+      color: AppColors.isDark(context)
+          ? AppColors.darkBackground
+          : const Color(0xFFF7F7F8),
       child: Column(
         children: [
-          Container(
-            color: AppColors.cardBackground(context),
-            padding: EdgeInsets.fromLTRB(
-              16,
-              MediaQuery.viewPaddingOf(context).top + 20,
-              16,
-              14,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.text('rgcDecision'),
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                OutlinedButton(
-                  onPressed: _openFilters,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.secondaryText(context),
-                    side: BorderSide(color: AppColors.border(context)),
-                    minimumSize: const Size(0, 28),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${l10n.text('filter')}${_filters.count == 0 ? '' : ' (${_filters.count})'}',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      const SizedBox(width: 5),
-                      const Icon(Icons.filter_list, size: 16),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          ListScreenHeader(
+            title: l10n.text('rgcDecision'),
+            activeCount: _filters.count,
+            onFilter: _openFilters,
           ),
           Expanded(
-            child: ListView.separated(
-              key: const ValueKey('cdc-rgc-reports'),
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
-              itemCount: reports.isEmpty ? 1 : reports.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 16),
-              itemBuilder: (context, index) => reports.isEmpty
-                  ? Center(child: Text(l10n.text('noRgcDecisions')))
-                  : _ReportCard(report: reports[index]),
-            ),
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _error != null && _decisions.isEmpty
+                ? Center(
+                    child: TextButton(
+                      onPressed: _ministries == null
+                          ? _loadMinistries
+                          : () => _loadPage(1),
+                      child: Text(l10n.text('retry')),
+                    ),
+                  )
+                : ListView.separated(
+                    key: const ValueKey('cdc-rgc-reports'),
+                    padding: const EdgeInsets.fromLTRB(14, 12, 14, 96),
+                    itemCount: reports.length + 1,
+                    separatorBuilder: (_, _) => const SizedBox(height: 16),
+                    itemBuilder: (context, index) {
+                      if (index < reports.length) {
+                        return _ReportCard(decision: reports[index]);
+                      }
+                      if (_error != null) {
+                        return Center(
+                          child: TextButton(
+                            onPressed: () => _loadPage(_page + 1),
+                            child: Text(l10n.text('retry')),
+                          ),
+                        );
+                      }
+                      if (_loadingMore) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (_page < _totalPages) {
+                        return Center(
+                          child: TextButton(
+                            onPressed: () => _loadPage(_page + 1),
+                            child: const Text('Load more'),
+                          ),
+                        );
+                      }
+                      return reports.isEmpty
+                          ? Center(child: Text(l10n.text('noRgcDecisions')))
+                          : const SizedBox.shrink();
+                    },
+                  ),
           ),
         ],
       ),
@@ -111,8 +214,8 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
 }
 
 class _ReportCard extends StatelessWidget {
-  const _ReportCard({required this.report});
-  final CdcRgcReport report;
+  const _ReportCard({required this.decision});
+  final RgcDecision decision;
 
   @override
   Widget build(BuildContext context) {
@@ -125,33 +228,31 @@ class _ReportCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const CircleAvatar(
-                radius: 10,
-                backgroundColor: AppColors.primary,
-                child: Icon(
-                  Icons.account_balance_outlined,
-                  size: 13,
-                  color: Colors.white,
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: IssueAgencyLogo(path: decision.agencyLogo),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  report.agency,
+                  rgcValue(decision.agencyName),
                   style: const TextStyle(fontSize: 13),
                 ),
               ),
-              CdcRgcStatus(status: report.status),
+              CdcRgcStatus(status: decision.status),
             ],
           ),
           const SizedBox(height: 12),
           for (final row in [
-            (l10n.text('meetingDate'), report.meetingDate),
-            (l10n.text('categories'), report.category),
-            (l10n.text('focalPersonHE'), report.focalPerson),
+            (l10n.text('meetingDate'), rgcDate(decision.meetingDate)),
+            (l10n.text('categories'), rgcValue(decision.category)),
+            (l10n.text('focalPersonHE'), rgcValue(decision.focalPerson)),
           ]) ...[
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Text(
@@ -185,7 +286,7 @@ class _ReportCard extends StatelessWidget {
                 const Icon(Icons.link, size: 14),
                 const SizedBox(width: 5),
                 Text(
-                  l10n.text('twoLinks'),
+                  '${decision.linkCount} Link',
                   style: const TextStyle(fontSize: 12),
                 ),
               ],
@@ -198,7 +299,8 @@ class _ReportCard extends StatelessWidget {
             child: FilledButton(
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => CdcRgcDecisionOverviewScreen(report: report),
+                  builder: (_) =>
+                      CdcRgcDecisionOverviewScreen(decisionId: decision.id),
                 ),
               ),
               style: FilledButton.styleFrom(

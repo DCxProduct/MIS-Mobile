@@ -55,13 +55,14 @@ final cdcReportFilterGroups = <String, List<String>>{
 };
 
 class CdcReportFilterSheet extends StatelessWidget {
-  const CdcReportFilterSheet({super.key, required this.initial});
+  const CdcReportFilterSheet({super.key, required this.initial, this.groups});
   final CdcDashboardFilters initial;
+  final Map<String, List<String>>? groups;
 
   @override
   Widget build(BuildContext context) => CdcDashboardFilterSheet(
     initial: initial,
-    groups: cdcReportFilterGroups,
+    groups: groups ?? cdcReportFilterGroups,
     reportLayout: true,
   );
 }

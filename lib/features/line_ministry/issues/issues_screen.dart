@@ -5,6 +5,7 @@ import '../../shared/issues/widgets/issue_agency_logo.dart';
 import '../../shared/issues/data/wg_issue_summary.dart';
 import '../../shared/issues/widgets/wg_issue_summary_loader.dart';
 import 'package:flutter/material.dart';
+import '../../shared/widgets/list_screen_header.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/app_colors.dart';
@@ -116,53 +117,21 @@ class _LineMinistryIssuesScreenViewState
     final contentBackground = isDark
         ? AppColors.darkBackground
         : const Color(0xFFF7F7F8);
-    final headerBackground = isDark ? AppColors.darkBackground : Colors.white;
-
-    final topPadding = MediaQuery.of(context).viewPadding.top;
 
     return ColoredBox(
       color: contentBackground,
       child: Column(
         children: [
-          // STICKY HEADER
-          Container(
-            color: headerBackground,
-            padding: EdgeInsets.fromLTRB(
-              14,
-              topPadding > 0 ? topPadding + 12 : 34,
-              14,
-              12,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l10n.text(widget.titleKey),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    _FilterButton(
-                      activeCount: _activeFilterCount,
-                      onTap: () => _openFilterSheet(context),
-                    ),
-                  ],
-                ),
-                if (widget.showTabs) ...[
-                  const SizedBox(height: 14),
-                  _IssueTabs(
+          ListScreenHeader(
+            title: l10n.text(widget.titleKey),
+            activeCount: _activeFilterCount,
+            onFilter: () => _openFilterSheet(context),
+            bottom: widget.showTabs
+                ? _IssueTabs(
                     selectedIndex: _selectedTab,
                     onSelected: (index) => setState(() => _selectedTab = index),
-                  ),
-                ],
-              ],
-            ),
+                  )
+                : null,
           ),
           // SCROLLABLE CONTENT
           Expanded(
@@ -772,74 +741,6 @@ class _MetaInfo extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _FilterButton extends StatelessWidget {
-  const _FilterButton({required this.activeCount, required this.onTap});
-
-  final int activeCount;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(7),
-      child: Container(
-        height: 38,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkCard : Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isDark ? AppColors.darkBorder : const Color(0xFFE3E7EC),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              AppLocalizations.of(context).text('filter'),
-              style: const TextStyle(
-                color: AppColors.mutedText,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            if (activeCount > 0) ...[
-              const SizedBox(width: 6),
-              Container(
-                constraints: const BoxConstraints(minWidth: 18),
-                height: 18,
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.accent(context),
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: Text(
-                  '$activeCount',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-            const SizedBox(width: 7),
-            Icon(
-              Icons.filter_list,
-              color: Theme.of(context).colorScheme.onSurface,
-              size: 18,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

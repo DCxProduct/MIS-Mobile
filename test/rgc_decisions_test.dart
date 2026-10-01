@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:gpsf_app/features/cdc_section/reports/rgc_decision_details.dart';
+import 'package:gpsf_app/features/shared/meetings/data/rgc_decision.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,6 +15,16 @@ import 'package:gpsf_app/screens/report/report_screen.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 
 void main() {
+  test('formats API dates in Cambodia time', () {
+    expect(rgcDate(DateTime.parse('2026-09-29T17:00:00.000Z')), 'Sep 30, 2026');
+    expect(
+      rgcDate(DateTime.parse('2026-09-30T00:00:00+07:00')),
+      'Sep 30, 2026',
+    );
+    expect(rgcDate(DateTime.parse('2026-09-14T00:00:00.000Z')), 'Sep 14, 2026');
+    expect(rgcDate(DateTime.parse('2026-09-30')), 'Sep 30, 2026');
+    expect(rgcDate(null), '—');
+  });
   final response = {
     'success': true,
     'data': {
@@ -49,6 +61,183 @@ void main() {
     expect(decision.category, 'Climate');
     expect(decision.statusCode, 'NOT_ADDRESSED');
     expect(decision.linkCount, 2);
+  });
+
+  test('loads deadline using the linked plenary ID', () async {
+    final requested = <String>[];
+    final api = ApiClient(
+      client: MockClient((request) async {
+        requested.add(request.url.path);
+        return http.Response(
+          jsonEncode({
+            'success': true,
+            'data': request.url.path.endsWith('/rgc-decisions/1')
+                ? {'id': 1, 'plenaryId': 3}
+                : {'id': 3, 'deadline': '2026-09-30T00:00:00.000Z'},
+          }),
+          200,
+        );
+      }),
+    );
+    addTearDown(api.close);
+    final detail = await RgcDecisionsRepository(api).getDecision(1);
+    expect(detail.deadline, DateTime.utc(2026, 9, 30));
+    expect(requested, ['/api/v1/rgc-decisions/1', '/api/v1/plenaries/3']);
+  });
+
+  test('keeps decision readable when plenary access fails', () async {
+    final api = ApiClient(
+      client: MockClient((request) async {
+        if (request.url.path.endsWith('/plenaries/3')) {
+          return http.Response(
+            jsonEncode({'success': false, 'message': 'Forbidden'}),
+            403,
+          );
+        }
+        return http.Response(
+          jsonEncode({
+            'success': true,
+            'data': {
+              'id': 1,
+              'plenary': {'id': 3},
+              'decision': 'Decision text',
+            },
+          }),
+          200,
+        );
+      }),
+    );
+    addTearDown(api.close);
+    final detail = await RgcDecisionsRepository(api).getDecision(1);
+    expect(detail.deadline, isNull);
+    expect(detail.issues.single.rgcDecision, 'Decision text');
+  });
+
+  test('uses an existing deadline without another request', () async {
+    for (final data in [
+      {'id': 1, 'plenaryId': 3, 'deadline': '2026-09-30'},
+      {
+        'id': 1,
+        'plenary': {'id': 3, 'deadline': '2026-09-30'},
+      },
+      {'id': 1},
+    ]) {
+      var requests = 0;
+      final api = ApiClient(
+        client: MockClient((request) async {
+          requests++;
+          return http.Response(
+            jsonEncode({'success': true, 'data': data}),
+            200,
+          );
+        }),
+      );
+      addTearDown(api.close);
+      final detail = await RgcDecisionsRepository(api).getDecision(1);
+      expect(requests, 1);
+      expect(detail.deadline, data.length > 1 ? DateTime(2026, 9, 30) : null);
+    }
+  });
+
+  test('maps issue submitter separately from submitting organization', () {
+    final issue = RgcDecisionIssue.fromJson(
+      {
+        'stakeholder': {'name': 'Agriculture & Agro-Industry'},
+        'user': {'name': 'PSWG Secretariat A'},
+        'createdAt': '2026-09-03T02:35:59.659Z',
+      },
+      decision: {'submittedToCdcAt': '2026-09-14T09:00:40.620Z'},
+    );
+    expect(issue.submittedBy, 'Agriculture & Agro-Industry');
+    expect(issue.submittedByName, 'PSWG Secretariat A');
+    expect(issue.submittedDate, DateTime.parse('2026-09-03T02:35:59.659Z'));
+    final fallback = RgcDecisionIssue.fromJson(
+      {
+        'stakeholder': {'name': 'MAFF'},
+      },
+      decision: {'submittedToCdcAt': '2026-09-14T09:00:40.620Z'},
+    );
+    expect(fallback.submittedByName, 'MAFF');
+    expect(fallback.submittedDate, DateTime.parse('2026-09-14T09:00:40.620Z'));
+  });
+
+  test('uses issue attachment before meeting documents with fallback', () {
+    final meeting = {
+      'meetingRequestLetter': {
+        'path': '/uploads/request.pdf',
+        'name': 'Request',
+      },
+    };
+    final issue = RgcDecisionIssue.fromJson({
+      'attachment': '/uploads/issues/1788402959624-Issue_reference.pdf',
+      'meetingRequest': meeting,
+    });
+    expect(
+      issue.meetingRequestDocumentPath,
+      '/uploads/issues/1788402959624-Issue_reference.pdf',
+    );
+    expect(
+      RgcDecisionIssue.fromJson({
+        'attachment': ' ',
+        'meetingRequest': meeting,
+      }).meetingRequestDocumentPath,
+      '/uploads/request.pdf',
+    );
+    expect(
+      RgcDecisionIssue.fromJson({
+        'attachment': null,
+        'meetingRequest': meeting,
+      }).meetingRequestDocumentName,
+      'Request',
+    );
+    expect(RgcDecisionIssue.fromJson({}).meetingRequestDocumentPath, isEmpty);
+  });
+
+  test('maps agency order and progress report content', () {
+    final issue = RgcDecisionDetail.fromJson({
+      'id': 1,
+      'indicatorDescription': '',
+      'indicatorName': 'Milestone 2',
+      'issues': [
+        {
+          'governmentAgencies': [
+            {
+              'agencyOrder': 3,
+              'stakeholder': {'name': 'MISTI'},
+            },
+            {
+              'agencyOrder': 1,
+              'stakeholder': {'name': 'MAFF'},
+            },
+            {
+              'agencyOrder': 2,
+              'stakeholder': {'name': 'MEF'},
+            },
+          ],
+        },
+      ],
+      'progressReports': [
+        {
+          'indicators': '<p>Report indicator</p>',
+          'progressSolution': '<p>Progress <strong>solution</strong></p>',
+          'implementationChallenges': '<p>Challenge</p>',
+          'requests': '<p>Request</p>',
+        },
+      ],
+    }).issues.single;
+    expect(issue.governmentAgencies, {1: 'MAFF', 2: 'MEF', 3: 'MISTI'});
+    expect(issue.governmentAgencies[4], isNull);
+    expect(issue.indicators, 'Report indicator');
+    expect(issue.progressSolution, 'Progress solution');
+    expect(issue.implementationChallenges, 'Challenge');
+    expect(issue.request, 'Request');
+    expect(
+      RgcDecisionIssue.fromJson(
+        {},
+        decision: {'indicatorDescription': '', 'indicatorName': 'Milestone 2'},
+      ).indicators,
+      'Milestone 2',
+    );
   });
 
   testWidgets('Ministry RGC Decision tab uses the API', (tester) async {
