@@ -49,6 +49,8 @@ void main() {
                     ).readAsStringSync()
                   : request.url.path == '/api/v1/dashboards/pswg/live'
                   ? File('test/fixtures/working_groups.json').readAsStringSync()
+                  : request.url.path == '/api/v1/dashboards/plenary/live'
+                  ? File('test/fixtures/plenary.json').readAsStringSync()
                   : request.url.path == '/api/v1/rgc-decisions/scorecard'
                   ? jsonEncode({
                       'success': true,
@@ -171,16 +173,15 @@ void main() {
 
     await tester.tap(find.text('Report').last);
     await tester.pumpAndSettle();
-    expect(find.text('166/179'), findsOneWidget);
-    expect(find.text('92.73%'), findsOneWidget);
+    expect(find.text('0/1'), findsNWidgets(2));
     await tester.tap(find.text('Agencies'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Working Group'));
     await tester.pumpAndSettle();
-    expect(find.text('(D) Law, Tax, and Governance'), findsOneWidget);
+    expect(find.text('Law, Tax, and Governance'), findsOneWidget);
     await tester.tap(find.text('Categories'));
     await tester.pumpAndSettle();
-    expect(find.text('11. Other issues'), findsOneWidget);
+    expect(find.text('General'), findsOneWidget);
     await tester.tap(find.text('Plenaries'));
     await tester.pumpAndSettle();
     expect(find.text('19th G-PSF. Plenary'), findsOneWidget);

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
+import '../../../features/shared/dashboard/data/working_group_summary.dart';
 
 class CdcReportAgenciesTab extends StatelessWidget {
-  const CdcReportAgenciesTab({super.key});
+  const CdcReportAgenciesTab({super.key, this.agencies});
+
+  final List<WorkingGroupSummary>? agencies;
 
   @override
   Widget build(BuildContext context) {
@@ -20,17 +23,20 @@ class CdcReportAgenciesTab extends StatelessWidget {
           color: isDark ? AppColors.darkBorder : const Color(0xFFE9EDF2),
         ),
       ),
-      child: CustomPaint(painter: _AgenciesBarChartPainter(isDark: isDark)),
+      child: CustomPaint(
+        painter: _AgenciesBarChartPainter(isDark: isDark, agencies: agencies),
+      ),
     );
   }
 }
 
 class _AgenciesBarChartPainter extends CustomPainter {
-  const _AgenciesBarChartPainter({required this.isDark});
+  const _AgenciesBarChartPainter({required this.isDark, this.agencies});
 
   final bool isDark;
+  final List<WorkingGroupSummary>? agencies;
 
-  static const _labels = [
+  static const _fallbackLabels = [
     'SHV Admin',
     'MPWT',
     'MME',
@@ -42,10 +48,15 @@ class _AgenciesBarChartPainter extends CustomPainter {
     'MAFF',
   ];
 
-  static const _values = [4.8, 5.9, 4.5, 2.3, 8.2, 3.6, 7.9, 9.0, 1.7];
-
   @override
   void paint(Canvas canvas, Size size) {
+    final rows = agencies;
+    final labels = rows == null || rows.isEmpty
+        ? _fallbackLabels
+        : rows.map((row) => row.name).toList();
+    final values = rows == null || rows.isEmpty
+        ? [4.8, 5.9, 4.5, 2.3, 8.2, 3.6, 7.9, 9.0, 1.7]
+        : rows.map((row) => row.total.toDouble()).toList();
     const labelWidth = 50.0;
     const rightPadding = 4.0;
     const bottomAxisHeight = 28.0;
@@ -54,9 +65,12 @@ class _AgenciesBarChartPainter extends CustomPainter {
     final chartTop = 8.0;
     final chartRight = size.width - rightPadding;
     final chartBottom = size.height - bottomAxisHeight;
-    final rowHeight = (chartBottom - chartTop) / _labels.length;
+    final rowHeight = (chartBottom - chartTop) / labels.length;
 
-    const maxValue = 9.0;
+    final maxValue = values.fold<double>(
+      1,
+      (max, value) => value > max ? value : max,
+    );
 
     final labelStyle = TextStyle(
       color: isDark ? const Color(0xFFE3E8EF) : const Color(0xFF3D4652),
@@ -79,12 +93,12 @@ class _AgenciesBarChartPainter extends CustomPainter {
       ..style = PaintingStyle.fill
       ..isAntiAlias = true;
 
-    for (var i = 0; i < _labels.length; i++) {
+    for (var i = 0; i < labels.length; i++) {
       final centerY = chartTop + rowHeight * i + rowHeight / 2;
 
       _paintText(
         canvas,
-        _labels[i],
+        labels[i],
         Offset(0, centerY),
         labelStyle,
         verticalCenter: true,
@@ -96,7 +110,7 @@ class _AgenciesBarChartPainter extends CustomPainter {
         gridPaint,
       );
 
-      final barWidth = (_values[i] / maxValue) * (chartRight - chartLeft);
+      final barWidth = (values[i] / maxValue) * (chartRight - chartLeft);
 
       final barRect = Rect.fromLTWH(chartLeft, centerY - 5, barWidth, 10);
 
@@ -181,5 +195,5 @@ class _AgenciesBarChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _AgenciesBarChartPainter oldDelegate) =>
-      oldDelegate.isDark != isDark;
+      oldDelegate.isDark != isDark || oldDelegate.agencies != agencies;
 }

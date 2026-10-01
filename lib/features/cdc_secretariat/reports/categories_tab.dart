@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
+import '../../../features/shared/dashboard/data/working_group_summary.dart';
 
 class CdcReportCategoriesTab extends StatelessWidget {
-  const CdcReportCategoriesTab({super.key});
+  const CdcReportCategoriesTab({super.key, this.categories});
+
+  final List<WorkingGroupSummary>? categories;
 
   static const _items = [
     '1. Adjusting business and investment climate',
@@ -35,10 +38,22 @@ class CdcReportCategoriesTab extends StatelessWidget {
       ),
       child: Column(
         children: List.generate(
-          _items.length,
+          categories?.isNotEmpty == true ? categories!.length : _items.length,
           (index) => _CategoryIssueRow(
-            label: _items[index],
-            bottomPadding: index == _items.length - 1 ? 0 : 13,
+            label: categories?.isNotEmpty == true
+                ? categories![index].name
+                : _items[index],
+            count: categories?.isNotEmpty == true
+                ? categories![index].total
+                : 3,
+            bottomPadding:
+                index ==
+                    (categories?.isNotEmpty == true
+                        ? categories!.length
+                        : _items.length) -
+                1
+                ? 0
+                : 13,
           ),
         ),
       ),
@@ -47,9 +62,14 @@ class CdcReportCategoriesTab extends StatelessWidget {
 }
 
 class _CategoryIssueRow extends StatelessWidget {
-  const _CategoryIssueRow({required this.label, required this.bottomPadding});
+  const _CategoryIssueRow({
+    required this.label,
+    required this.count,
+    required this.bottomPadding,
+  });
 
   final String label;
+  final int count;
   final double bottomPadding;
 
   @override
@@ -74,7 +94,7 @@ class _CategoryIssueRow extends StatelessWidget {
                 ),
               ),
               Text(
-                '3',
+                '$count',
                 style: TextStyle(
                   color: colors.onSurfaceVariant,
                   fontSize: 12,

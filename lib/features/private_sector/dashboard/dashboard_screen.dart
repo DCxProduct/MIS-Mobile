@@ -215,7 +215,7 @@ class DashboardPageState extends State<DashboardPage> {
       );
     }
     if (module == AppModuleType.cdcSecretariat) {
-      return PswgDataLoader(builder: _buildContent);
+      return PswgDataLoader(scope: DashboardScope.pswg, builder: _buildContent);
     }
     if (_selectedStatusTab == 2) {
       return PswgDataLoader(builder: _buildContent);
@@ -1369,7 +1369,7 @@ class _WideMetricCard extends StatelessWidget {
         color: isDark ? AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isDark ? AppColors.darkBorder : Colors.transparent,
+          color: isDark ? AppColors.darkBorder : const Color(0xFFE0E5EB),
         ),
       ),
       child: Row(
@@ -1389,7 +1389,7 @@ class _WideMetricCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${PswgDataScope.maybeOf(context)?.cards['totalPrimaryAgencies'] ?? 14}',
+                  '${PswgDataScope.maybeOf(context)?.cards['totalPrimaryAgencies'] ?? 0}',
                   style: TextStyle(
                     color: isDark ? Colors.white : const Color(0xFF27364A),
                     fontSize: 20,
@@ -1428,6 +1428,8 @@ class _DashboardTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isCdcGpsf =
+        AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat;
     final tabs = [
       l10n.text('overall'),
       l10n.text('agencies'),
@@ -1436,8 +1438,8 @@ class _DashboardTabs extends StatelessWidget {
     ];
 
     return Container(
-      height: 38,
-      padding: const EdgeInsets.all(4),
+      height: isCdcGpsf ? 38 : 38,
+      padding: EdgeInsets.all(isCdcGpsf ? 3 : 4),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(8),
@@ -1466,7 +1468,7 @@ class _DashboardTabs extends StatelessWidget {
                     color: selectedIndex == index
                         ? Colors.white
                         : AppColors.mutedText,
-                    fontSize: 12,
+                    fontSize: isCdcGpsf ? 10 : 12,
                     fontWeight: selectedIndex == index
                         ? FontWeight.w700
                         : FontWeight.w500,

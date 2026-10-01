@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../../translations/app_language.dart';
 import '../../../core/app_colors.dart';
+import '../../../features/shared/dashboard/data/dashboard_repository.dart';
+import '../../../features/shared/dashboard/widgets/pswg_live_dashboard.dart';
+import '../dashboard/agencies_tab.dart';
+import '../dashboard/categories_tab.dart';
+import '../dashboard/overall_tab.dart';
+import '../dashboard/working_group_tab.dart';
 import '../../../screens/report/plenary_detail_screen.dart';
 import '../../../screens/report/rgc_decision_detail_screen.dart';
 import '../../../translations/app_localizations.dart';
 import '../dashboard/filter_sheet.dart';
-import 'agencies_tab.dart';
-import 'categories_tab.dart';
 import 'report_filter_sheet.dart';
 
 class CdcSecretariatReportsScreenView extends StatefulWidget {
@@ -555,25 +559,21 @@ class _ReportDashboardTab extends StatefulWidget {
 class _ReportDashboardTabState extends State<_ReportDashboardTab> {
   int _selectedFilter = 0;
 
-  static const _workingGroupItems = [
-    '(A) Agriculture and Agro-industry',
-    '(E) Banking and Financial Services',
-    '(M) Construction and Real Estate',
-    '(J) Energy and Mineral Resources',
-    '(G) Export Processing and Trade Facilitation',
-    '(H) Industrial Relations',
-    '(D) Law, Tax, and Governance',
-    '(N) Non-Bank Financial Services Other issues',
-    '(I) Rice and Paddy',
-    '(C) SMEs, Manufacturing, and Services',
-    '(B) Tourism',
-    '(F) Transportation and Infrastructure',
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return PswgDataLoader(
+      scope: DashboardScope.plenary,
+      builder: _buildContent,
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final cards = PswgDataScope.maybeOf(context)?.cards;
+    final totalIssues = cards?['totalIssues'] ?? 0;
+    final solved = cards?['solved'] ?? 0;
+    final inProgress = cards?['inProgress'] ?? 0;
+    final notAddressed = cards?['notAddressed'] ?? 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -589,38 +589,42 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
           children: [
             _MetricCard(
               label: l10n.text('totalIssues'),
-              value: '179',
-              background: Color(0xFFDDEEFF),
+              value: '$totalIssues',
+              background: const Color(0xFFDDEEFF),
               icon: Icons.library_books_outlined,
             ),
             _MetricCard(
               label: l10n.text('solved'),
-              value: '166/179',
-              background: Color(0xFFE5FAEF),
+              value: '$solved/$totalIssues',
+              background: const Color(0xFFE5FAEF),
               icon: Icons.fact_check_outlined,
             ),
             _MetricCard(
               label: l10n.text('inProgress'),
-              value: '13/179',
-              background: Color(0xFFFFF8DC),
+              value: '$inProgress/$totalIssues',
+              background: const Color(0xFFFFF8DC),
               icon: Icons.add_box_outlined,
             ),
             _MetricCard(
               label: l10n.text('notAddressed'),
-              value: '0/179',
-              background: Color(0xFFFFEEEE),
+              value: '$notAddressed/$totalIssues',
+              background: const Color(0xFFFFEEEE),
               icon: Icons.assignment_late_outlined,
             ),
           ],
         ),
         const SizedBox(height: 12),
-        const _TotalPrimaryAgenciesCard(value: '14/14'),
+        _TotalPrimaryAgenciesCard(
+          value: '${cards?['totalPrimaryAgencies'] ?? 0}',
+        ),
         const SizedBox(height: 16),
         Container(
-          padding: const EdgeInsets.all(4),
+          height: 34,
+          padding: const EdgeInsets.all(3),
           decoration: BoxDecoration(
             color: AppColors.cardBackground(context),
             borderRadius: BorderRadius.circular(9),
+            border: Border.all(color: AppColors.border(context)),
           ),
           child: Row(
             children: [
@@ -643,314 +647,14 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
           ),
         ),
         const SizedBox(height: 16),
-        if (_selectedFilter == 1) ...[
-          Text(l10n.text('agencies')),
-          const SizedBox(height: 12),
-          const CdcReportAgenciesTab(),
-        ] else if (_selectedFilter == 2) ...[
-          _AgenciesListCard(
-            title: l10n.text('workingGroup'),
-            items: _workingGroupItems,
-          ),
-        ] else if (_selectedFilter == 3) ...[
-          Text(l10n.text('categoriesOfIssues')),
-          const SizedBox(height: 12),
-          const CdcReportCategoriesTab(),
-        ] else ...[
-          Text(
-            l10n.text('overallStatus'),
-            style: const TextStyle(fontSize: 14),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkCard : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
-              ),
-            ),
-            child: Column(
-              children: [
-                DonutChartWidget(
-                  slices: const [
-                    DonutChartData(
-                      percentage: 0.9273,
-                      color: Color(0xFF009F5C),
-                      label: 'Solved',
-                    ),
-                    DonutChartData(
-                      percentage: 0.0727,
-                      color: Color(0xFFF59E0B),
-                      label: 'In Progress',
-                    ),
-                  ],
-                  centerTitle: l10n.text('totalIssues'),
-                  centerValue: '179',
-                  badge1Text: '92.73%',
-                  badge1DotColor: Color(0xFF009F5C),
-                  badge2Text: '7.27%',
-                  badge2DotColor: Color(0xFFF59E0B),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.square,
-                          color: Color(0xFF009F5C),
-                          size: 10,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          l10n.text('solved'),
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      '(166)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.square,
-                          color: Color(0xFFF59E0B),
-                          size: 10,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          l10n.text('inProgress'),
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      '(13)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.text('overallStatus'),
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkCard : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
-              ),
-            ),
-            child: Column(
-              children: [
-                DonutChartWidget(
-                  slices: const [
-                    DonutChartData(
-                      percentage: 0.923,
-                      color: Color(0xFFFAA15A),
-                      label: 'Mid Progress',
-                    ),
-                    DonutChartData(
-                      percentage: 0.077,
-                      color: Color(0xFFF1DAA7),
-                      label: 'Early Progress',
-                    ),
-                  ],
-                  centerTitle: l10n.text('inProgress'),
-                  centerValue: '13',
-                  badge1Text: '92.3%',
-                  badge1DotColor: Color(0xFFFAA15A),
-                  badge2Text: '7.7%',
-                  badge2DotColor: Color(0xFFF1DAA7),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
-                    Row(
-                      children: [
-                        Icon(Icons.square, color: Color(0xFFFAA15A), size: 10),
-                        SizedBox(width: 6),
-                        Text('Mid Progress', style: TextStyle(fontSize: 12)),
-                      ],
-                    ),
-                    Text(
-                      '(12)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
-                    Row(
-                      children: [
-                        Icon(Icons.square, color: Color(0xFFF1DAA7), size: 10),
-                        SizedBox(width: 6),
-                        Text('Early Progress', style: TextStyle(fontSize: 12)),
-                      ],
-                    ),
-                    Text(
-                      '(1)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _MiniBarChart extends StatelessWidget {
-  const _MiniBarChart();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 18,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Container(
-            width: 3.5,
-            height: 8,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFAA15A),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 3),
-          Container(
-            width: 3.5,
-            height: 11,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEF4444),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 3),
-          Container(
-            width: 3.5,
-            height: 16,
-            decoration: BoxDecoration(
-              color: const Color(0xFF009F5C),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AgenciesListCard extends StatelessWidget {
-  const _AgenciesListCard({required this.title, required this.items});
-
-  final String title;
-  final List<String> items;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.darkCard : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
-            ),
-          ),
-          child: ListView.separated(
-            shrinkWrap: true,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: items.length,
-            separatorBuilder: (_, _) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Divider(
-                height: 1,
-                color: isDark ? AppColors.darkBorder : const Color(0xFFF0F2F5),
-              ),
-            ),
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        items[index],
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    const _MiniBarChart(),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
+        if (_selectedFilter == 1)
+          const CdcSecretariatAgenciesTab()
+        else if (_selectedFilter == 2)
+          const CdcSecretariatWorkingGroupTab()
+        else if (_selectedFilter == 3)
+          const CdcSecretariatCategoriesTab()
+        else
+          const CdcSecretariatOverallTab(),
       ],
     );
   }
@@ -1063,7 +767,10 @@ class _DonutChartPainter extends CustomPainter {
 
     for (final slice in slices) {
       final totalSweep = slice.percentage * 2 * 3.141592653589793;
-      final drawSweep = (totalSweep - gapAngle).clamp(0.01, totalSweep);
+      if (totalSweep <= 0) continue;
+      final drawSweep = totalSweep <= gapAngle
+          ? totalSweep
+          : totalSweep - gapAngle;
 
       final paint = Paint()
         ..color = slice.color
@@ -1157,17 +864,12 @@ class _SubFilterChip extends StatelessWidget {
       borderRadius: BorderRadius.circular(6),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
         decoration: BoxDecoration(
           color: selected
               ? AppColors.accent(context)
               : (isDark ? AppColors.darkCard : Colors.white),
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: selected
-                ? AppColors.accent(context)
-                : (isDark ? AppColors.darkBorder : const Color(0xFFE2E7ED)),
-          ),
         ),
         child: FittedBox(
           fit: BoxFit.scaleDown,
@@ -1179,7 +881,7 @@ class _SubFilterChip extends StatelessWidget {
                   : (isDark
                         ? AppColors.secondaryText(context)
                         : const Color(0xFF4C5563)),
-              fontSize: 12,
+              fontSize: 10,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
             ),
           ),
