@@ -7,6 +7,7 @@ import '../../cdc_section/reports/rgc_decision_details.dart';
 import 'package:flutter/material.dart';
 import '../../../translations/app_language.dart';
 import '../../../core/app_colors.dart';
+import '../../../core/widgets/pdf_attachment_preview.dart';
 import '../../../features/shared/dashboard/data/dashboard_repository.dart';
 import '../../../features/shared/dashboard/widgets/pswg_live_dashboard.dart';
 import '../dashboard/agencies_tab.dart';
@@ -358,6 +359,7 @@ class _PlenaryTab extends StatelessWidget {
               deadline: rgcDate(plenary.deadline),
               attachmentCount:
                   '${plenary.attachmentCount} ${AppLocalizations.of(context).text('attachmentsLabel')}',
+              documentReference: plenary.documentReference,
             ),
         ],
       ),
@@ -373,6 +375,7 @@ class _PlenaryCard extends StatelessWidget {
     required this.numberOfRgcDecision,
     required this.deadline,
     required this.attachmentCount,
+    this.documentReference,
   });
 
   final String title;
@@ -381,6 +384,7 @@ class _PlenaryCard extends StatelessWidget {
   final String numberOfRgcDecision;
   final String deadline;
   final String attachmentCount;
+  final String? documentReference;
 
   @override
   Widget build(BuildContext context) {
@@ -456,31 +460,39 @@ class _PlenaryCard extends StatelessWidget {
           const SizedBox(height: 8),
           _ReportRow(label: l10n.text('deadline'), value: deadline),
           const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkCard : const Color(0xFFFAFAFA),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
-                const SizedBox(width: 6),
-                Text(
-                  attachmentCount == '2 Attachement'
-                      ? l10n.text('twoAttachments')
-                      : attachmentCount,
-                  style: const TextStyle(
-                    color: Color(0xFF4C5563),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                  ),
+          PdfAttachmentPreview(
+            path: documentReference ?? '',
+            name: documentReference == null
+                ? null
+                : pdfAttachmentName(documentReference!),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkCard : const Color(0xFFFAFAFA),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: isDark
+                      ? AppColors.darkBorder
+                      : const Color(0xFFE5E8ED),
                 ),
-              ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
+                  const SizedBox(width: 6),
+                  Text(
+                    attachmentCount == '2 Attachement'
+                        ? l10n.text('twoAttachments')
+                        : attachmentCount,
+                    style: const TextStyle(
+                      color: Color(0xFF4C5563),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -491,7 +503,10 @@ class _PlenaryCard extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => PlenaryDetailScreen(title: title),
+                    builder: (_) => PlenaryDetailScreen(
+                      title: title,
+                      documentReference: documentReference,
+                    ),
                   ),
                 );
               },

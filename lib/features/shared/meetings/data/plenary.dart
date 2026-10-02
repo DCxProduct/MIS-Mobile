@@ -10,6 +10,7 @@ class Plenary {
       statusCode = _string(json['statusCode']),
       numberOfRgcDecisions = _int(json['numberOfRgcDecisions']),
       ministryCount = _listLength(json['ministries']),
+      documentReference = _nullableString(json['documentReference']),
       attachmentCount = _attachmentCount(json['documentReference']);
 
   final int id;
@@ -20,11 +21,15 @@ class Plenary {
   final String statusCode;
   final int numberOfRgcDecisions;
   final int ministryCount;
+  final String? documentReference;
   final int attachmentCount;
 
   static int _int(Object? value) => value is int ? value : 0;
 
   static String _string(Object? value) => value is String ? value : '';
+
+  static String? _nullableString(Object? value) =>
+      value is String && value.trim().isNotEmpty ? value : null;
 
   static DateTime? _date(Object? value) =>
       value is String ? DateTime.tryParse(value) : null;

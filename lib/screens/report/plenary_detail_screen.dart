@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
+import '../../core/widgets/pdf_attachment_preview.dart';
 
 class PlenaryDetailScreen extends StatelessWidget {
-  const PlenaryDetailScreen({super.key, required this.title});
+  const PlenaryDetailScreen({
+    super.key,
+    required this.title,
+    this.documentReference,
+  });
 
   final String title;
+  final String? documentReference;
 
   @override
   Widget build(BuildContext context) {
@@ -90,36 +96,44 @@ class PlenaryDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(
-                  Icons.picture_as_pdf,
-                  color: Color(0xFFE53935),
-                  size: 18,
-                ),
-                const SizedBox(width: 6),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Request Doc',
-                      style: TextStyle(
-                        color: AppColors.primaryText(context),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
+            PdfAttachmentPreview(
+              path: documentReference ?? '',
+              name: documentReference == null
+                  ? null
+                  : pdfAttachmentName(documentReference!),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.picture_as_pdf,
+                    color: Color(0xFFE53935),
+                    size: 18,
+                  ),
+                  const SizedBox(width: 6),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        documentReference == null
+                            ? 'Request Doc'
+                            : pdfAttachmentName(documentReference!),
+                        style: TextStyle(
+                          color: AppColors.primaryText(context),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                    const Text(
-                      '200 KB',
-                      style: TextStyle(
-                        color: AppColors.mutedText,
-                        fontSize: 7,
-                        fontWeight: FontWeight.w500,
+                      const Text(
+                        'PDF',
+                        style: TextStyle(
+                          color: AppColors.mutedText,
+                          fontSize: 7,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 20),
             const _PlenaryIssueItemCard(
