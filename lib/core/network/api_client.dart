@@ -42,6 +42,41 @@ class ApiClient {
   Future<List<dynamic>> getList(String path) async =>
       await _request('GET', path, expectList: true) as List<dynamic>;
 
+  /// List endpoints in this API expose totalPages in their pagination metadata.
+  Future<List<dynamic>> getAllPages(
+    String path, {
+    Map<String, String> query = const {},
+    bool objectItems = false,
+    int limit = 100,
+  }) async {
+    final items = <dynamic>[];
+    var totalPages = 1;
+    for (var page = 1; page <= totalPages; page++) {
+      final params = {...query, 'page': '$page', 'limit': '$limit'};
+      final response = objectItems
+          ? await getObjectPage(path, query: params)
+          : await getListPage(path, query: params);
+      final data = response['data'];
+      final rows = objectItems && data is Map ? data['items'] : data;
+      if (rows is! List) {
+        throw ApiException('Invalid paginated list.', endpoint: path);
+      }
+      items.addAll(rows);
+      final meta = objectItems && data is Map
+          ? data['meta'] ?? response['meta']
+          : response['meta'];
+      if (meta != null) {
+        if (meta is! Map ||
+            meta['totalPages'] is! int ||
+            (meta['totalPages'] as int) < 0) {
+          throw ApiException('Invalid pagination metadata.', endpoint: path);
+        }
+        if (page == 1) totalPages = meta['totalPages'] as int;
+      }
+    }
+    return List.unmodifiable(items);
+  }
+
   /// Retains top-level pagination metadata alongside an array of data.
   Future<Map<String, dynamic>> getListPage(
     String path, {

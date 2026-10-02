@@ -1,10 +1,11 @@
+import '../../../core/app_settings.dart';
+import '../../../core/widgets/filters/api_filter_sheet.dart';
 import '../../shared/issues/data/working_group_issue.dart';
 import '../../shared/issues/widgets/wg_issues_list.dart';
 import '../../shared/issues/widgets/issue_display.dart';
 import '../../shared/issues/data/wg_issue_summary.dart';
 import '../../shared/issues/widgets/wg_issue_summary_loader.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../core/app_colors.dart';
 import '../../../core/widgets/pdf_attachment_preview.dart';
@@ -22,43 +23,25 @@ class _IssuesScreenState extends State<IssuesScreen> {
   int _selectedTab = 0;
   String _searchQuery = '';
 
-  Set<String> _selectedYears = {};
-  Set<String> _selectedStatuses = {};
-  Set<String> _selectedAgencies = {};
-  Set<String> _selectedProgressReports = {};
+  final _filters = [FilterSelection(), FilterSelection()];
 
   Future<void> _openIssuesFilterSheet(BuildContext context) async {
-    final result = await showModalBottomSheet<_IssuesFilterResult>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: false,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return _IssuesFilterSheet(
-          selectedYears: _selectedYears,
-          selectedStatuses: _selectedStatuses,
-          selectedAgencies: _selectedAgencies,
-          selectedProgressReports: _selectedProgressReports,
-        );
-      },
+    final tab = _selectedTab;
+    final catalogs = AppSettings.of(context).filters;
+    final result = await Navigator.of(context).push<FilterSelection>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => ApiFilterSheet(
+          initial: _filters[tab],
+          load: () => catalogs.pswgIssues(matrix: tab == 1),
+        ),
+      ),
     );
-
-    if (result != null) {
-      setState(() {
-        _selectedYears = result.years;
-        _selectedStatuses = result.statuses;
-        _selectedAgencies = result.agencies;
-        _selectedProgressReports = result.progressReports;
-      });
-    }
+    if (!mounted || result == null) return;
+    setState(() => _filters[tab] = result);
   }
 
-  int get _activeFilterCount {
-    return _selectedYears.length +
-        _selectedStatuses.length +
-        _selectedAgencies.length +
-        _selectedProgressReports.length;
-  }
+  int get _activeFilterCount => _filters[_selectedTab].count;
 
   @override
   Widget build(BuildContext context) {
@@ -181,8 +164,16 @@ class _IssuesScreenState extends State<IssuesScreen> {
                       ),
                 const SizedBox(height: 14),
                 _selectedTab == 0
-                    ? _WgIssuesList(query: _searchQuery)
-                    : _IssuesMatrixList(query: _searchQuery),
+                    ? _WgIssuesList(
+                        query: _searchQuery,
+                        apiFilters: _filters[0].toQuery(),
+                        selection: _filters[0],
+                      )
+                    : _IssuesMatrixList(
+                        query: _searchQuery,
+                        apiFilters: _filters[1].toQuery(),
+                        selection: _filters[1],
+                      ),
               ],
             ),
           ),
@@ -472,11 +463,19 @@ class _IssueMetricCard extends StatelessWidget {
 }
 
 class _WgIssuesList extends StatelessWidget {
-  const _WgIssuesList({this.query = ''});
+  const _WgIssuesList({
+    this.query = '',
+    this.apiFilters = const {},
+    this.selection,
+  });
+  final Map<String, String> apiFilters;
+  final FilterSelection? selection;
   final String query;
   @override
   Widget build(BuildContext context) => WgIssuesList(
     query: query,
+    apiFilters: apiFilters,
+    selection: selection,
     itemBuilder: (issue) => _IssueCard(
       title: issue.title,
       category: issue.category.isEmpty ? '—' : issue.category,
@@ -494,7 +493,13 @@ _IssueCardStatus _statusForIssue(WorkingGroupIssue issue) =>
     };
 
 class _IssuesMatrixList extends StatelessWidget {
-  const _IssuesMatrixList({this.query = ''});
+  const _IssuesMatrixList({
+    this.query = '',
+    this.apiFilters = const {},
+    this.selection,
+  });
+  final Map<String, String> apiFilters;
+  final FilterSelection? selection;
 
   final String query;
 
@@ -502,6 +507,8 @@ class _IssuesMatrixList extends StatelessWidget {
   Widget build(BuildContext context) => WgIssuesList(
     matrix: true,
     query: query,
+    apiFilters: apiFilters,
+    selection: selection,
     itemBuilder: (issue) => _IssueCard(
       title: issue.title,
       category: issue.category.isEmpty ? '—' : issue.category,
@@ -822,474 +829,6 @@ class _IssueStatusBadge extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _IssuesFilterResult {
-  const _IssuesFilterResult({
-    required this.years,
-    required this.statuses,
-    required this.agencies,
-    required this.progressReports,
-  });
-
-  final Set<String> years;
-  final Set<String> statuses;
-  final Set<String> agencies;
-  final Set<String> progressReports;
-}
-
-class _IssuesFilterSheet extends StatefulWidget {
-  const _IssuesFilterSheet({
-    required this.selectedYears,
-    required this.selectedStatuses,
-    required this.selectedAgencies,
-    required this.selectedProgressReports,
-  });
-
-  final Set<String> selectedYears;
-  final Set<String> selectedStatuses;
-  final Set<String> selectedAgencies;
-  final Set<String> selectedProgressReports;
-
-  @override
-  State<_IssuesFilterSheet> createState() => _IssuesFilterSheetState();
-}
-
-class _IssuesFilterSheetState extends State<_IssuesFilterSheet> {
-  late Set<String> _years;
-  late Set<String> _statuses;
-  late Set<String> _agencies;
-  late Set<String> _progressReports;
-
-  bool _showAllAgencies = false;
-
-  static const _yearItems = ['2026', '2025', '2024', '2023'];
-  static const _statusItems = ['Sent', 'Draft'];
-  static const _agencyItems = [
-    'GDT',
-    'MFF',
-    'GDCE',
-    'MLVT',
-    'MPTC',
-    'MAFF',
-    'Moh',
-    'NBC',
-    'MoC',
-    'MoT',
-    'MLMUPC',
-    'MoI',
-    'CDC',
-    'MPWT',
-    'MISTI',
-  ];
-  static const _progressReportItems = ['Both', 'S1', 'S2'];
-
-  @override
-  void initState() {
-    super.initState();
-    _years = {...widget.selectedYears};
-    _statuses = {...widget.selectedStatuses};
-    _agencies = {...widget.selectedAgencies};
-    _progressReports = {...widget.selectedProgressReports};
-  }
-
-  void _toggle(Set<String> set, String value) {
-    setState(() {
-      if (set.contains(value)) {
-        set.remove(value);
-      } else {
-        set.add(value);
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final background = isDark ? AppColors.darkBackground : Colors.white;
-    final borderColor = isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
-
-    final viewPadding = MediaQuery.of(context).viewPadding;
-    final topInset = viewPadding.top > 48.0 ? viewPadding.top : 48.0;
-    final bottomInset = viewPadding.bottom;
-
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
-      ),
-      child: FractionallySizedBox(
-        heightFactor: 1.0,
-        child: Container(
-          decoration: BoxDecoration(color: background),
-          child: Column(
-            children: [
-              // ================= FILTER HEADER =================
-              Container(
-                padding: EdgeInsets.fromLTRB(22, topInset + 24, 22, 12),
-                child: Row(
-                  children: [
-                    const SizedBox(width: 28),
-
-                    Expanded(
-                      child: Text(
-                        l10n.text('filters'),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-
-                    InkWell(
-                      onTap: () => Navigator.pop(context),
-                      borderRadius: BorderRadius.circular(18),
-                      child: const SizedBox(
-                        width: 28,
-                        height: 28,
-                        child: Icon(Icons.close, size: 25),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // ================= FILTER CONTENT =================
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(25, 20, 25, 22),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Section 1: Year
-                      _FilterGridSection(
-                        title: l10n.text('year'),
-                        items: _yearItems,
-                        columns: 4,
-                        selectedItems: _years,
-                        onChanged: (year) => _toggle(_years, year),
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      // Section 2: Status
-                      _FilterGridSection(
-                        title: l10n.text('status'),
-                        items: _statusItems,
-                        columns: 3,
-                        selectedItems: _statuses,
-                        onChanged: (status) => _toggle(_statuses, status),
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      // Section 3: Primary Agency
-                      Text(
-                        l10n.text('primaryAgency'),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _FilterGrid(
-                        items: _showAllAgencies
-                            ? _agencyItems
-                            : _agencyItems.take(10).toList(),
-                        columns: 5,
-                        selectedItems: _agencies,
-                        onChanged: (agency) => _toggle(_agencies, agency),
-                      ),
-                      const SizedBox(height: 10),
-                      Center(
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              _showAllAgencies = !_showAllAgencies;
-                            });
-                          },
-                          borderRadius: BorderRadius.circular(6),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  _showAllAgencies
-                                      ? l10n.text('viewLess')
-                                      : l10n.text('viewAll'),
-                                  style: TextStyle(
-                                    color: AppColors.accent(context),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(width: 7),
-                                Icon(
-                                  _showAllAgencies
-                                      ? Icons.keyboard_arrow_up
-                                      : Icons.keyboard_arrow_down,
-                                  color: AppColors.accent(context),
-                                  size: 15,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // Section 4: Progress Report
-                      _FilterGridSection(
-                        title: l10n.text('progressReport'),
-                        items: _progressReportItems,
-                        columns: 3,
-                        selectedItems: _progressReports,
-                        onChanged: (item) => _toggle(_progressReports, item),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // ================= APPLY BUTTON =================
-              Container(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  13,
-                  16,
-                  bottomInset > 0 ? bottomInset + 10 : 12,
-                ),
-                decoration: BoxDecoration(
-                  color: background,
-                  border: Border(top: BorderSide(color: borderColor)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 8,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
-                ),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent(context),
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(9),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(
-                        context,
-                        _IssuesFilterResult(
-                          years: {..._years},
-                          statuses: {..._statuses},
-                          agencies: {..._agencies},
-                          progressReports: {..._progressReports},
-                        ),
-                      );
-                    },
-                    child: Text(
-                      l10n.text('applyFilters'),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FilterGridSection extends StatelessWidget {
-  const _FilterGridSection({
-    required this.title,
-    required this.items,
-    required this.columns,
-    required this.selectedItems,
-    required this.onChanged,
-  });
-
-  final String title;
-  final List<String> items;
-  final int columns;
-  final Set<String> selectedItems;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 16),
-        _FilterGrid(
-          items: items,
-          columns: columns,
-          selectedItems: selectedItems,
-          onChanged: onChanged,
-        ),
-      ],
-    );
-  }
-}
-
-class _FilterGrid extends StatelessWidget {
-  const _FilterGrid({
-    required this.items,
-    required this.columns,
-    required this.selectedItems,
-    required this.onChanged,
-  });
-
-  final List<String> items;
-  final int columns;
-  final Set<String> selectedItems;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    const horizontalGap = 8.0;
-    const verticalGap = 15.0;
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final itemWidth =
-            (constraints.maxWidth - horizontalGap * (columns - 1)) / columns;
-
-        return Wrap(
-          spacing: horizontalGap,
-          runSpacing: verticalGap,
-          children: [
-            for (final item in items)
-              SizedBox(
-                width: itemWidth,
-                child: _CheckTile(
-                  label: item,
-                  selected: selectedItems.contains(item),
-                  onTap: () => onChanged(item),
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _CheckTile extends StatelessWidget {
-  const _CheckTile({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(4),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _CheckTileBox(selected: selected),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              _localizeLabel(context, label),
-              style: const TextStyle(
-                color: AppColors.filterLabel,
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-String _localizeLabel(BuildContext context, String text) {
-  final l10n = AppLocalizations.of(context);
-  return switch (text) {
-    'Drafted' => l10n.text('drafted'),
-    'Submitted' => l10n.text('submitted'),
-    'Under Review' => l10n.text('underReview'),
-    'Scheduled' => l10n.text('scheduled'),
-    'Completed' => l10n.text('completed'),
-    'Solved' => l10n.text('solved'),
-    'In Progress' => l10n.text('inProgress'),
-    'Not Address' || 'Not Addressed' => l10n.text('notAddressed'),
-    'Both' => l10n.text('both'),
-    'Sent' => l10n.text('sent'),
-    'Draft' => l10n.text('draft'),
-    'View All' => l10n.text('viewAll'),
-    'View Less' => l10n.text('viewLess'),
-    _ => text,
-  };
-}
-
-class _CheckTileBox extends StatelessWidget {
-  const _CheckTileBox({required this.selected});
-
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 140),
-      width: 16,
-      height: 16,
-      decoration: BoxDecoration(
-        color: selected ? AppColors.accent(context) : Colors.transparent,
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(
-          color: selected
-              ? AppColors.accent(context)
-              : (isDark ? AppColors.darkBorder : AppColors.filterOutline),
-          width: 1,
-        ),
-      ),
-      child: selected
-          ? const Icon(Icons.check, size: 11, color: Colors.white)
-          : null,
     );
   }
 }

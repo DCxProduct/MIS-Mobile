@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../dashboard/data/filter_sections.dart';
+import '../../../core/widgets/filters/app_filter_sheet.dart';
 
 import '../dashboard/data/filter_options.dart';
 import '../dashboard/filter_sheet.dart';
@@ -55,14 +57,36 @@ final cdcReportFilterGroups = <String, List<String>>{
 };
 
 class CdcReportFilterSheet extends StatelessWidget {
-  const CdcReportFilterSheet({super.key, required this.initial, this.groups});
+  const CdcReportFilterSheet({
+    super.key,
+    required this.initial,
+    this.groups,
+    this.singleAgency = false,
+  });
   final CdcDashboardFilters initial;
   final Map<String, List<String>>? groups;
+  final bool singleAgency;
 
   @override
-  Widget build(BuildContext context) => CdcDashboardFilterSheet(
+  Widget build(BuildContext context) => AppFilterSheet(
     initial: initial,
-    groups: groups ?? cdcReportFilterGroups,
-    reportLayout: true,
+    sections: [
+      for (final section in cdcFilterSections(
+        context,
+        groups ?? cdcReportFilterGroups,
+      ))
+        if (singleAgency && section.id == 'primaryAgency')
+          FilterSection(
+            id: section.id,
+            title: section.title,
+            options: section.options,
+            columns: section.columns,
+            collapsedItemCount: section.collapsedItemCount,
+            singleSelection: true,
+          )
+        else
+          section,
+    ],
+    compact: false,
   );
 }

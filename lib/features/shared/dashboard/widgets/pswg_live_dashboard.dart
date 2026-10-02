@@ -1,3 +1,5 @@
+import '../../../../core/widgets/filters/filter_models.dart';
+import '../../../../core/widgets/filters/api_filter_scope.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/app_settings.dart';
 import '../../../../translations/app_localizations.dart';
@@ -22,9 +24,13 @@ class PswgDataLoader extends StatefulWidget {
     super.key,
     required this.builder,
     this.scope = DashboardScope.pswg,
+    this.progressReportId,
+    this.selection,
   });
 
   final DashboardScope scope;
+  final int? progressReportId;
+  final FilterSelection? selection;
 
   final WidgetBuilder builder;
 
@@ -34,22 +40,49 @@ class PswgDataLoader extends StatefulWidget {
 
 class _PswgDataLoaderState extends State<PswgDataLoader> {
   Future<PswgDashboard>? _request;
+  int? _effectiveReportId;
+  String? _year;
+  FilterSelection get _selection =>
+      widget.selection ?? ApiFilterScope.selection(context, 'dashboard');
+
+  Future<PswgDashboard> _load() =>
+      AppSettings.of(context).dashboard.getLiveDashboard(
+        scope: widget.scope,
+        progressReportId: _effectiveReportId,
+        year: _year,
+      );
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _request ??= AppSettings.of(
-      context,
-    ).dashboard.getLiveDashboard(scope: widget.scope);
+    final reportId =
+        widget.progressReportId ??
+        int.tryParse(
+          ApiFilterScope.query(context, 'dashboard')['progressReportId'] ?? '',
+        );
+    final year = _selection['local.year'].firstOrNull;
+    if (_request == null || reportId != _effectiveReportId || year != _year) {
+      _year = year;
+      _effectiveReportId = reportId;
+      _request = _load();
+    }
   }
 
   @override
   void didUpdateWidget(covariant PswgDataLoader oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.scope != widget.scope) {
-      _request = AppSettings.of(
-        context,
-      ).dashboard.getLiveDashboard(scope: widget.scope);
+    if (oldWidget.scope != widget.scope ||
+        oldWidget.progressReportId != widget.progressReportId ||
+        oldWidget.selection?['local.year'].firstOrNull !=
+            widget.selection?['local.year'].firstOrNull) {
+      _year = _selection['local.year'].firstOrNull;
+      _effectiveReportId =
+          widget.progressReportId ??
+          int.tryParse(
+            ApiFilterScope.query(context, 'dashboard')['progressReportId'] ??
+                '',
+          );
+      _request = _load();
     }
   }
 
@@ -69,9 +102,7 @@ class _PswgDataLoaderState extends State<PswgDataLoader> {
               Text(l10n.text('dashboardLoadError')),
               TextButton(
                 onPressed: () => setState(() {
-                  _request = AppSettings.of(
-                    context,
-                  ).dashboard.getLiveDashboard(scope: widget.scope);
+                  _request = _load();
                 }),
                 child: Text(l10n.text('retry')),
               ),
@@ -80,7 +111,7 @@ class _PswgDataLoaderState extends State<PswgDataLoader> {
         );
       }
       return PswgDataScope(
-        data: snapshot.data!,
+        data: snapshot.data!.filtered(_selection),
         child: Builder(builder: widget.builder),
       );
     },

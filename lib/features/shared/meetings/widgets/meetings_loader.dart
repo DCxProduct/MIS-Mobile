@@ -1,3 +1,5 @@
+import '../../../../core/widgets/filters/api_filter_scope.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/app_settings.dart';
 import '../../../../translations/app_localizations.dart';
@@ -12,10 +14,15 @@ class MeetingsLoader extends StatefulWidget {
 
 class _MeetingsLoaderState extends State<MeetingsLoader> {
   Future<List<CalendarMeeting>>? _future;
+  Map<String, String>? _query;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _future ??= AppSettings.of(context).meetings.getMeetings();
+    final query = ApiFilterScope.query(context, 'meetings');
+    if (_future == null || !mapEquals(_query, query)) {
+      _query = Map.of(query);
+      _future = AppSettings.of(context).meetings.getMeetings(filters: query);
+    }
   }
 
   @override
@@ -31,14 +38,20 @@ class _MeetingsLoaderState extends State<MeetingsLoader> {
             Text(l10n.text('meetingsLoadError')),
             TextButton(
               onPressed: () => setState(() {
-                _future = AppSettings.of(context).meetings.getMeetings();
+                _future = AppSettings.of(
+                  context,
+                ).meetings.getMeetings(filters: _query ?? const {});
               }),
               child: Text(l10n.text('retry')),
             ),
           ],
         );
-      if (snapshot.data!.isEmpty) return Text(l10n.text('noMeetings'));
-      return widget.builder(snapshot.data!);
+      final selection = ApiFilterScope.selection(context, 'meetings');
+      final items = snapshot.data!
+          .where((item) => selection.matchesLocal(item.details.filterValues))
+          .toList();
+      if (items.isEmpty) return Text(l10n.text('noMeetings'));
+      return widget.builder(items);
     },
   );
 }

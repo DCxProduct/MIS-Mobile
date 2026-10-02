@@ -8,7 +8,7 @@ import '../../shared/meetings/data/rgc_decision.dart';
 import '../../shared/meetings/data/rgc_decisions_repository.dart';
 import '../../shared/issues/widgets/issue_agency_logo.dart';
 import '../../cdc_secretariat/dashboard/filter_sheet.dart';
-import '../../cdc_secretariat/reports/report_filter_sheet.dart';
+import '../../../core/widgets/filters/api_filter_sheet.dart';
 import 'rgc_decision_details.dart';
 
 class CdcSectionReportsScreenView extends StatefulWidget {
@@ -26,6 +26,7 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
   int _totalPages = 0;
   bool _loading = true;
   bool _loadingMore = false;
+  int _loadVersion = 0;
   String? _error;
   late RgcDecisionsRepository _repository;
 
@@ -63,6 +64,8 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
   Future<void> _loadPage(int page) async {
     final id = _stakeholderId;
     if (id == null) return;
+    final version = page == 1 ? ++_loadVersion : _loadVersion;
+    final filters = _filters.toQuery();
     setState(() {
       if (page == 1) {
         _loading = true;
@@ -74,23 +77,31 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
       _error = null;
     });
     try {
-      final result = await _repository.getDecisionsPage(
-        stakeholderId: id,
-        page: page,
-        limit: 20,
-      );
-      if (!mounted || id != _stakeholderId) return;
+      final all = _filters.hasLocalFilters
+          ? await _repository.getDecisions(
+              filters: {'stakeholderId': '$id', ...filters},
+            )
+          : null;
+      final result = all == null
+          ? await _repository.getDecisionsPage(
+              stakeholderId: id,
+              page: page,
+              limit: 20,
+              filters: filters,
+            )
+          : null;
+      if (!mounted || id != _stakeholderId || version != _loadVersion) return;
       setState(() {
         _decisions = page == 1
-            ? result.items
-            : [..._decisions, ...result.items];
+            ? all ?? result!.items
+            : [..._decisions, ...result!.items];
         _page = page;
-        _totalPages = result.totalPages;
+        _totalPages = all != null ? 1 : result!.totalPages;
         _loading = false;
         _loadingMore = false;
       });
     } catch (_) {
-      if (mounted && id == _stakeholderId) {
+      if (mounted && id == _stakeholderId && version == _loadVersion) {
         setState(() {
           _error = 'load';
           _loading = false;
@@ -101,55 +112,24 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
   }
 
   Future<void> _openFilters() async {
-    final result = await Navigator.of(context).push<CdcDashboardFilters>(
+    final catalogs = AppSettings.of(context).filters;
+    final result = await Navigator.of(context).push<FilterSelection>(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (_) => CdcReportFilterSheet(
-          initial: _filters,
-          groups: {
-            'status': ['Solved', 'In Progress', 'Not Addressed'],
-            'primaryAgency': [
-              for (final ministry in _ministries ?? const <RgcMinistry>[])
-                ministry.name,
-            ],
-          },
-        ),
+        builder: (_) => ApiFilterSheet(initial: _filters, load: catalogs.rgc),
       ),
     );
     if (!mounted || result == null) return;
-    final selectedAgencies = result.values['primaryAgency'];
-    final selectedMinistry =
-        selectedAgencies == null || selectedAgencies.isEmpty
-        ? null
-        : _ministries
-              ?.where((ministry) => selectedAgencies.contains(ministry.name))
-              .firstOrNull;
-    final selectedId = selectedMinistry?.id;
-    if (selectedMinistry != null) {
-      result.values['primaryAgency'] = {selectedMinistry.name};
-    }
-    final changed = selectedId != null && selectedId != _stakeholderId;
-    setState(() {
-      _filters = result;
-      if (changed) _stakeholderId = selectedId;
-    });
-    if (changed) await _loadPage(1);
-  }
-
-  bool _matches(RgcDecision decision) {
-    bool includes(String group, String value) {
-      final selected = _filters.values[group];
-      return selected == null || selected.isEmpty || selected.contains(value);
-    }
-
-    return includes('status', decision.status) &&
-        includes('primaryAgency', decision.agencyName);
+    setState(() => _filters = result);
+    await _loadPage(1);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final reports = _decisions.where(_matches).toList();
+    final reports = _decisions
+        .where((decision) => _filters.matchesLocal(decision.filterValues))
+        .toList();
     return ColoredBox(
       color: AppColors.isDark(context)
           ? AppColors.darkBackground

@@ -6,11 +6,15 @@ class PlenariesRepository {
 
   final ApiClient _api;
 
-  Future<List<Plenary>> getPlenaries() async {
-    final data = await _api.get('plenaries');
+  Future<List<Plenary>> getPlenaries({
+    Map<String, String> filters = const {},
+  }) async {
+    final items = await _api.getAllPages(
+      'plenaries',
+      query: filters,
+      objectItems: true,
+    );
     try {
-      final items = data['items'];
-      if (items is! List) throw const FormatException();
       return List.unmodifiable(
         items.map((item) {
           if (item is! Map<String, dynamic>) throw const FormatException();

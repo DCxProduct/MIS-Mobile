@@ -1,3 +1,6 @@
+import '../../../../core/config/module_config.dart';
+import '../../../../core/widgets/filters/api_filter_scope.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_settings.dart';
@@ -64,11 +67,20 @@ class RgcDecisionsLoader extends StatefulWidget {
 
 class _RgcDecisionsLoaderState extends State<RgcDecisionsLoader> {
   Future<List<RgcDecision>>? _future;
+  Map<String, String>? _query;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _future ??= AppSettings.of(context).rgcDecisions.getDecisions();
+    final query = ApiFilterScope.query(context, 'rgc-decisions');
+    if (_future == null || !mapEquals(_query, query)) {
+      _query = Map.of(query);
+      _future = AppSettings.of(context).rgcDecisions.getDecisions(
+        filters: query,
+        cdcGpsf:
+            AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat,
+      );
+    }
   }
 
   @override
@@ -88,14 +100,22 @@ class _RgcDecisionsLoaderState extends State<RgcDecisionsLoader> {
             Text(l10n.text('rgcDecisionsLoadError')),
             TextButton(
               onPressed: () => setState(() {
-                _future = AppSettings.of(context).rgcDecisions.getDecisions();
+                _future = AppSettings.of(context).rgcDecisions.getDecisions(
+                  filters: _query ?? const {},
+                  cdcGpsf:
+                      AppSettings.of(context).moduleType ==
+                      AppModuleType.cdcSecretariat,
+                );
               }),
               child: Text(l10n.text('retry')),
             ),
           ],
         );
       }
-      final decisions = snapshot.data ?? const <RgcDecision>[];
+      final selection = ApiFilterScope.selection(context, 'rgc-decisions');
+      final decisions = (snapshot.data ?? const <RgcDecision>[])
+          .where((decision) => selection.matchesLocal(decision.filterValues))
+          .toList();
       if (decisions.isEmpty) {
         return Text(l10n.text('noRgcDecisions'));
       }

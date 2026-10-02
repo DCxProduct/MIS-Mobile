@@ -1,3 +1,5 @@
+import '../../../../core/widgets/filters/api_filter_scope.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_settings.dart';
@@ -15,11 +17,16 @@ class PlenariesLoader extends StatefulWidget {
 
 class _PlenariesLoaderState extends State<PlenariesLoader> {
   Future<List<Plenary>>? _future;
+  Map<String, String>? _query;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _future ??= AppSettings.of(context).plenaries.getPlenaries();
+    final query = ApiFilterScope.query(context, 'plenaries');
+    if (_future == null || !mapEquals(_query, query)) {
+      _query = Map.of(query);
+      _future = AppSettings.of(context).plenaries.getPlenaries(filters: query);
+    }
   }
 
   @override
@@ -39,7 +46,9 @@ class _PlenariesLoaderState extends State<PlenariesLoader> {
             Text(l10n.text('plenariesLoadError')),
             TextButton(
               onPressed: () => setState(() {
-                _future = AppSettings.of(context).plenaries.getPlenaries();
+                _future = AppSettings.of(
+                  context,
+                ).plenaries.getPlenaries(filters: _query ?? const {});
               }),
               child: Text(l10n.text('retry')),
             ),

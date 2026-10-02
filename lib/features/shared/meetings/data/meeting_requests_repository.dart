@@ -5,8 +5,14 @@ class MeetingRequestsRepository {
   MeetingRequestsRepository(this._api);
   final ApiClient _api;
 
-  Future<List<MeetingRequest>> getRequests() async {
-    final data = await _api.getList('meeting-requests');
+  Future<List<MeetingRequest>> getRequests({
+    Map<String, String> filters = const {},
+  }) async {
+    final data = await _api.getAllPages(
+      'meeting-requests',
+      query: filters,
+      limit: 50,
+    );
     try {
       return List.unmodifiable(
         data.map((item) => MeetingRequest(item as Map<String, dynamic>)),

@@ -8,30 +8,25 @@ class IssuesRepository {
 
   final ApiClient _api;
 
-  Future<List<WorkingGroupIssue>> getMyWorkingGroupIssues() async {
-    final data = await _api.get('working-group-issues/my');
-    try {
-      final items = data['items'];
-      if (items is! List) throw const FormatException();
-      return List.unmodifiable(
-        items.map((item) {
-          if (item is! Map<String, dynamic>) throw const FormatException();
-          return WorkingGroupIssue.fromJson(item);
-        }),
-      );
-    } on FormatException {
-      throw const ApiException('The server returned invalid issue data.');
-    }
-  }
+  Future<List<WorkingGroupIssue>> getMyWorkingGroupIssues({
+    Map<String, String> filters = const {},
+  }) => _getPages('working-group-issues/my', filters);
 
-  Future<List<WorkingGroupIssue>> getIssueMatrix() async {
+  Future<List<WorkingGroupIssue>> getIssueMatrix({
+    Map<String, String> filters = const {},
+  }) => _getPages('working-group-issues/issue-matrix', filters);
+
+  Future<List<WorkingGroupIssue>> _getPages(
+    String endpoint,
+    Map<String, String> filters,
+  ) async {
     try {
       final issues = <WorkingGroupIssue>[];
       var totalPages = 1;
       for (var page = 1; page <= totalPages; page++) {
         final response = await _api.getObjectPage(
-          'working-group-issues/issue-matrix',
-          query: {'limit': '50', 'page': '$page'},
+          endpoint,
+          query: {...filters, 'limit': '50', 'page': '$page'},
         );
         final data = response['data'] as Map<String, dynamic>;
         final items = data['items'];

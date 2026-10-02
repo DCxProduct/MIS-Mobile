@@ -1,3 +1,4 @@
+import '../../../../core/widgets/filters/filter_models.dart';
 import '../../../../core/text/html_text.dart';
 import '../../issues/data/working_group_issue.dart';
 
@@ -10,6 +11,14 @@ class MeetingRequest {
       meetingDate = _date(json['meetingDate']),
       submittedAt = _date(json['submittedAt']),
       submittedBy = _string(_object(json['user'])['name']),
+      groupNames = (_object(json['user'])['stakeholders'] as List? ?? [])
+          .map((entry) => _string(_object(entry)['stakeholder']?['name']))
+          .where((name) => name.isNotEmpty)
+          .toList(),
+      agencyNames = (json['governmentAgencies'] as List? ?? [])
+          .map((entry) => _string(_object(entry)['stakeholder']?['name']))
+          .where((name) => name.isNotEmpty)
+          .toList(),
       group = (_object(json['user'])['stakeholders'] as List? ?? [])
           .map((entry) => _string(_object(entry)['stakeholder']?['name']))
           .where((name) => name.isNotEmpty)
@@ -41,6 +50,18 @@ class MeetingRequest {
         ),
       );
 
+  final List<String> groupNames, agencyNames;
+  Map<String, Iterable<String>> get filterValues => {
+    'local.workingGroup': groupNames,
+    'local.primaryAgency': agencyNames,
+    'local.status': [status],
+    'local.year': [
+      if (meetingDate != null)
+        FilterSelection.dateValue(meetingDate).substring(0, 4),
+    ],
+    'local.issueCount': ['$issuesCount'],
+    'local.date': [FilterSelection.dateValue(meetingDate)],
+  };
   final int id, issuesCount, attachmentCount;
   final String title,
       status,

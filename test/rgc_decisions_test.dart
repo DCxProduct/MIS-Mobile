@@ -139,6 +139,27 @@ void main() {
     }
   });
 
+  test('maps the report filter metadata from API fields', () {
+    final decision = RgcDecision({
+      'id': 1,
+      'plenary': {'name': '21th'},
+      'measureCategory': {'name': '8. Banking and Finance Sector'},
+      'dateOfDecision': '2026-09-29T17:00:00.000Z',
+      'issues': [
+        {
+          'stakeholder': {'name': 'Banking and Financial Services'},
+        },
+        {
+          'stakeholder': {'name': 'Banking and Financial Services'},
+        },
+      ],
+    });
+    expect(decision.plenaryName, '21th');
+    expect(decision.workingGroups, ['Banking and Financial Services']);
+    expect(decision.measureCategory, '8. Banking and Finance Sector');
+    expect(decision.decisionDate, DateTime.utc(2026, 9, 29, 17));
+  });
+
   test('maps issue submitter separately from submitting organization', () {
     final issue = RgcDecisionIssue.fromJson(
       {

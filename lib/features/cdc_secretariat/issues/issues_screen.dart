@@ -1,3 +1,6 @@
+import '../../../core/app_settings.dart';
+import '../../../core/widgets/filters/api_filter_sheet.dart';
+import '../../../core/widgets/filters/api_filter_scope.dart';
 import '../../shared/issues/data/working_group_issue.dart';
 import '../../shared/issues/widgets/wg_issues_list.dart';
 import '../../shared/issues/widgets/issue_display.dart';
@@ -10,9 +13,6 @@ import '../../../core/app_colors.dart';
 import '../../../translations/app_localizations.dart';
 import '../../../screens/report/rgc_decision_detail_screen.dart';
 import '../../private_sector/issues/issue_detail_screen.dart';
-import '../dashboard/filter_sheet.dart';
-
-import 'issue_filter_sheet.dart';
 
 class CdcSecretariatIssuesScreenView extends StatefulWidget {
   const CdcSecretariatIssuesScreenView({super.key});
@@ -23,137 +23,130 @@ class CdcSecretariatIssuesScreenView extends StatefulWidget {
 
 class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
   int _tab = 0;
-  CdcDashboardFilters _filters = CdcDashboardFilters();
-
-  bool _matchesIssue(WorkingGroupIssue issue) {
-    bool includes(String group, String value) {
-      final selected = _filters.values[group];
-      return selected == null || selected.isEmpty || selected.contains(value);
-    }
-
-    final date = issue.meetingDate ?? issue.createdAt;
-    final year = date == null ? '' : '${date.year}';
-    final pswg = '${issue.agency} ${issue.submittedBy} ${issue.title}'
-        .toLowerCase();
-    final pswgSelected = _filters.values['allPswgs'];
-    final matchesPswg =
-        pswgSelected == null ||
-        pswgSelected.isEmpty ||
-        pswgSelected.any((value) => pswg.contains(value.toLowerCase()));
-    return matchesPswg && includes('year', year);
-  }
-
+  final _filters = [FilterSelection(), FilterSelection()];
   Future<void> _openFilters() async {
-    final result = await Navigator.of(context).push<CdcDashboardFilters>(
+    final tab = _tab;
+    final catalogs = AppSettings.of(context).filters;
+    final result = await Navigator.of(context).push<FilterSelection>(
       MaterialPageRoute(
-        builder: (_) => CdcIssueFilterSheet(initial: _filters),
         fullscreenDialog: true,
+        builder: (_) => ApiFilterSheet(
+          initial: _filters[tab],
+          load: tab == 0
+              ? () => catalogs.rgc(cdcGpsf: true)
+              : () => catalogs.issues(matrix: true, cdcDesign: true),
+        ),
       ),
     );
     if (!mounted || result == null) return;
-    setState(() => _filters = result);
+    setState(() => _filters[tab] = result);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return ColoredBox(
-      color: AppColors.isDark(context)
-          ? AppColors.darkBackground
-          : const Color(0xFFF7F8FA),
-      child: Column(
-        children: [
-          Container(
-            color: AppColors.cardBackground(context),
-            padding: EdgeInsets.fromLTRB(
-              16,
-              MediaQuery.of(context).viewPadding.top + 20,
-              16,
-              14,
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l10n.text('wgIssues'),
-                        style: TextStyle(
-                          color: AppColors.primaryText(context),
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.secondaryText(context),
-                        side: BorderSide(color: AppColors.border(context)),
-                        minimumSize: const Size(0, 30),
-                        padding: const EdgeInsets.symmetric(horizontal: 9),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                      onPressed: _openFilters,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '${l10n.text('filter')}${_filters.count > 0 ? ' (${_filters.count})' : ''}',
-                            style: const TextStyle(fontSize: 12),
+    return ApiFilterScope(
+      selections: {'rgc-decisions': _filters[0]},
+      queries: {'rgc-decisions': _filters[0].toQuery()},
+      child: ColoredBox(
+        color: AppColors.isDark(context)
+            ? AppColors.darkBackground
+            : const Color(0xFFF7F8FA),
+        child: Column(
+          children: [
+            Container(
+              color: AppColors.cardBackground(context),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                MediaQuery.of(context).viewPadding.top + 20,
+                16,
+                14,
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.text('wgIssues'),
+                          style: TextStyle(
+                            color: AppColors.primaryText(context),
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
                           ),
-                          const SizedBox(width: 5),
-                          const Icon(Icons.filter_list, size: 16),
+                        ),
+                      ),
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.secondaryText(context),
+                          side: BorderSide(color: AppColors.border(context)),
+                          minimumSize: const Size(0, 30),
+                          padding: const EdgeInsets.symmetric(horizontal: 9),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        onPressed: _openFilters,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${l10n.text('filter')}${_filters[_tab].count > 0 ? ' (${_filters[_tab].count})' : ''}',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            const SizedBox(width: 5),
+                            const Icon(Icons.filter_list, size: 16),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  _IssueTabs(
+                    selectedIndex: _tab,
+                    onSelected: (value) => setState(() => _tab = value),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                key: ValueKey(_tab),
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
+                children: [
+                  _tab == 0
+                      ? RgcDecisionScorecardLoader(
+                          builder: (scorecard) =>
+                              _IssueMetricGrid(scorecard: scorecard),
+                        )
+                      : WgIssueSummaryLoader(
+                          matrix: true,
+                          builder: (summary) =>
+                              _IssueMetricGrid(summary: summary),
+                        ),
+                  const SizedBox(height: 16),
+                  if (_tab == 0) ...[
+                    RgcDecisionsLoader(
+                      builder: (decisions) => Column(
+                        children: [
+                          for (final decision in decisions)
+                            _DecisionCard(decision: decision),
                         ],
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                _IssueTabs(
-                  selectedIndex: _tab,
-                  onSelected: (value) => setState(() => _tab = value),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: ListView(
-              key: ValueKey(_tab),
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
-              children: [
-                _tab == 0
-                    ? RgcDecisionScorecardLoader(
-                        builder: (scorecard) =>
-                            _IssueMetricGrid(scorecard: scorecard),
-                      )
-                    : WgIssueSummaryLoader(
-                        matrix: true,
-                        builder: (summary) =>
-                            _IssueMetricGrid(summary: summary),
-                      ),
-                const SizedBox(height: 16),
-                if (_tab == 0) ...[
-                  RgcDecisionsLoader(
-                    builder: (decisions) => Column(
-                      children: [
-                        for (final decision in decisions)
-                          _DecisionCard(decision: decision),
-                      ],
+                  ] else ...[
+                    WgIssuesList(
+                      matrix: true,
+                      apiFilters: _filters[1].toQuery(),
+                      selection: _filters[1],
+                      itemBuilder: (issue) => _IssueCard(issue: issue),
                     ),
-                  ),
-                ] else ...[
-                  WgIssuesList(
-                    matrix: true,
-                    filter: _matchesIssue,
-                    itemBuilder: (issue) => _IssueCard(issue: issue),
-                  ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

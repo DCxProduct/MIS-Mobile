@@ -1,3 +1,9 @@
+import '../../../core/app_settings.dart';
+import '../../../core/widgets/filters/api_filter_sheet.dart';
+import '../../../core/widgets/filters/api_filter_scope.dart';
+import '../../shared/meetings/widgets/rgc_decisions_loader.dart';
+import '../../shared/meetings/widgets/plenaries_loader.dart';
+import '../../cdc_section/reports/rgc_decision_details.dart';
 import 'package:flutter/material.dart';
 import '../../../translations/app_language.dart';
 import '../../../core/app_colors.dart';
@@ -8,10 +14,7 @@ import '../dashboard/categories_tab.dart';
 import '../dashboard/overall_tab.dart';
 import '../dashboard/working_group_tab.dart';
 import '../../../screens/report/plenary_detail_screen.dart';
-import '../../../screens/report/rgc_decision_detail_screen.dart';
 import '../../../translations/app_localizations.dart';
-import '../dashboard/filter_sheet.dart';
-import 'report_filter_sheet.dart';
 
 class CdcSecretariatReportsScreenView extends StatefulWidget {
   const CdcSecretariatReportsScreenView({super.key});
@@ -21,23 +24,21 @@ class CdcSecretariatReportsScreenView extends StatefulWidget {
 
 class _CdcReportsState extends State<CdcSecretariatReportsScreenView> {
   int _tab = 0;
-  final _filters = List.generate(3, (_) => CdcDashboardFilters());
+  final _filters = List.generate(3, (_) => FilterSelection());
   Future<void> _openFilters() async {
     final tab = _tab;
-    final result = await Navigator.of(context).push<CdcDashboardFilters>(
+    final catalogs = AppSettings.of(context).filters;
+    final result = await Navigator.of(context).push<FilterSelection>(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (_) => tab != 1
-            ? CdcReportFilterSheet(initial: _filters[tab])
-            : CdcDashboardFilterSheet(
-                initial: _filters[tab],
-                groups: tab == 1
-                    ? const {
-                        'status': ['Sent', 'Draft'],
-                        'year': ['2026', '2025', '2024', '2023'],
-                      }
-                    : null,
-              ),
+        builder: (_) => ApiFilterSheet(
+          initial: _filters[tab],
+          load: switch (tab) {
+            0 => () => catalogs.dashboard('plenary'),
+            1 => catalogs.plenaries,
+            _ => () => catalogs.rgc(cdcGpsf: true),
+          },
+        ),
       ),
     );
     if (!mounted || result == null) return;
@@ -47,82 +48,90 @@ class _CdcReportsState extends State<CdcSecretariatReportsScreenView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return ColoredBox(
-      color: AppColors.isDark(context)
-          ? AppColors.darkBackground
-          : const Color(0xFFF7F8FA),
-      child: Column(
-        children: [
-          Container(
-            color: AppColors.cardBackground(context),
-            padding: EdgeInsets.fromLTRB(
-              16,
-              MediaQuery.of(context).viewPadding.top + 20,
-              16,
-              14,
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l10n.text(['report', 'plenary', 'rgcDecision'][_tab]),
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    OutlinedButton(
-                      onPressed: _openFilters,
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: AppColors.border(context)),
-                        minimumSize: const Size(0, 30),
-                        padding: const EdgeInsets.symmetric(horizontal: 9),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '${l10n.text('filter')}${_filters[_tab].count == 0 ? '' : ' (${_filters[_tab].count})'}',
-                            style: const TextStyle(fontSize: 12),
+    return ApiFilterScope(
+      selections: {'rgc-decisions': _filters[2], 'dashboard': _filters[0]},
+      queries: {
+        'dashboard': _filters[0].toQuery(),
+        'plenaries': _filters[1].toQuery(),
+        'rgc-decisions': _filters[2].toQuery(),
+      },
+      child: ColoredBox(
+        color: AppColors.isDark(context)
+            ? AppColors.darkBackground
+            : const Color(0xFFF7F8FA),
+        child: Column(
+          children: [
+            Container(
+              color: AppColors.cardBackground(context),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                MediaQuery.of(context).viewPadding.top + 20,
+                16,
+                14,
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.text(['report', 'plenary', 'rgcDecision'][_tab]),
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
                           ),
-                          const SizedBox(width: 5),
-                          const Icon(Icons.filter_list, size: 16),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                _ReportTabs(
-                  selectedIndex: _tab,
-                  onSelected: (tab) => setState(() => _tab = tab),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: IndexedStack(
-              index: _tab,
-              children: [
-                for (final child in const [
-                  _ReportDashboardTab(),
-                  _PlenaryTab(),
-                  _RgcDecisionTab(),
-                ])
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(16, 18, 16, 100),
-                    child: child,
+                      OutlinedButton(
+                        onPressed: _openFilters,
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: AppColors.border(context)),
+                          minimumSize: const Size(0, 30),
+                          padding: const EdgeInsets.symmetric(horizontal: 9),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${l10n.text('filter')}${_filters[_tab].count == 0 ? '' : ' (${_filters[_tab].count})'}',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            const SizedBox(width: 5),
+                            const Icon(Icons.filter_list, size: 16),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-              ],
+                  const SizedBox(height: 10),
+                  _ReportTabs(
+                    selectedIndex: _tab,
+                    onSelected: (tab) => setState(() => _tab = tab),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: IndexedStack(
+                index: _tab,
+                children: [
+                  for (final child in const [
+                    _ReportDashboardTab(),
+                    _PlenaryTab(),
+                    _RgcDecisionTab(),
+                  ])
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(16, 18, 16, 100),
+                      child: child,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -133,31 +142,29 @@ class _RgcDecisionTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        _RgcDecisionCard(
-          agencyName: 'MPWT',
-          status: 'In Progress',
-          meetingDate: 'Nov 13, 2023',
-          category: 'Legislation',
-          focalPerson: 'Peng Ponea',
-          linkCount: '2 Link',
-        ),
-        _RgcDecisionCard(
-          agencyName: 'MPWT',
-          status: 'Solved',
-          meetingDate: 'Apr 28, 2025',
-          category: 'Legislation',
-          focalPerson: 'Peng Ponea',
-          linkCount: '2 Link',
-        ),
-      ],
+    return RgcDecisionsLoader(
+      builder: (decisions) => Column(
+        children: [
+          for (final decision in decisions)
+            _RgcDecisionCard(
+              decisionId: decision.id,
+              agencyName: decision.agencyName,
+              status: decision.status,
+              meetingDate: rgcDate(decision.meetingDate),
+              category: decision.category,
+              focalPerson: decision.focalPerson,
+              linkCount:
+                  '${decision.linkCount} ${AppLocalizations.of(context).text('link')}',
+            ),
+        ],
+      ),
     );
   }
 }
 
 class _RgcDecisionCard extends StatelessWidget {
   const _RgcDecisionCard({
+    required this.decisionId,
     required this.agencyName,
     required this.status,
     required this.meetingDate,
@@ -166,6 +173,7 @@ class _RgcDecisionCard extends StatelessWidget {
     required this.linkCount,
   });
 
+  final int decisionId;
   final String agencyName;
   final String status;
   final String meetingDate;
@@ -301,7 +309,7 @@ class _RgcDecisionCard extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) =>
-                        RgcDecisionDetailScreen(agencyName: agencyName),
+                        CdcRgcDecisionOverviewScreen(decisionId: decisionId),
                   ),
                 );
               },
@@ -338,17 +346,21 @@ class _PlenaryTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        _PlenaryCard(
-          title: '19th G-PSF. Plenary',
-          status: 'Sent',
-          meetingDate: 'Apr 08, 2025',
-          numberOfRgcDecision: '179',
-          deadline: 'Apr 15, 2025',
-          attachmentCount: '2 Attachement',
-        ),
-      ],
+    return PlenariesLoader(
+      builder: (plenaries) => Column(
+        children: [
+          for (final plenary in plenaries)
+            _PlenaryCard(
+              title: plenary.name,
+              status: plenary.status,
+              meetingDate: rgcDate(plenary.meetingDate),
+              numberOfRgcDecision: '${plenary.numberOfRgcDecisions}',
+              deadline: rgcDate(plenary.deadline),
+              attachmentCount:
+                  '${plenary.attachmentCount} ${AppLocalizations.of(context).text('attachmentsLabel')}',
+            ),
+        ],
+      ),
     );
   }
 }

@@ -1,5 +1,4 @@
 import 'overall_status_card.dart';
-import 'working_group_filter_sheet.dart';
 import '../../cdc_secretariat/dashboard/filter_sheet.dart';
 import '../../shared/dashboard/data/dashboard_repository.dart';
 import '../../shared/dashboard/widgets/pswg_live_dashboard.dart';
@@ -10,7 +9,9 @@ import '../../../core/app_colors.dart';
 import '../../../core/app_settings.dart';
 import '../../../translations/app_localizations.dart';
 import '../../../widgets/app_logo.dart';
-import '../../line_ministry/reports/reports_screen.dart';
+import '../../../core/widgets/filters/api_filter_sheet.dart';
+import 'working_group_filter_sheet.dart';
+import '../../cdc_secretariat/reports/report_filter_sheet.dart';
 
 class CdcSectionDashboardScreenView extends StatefulWidget {
   const CdcSectionDashboardScreenView({super.key});
@@ -24,26 +25,35 @@ class _CdcSectionDashboardScreenViewState
     extends State<CdcSectionDashboardScreenView> {
   int _mainTab = 0; // 0: Plenary, 1: Working Group
   CdcDashboardFilters _workingGroupFilters = CdcDashboardFilters();
+  CdcDashboardFilters _plenaryFilters = CdcDashboardFilters();
 
   Future<void> _openDashboardFilters() async {
-    if (_mainTab == 0) {
-      await showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => const LineMinistryDashboardFilterSheet(),
-      );
-      return;
-    }
+    final tab = _mainTab;
     final result = await Navigator.of(context).push<CdcDashboardFilters>(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (_) =>
-            CdcWorkingGroupDashboardFilterSheet(initial: _workingGroupFilters),
+        builder: (_) => AppSettings.of(context).auth.isStaticSession
+            ? (tab == 0
+                  ? CdcReportFilterSheet(initial: _plenaryFilters)
+                  : CdcWorkingGroupDashboardFilterSheet(
+                      initial: _workingGroupFilters,
+                    ))
+            : ApiFilterSheet(
+                initial: tab == 0 ? _plenaryFilters : _workingGroupFilters,
+                load: () => AppSettings.of(
+                  context,
+                ).filters.dashboard(tab == 0 ? 'plenary' : 'pswg'),
+              ),
       ),
     );
     if (!mounted || result == null) return;
-    setState(() => _workingGroupFilters = result);
+    setState(() {
+      if (tab == 0) {
+        _plenaryFilters = result;
+      } else {
+        _workingGroupFilters = result;
+      }
+    });
   }
 
   int _subFilter =
@@ -67,7 +77,13 @@ class _CdcSectionDashboardScreenViewState
       return _buildContent(context);
     }
     return PswgDataLoader(
+      selection: _mainTab == 0 ? _plenaryFilters : _workingGroupFilters,
       scope: _mainTab == 0 ? DashboardScope.plenary : DashboardScope.pswg,
+      progressReportId: int.tryParse(
+        (_mainTab == 0 ? _plenaryFilters : _workingGroupFilters)
+                .toQuery()['progressReportId'] ??
+            '',
+      ),
       builder: _buildContent,
     );
   }
@@ -180,7 +196,7 @@ class _CdcSectionDashboardScreenViewState
                     _FilterButton(
                       activeCount: _mainTab == 1
                           ? _workingGroupFilters.count
-                          : 0,
+                          : _plenaryFilters.count,
                       onTap: _openDashboardFilters,
                     ),
                   ],

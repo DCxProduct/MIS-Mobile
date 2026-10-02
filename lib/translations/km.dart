@@ -205,6 +205,8 @@ const Map<String, String> kmTranslations = {
   'emptyIssues': 'បញ្ជីបញ្ហានឹងបង្ហាញនៅទីនេះ។',
   'emptyReport': 'របាយការណ៍នឹងបង្ហាញនៅទីនេះ។',
   'filters': 'តម្រង',
+  'filtersLoadError': 'មិនអាចទាញយកជម្រើសតម្រងបាន។',
+  'clearAllFilters': 'សម្អាតទាំងអស់',
   'applyFilters': 'អនុវត្តតម្រង',
   'viewAll': 'មើលទាំងអស់',
   'viewLess': 'មើលតិច',

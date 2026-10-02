@@ -5,10 +5,15 @@ class MeetingSummariesRepository {
   MeetingSummariesRepository(this._api);
   final ApiClient _api;
 
-  Future<List<MeetingSummary>> getSummaries() async {
-    final data = await _api.get('meeting-summaries');
+  Future<List<MeetingSummary>> getSummaries({
+    Map<String, String> filters = const {},
+  }) async {
+    final items = await _api.getAllPages(
+      'meeting-summaries',
+      query: filters,
+      objectItems: true,
+    );
     try {
-      final items = data['items'] as List? ?? const [];
       return List.unmodifiable(
         items.map((item) => MeetingSummary(item as Map<String, dynamic>)),
       );

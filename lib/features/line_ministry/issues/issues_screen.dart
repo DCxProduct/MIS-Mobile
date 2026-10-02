@@ -1,3 +1,5 @@
+import '../../../core/app_settings.dart';
+import '../../../core/widgets/filters/api_filter_sheet.dart';
 import '../../shared/issues/data/working_group_issue.dart';
 import '../../shared/issues/widgets/wg_issues_list.dart';
 import '../../shared/issues/widgets/issue_display.dart';
@@ -6,7 +8,6 @@ import '../../shared/issues/data/wg_issue_summary.dart';
 import '../../shared/issues/widgets/wg_issue_summary_loader.dart';
 import 'package:flutter/material.dart';
 import '../../shared/widgets/list_screen_header.dart';
-import 'package:flutter/services.dart';
 
 import '../../../core/app_colors.dart';
 import '../../../core/widgets/pdf_attachment_preview.dart';
@@ -48,43 +49,43 @@ class _LineMinistryIssuesScreenViewState
     extends State<LineMinistryIssuesScreenView> {
   int _selectedTab = 0;
 
+  final _apiSelections = [FilterSelection(), FilterSelection()];
+
   Set<String> _selectedYears = {};
+  Set<String> _selectedCategories = {};
   Set<String> _selectedStatuses = {};
   Set<String> _selectedAgencies = {};
   Set<String> _selectedProgressReports = {};
 
   Future<void> _openFilterSheet(BuildContext context) async {
-    if (widget.staticPreview || widget.issueDetailBuilder != null) {
+    if (widget.staticPreview) {
       await _openPreviewFilters(context);
       return;
     }
-    final result = await showModalBottomSheet<_LineMinistryIssuesFilterResult>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: false,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return _LineMinistryIssuesFilterSheet(
-          selectedYears: _selectedYears,
-          selectedStatuses: _selectedStatuses,
-          selectedAgencies: _selectedAgencies,
-          selectedProgressReports: _selectedProgressReports,
-        );
-      },
+    final tab = _selectedTab == 0 && widget.showTabs ? 0 : 1;
+    final catalogs = AppSettings.of(context).filters;
+    final result = await Navigator.of(context).push<FilterSelection>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => ApiFilterSheet(
+          initial: _apiSelections[tab],
+          load: () => widget.cdcMatrix
+              ? catalogs.cdcIssues()
+              : catalogs.issues(
+                  matrix: tab == 1,
+                  cdcDesign: widget.issueDetailBuilder != null,
+                ),
+        ),
+      ),
     );
-
-    if (result != null) {
-      setState(() {
-        _selectedYears = result.years;
-        _selectedStatuses = result.statuses;
-        _selectedAgencies = result.agencies;
-        _selectedProgressReports = result.progressReports;
-      });
-    }
+    if (!mounted || result == null) return;
+    setState(() => _apiSelections[tab] = result);
   }
 
   Future<void> _openPreviewFilters(BuildContext context) async {
     final initial = CdcDashboardFilters({
+      'categories': {..._selectedCategories},
+      'status': {..._selectedStatuses},
       'allPswgs': {..._selectedAgencies},
       'year': {..._selectedYears},
       'plenaryEscalation': {..._selectedProgressReports},
@@ -97,6 +98,8 @@ class _LineMinistryIssuesScreenViewState
     );
     if (!mounted || result == null) return;
     setState(() {
+      _selectedCategories = {...?result.values['categories']};
+      _selectedStatuses = {...?result.values['status']};
       _selectedAgencies = {...?result.values['allPswgs']};
       _selectedYears = {...?result.values['year']};
       _selectedProgressReports = {...?result.values['plenaryEscalation']};
@@ -104,7 +107,11 @@ class _LineMinistryIssuesScreenViewState
   }
 
   int get _activeFilterCount {
-    return _selectedYears.length +
+    if (!widget.staticPreview) {
+      return _apiSelections[_selectedTab == 0 && widget.showTabs ? 0 : 1].count;
+    }
+    return _selectedCategories.length +
+        _selectedYears.length +
         _selectedStatuses.length +
         _selectedAgencies.length +
         _selectedProgressReports.length;
@@ -196,6 +203,8 @@ class _LineMinistryIssuesScreenViewState
                   const SizedBox(height: 12),
                   _selectedTab == 0 && widget.showTabs
                       ? WgIssuesList(
+                          apiFilters: _apiSelections[0].toQuery(),
+                          selection: _apiSelections[0],
                           itemBuilder: (issue) => _LineMinistryIssueListCard(
                             title: issue.title,
                             category: issue.category.isEmpty
@@ -216,6 +225,8 @@ class _LineMinistryIssuesScreenViewState
                       : WgIssuesList(
                           cdcMatrix: widget.cdcMatrix,
                           matrix: true,
+                          apiFilters: _apiSelections[1].toQuery(),
+                          selection: _apiSelections[1],
                           itemBuilder: (issue) => _LineMinistryIssueListCard(
                             title: issue.title,
                             category: issue.category.isEmpty
@@ -815,463 +826,6 @@ class _IssueTabs extends StatelessWidget {
                 ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-String _translateFilterLabel(String item, AppLocalizations l10n) {
-  switch (item) {
-    case 'Drafted':
-      return l10n.text('drafted');
-    case 'Submitted':
-      return l10n.text('submitted');
-    case 'Under Review':
-      return l10n.text('underReview');
-    case 'Scheduled':
-      return l10n.text('scheduled');
-    case 'Completed':
-      return l10n.text('completed');
-    case 'Solved':
-      return l10n.text('solved');
-    case 'In Progress':
-      return l10n.text('inProgress');
-    case 'Not Address':
-    case 'Not Addressed':
-      return l10n.text('notAddressed');
-    case 'Sent':
-      return l10n.text('sent');
-    case 'Draft':
-      return l10n.text('draft');
-    default:
-      return item;
-  }
-}
-
-class _InlineCheckbox extends StatelessWidget {
-  const _InlineCheckbox({
-    required this.label,
-    required this.checked,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool checked;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final l10n = AppLocalizations.of(context);
-    final translatedLabel = _translateFilterLabel(label, l10n);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(4),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 140),
-              width: 16,
-              height: 16,
-              decoration: BoxDecoration(
-                color: checked ? AppColors.accent(context) : Colors.transparent,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(
-                  color: checked
-                      ? AppColors.accent(context)
-                      : (isDark
-                            ? AppColors.darkBorder
-                            : AppColors.filterOutline),
-                  width: 1,
-                ),
-              ),
-              child: checked
-                  ? const Icon(Icons.check, size: 11, color: Colors.white)
-                  : null,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              translatedLabel,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LineMinistryIssuesFilterResult {
-  const _LineMinistryIssuesFilterResult({
-    required this.years,
-    required this.statuses,
-    required this.agencies,
-    required this.progressReports,
-  });
-
-  final Set<String> years;
-  final Set<String> statuses;
-  final Set<String> agencies;
-  final Set<String> progressReports;
-}
-
-class _LineMinistryIssuesFilterSheet extends StatefulWidget {
-  const _LineMinistryIssuesFilterSheet({
-    required this.selectedYears,
-    required this.selectedStatuses,
-    required this.selectedAgencies,
-    required this.selectedProgressReports,
-  });
-
-  final Set<String> selectedYears;
-  final Set<String> selectedStatuses;
-  final Set<String> selectedAgencies;
-  final Set<String> selectedProgressReports;
-
-  @override
-  State<_LineMinistryIssuesFilterSheet> createState() =>
-      _LineMinistryIssuesFilterSheetState();
-}
-
-class _LineMinistryIssuesFilterSheetState
-    extends State<_LineMinistryIssuesFilterSheet> {
-  late Set<String> _categories;
-  late Set<String> _statuses;
-  late Set<String> _pswgs;
-  late Set<String> _years;
-
-  bool _isCategoriesExpanded = false;
-
-  static const _defaultCategories = [
-    'Law, Tax, and Governance',
-    'Tourism',
-    'Construction and Real Estate',
-    'Energy and Mineral Resources',
-    'Non-Bank Financial Services Other issues',
-  ];
-
-  static const _extraCategories = [
-    'Industrial Relations',
-    'Banking and Financial Services',
-    'Agriculture and Agro-Industry',
-    'Other issues',
-    'SMEs, Manufacturing, and Services',
-    'Export Processing and Trad',
-    'Rice and Paddy',
-    'Transportation and Infrastructure',
-  ];
-
-  static const _statusRow1 = ['Drafted', 'Submitted', 'Under Review'];
-  static const _statusRow2 = ['Scheduled', 'Completed'];
-  static const _pswgItems = ['CRF', 'ABC', 'GDCE', 'IBC', 'CTF'];
-  static const _yearItems = ['2026', '2025', '2024', '2023'];
-
-  @override
-  void initState() {
-    super.initState();
-    _categories = {};
-    _statuses = {...widget.selectedStatuses};
-    _pswgs = {};
-    _years = {...widget.selectedYears};
-  }
-
-  void _toggle(Set<String> set, String value) {
-    setState(() {
-      if (set.contains(value)) {
-        set.remove(value);
-      } else {
-        set.add(value);
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final background = isDark ? AppColors.darkBackground : Colors.white;
-
-    final viewPadding = MediaQuery.of(context).viewPadding;
-    final topInset = viewPadding.top > 48.0 ? viewPadding.top : 48.0;
-    final bottomInset = viewPadding.bottom;
-
-    final displayedCategories = _isCategoriesExpanded
-        ? [..._defaultCategories, ..._extraCategories]
-        : _defaultCategories;
-
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-      ),
-      child: FractionallySizedBox(
-        heightFactor: 1.0,
-        child: Container(
-          color: background,
-          child: Column(
-            children: [
-              Container(
-                padding: EdgeInsets.fromLTRB(22, topInset + 24, 22, 12),
-                child: Row(
-                  children: [
-                    const SizedBox(width: 28),
-                    Expanded(
-                      child: Text(
-                        l10n.text('filters'),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () => Navigator.pop(context),
-                      child: const Icon(Icons.close, size: 25),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 25,
-                    vertical: 20,
-                  ),
-                  children: [
-                    // SECTION 1: CATEGORIES
-                    Text(
-                      l10n.text('categories'),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Column(
-                      children: displayedCategories.map((item) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: InkWell(
-                            onTap: () => _toggle(_categories, item),
-                            child: Row(
-                              children: [
-                                AnimatedContainer(
-                                  duration: const Duration(milliseconds: 140),
-                                  width: 16,
-                                  height: 16,
-                                  decoration: BoxDecoration(
-                                    color: _categories.contains(item)
-                                        ? AppColors.accent(context)
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border.all(
-                                      color: _categories.contains(item)
-                                          ? AppColors.accent(context)
-                                          : (isDark
-                                                ? AppColors.darkBorder
-                                                : const Color(0xFFCED7E1)),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: _categories.contains(item)
-                                      ? const Icon(
-                                          Icons.check,
-                                          size: 11,
-                                          color: Colors.white,
-                                        )
-                                      : null,
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    item,
-                                    style: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurface,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 4),
-                    Center(
-                      child: InkWell(
-                        onTap: () {
-                          setState(() {
-                            _isCategoriesExpanded = !_isCategoriesExpanded;
-                          });
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                _isCategoriesExpanded
-                                    ? l10n.text('viewLess')
-                                    : l10n.text('viewAll'),
-                                style: const TextStyle(
-                                  color: AppColors.primary,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                _isCategoriesExpanded
-                                    ? Icons.keyboard_arrow_up
-                                    : Icons.keyboard_arrow_down,
-                                color: AppColors.primary,
-                                size: 16,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // SECTION 2: STATUS
-                    Text(
-                      l10n.text('status'),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 16,
-                      runSpacing: 10,
-                      children: _statusRow1.map((item) {
-                        return _InlineCheckbox(
-                          label: item,
-                          checked: _statuses.contains(item),
-                          onTap: () => _toggle(_statuses, item),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 16,
-                      runSpacing: 10,
-                      children: _statusRow2.map((item) {
-                        return _InlineCheckbox(
-                          label: item,
-                          checked: _statuses.contains(item),
-                          onTap: () => _toggle(_statuses, item),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // SECTION 3: ALL PSWGS
-                    const Text(
-                      'All PSWGS',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 18,
-                      runSpacing: 10,
-                      children: _pswgItems.map((item) {
-                        return _InlineCheckbox(
-                          label: item,
-                          checked: _pswgs.contains(item),
-                          onTap: () => _toggle(_pswgs, item),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // SECTION 4: YEAR
-                    Text(
-                      l10n.text('year'),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 20,
-                      runSpacing: 10,
-                      children: _yearItems.map((item) {
-                        return _InlineCheckbox(
-                          label: item,
-                          checked: _years.contains(item),
-                          onTap: () => _toggle(_years, item),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  13,
-                  16,
-                  bottomInset > 0 ? bottomInset + 10 : 12,
-                ),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent(context),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(
-                        context,
-                        _LineMinistryIssuesFilterResult(
-                          years: {..._years},
-                          statuses: {..._statuses},
-                          agencies: {},
-                          progressReports: {},
-                        ),
-                      );
-                    },
-                    child: Text(
-                      l10n.text('applyFilters'),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ),
         ),
       ),

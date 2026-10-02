@@ -1,3 +1,4 @@
+import '../../../../core/widgets/filters/filter_models.dart';
 import 'working_group_summary.dart';
 
 class PswgDashboard {
@@ -12,6 +13,43 @@ class PswgDashboard {
   final List<WorkingGroupSummary> workingGroups;
   final List<WorkingGroupSummary> agencies;
   final List<WorkingGroupSummary> categories;
+
+  PswgDashboard filtered(FilterSelection selection) {
+    final statuses = selection['local.status'];
+    List<WorkingGroupSummary> filterRows(
+      List<WorkingGroupSummary> rows,
+      String key,
+    ) => [
+      for (final row in rows)
+        if (selection[key].isEmpty || selection[key].contains(row.name))
+          WorkingGroupSummary(
+            id: row.id,
+            name: row.name,
+            total: statuses.isEmpty
+                ? row.total
+                : (statuses.contains('SOLVED') ? row.solved : 0) +
+                      (statuses.contains('IN_PROGRESS') ? row.inProgress : 0) +
+                      (statuses.contains('NOT_ADDRESSED')
+                          ? row.notAddressed
+                          : 0),
+            solved: statuses.isEmpty || statuses.contains('SOLVED')
+                ? row.solved
+                : 0,
+            inProgress: statuses.isEmpty || statuses.contains('IN_PROGRESS')
+                ? row.inProgress
+                : 0,
+            notAddressed: statuses.isEmpty || statuses.contains('NOT_ADDRESSED')
+                ? row.notAddressed
+                : 0,
+          ),
+    ];
+    return PswgDashboard(
+      cards: cards,
+      workingGroups: filterRows(workingGroups, 'local.workingGroup'),
+      agencies: filterRows(agencies, 'local.primaryAgency'),
+      categories: filterRows(categories, 'local.category'),
+    );
+  }
 
   factory PswgDashboard.fromJson(Map<String, dynamic> json) {
     final rawCards = json['cards'];

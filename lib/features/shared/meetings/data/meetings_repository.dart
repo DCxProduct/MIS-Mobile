@@ -4,11 +4,17 @@ import 'calendar_meeting.dart';
 class MeetingsRepository {
   MeetingsRepository(this._api);
   final ApiClient _api;
-  Future<List<CalendarMeeting>> getMeetings() async {
-    final data = await _api.get('meetings');
+  Future<List<CalendarMeeting>> getMeetings({
+    Map<String, String> filters = const {},
+  }) async {
+    final items = await _api.getAllPages(
+      'meetings',
+      objectItems: true,
+      query: filters,
+    );
     try {
       return List.unmodifiable(
-        (data['items'] as List).map(
+        items.map(
           (item) => CalendarMeeting.fromJson(item as Map<String, dynamic>),
         ),
       );

@@ -4,6 +4,7 @@ import '../../../../core/text/html_text.dart';
 class IssueProgressReport {
   const IssueProgressReport({
     required this.progressReportId,
+    this.semester = '',
     required this.title,
     required this.implementationDate,
     required this.referenceName,
@@ -21,6 +22,7 @@ class IssueProgressReport {
   });
 
   final int? progressReportId;
+  final String semester;
   final String title;
   final DateTime? implementationDate;
   final String referenceName;
@@ -135,6 +137,7 @@ class IssueProgressReport {
           : issueSourceOfVerification,
     );
     return IssueProgressReport(
+      semester: semester,
       progressReportId: json['progressReportId'] is int
           ? json['progressReportId'] as int
           : report['id'] is int

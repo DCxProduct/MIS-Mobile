@@ -203,6 +203,8 @@ const Map<String, String> enTranslations = {
   'emptyIssues': 'Issue list will appear here.',
   'emptyReport': 'Reports will appear here.',
   'filters': 'Filters',
+  'filtersLoadError': 'Unable to load filter options.',
+  'clearAllFilters': 'Clear all',
   'applyFilters': 'Apply Filters',
   'viewAll': 'View All',
   'viewLess': 'View Less',

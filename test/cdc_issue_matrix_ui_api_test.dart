@@ -71,6 +71,15 @@ void main() {
                                   'workingGroup': {'name': 'CDC working group'},
                                   'submittedAt': '2026-09-14T00:00:00.000Z',
                                 },
+                                {
+                                  'issueId': 18,
+                                  'title': 'Other CDC issue',
+                                  'status': {
+                                    'code': 'SOLVED',
+                                    'name': 'Solved',
+                                  },
+                                  'attachment': null,
+                                },
                               ],
                         'page': 1,
                         'limit': 50,
@@ -130,6 +139,29 @@ void main() {
       expect(find.text('56'), findsNothing);
       if (empty) expect(find.text('No issues found.'), findsOneWidget);
       if (!empty) {
+        final callsBeforeFiltering = paths.length;
+        await tester.tap(find.text('Filter'));
+        await tester.pumpAndSettle();
+        final solved = find.byKey(const ValueKey('filter-local.status-SOLVED'));
+        await tester.scrollUntilVisible(solved, 150);
+        await tester.pumpAndSettle();
+        await tester.tap(solved);
+        await tester.tap(find.text('Apply Filters'));
+        await tester.pumpAndSettle();
+        expect(find.text('Only CDC issue'), findsNothing);
+        expect(find.text('Other CDC issue'), findsOneWidget);
+        await tester.tap(find.text('Filter'));
+        await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(solved, 150);
+        await tester.pumpAndSettle();
+        await tester.tap(solved);
+        await tester.tap(find.text('Apply Filters'));
+        await tester.pumpAndSettle();
+        expect(find.text('Only CDC issue'), findsOneWidget);
+        expect(
+          paths.length,
+          callsBeforeFiltering + 4,
+        ); // Each catalog reload fetches the list and detail.
         expect(find.text('1 Attachments'), findsOneWidget);
         await tester.ensureVisible(find.text('Only CDC issue'));
         await tester.pumpAndSettle();

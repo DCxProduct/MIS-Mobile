@@ -51,6 +51,32 @@ void main() {
                   ? File('test/fixtures/working_groups.json').readAsStringSync()
                   : request.url.path == '/api/v1/dashboards/plenary/live'
                   ? File('test/fixtures/plenary.json').readAsStringSync()
+                  : request.url.path.endsWith('/filter-options')
+                  ? jsonEncode({
+                      'success': true,
+                      'data': {
+                        'categories': [],
+                        'statuses': [],
+                        'governmentAgencies': [],
+                        'years': [],
+                      },
+                    })
+                  : request.url.path == '/api/v1/plenaries'
+                  ? jsonEncode({
+                      'success': true,
+                      'data': {
+                        'items': [
+                          {
+                            'id': 19,
+                            'name': '19th G-PSF. Plenary',
+                            'status': 'Sent',
+                            'meetingDate': '2025-04-08',
+                            'deadline': '2025-04-15',
+                            'numberOfRgcDecisions': 179,
+                          },
+                        ],
+                      },
+                    })
                   : request.url.path == '/api/v1/rgc-decisions/scorecard'
                   ? jsonEncode({
                       'success': true,
@@ -63,7 +89,7 @@ void main() {
                         ],
                       },
                     })
-                  : request.url.path == '/api/v1/rgc-decisions'
+                  : request.url.path == '/api/v1/rgc-decisions/cdc-gpsf'
                   ? jsonEncode({
                       'success': true,
                       'data': {
@@ -185,15 +211,15 @@ void main() {
     await tester.tap(find.text('Plenaries'));
     await tester.pumpAndSettle();
     expect(find.text('19th G-PSF. Plenary'), findsOneWidget);
-    expect(find.text('Apr 08, 2025'), findsOneWidget);
+    expect(find.text('Apr 8, 2025'), findsOneWidget);
     await tester.tap(find.text('View Details'));
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
     await tester.tap(find.text('RGC Decision').first);
     await tester.pumpAndSettle();
-    expect(find.text('MPWT'), findsNWidgets(2));
-    expect(find.text('Nov 13, 2023'), findsOneWidget);
+    expect(find.text('MAFF'), findsOneWidget);
+    expect(find.text('Sep 14, 2026'), findsOneWidget);
 
     final context = tester.element(find.byType(AppBottomNavBar));
     Navigator.of(context).push(

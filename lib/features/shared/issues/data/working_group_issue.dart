@@ -1,5 +1,6 @@
 import '../../../../core/text/html_text.dart';
 import 'issue_progress_report.dart';
+import '../../../../core/widgets/filters/filter_models.dart';
 
 class WorkingGroupIssue {
   WorkingGroupIssue({
@@ -25,8 +26,10 @@ class WorkingGroupIssue {
     this.progressReports = const [],
     this.reportsIncluded = false,
     this.issueProgress,
+    this.plenaryEscalation,
   });
   final int id;
+  final bool? plenaryEscalation;
   final String title,
       category,
       statusCode,
@@ -45,6 +48,22 @@ class WorkingGroupIssue {
   final List<IssueProgressReport> progressReports;
   final bool reportsIncluded;
   final IssueProgressReport? issueProgress;
+  Map<String, Iterable<String>> get filterValues => {
+    'local.semester': [
+      'Both',
+      ...progressReports.map((report) => report.semester),
+    ],
+    'local.category': [category],
+    'local.status': [statusCode, statusName],
+    'local.pswgs': [submittedBy],
+    'local.year': [
+      if (createdAt != null)
+        FilterSelection.dateValue(createdAt).substring(0, 4),
+    ],
+    'local.plenaryEscalation': [
+      if (plenaryEscalation != null) '$plenaryEscalation',
+    ],
+  };
 
   factory WorkingGroupIssue.fromJson(Map<String, dynamic> json) {
     Map<String, dynamic> object(Object? value) {
@@ -138,8 +157,16 @@ class WorkingGroupIssue {
       );
     }).toList();
     final issueProgress = IssueProgressReport.fromIssueFields(json);
+    final hasEscalation =
+        json.containsKey('plenaryEscalation') || json.containsKey('escalation');
+    final escalation = json['plenaryEscalation'] ?? json['escalation'];
     return WorkingGroupIssue(
       id: id,
+      plenaryEscalation: escalation is bool
+          ? escalation
+          : hasEscalation && escalation == null
+          ? false
+          : null,
       title: title,
       category: json['category'] is String
           ? string(json['category'])

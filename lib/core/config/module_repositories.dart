@@ -1,6 +1,8 @@
 import '../network/api_client.dart';
+import '../network/filter_catalog_repository.dart';
 import '../../features/shared/dashboard/data/dashboard_repository.dart';
 import '../../features/shared/issues/data/issues_repository.dart';
+import '../../features/shared/issues/data/cdc_issue_matrix_repository.dart';
 import '../../features/shared/meetings/data/meeting_requests_repository.dart';
 import '../../features/shared/meetings/data/meetings_repository.dart';
 import '../../features/shared/meetings/data/meeting_summaries_repository.dart';
@@ -16,14 +18,17 @@ class ModuleRepositories {
     required ApiClient apiClient,
     DashboardRepository? dashboard,
     IssuesRepository? issues,
+    CdcIssueMatrixRepository? cdcIssueMatrix,
     MeetingRequestsRepository? meetingRequests,
     MeetingsRepository? meetings,
     MeetingSummariesRepository? meetingSummaries,
     ProgressReportsRepository? progressReports,
     PlenariesRepository? plenaries,
     RgcDecisionsRepository? rgcDecisions,
-  }) : dashboard = dashboard ?? DashboardRepository(apiClient),
+  }) : filters = FilterCatalogRepository(apiClient),
+       dashboard = dashboard ?? DashboardRepository(apiClient),
        issues = issues ?? IssuesRepository(apiClient),
+       cdcIssueMatrix = cdcIssueMatrix ?? CdcIssueMatrixRepository(apiClient),
        meetingRequests =
            meetingRequests ?? MeetingRequestsRepository(apiClient),
        meetings = meetings ?? MeetingsRepository(apiClient),
@@ -35,7 +40,9 @@ class ModuleRepositories {
        rgcDecisions = rgcDecisions ?? RgcDecisionsRepository(apiClient);
 
   final DashboardRepository dashboard;
+  final FilterCatalogRepository filters;
   final IssuesRepository issues;
+  final CdcIssueMatrixRepository cdcIssueMatrix;
   final MeetingRequestsRepository meetingRequests;
   final MeetingsRepository meetings;
   final MeetingSummariesRepository meetingSummaries;

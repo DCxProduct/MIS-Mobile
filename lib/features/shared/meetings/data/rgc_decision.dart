@@ -1,8 +1,17 @@
 import 'package:html/parser.dart' as html_parser;
+import '../../../../core/widgets/filters/filter_models.dart';
 
 class RgcDecision {
   RgcDecision(Map<String, dynamic> json)
     : id = _int(json['id']),
+      plenaryName = _string(_object(json['plenary'])['name']),
+      workingGroups = _workingGroups(json),
+      measureCategory = _string(
+        json['measureCategory'] is String
+            ? json['measureCategory']
+            : _object(json['measureCategory'])['name'] ?? json['category'],
+      ),
+      decisionDate = _date(json['dateOfDecision'] ?? json['meetingDate']),
       agencyName = _string(_object(json['stakeholder'])['name']),
       agencyLogo = _string(_object(json['stakeholder'])['logo']),
       status = _string(json['status']),
@@ -15,6 +24,9 @@ class RgcDecision {
       linkCount = _links(json).length;
 
   final int id, linkCount;
+  final String plenaryName, measureCategory;
+  final List<String> workingGroups;
+  final DateTime? decisionDate;
   final String agencyName,
       agencyLogo,
       status,
@@ -22,6 +34,10 @@ class RgcDecision {
       category,
       focalPerson;
   final DateTime? meetingDate;
+  Map<String, Iterable<String>> get filterValues => {
+    'local.workingGroup': workingGroups,
+    'local.dateOfDecision': [FilterSelection.dateValue(decisionDate)],
+  };
 
   static Map<String, dynamic> _object(Object? value) =>
       value is Map<String, dynamic> ? value : const <String, dynamic>{};
@@ -32,6 +48,20 @@ class RgcDecision {
 
   static DateTime? _date(Object? value) =>
       value is String ? DateTime.tryParse(value) : null;
+
+  static List<String> _workingGroups(Map<String, dynamic> json) {
+    final names = <String>{};
+    final direct = _string(_object(json['workingGroup'])['name']);
+    if (direct.isNotEmpty) names.add(direct);
+    final issues = json['issues'];
+    if (issues is List) {
+      for (final issue in issues) {
+        final name = _string(_object(_object(issue)['stakeholder'])['name']);
+        if (name.isNotEmpty) names.add(name);
+      }
+    }
+    return List.unmodifiable(names);
+  }
 
   static Set<String> _links(Map<String, dynamic> json) {
     final links = <String>{};

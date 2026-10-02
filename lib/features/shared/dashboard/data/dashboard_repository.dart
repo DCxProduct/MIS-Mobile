@@ -11,8 +11,31 @@ class DashboardRepository {
 
   Future<PswgDashboard> getLiveDashboard({
     DashboardScope scope = DashboardScope.pswg,
+    int? progressReportId,
+    String? year,
   }) async {
-    final data = await _api.get('dashboards/${scope.name}/live');
+    if (progressReportId == null && year != null) {
+      final saved =
+          (await _api.getList('dashboards/${scope.name}/saved'))
+              .whereType<Map>()
+              .where(
+                (row) =>
+                    '${row['year']}' == year && row['progressReportId'] is int,
+              )
+              .toList()
+            ..sort((a, b) => '${b['semester']}'.compareTo('${a['semester']}'));
+      if (saved.isEmpty) {
+        throw const ApiException(
+          'No published dashboard for the selected year.',
+        );
+      }
+      progressReportId = saved.first['progressReportId'] as int;
+    }
+    final data = await _api.get(
+      progressReportId == null
+          ? 'dashboards/${scope.name}/live'
+          : 'progress-reports/$progressReportId/dashboards/${scope.name}/final',
+    );
     try {
       return PswgDashboard.fromJson(data);
     } on FormatException {

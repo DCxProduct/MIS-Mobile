@@ -1,3 +1,4 @@
+import '../../../../core/widgets/filters/filter_models.dart';
 import '../../../../core/text/html_text.dart';
 
 class MeetingSummary {
@@ -31,6 +32,13 @@ class MeetingSummary {
       ),
       issues = _issues(json['issues']);
 
+  Map<String, Iterable<String>> get filterValues => {
+    'local.status': [status],
+    'local.year': [
+      if (date != null) FilterSelection.dateValue(date).substring(0, 4),
+    ],
+    'local.issueCount': ['$issueCount'],
+  };
   final int id;
   final String title, governmentAgency, pswg, status, meetingPswg;
   final DateTime? date;

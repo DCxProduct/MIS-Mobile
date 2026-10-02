@@ -26,6 +26,7 @@ class RgcDecisionsRepository {
     required int stakeholderId,
     int page = 1,
     int limit = 20,
+    Map<String, String> filters = const {},
   }) async {
     if (stakeholderId <= 0 || page <= 0 || limit <= 0) {
       throw ArgumentError('Ministry, page, and limit must be positive.');
@@ -34,6 +35,7 @@ class RgcDecisionsRepository {
       'rgc-decisions',
       query: {
         'stakeholderId': '$stakeholderId',
+        ...filters,
         'page': '$page',
         'limit': '$limit',
       },
@@ -89,11 +91,16 @@ class RgcDecisionsRepository {
     }
   }
 
-  Future<List<RgcDecision>> getDecisions() async {
-    final data = await _api.get('rgc-decisions');
+  Future<List<RgcDecision>> getDecisions({
+    Map<String, String> filters = const {},
+    bool cdcGpsf = false,
+  }) async {
+    final items = await _api.getAllPages(
+      cdcGpsf ? 'rgc-decisions/cdc-gpsf' : 'rgc-decisions',
+      query: filters,
+      objectItems: true,
+    );
     try {
-      final items = data['items'];
-      if (items is! List) throw const FormatException();
       return List.unmodifiable(
         items.map((item) {
           if (item is! Map<String, dynamic>) throw const FormatException();

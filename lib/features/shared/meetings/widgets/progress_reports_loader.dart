@@ -1,3 +1,5 @@
+import '../../../../core/widgets/filters/api_filter_scope.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_settings.dart';
@@ -14,11 +16,18 @@ class ProgressReportsLoader extends StatefulWidget {
 
 class _ProgressReportsLoaderState extends State<ProgressReportsLoader> {
   Future<List<ProgressReport>>? _future;
+  Map<String, String>? _query;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _future ??= AppSettings.of(context).progressReports.getReports();
+    final query = ApiFilterScope.query(context, 'progress-reports');
+    if (_future == null || !mapEquals(_query, query)) {
+      _query = Map.of(query);
+      _future = AppSettings.of(
+        context,
+      ).progressReports.getReports(filters: query);
+    }
   }
 
   @override
@@ -38,7 +47,9 @@ class _ProgressReportsLoaderState extends State<ProgressReportsLoader> {
             Text(l10n.text('progressReportsLoadError')),
             TextButton(
               onPressed: () => setState(() {
-                _future = AppSettings.of(context).progressReports.getReports();
+                _future = AppSettings.of(
+                  context,
+                ).progressReports.getReports(filters: _query ?? const {});
               }),
               child: Text(l10n.text('retry')),
             ),

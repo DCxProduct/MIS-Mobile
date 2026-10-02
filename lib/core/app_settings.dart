@@ -5,6 +5,7 @@ import '../features/shared/meetings/data/meetings_repository.dart';
 import '../translations/app_language.dart';
 import 'config/module_config.dart';
 import 'network/api_client.dart';
+import 'network/filter_catalog_repository.dart';
 import 'config/role_modules.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/data/auth_user.dart';
@@ -33,10 +34,9 @@ class AppSettingsController extends ChangeNotifier {
       _moduleRepositories[moduleType] ?? _defaultRepositories;
 
   DashboardRepository get dashboard => _repositories.dashboard;
+  FilterCatalogRepository get filters => _repositories.filters;
   IssuesRepository get issues => _repositories.issues;
-  late final CdcIssueMatrixRepository cdcIssueMatrix = CdcIssueMatrixRepository(
-    auth.apiClient,
-  );
+  CdcIssueMatrixRepository get cdcIssueMatrix => _repositories.cdcIssueMatrix;
   MeetingRequestsRepository get meetingRequests =>
       _repositories.meetingRequests;
   MeetingsRepository get meetings => _repositories.meetings;

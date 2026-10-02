@@ -36,6 +36,34 @@ void main() {
           ],
         });
       }
+      if (path.endsWith('/lookups/categories')) {
+        return ok({
+          'items': [
+            {'id': 7, 'name': 'Legislation'},
+          ],
+        });
+      }
+      if (path.endsWith('/plenaries')) {
+        return ok({
+          'items': [
+            {'id': 3, 'name': '21th'},
+            {'id': 4, 'name': '20th'},
+          ],
+          'meta': {'totalPages': 1},
+        });
+      }
+      if (path.endsWith('/stakeholders/working-groups')) {
+        return ok([
+          {'id': 1, 'name': 'Banking and Financial Services'},
+          {'id': 2, 'name': 'Tourism'},
+        ]);
+      }
+      if (path.endsWith('/working-group-issues/statuses')) {
+        return ok([
+          {'id': 1, 'code': 'IN_PROGRESS', 'name': 'In Progress'},
+          {'id': 2, 'code': 'SOLVED', 'name': 'Solved'},
+        ]);
+      }
       if (path.endsWith('/meeting-requests')) {
         return ok([
           {
@@ -92,7 +120,7 @@ void main() {
       if (path.endsWith('/rgc-decisions')) {
         final ministry = request.url.queryParameters['stakeholderId'];
         final page = request.url.queryParameters['page'];
-        expect(request.url.queryParameters['limit'], '20');
+        expect(request.url.queryParameters['limit'], anyOf('20', '100'));
         if (ministry == '13') {
           return ok({
             'items': [
@@ -110,6 +138,20 @@ void main() {
           'items': [
             {
               'id': page == '1' ? 179 : 181,
+              'plenary': {'name': page == '1' ? '21th' : '20th'},
+              'issues': [
+                {
+                  'stakeholder': {
+                    'name': page == '1'
+                        ? 'Banking and Financial Services'
+                        : 'Tourism',
+                  },
+                },
+              ],
+              'measureCategory': page == '1'
+                  ? '8. Banking and Finance Sector'
+                  : '5. Improving transportation and infrastructure',
+              'dateOfDecision': page == '1' ? '2023-11-13' : '2024-01-24',
               'stakeholder': {'name': 'MPWT'},
               'status': 'In Progress',
               'meetingDate': '2023-11-13',
@@ -223,9 +265,36 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
+    for (final selection in [
+      ('plenaryId', '3'),
+      ('categoryId', '7'),
+      ('status', 'IN_PROGRESS'),
+    ]) {
+      Future<void> toggleSelection() async {
+        await tester.tap(find.textContaining('Filter').first);
+        await tester.pumpAndSettle();
+        final option = find.byKey(
+          ValueKey('filter-${selection.$1}-${selection.$2}'),
+        );
+        await tester.scrollUntilVisible(option, 150);
+        await tester.tap(option);
+        await tester.tap(find.text('Apply Filters'));
+        await tester.pumpAndSettle();
+      }
+
+      await toggleSelection();
+      expect(requested.last.queryParameters[selection.$1], selection.$2);
+      expect(requested.last.queryParameters['page'], '1');
+      expect(find.text('View Details'), findsOneWidget);
+      await toggleSelection();
+      expect(requested.last.queryParameters.containsKey(selection.$1), isFalse);
+    }
     await tester.tap(find.text('Filter'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('filter-primaryAgency-MAFF')));
+    final agencyOption = find.byKey(const ValueKey('filter-stakeholderId-13'));
+    await tester.scrollUntilVisible(agencyOption, 150);
+    await tester.pumpAndSettle();
+    await tester.tap(agencyOption);
     await tester.tap(find.text('Apply Filters'));
     await tester.pumpAndSettle();
     expect(

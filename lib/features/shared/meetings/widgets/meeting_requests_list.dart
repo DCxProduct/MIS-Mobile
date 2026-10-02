@@ -1,3 +1,5 @@
+import '../../../../core/widgets/filters/api_filter_scope.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/app_settings.dart';
 import '../../../../translations/app_localizations.dart';
@@ -17,10 +19,17 @@ class MeetingRequestsList extends StatefulWidget {
 
 class _MeetingRequestsListState extends State<MeetingRequestsList> {
   Future<List<MeetingRequest>>? _request;
+  Map<String, String>? _query;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _request ??= AppSettings.of(context).meetingRequests.getRequests();
+    final query = ApiFilterScope.query(context, 'meeting-requests');
+    if (_request == null || !mapEquals(_query, query)) {
+      _query = Map.of(query);
+      _request = AppSettings.of(
+        context,
+      ).meetingRequests.getRequests(filters: query);
+    }
   }
 
   @override
@@ -42,7 +51,7 @@ class _MeetingRequestsListState extends State<MeetingRequestsList> {
               onPressed: () => setState(() {
                 _request = AppSettings.of(
                   context,
-                ).meetingRequests.getRequests();
+                ).meetingRequests.getRequests(filters: _query ?? const {});
               }),
               child: Text(l10n.text('retry')),
             ),
@@ -50,7 +59,9 @@ class _MeetingRequestsListState extends State<MeetingRequestsList> {
         );
       }
       final query = widget.query.trim().toLowerCase();
+      final selection = ApiFilterScope.selection(context, 'meeting-requests');
       final items = snapshot.data!
+          .where((item) => selection.matchesLocal(item.filterValues))
           .where(
             (issue) =>
                 query.isEmpty ||

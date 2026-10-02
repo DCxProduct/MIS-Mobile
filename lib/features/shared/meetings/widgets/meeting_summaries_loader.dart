@@ -1,3 +1,5 @@
+import '../../../../core/widgets/filters/api_filter_scope.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_settings.dart';
@@ -16,10 +18,17 @@ class MeetingSummariesLoader extends StatefulWidget {
 class _MeetingSummariesLoaderState extends State<MeetingSummariesLoader> {
   Future<List<MeetingSummary>>? _future;
 
+  Map<String, String>? _query;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _future ??= AppSettings.of(context).meetingSummaries.getSummaries();
+    final query = ApiFilterScope.query(context, 'meeting-summaries');
+    if (_future == null || !mapEquals(_query, query)) {
+      _query = Map.of(query);
+      _future = AppSettings.of(
+        context,
+      ).meetingSummaries.getSummaries(filters: query);
+    }
   }
 
   @override
@@ -41,14 +50,17 @@ class _MeetingSummariesLoaderState extends State<MeetingSummariesLoader> {
               onPressed: () => setState(() {
                 _future = AppSettings.of(
                   context,
-                ).meetingSummaries.getSummaries();
+                ).meetingSummaries.getSummaries(filters: _query ?? const {});
               }),
               child: Text(l10n.text('retry')),
             ),
           ],
         );
       }
-      final summaries = snapshot.data ?? const <MeetingSummary>[];
+      final selection = ApiFilterScope.selection(context, 'meeting-summaries');
+      final summaries = (snapshot.data ?? const <MeetingSummary>[])
+          .where((item) => selection.matchesLocal(item.filterValues))
+          .toList();
       if (summaries.isEmpty) return Text(l10n.text('noMeetingSummaries'));
       return widget.builder(summaries);
     },
