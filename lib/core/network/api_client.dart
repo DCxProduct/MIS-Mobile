@@ -95,6 +95,19 @@ class ApiClient {
     await _request('POST', path, body: body, expectData: false);
   }
 
+  Future<Map<String, dynamic>> patch(
+    String path, {
+    Map<String, dynamic>? body,
+  }) async => await _request('PATCH', path, body: body) as Map<String, dynamic>;
+
+  Future<void> patchAction(String path, {Map<String, dynamic>? body}) async {
+    await _request('PATCH', path, body: body, expectData: false);
+  }
+
+  Future<void> deleteAction(String path) async {
+    await _request('DELETE', path, expectData: false);
+  }
+
   Future<Map<String, dynamic>> getObjectPage(
     String path, {
     Map<String, String>? query,

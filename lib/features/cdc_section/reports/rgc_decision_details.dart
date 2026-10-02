@@ -127,11 +127,11 @@ class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
                   children: [
                     Text(l10n.text('rgcDecisionsLoadError')),
                     TextButton(
-                      onPressed: () => setState(
-                        () => _detail = AppSettings.of(
+                      onPressed: () => setState(() {
+                        _detail = AppSettings.of(
                           context,
-                        ).rgcDecisions.getDecision(widget.decisionId),
-                      ),
+                        ).rgcDecisions.getDecision(widget.decisionId);
+                      }),
                       child: Text(l10n.text('retry')),
                     ),
                   ],
@@ -378,7 +378,7 @@ class _Info extends StatelessWidget {
   );
 }
 
-class CdcRgcDecisionIssueScreen extends StatefulWidget {
+class CdcRgcDecisionIssueScreen extends StatelessWidget {
   const CdcRgcDecisionIssueScreen({
     super.key,
     required this.detail,
@@ -388,16 +388,84 @@ class CdcRgcDecisionIssueScreen extends StatefulWidget {
   final RgcDecisionIssue issue;
 
   @override
-  State<CdcRgcDecisionIssueScreen> createState() => _IssueScreenState();
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: cdcReportBackground(context),
+    appBar: _appBar(context),
+    body: CdcRgcDecisionIssueDetails(detail: detail, issue: issue),
+  );
 }
 
-class _IssueScreenState extends State<CdcRgcDecisionIssueScreen> {
+/// The CDC detail body, also used for decisions within a progress report.
+class CdcRgcDecisionIssueDetails extends StatelessWidget {
+  const CdcRgcDecisionIssueDetails({
+    super.key,
+    required this.detail,
+    required this.issue,
+    this.controller,
+    this.documents,
+    this.additionalIssues = const [],
+  });
+
+  final RgcDecisionDetail detail;
+  final RgcDecisionIssue issue;
+  final ScrollController? controller;
+  final Map<String, String>? documents;
+  final List<RgcDecisionIssue> additionalIssues;
+
+  @override
+  Widget build(BuildContext context) {
+    final issues = [issue, ...additionalIssues];
+    return ListView(
+      key: const ValueKey('cdc-rgc-issue-details'),
+      controller: controller,
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+      children: [
+        for (var index = 0; index < issues.length; index++) ...[
+          if (issues.length > 1 && issues[index].title.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Text(
+                issues[index].title,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          _CdcRgcDecisionIssuePanel(
+            detail: detail,
+            issue: issues[index],
+            documents: index == 0 ? documents : null,
+          ),
+          if (index < issues.length - 1) const Divider(height: 32),
+        ],
+      ],
+    );
+  }
+}
+
+class _CdcRgcDecisionIssuePanel extends StatefulWidget {
+  const _CdcRgcDecisionIssuePanel({
+    required this.detail,
+    required this.issue,
+    this.documents,
+  });
+  final RgcDecisionDetail detail;
+  final RgcDecisionIssue issue;
+  final Map<String, String>? documents;
+
+  @override
+  State<_CdcRgcDecisionIssuePanel> createState() => _IssueDetailsState();
+}
+
+class _IssueDetailsState extends State<_CdcRgcDecisionIssuePanel> {
   Future<MeetingRequest?>? _meetingRequest;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_meetingRequest == null &&
+    if (widget.documents == null &&
+        _meetingRequest == null &&
         widget.issue.meetingRequestDocumentPath.isEmpty &&
         widget.issue.meetingRequestId > 0) {
       _meetingRequest = _loadMeetingRequest();
@@ -435,177 +503,174 @@ class _IssueScreenState extends State<CdcRgcDecisionIssueScreen> {
       ('sourceOfVerification', issue.sourceOfVerification),
       ('linkToVerificationSource', issue.verificationLink),
     ];
-    return Scaffold(
-      backgroundColor: cdcReportBackground(context),
-      appBar: _appBar(context),
-      body: ListView(
-        key: const ValueKey('cdc-rgc-issue-details'),
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: CdcDetailInfoValue(
-                  label: l10n.text('submittedBy'),
-                  value: rgcValue(issue.submittedBy),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: CdcDetailInfoValue(
+                label: l10n.text('submittedBy'),
+                value: rgcValue(issue.submittedBy),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: CdcDetailInfoValue(
+                label: l10n.text('status'),
+                value: rgcValue(
+                  issue.status.isEmpty ? detail.decision.status : issue.status,
+                ),
+                color: _statusColor(issue.status),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: CdcDetailInfoValue(
+                label: l10n.text('categories'),
+                value: rgcValue(
+                  issue.category.isEmpty
+                      ? detail.decision.category
+                      : issue.category,
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: CdcDetailInfoValue(
-                  label: l10n.text('status'),
-                  value: rgcValue(
-                    issue.status.isEmpty
-                        ? detail.decision.status
-                        : issue.status,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.text('meetingRequestDocument'),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.mutedText,
+                    ),
                   ),
-                  color: _statusColor(issue.status),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: CdcDetailInfoValue(
-                  label: l10n.text('categories'),
-                  value: rgcValue(
-                    issue.category.isEmpty
-                        ? detail.decision.category
-                        : issue.category,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.text('meetingRequestDocument'),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.mutedText,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    FutureBuilder<MeetingRequest?>(
-                      future: _meetingRequest,
-                      builder: (context, snapshot) {
-                        final request = snapshot.data;
-                        final path = issue.meetingRequestDocumentPath.isNotEmpty
-                            ? issue.meetingRequestDocumentPath
-                            : request?.letterPath ?? '';
-                        final name = issue.meetingRequestDocumentPath.isNotEmpty
-                            ? (issue.meetingRequestDocumentName.isNotEmpty
-                                  ? issue.meetingRequestDocumentName
-                                  : pdfAttachmentName(path))
-                            : request?.letterName ?? '';
-                        if (path.isEmpty) {
-                          return const Text(
-                            '—',
-                            style: TextStyle(fontSize: 12),
-                          );
-                        }
-                        return PdfAttachmentPreview(
-                          path: path,
-                          name: name,
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.picture_as_pdf,
-                                size: 18,
-                                color: Color(0xFFFF4842),
+                  const SizedBox(height: 8),
+                  FutureBuilder<MeetingRequest?>(
+                    future: _meetingRequest,
+                    builder: (context, snapshot) {
+                      final request = snapshot.data;
+                      final path = issue.meetingRequestDocumentPath.isNotEmpty
+                          ? issue.meetingRequestDocumentPath
+                          : request?.letterPath ?? '';
+                      final name = issue.meetingRequestDocumentPath.isNotEmpty
+                          ? (issue.meetingRequestDocumentName.isNotEmpty
+                                ? issue.meetingRequestDocumentName
+                                : pdfAttachmentName(path))
+                          : request?.letterName ?? '';
+                      final documents =
+                          widget.documents ?? {if (path.isNotEmpty) path: name};
+                      if (documents.isEmpty) {
+                        return const Text('—', style: TextStyle(fontSize: 12));
+                      }
+                      return Column(
+                        children: [
+                          for (final document in documents.entries)
+                            PdfAttachmentPreview(
+                              path: document.key,
+                              name: document.value,
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.picture_as_pdf,
+                                    size: 18,
+                                    color: Color(0xFFFF4842),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      document.value.isNotEmpty
+                                          ? document.value
+                                          : pdfAttachmentName(document.key),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 11),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  name.isNotEmpty
-                                      ? name
-                                      : pdfAttachmentName(path),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 11),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                CdcDetailDateChip(
-                  label: l10n.text('submittedBy'),
-                  value: rgcValue(issue.submittedByName),
-                ),
-                const SizedBox(width: 20),
-                CdcDetailDateChip(
-                  label: l10n.text('submittedDate'),
-                  value: rgcDate(issue.submittedDate),
-                ),
-                const SizedBox(width: 20),
-                for (var order = 1; order <= 5; order++) ...[
-                  if (order > 1) const SizedBox(width: 20),
-                  CdcDetailDateChip(
-                    label: l10n.text(
-                      [
-                        'governmentAgency',
-                        'governmentSecondAgency',
-                        'governmentThirdAgency',
-                        'governmentFourthAgency',
-                        'governmentFifthAgency',
-                      ][order - 1],
-                    ),
-                    value:
-                        issue.governmentAgencies[order]?.trim().isNotEmpty ==
-                            true
-                        ? issue.governmentAgencies[order]!
-                        : l10n.text('noData'),
+                            ),
+                        ],
+                      );
+                    },
                   ),
                 ],
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          for (final section in sections) ...[
-            Text(l10n.text(section.$1), style: const TextStyle(fontSize: 13)),
-            const SizedBox(height: 10),
-            Container(
-              constraints: const BoxConstraints(minHeight: 52),
-              padding: const EdgeInsets.all(11),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.fieldBorder),
               ),
-              child: section.$1 == 'linkToVerificationSource'
-                  ? SelectableText(
-                      section.$2,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        decoration: TextDecoration.underline,
-                      ),
-                    )
-                  : Text(
-                      section.$2,
-                      style: const TextStyle(fontSize: 12, height: 1.35),
-                    ),
             ),
-            const SizedBox(height: 16),
           ],
+        ),
+        const SizedBox(height: 16),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              CdcDetailDateChip(
+                label: l10n.text('submittedBy'),
+                value: rgcValue(issue.submittedByName),
+              ),
+              const SizedBox(width: 20),
+              CdcDetailDateChip(
+                label: l10n.text('submittedDate'),
+                value: rgcDate(issue.submittedDate),
+              ),
+              const SizedBox(width: 20),
+              for (var order = 1; order <= 5; order++) ...[
+                if (order > 1) const SizedBox(width: 20),
+                CdcDetailDateChip(
+                  label: l10n.text(
+                    [
+                      'governmentAgency',
+                      'governmentSecondAgency',
+                      'governmentThirdAgency',
+                      'governmentFourthAgency',
+                      'governmentFifthAgency',
+                    ][order - 1],
+                  ),
+                  value:
+                      issue.governmentAgencies[order]?.trim().isNotEmpty == true
+                      ? issue.governmentAgencies[order]!
+                      : l10n.text('noData'),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        for (final section in sections) ...[
+          Text(l10n.text(section.$1), style: const TextStyle(fontSize: 13)),
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            constraints: const BoxConstraints(minHeight: 52),
+            padding: const EdgeInsets.all(11),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.fieldBorder),
+            ),
+            child: section.$1 == 'linkToVerificationSource'
+                ? SelectableText(
+                    rgcValue(section.$2),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      decoration: TextDecoration.underline,
+                    ),
+                  )
+                : Text(
+                    rgcValue(section.$2),
+                    style: const TextStyle(fontSize: 12, height: 1.35),
+                  ),
+          ),
+          const SizedBox(height: 16),
         ],
-      ),
+      ],
     );
   }
 }

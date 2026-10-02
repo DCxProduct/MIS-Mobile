@@ -52,6 +52,7 @@ class RgcDecisionsRepository {
     final data = await _api.get('rgc-decisions/$id');
     try {
       final detail = RgcDecisionDetail.fromJson(data);
+      if (detail.decision.id != id) throw const FormatException();
       if (detail.deadline != null) return detail;
 
       final plenary = data['plenary'];

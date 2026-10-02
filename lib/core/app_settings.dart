@@ -1,4 +1,5 @@
 import 'config/module_repositories.dart';
+import '../features/shared/notifications/data/notifications_repository.dart';
 import 'package:flutter/material.dart';
 import '../features/shared/meetings/data/meetings_repository.dart';
 
@@ -46,11 +47,18 @@ class AppSettingsController extends ChangeNotifier {
       _repositories.progressReports;
   PlenariesRepository get plenaries => _repositories.plenaries;
   RgcDecisionsRepository get rgcDecisions => _repositories.rgcDecisions;
+  NotificationsRepository get notifications => _repositories.notifications;
   AuthUser? currentUser;
 
   void setCurrentUser(AuthUser user) {
     final module = moduleForRoles(user.roles);
     if (module == null) throw const UnsupportedRoleException();
+    if (currentUser?.id != user.id) {
+      _defaultRepositories.notifications.resetSession();
+      for (final repositories in _moduleRepositories.values) {
+        repositories.notifications.resetSession();
+      }
+    }
     currentUser = user;
     _userEmail = user.email;
     _moduleType = module;
@@ -58,6 +66,10 @@ class AppSettingsController extends ChangeNotifier {
   }
 
   void clearSession() {
+    _defaultRepositories.notifications.resetSession();
+    for (final repositories in _moduleRepositories.values) {
+      repositories.notifications.resetSession();
+    }
     auth.clearSession();
     currentUser = null;
     _userEmail = '';
@@ -67,6 +79,7 @@ class AppSettingsController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _defaultRepositories.notifications.dispose();
     auth.dispose();
     super.dispose();
   }

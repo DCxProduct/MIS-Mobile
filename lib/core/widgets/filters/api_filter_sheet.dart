@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../translations/app_localizations.dart';
 import 'app_filter_sheet.dart';
+import 'filter_sheet_header.dart';
 
 export 'filter_models.dart';
 
@@ -47,26 +48,12 @@ class _ApiFilterSheetState extends State<ApiFilterSheet> {
         child: SafeArea(
           child: Column(
             children: [
-              SizedBox(
-                height: 58,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Text(
-                      l10n.text('filters'),
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Positioned(
-                      right: 6,
-                      child: IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close_rounded),
-                      ),
-                    ),
-                  ],
+              FilterSheetHeader(
+                title: l10n.text('filters'),
+                onClose: () => Navigator.pop(context),
+                titleStyle: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               Expanded(

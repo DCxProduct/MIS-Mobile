@@ -7,7 +7,9 @@ import '../../../shared/meetings/widgets/meetings_loader.dart';
 import '../meeting_request_detail_screen.dart';
 
 class CalendarTab extends StatefulWidget {
-  const CalendarTab({super.key});
+  const CalendarTab({super.key, this.initialMeetingId});
+
+  final int? initialMeetingId;
 
   @override
   State<CalendarTab> createState() => _CalendarTabState();
@@ -40,6 +42,14 @@ class _CalendarTabState extends State<CalendarTab> {
     }
 
     final firstDate = datedMeetings.first.date!.toLocal();
+    if (_selectedDate == null && widget.initialMeetingId != null) {
+      for (final meeting in datedMeetings) {
+        if (meeting.details.id == widget.initialMeetingId) {
+          _selectedDate = meeting.date!.toLocal();
+          break;
+        }
+      }
+    }
     final selected = _selectedDate == null
         ? DateTime(firstDate.year, firstDate.month, firstDate.day)
         : DateTime(
@@ -143,13 +153,14 @@ class _CalendarDays extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = MediaQuery.textScalerOf(context).scale(12) / 12;
     return Container(
       padding: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.border(context))),
       ),
       child: SizedBox(
-        height: 58,
+        height: 58 * scale,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           itemCount: daysInMonth,
@@ -158,7 +169,7 @@ class _CalendarDays extends StatelessWidget {
             final date = DateTime(monthStart.year, monthStart.month, index + 1);
             final selected = _sameDay(date, selectedDate);
             return SizedBox(
-              width: 36,
+              width: 36 * scale,
               child: InkWell(
                 onTap: () => onSelected(date),
                 borderRadius: BorderRadius.circular(6),
@@ -166,6 +177,8 @@ class _CalendarDays extends StatelessWidget {
                   children: [
                     Text(
                       _weekday(date.weekday),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: Color(0xFF6B7280),
                         fontSize: 12,
@@ -174,8 +187,8 @@ class _CalendarDays extends StatelessWidget {
                     ),
                     const SizedBox(height: 9),
                     Container(
-                      width: 26,
-                      height: 26,
+                      width: 26 * scale,
+                      height: 26 * scale,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: selected

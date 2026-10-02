@@ -4,7 +4,7 @@ import '../../../core/app_colors.dart';
 import '../../../features/shared/meetings/data/progress_report.dart';
 import '../../../features/shared/meetings/widgets/progress_reports_loader.dart';
 import '../../../translations/app_localizations.dart';
-import '../report_detail_screen.dart';
+import '../progress_report_detail_loader.dart';
 
 class ReportProgressReportTab extends StatelessWidget {
   const ReportProgressReportTab({
@@ -121,8 +121,7 @@ class _ProgressReportCard extends StatelessWidget {
             child: FilledButton(
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) =>
-                      ReportDetailScreen(title: report.title, report: report),
+                  builder: (_) => ProgressReportDetailLoader(id: report.id),
                 ),
               ),
               style: FilledButton.styleFrom(

@@ -9,6 +9,7 @@ import '../../../core/app_colors.dart';
 import '../../../core/app_settings.dart';
 import '../../../translations/app_localizations.dart';
 import '../../../widgets/app_logo.dart';
+import '../../../widgets/notification_bell.dart';
 import '../../../core/widgets/filters/api_filter_sheet.dart';
 import 'working_group_filter_sheet.dart';
 import '../../cdc_secretariat/reports/report_filter_sheet.dart';
@@ -112,14 +113,7 @@ class _CdcSectionDashboardScreenViewState
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const AppLogo(width: 88),
-                const Icon(
-                  Icons.notifications,
-                  color: Color(0xFF83BEE9),
-                  size: 28,
-                ),
-              ],
+              children: [const AppLogo(width: 88), const NotificationBell()],
             ),
           ),
           Expanded(

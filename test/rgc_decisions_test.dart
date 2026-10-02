@@ -9,12 +9,124 @@ import 'package:http/testing.dart';
 import 'package:gpsf_app/core/app_settings.dart';
 import 'package:gpsf_app/core/config/module_config.dart';
 import 'package:gpsf_app/core/network/api_client.dart';
+import 'package:gpsf_app/core/widgets/pdf_attachment_preview.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/shared/meetings/data/rgc_decisions_repository.dart';
 import 'package:gpsf_app/screens/report/report_screen.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 
 void main() {
+  testWidgets(
+    'CDC detail retains its linked request document and progress content',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final calls = <String>[];
+      final settings = AppSettingsController(
+        authRepository: AuthRepository(
+          ApiClient(
+            client: MockClient((request) async {
+              calls.add(request.url.path);
+              expect(request.url.path, '/api/v1/meeting-requests');
+              return http.Response(
+                jsonEncode({
+                  'success': true,
+                  'data': [
+                    {
+                      'id': 11,
+                      'meetingRequestLetter': {
+                        'path': '/uploads/cdc_request.pdf',
+                        'name': 'CDC Request.pdf',
+                      },
+                    },
+                    {
+                      'id': 12,
+                      'meetingRequestLetter': {
+                        'path': '/uploads/unrelated.pdf',
+                        'name': 'Unrelated.pdf',
+                      },
+                    },
+                  ],
+                }),
+                200,
+              );
+            }),
+          ),
+        ),
+      )..setLanguage(AppLanguage.english);
+      addTearDown(settings.dispose);
+      final detail = RgcDecisionDetail.fromJson({
+        'id': 7,
+        'decision': 'Actual CDC decision',
+        'status': 'In Progress',
+        'issues': [
+          {
+            'meetingRequest': {'id': 11},
+            'stakeholder': {'name': 'Agriculture & Agro-Industry'},
+            'user': {'name': 'Actual CDC submitter'},
+            'submittedDate': '2026-09-14',
+            'description': 'Actual CDC description',
+            'recommendation': 'Actual CDC recommendation',
+          },
+        ],
+        'progressReports': [
+          {'indicators': '<p>Actual CDC indicator</p>'},
+        ],
+      });
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: MaterialApp(
+            home: CdcRgcDecisionIssueScreen(
+              detail: detail,
+              issue: detail.issues.single,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('RGC Decision Details'), findsOneWidget);
+      expect(find.text('Agriculture & Agro-Industry'), findsOneWidget);
+      expect(find.text('Submitted By : Actual CDC submitter'), findsOneWidget);
+      expect(find.text('Submitted Date : Sep 14, 2026'), findsOneWidget);
+      expect(
+        tester
+            .widget<PdfAttachmentPreview>(find.byType(PdfAttachmentPreview))
+            .path,
+        '/uploads/cdc_request.pdf',
+      );
+      expect(find.text('Unrelated.pdf'), findsNothing);
+      await tester.scrollUntilVisible(
+        find.text('Actual CDC indicator'),
+        120,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Actual CDC decision'), findsOneWidget);
+      expect(calls, ['/api/v1/meeting-requests']);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  test('decision details reject a different record from the API', () async {
+    final api = ApiClient(
+      client: MockClient(
+        (request) async => http.Response(
+          jsonEncode({
+            'success': true,
+            'data': {'id': 3, 'deadline': '2026-10-03'},
+          }),
+          200,
+        ),
+      ),
+    );
+    addTearDown(api.close);
+    await expectLater(
+      RgcDecisionsRepository(api).getDecision(42),
+      throwsA(isA<ApiException>()),
+    );
+  });
   test('formats API dates in Cambodia time', () {
     expect(rgcDate(DateTime.parse('2026-09-29T17:00:00.000Z')), 'Sep 30, 2026');
     expect(

@@ -6,9 +6,6 @@ import '../../../../core/widgets/pdf_attachment_preview.dart';
 import '../../shared/meetings/data/meeting_summary.dart';
 import '../../../../translations/app_localizations.dart';
 
-const _fallbackSummaryTitle =
-    'សិក្ខាសាលាប្រចាំឆ្នាំរបស់ក្រុមការងារ ៣ ដែលមាននាង\nទ្រព្យអ្នកប្រតិបត្តិការ ៤';
-
 class MeetingSummaryDetailScreen extends StatefulWidget {
   const MeetingSummaryDetailScreen({super.key, this.id, this.summary});
 
@@ -38,15 +35,32 @@ class _MeetingSummaryDetailScreenState
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+          return Scaffold(
+            appBar: AppBar(title: const Text('Meeting Summary Details')),
+            body: const Center(child: CircularProgressIndicator()),
           );
         }
         if (snapshot.hasError || snapshot.data == null) {
           return Scaffold(
+            appBar: AppBar(title: const Text('Meeting Summary Details')),
             body: Center(
-              child: Text(
-                AppLocalizations.of(context).text('dashboardLoadError'),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    AppLocalizations.of(
+                      context,
+                    ).text('meetingSummariesLoadError'),
+                  ),
+                  TextButton(
+                    onPressed: () => setState(() {
+                      _future = AppSettings.of(
+                        context,
+                      ).meetingSummaries.getSummary(widget.id!);
+                    }),
+                    child: Text(AppLocalizations.of(context).text('retry')),
+                  ),
+                ],
               ),
             ),
           );
@@ -105,9 +119,7 @@ class _MeetingSummaryDetailScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    summary.detailTitle.isEmpty
-                        ? _fallbackSummaryTitle
-                        : summary.detailTitle,
+                    summary.detailTitle.isEmpty ? '—' : summary.detailTitle,
                     style: TextStyle(
                       color: AppColors.primaryText(context),
                       fontSize: 15,
@@ -123,18 +135,22 @@ class _MeetingSummaryDetailScreenState
               ),
             ),
             Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(14, 14, 14, 28),
-                itemCount: summary.issues.isEmpty ? 3 : summary.issues.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 14),
-                itemBuilder: (context, index) => _ClimateIssueCard(
-                  issue: summary.issues.isEmpty ? null : summary.issues[index],
-                  onTap: () => _showIssueDetails(
-                    context,
-                    summary.issues.isEmpty ? null : summary.issues[index],
-                  ),
-                ),
-              ),
+              child: summary.issues.isEmpty
+                  ? Center(
+                      child: Text(
+                        AppLocalizations.of(context).text('noIssuesFound'),
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(14, 14, 14, 28),
+                      itemCount: summary.issues.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 14),
+                      itemBuilder: (context, index) => _ClimateIssueCard(
+                        issue: summary.issues[index],
+                        onTap: () =>
+                            _showIssueDetails(context, summary.issues[index]),
+                      ),
+                    ),
             ),
           ],
         ),
@@ -371,9 +387,7 @@ class _ClimateIssueCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    issue?.title.isNotEmpty == true
-                        ? issue!.title
-                        : 'Climate Issue',
+                    issue?.title.isNotEmpty == true ? issue!.title : '—',
                     style: TextStyle(
                       color: AppColors.primaryText(context),
                       fontSize: 14,
@@ -392,9 +406,7 @@ class _ClimateIssueCard extends StatelessWidget {
                     border: Border.all(color: AppColors.border(context)),
                   ),
                   child: Text(
-                    issue?.status.isNotEmpty == true
-                        ? issue!.status
-                        : 'Not Addressed',
+                    issue?.status.isNotEmpty == true ? issue!.status : '—',
                     style: TextStyle(
                       color: AppColors.secondaryText(context),
                       fontSize: 12,
@@ -406,9 +418,7 @@ class _ClimateIssueCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              issue?.category.isNotEmpty == true
-                  ? issue!.category
-                  : 'Governance',
+              issue?.category.isNotEmpty == true ? issue!.category : '—',
               style: TextStyle(
                 color: Color(0xFF7C3AED),
                 fontSize: 12,
@@ -417,9 +427,7 @@ class _ClimateIssueCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              issue?.description.isNotEmpty == true
-                  ? issue!.description
-                  : 'The private sector stated that cultivation is largely dependent on the weather (rain), and the private sector also observed that the Ministry of Water Resources and...',
+              issue?.description.isNotEmpty == true ? issue!.description : '',
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -487,7 +495,7 @@ class _IssueDetailsSheet extends StatelessWidget {
                   Text(
                     issue?.title.isNotEmpty == true
                         ? issue!.title
-                        : _fallbackSummaryTitle,
+                        : '—',
                     style: TextStyle(
                       color: AppColors.primaryText(context),
                       fontSize: 15,

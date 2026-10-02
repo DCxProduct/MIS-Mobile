@@ -1,6 +1,7 @@
 class ProgressReport {
   ProgressReport(Map<String, dynamic> json)
-    : id = _requiredInt(json, 'id'),
+    : details = Map.unmodifiable(json),
+      id = _requiredInt(json, 'id'),
       title =
           _string(json['title']) ??
           _string(_object(json['progressReport'])['title']) ??
@@ -41,9 +42,70 @@ class ProgressReport {
       attachmentCount = _attachmentPaths(json).length;
 
   final int id, year, issues, attachmentCount;
+  final Map<String, dynamic> details;
   final String title, semester, status, reportStatus, ministry, attachmentName;
   final List<String>? attachmentPaths;
   final DateTime? deadline, firstMeeting, secondMeeting, secondDeadline;
+
+  String get description =>
+      _string(details['description']) ??
+      _string(_object(details['progressReport'])['description']) ??
+      '';
+  String get preparedBy =>
+      _string(
+        _object(_object(details['ministryInformation'])['preparedBy'])['name'],
+      ) ??
+      _string(_object(details['preparedBy'])['name']) ??
+      '';
+  String get reviewedBy =>
+      _string(
+        _object(_object(details['cdcInformation'])['reviewedBy'])['name'],
+      ) ??
+      _string(_object(details['reviewedBy'])['name']) ??
+      '';
+  String get cdcStatus => details.containsKey('cdcInformation')
+      ? _string(_object(details['cdcInformation'])['status']) ?? ''
+      : status;
+  DateTime? get submittedAt => _date(
+    _object(details['ministryInformation'])['submittedAt'] ??
+        details['submittedAt'],
+  );
+  DateTime? get updatedAt => _date(
+    details.containsKey('cdcInformation')
+        ? _object(details['cdcInformation'])['latestUpdatedAt']
+        : details['updatedAt'],
+  );
+  String? get approvalDocument =>
+      _string(
+        _object(
+          _object(details['ministryInformation'])['approvalProgressReport'],
+        )['path'],
+      ) ??
+      _string(_object(details['attachment'])['path']);
+  String? get requestDocument =>
+      _string(
+        _object(_object(details['cdcInformation'])['requestDocument'])['path'],
+      ) ??
+      _string(
+        _object(_object(details['progressReport'])['requestDocument'])['path'],
+      );
+  List<Map<String, dynamic>> get openIssues => _objects(details['openIssues']);
+  List<Map<String, dynamic>> get rgcDecisions =>
+      _objects(details['rgcDecisions']);
+  Map<String, dynamic> get latestMeeting =>
+      details.containsKey('cdcInformation')
+      ? _object(_object(details['cdcInformation'])['meeting'])
+      : _object(_object(details['progressReport'])['latestMeeting']).isNotEmpty
+      ? _object(_object(details['progressReport'])['latestMeeting'])
+      : _objects(details['meetings']).firstOrNull ??
+            _objects(
+              _object(details['progressReport'])['meetings'],
+            ).firstOrNull ??
+            const {};
+
+  static List<Map<String, dynamic>> _objects(Object? value) => value is List
+      ? value.whereType<Map<String, dynamic>>().toList()
+      : const [];
 
   static int _requiredInt(Map<String, dynamic> json, String key) {
     final value = json[key];
@@ -59,6 +121,8 @@ class ProgressReport {
       value is Map<String, dynamic> ? value : const <String, dynamic>{};
 
   static String _ministry(Map<String, dynamic> json) {
+    final ministry = _string(_object(json['ministry'])['name']);
+    if (ministry != null && ministry.isNotEmpty) return ministry;
     final documents = json['ministryDocuments'];
     if (documents is List && documents.isNotEmpty) {
       final first = _object(documents.first);
@@ -72,15 +136,20 @@ class ProgressReport {
       value is String ? DateTime.tryParse(value) : null;
 
   static DateTime? _meetingDate(Map<String, dynamic> json, int index) {
-    final meetings = json['meetings'];
+    final meetings =
+        json['meetings'] ?? _object(json['progressReport'])['meetings'];
     if (meetings is! List || index >= meetings.length) return null;
     return _date(_object(meetings[index])['meetingDate']);
   }
 
   static DateTime? _deadlineDate(Map<String, dynamic> json, int index) {
-    final deadlines = json['deadlines'];
+    final deadlines =
+        json['deadlines'] ?? _object(json['progressReport'])['deadlines'];
     if (deadlines is! List || index >= deadlines.length) return null;
-    return _date(_object(deadlines[index])['date']);
+    return _date(
+      _object(deadlines[index])['date'] ??
+          _object(deadlines[index])['deadline'],
+    );
   }
 
   static Set<String> _attachmentPaths(Map<String, dynamic> json) {
@@ -91,6 +160,8 @@ class ProgressReport {
     }
 
     add(json['attachment']);
+    add(_object(json['ministryInformation'])['approvalProgressReport']);
+    add(_object(json['cdcInformation'])['requestDocument']);
     add(json['draftSemesterReport']);
     add(json['finalSemesterReport']);
     add(_object(json['ministryAssignment'])['attachment']);
@@ -101,6 +172,8 @@ class ProgressReport {
       }
     }
     add(_object(json['progressReport'])['requestDocument']);
+    add(_object(json['progressReport'])['draftSemesterReport']);
+    add(_object(json['progressReport'])['finalSemesterReport']);
     return paths;
   }
 

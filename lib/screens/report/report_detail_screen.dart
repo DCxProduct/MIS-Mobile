@@ -1,9 +1,36 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
+import '../../core/text/html_text.dart';
 import '../../core/widgets/pdf_attachment_preview.dart';
 import '../../features/shared/meetings/data/progress_report.dart';
+import '../../features/shared/meetings/data/progress_reports_repository.dart';
 import '../../translations/app_localizations.dart';
+import 'report_item_detail_sheet.dart';
+
+String _value(String? value) =>
+    value == null || value.trim().isEmpty ? '—' : value;
+
+String _named(Object? value) => value is Map
+    ? '${value['name'] ?? value['code'] ?? ''}'
+    : value is String
+    ? value
+    : '';
+
+String _formatDate(DateTime? date) {
+  if (date == null) return '—';
+  final local = date.toLocal();
+  return '${local.day}/${local.month}/${local.year}';
+}
+
+String _meetingTime(ProgressReport? report) {
+  final meeting = report?.latestMeeting ?? const <String, dynamic>{};
+  final rawDate = meeting['meetingDate'];
+  final date = rawDate is String ? DateTime.tryParse(rawDate) : null;
+  if (date == null) return '—';
+  final time = meeting['startTime'];
+  return '${_formatDate(date)}${time is String && time.isNotEmpty ? '\n$time' : ''}';
+}
 
 class ReportDetailScreen extends StatefulWidget {
   const ReportDetailScreen({super.key, required this.title, this.report});
@@ -60,7 +87,9 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
           padding: const EdgeInsets.fromLTRB(16, 17, 16, 28),
           children: [
             Text(
-              'Ministry of Agriculture Forestry\nand Fisheries',
+              widget.report?.ministry.isNotEmpty == true
+                  ? widget.report!.ministry
+                  : widget.title,
               style: TextStyle(
                 color: AppColors.primaryText(context),
                 fontSize: 20,
@@ -69,6 +98,27 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
               ),
             ),
             const SizedBox(height: 14),
+            if (widget.report != null) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: _InfoBlock(
+                      label: 'Year',
+                      value: widget.report!.year == 0
+                          ? '—'
+                          : '${widget.report!.year}',
+                    ),
+                  ),
+                  Expanded(
+                    child: _InfoBlock(
+                      label: 'Semester',
+                      value: _value(widget.report!.semester),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+            ],
             _MaffInfoSection(title: widget.title, report: widget.report),
             const SizedBox(height: 9),
             _CdcInfoSection(report: widget.report),
@@ -86,9 +136,16 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
 
   Widget _buildTabContent() {
     return switch (_selectedTab) {
-      0 => const _DescriptionTab(),
-      1 => const _IssueListTab(status: _ReportIssueStatus.notAddressed),
-      2 => const _IssueListTab(status: _ReportIssueStatus.solved),
+      0 => _DescriptionTab(description: widget.report?.description ?? ''),
+      1 => _IssueListTab(
+        items: widget.report?.openIssues ?? const [],
+        requestDocument: widget.report?.requestDocument,
+      ),
+      2 => _IssueListTab(
+        items: widget.report?.rgcDecisions ?? const [],
+        type: ProgressReportItemType.rgcDecision,
+        requestDocument: widget.report?.requestDocument,
+      ),
       _ => _AttachmentTab(report: widget.report),
     };
   }
@@ -107,7 +164,10 @@ class _MaffInfoSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _SectionHeader(title: 'MAFF Info'),
+        _SectionHeader(
+          title:
+              '${report?.ministry.isNotEmpty == true ? report!.ministry : 'Ministry'} Info',
+        ),
         const SizedBox(height: 11),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,15 +175,15 @@ class _MaffInfoSection extends StatelessWidget {
             Expanded(
               child: _InfoBlock(
                 label: l10n.text('submittedDate'),
-                value: 'June 07, 2025',
+                value: _formatDate(report?.submittedAt),
               ),
             ),
             const SizedBox(width: 18),
-            const Expanded(
+            Expanded(
               child: _PersonInfoBlock(
                 label: 'Prepare by',
-                name: 'Ouk Sabda',
-                date: 'June 01, 2025',
+                name: _value(report?.preparedBy),
+                date: '',
               ),
             ),
           ],
@@ -131,7 +191,7 @@ class _MaffInfoSection extends StatelessWidget {
         const SizedBox(height: 13),
         _DocumentInfoBlock(
           label: 'Approval Report',
-          path: report?.attachmentPaths?.firstOrNull,
+          path: report?.approvalDocument,
         ),
       ],
     );
@@ -158,16 +218,16 @@ class _CdcInfoSection extends StatelessWidget {
             Expanded(
               child: _InfoBlock(
                 label: l10n.text('status'),
-                value: '• ${l10n.text('underReview')}',
+                value: _value(report?.cdcStatus),
                 valueColor: const Color(0xFFFF8A00),
               ),
             ),
             const SizedBox(width: 18),
-            const Expanded(
+            Expanded(
               child: _PersonInfoBlock(
                 label: 'Review by',
-                name: 'Seng Phanat',
-                date: 'June 01, 2025',
+                name: _value(report?.reviewedBy),
+                date: '',
               ),
             ),
           ],
@@ -177,33 +237,36 @@ class _CdcInfoSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: _InfoBlock(label: 'Last Update', value: '2025'),
+              child: _InfoBlock(
+                label: 'Last Update',
+                value: _formatDate(report?.updatedAt),
+              ),
             ),
             SizedBox(width: 18),
             Expanded(
               child: _DocumentInfoBlock(
                 label: 'Meeting Request Document:',
-                path: report?.attachmentPaths?.elementAtOrNull(1),
+                path: report?.requestDocument,
               ),
             ),
           ],
         ),
         const SizedBox(height: 14),
-        const Row(
+        Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: _InfoBlock(
                 label: 'Meeting Date & Time',
-                value: 'September 22, 2025,\n2:00PM-5:00PM',
+                value: _meetingTime(report),
               ),
             ),
             SizedBox(width: 18),
             Expanded(
               child: _PersonInfoBlock(
                 label: 'Review by',
-                name: 'Seng Phanat',
-                date: 'June 01, 2025',
+                name: _value(report?.reviewedBy),
+                date: '',
               ),
             ),
           ],
@@ -308,14 +371,15 @@ class _PersonInfoBlock extends StatelessWidget {
             ),
             children: [
               TextSpan(text: name),
-              TextSpan(
-                text: '  ( $date )',
-                style: const TextStyle(
-                  color: AppColors.mutedText,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w500,
+              if (date.isNotEmpty)
+                TextSpan(
+                  text: '  ( $date )',
+                  style: const TextStyle(
+                    color: AppColors.mutedText,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -332,6 +396,9 @@ class _DocumentInfoBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (path == null || path!.isEmpty) {
+      return _InfoBlock(label: label, value: '—');
+    }
     return PdfAttachmentPreview(
       path: path ?? '',
       name: path == null ? null : pdfAttachmentName(path!),
@@ -356,22 +423,13 @@ class _DocumentInfoBlock extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Request Doc',
+                      pdfAttachmentName(path!),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: AppColors.primaryText(context),
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 1),
-                    const Text(
-                      '200 KB',
-                      style: TextStyle(
-                        color: AppColors.mutedText,
-                        fontSize: 7,
-                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -446,18 +504,15 @@ class _ReportDetailTabs extends StatelessWidget {
 }
 
 class _DescriptionTab extends StatelessWidget {
-  const _DescriptionTab();
+  const _DescriptionTab({required this.description});
+  final String description;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 14),
       child: Text(
-        'The private sector stated that cultivation is largely dependent on the '
-        'weather (rain), and the private sector also observed that the Ministry '
-        'of Water Resources and Meteorology often issues announcements '
-        'regarding weather forecasting nationwide, which results in farmers in '
-        'each region not receiving clear information.',
+        _value(htmlToPlainText(description)),
         style: TextStyle(
           color: AppColors.secondaryText(context),
           fontSize: 12,
@@ -469,111 +524,142 @@ class _DescriptionTab extends StatelessWidget {
   }
 }
 
-enum _ReportIssueStatus { solved, notAddressed }
-
 class _IssueListTab extends StatelessWidget {
-  const _IssueListTab({required this.status});
-
-  final _ReportIssueStatus status;
+  const _IssueListTab({
+    required this.items,
+    this.type = ProgressReportItemType.issue,
+    this.requestDocument,
+  });
+  final List<Map<String, dynamic>> items;
+  final ProgressReportItemType type;
+  final String? requestDocument;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 14),
       child: Column(
-        children: List.generate(
-          1,
-          (index) => Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: _ReportIssueCard(title: 'Climate Issue', status: status),
-          ),
-        ),
+        children: items.isEmpty
+            ? [Text(AppLocalizations.of(context).text('noIssuesFound'))]
+            : [
+                for (final item in items)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: _ReportIssueCard(
+                      item: item,
+                      type: type,
+                      requestDocument: requestDocument,
+                    ),
+                  ),
+              ],
       ),
     );
   }
 }
 
 class _ReportIssueCard extends StatelessWidget {
-  const _ReportIssueCard({required this.title, required this.status});
-
-  final String title;
-  final _ReportIssueStatus status;
+  const _ReportIssueCard({
+    required this.item,
+    required this.type,
+    this.requestDocument,
+  });
+  final Map<String, dynamic> item;
+  final ProgressReportItemType type;
+  final String? requestDocument;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final solved = status == _ReportIssueStatus.solved;
+    final status = _named(item['status']);
+    final solved = status.toUpperCase() == 'SOLVED';
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
-      decoration: BoxDecoration(
-        color: AppColors.subtleBackground(context),
-        borderRadius: BorderRadius.circular(8),
+    return InkWell(
+      key: ValueKey('report-${type.name}-${item['id']}'),
+      onTap: () => showReportItemDetail(
+        context,
+        item: item,
+        type: type,
+        requestDocument: requestDocument,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: AppColors.primaryText(context),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
+        decoration: BoxDecoration(
+          color: AppColors.subtleBackground(context),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    _value(
+                      htmlToPlainText(
+                        '${item['title'] ?? item['decision'] ?? ''}',
+                      ),
+                    ),
+                    style: TextStyle(
+                      color: AppColors.primaryText(context),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-              ),
-              _SmallStatusBadge(
-                label: solved ? l10n.text('solved') : l10n.text('notAddressed'),
-                color: solved
-                    ? (isDark
-                          ? const Color(0xFF86EFAC)
-                          : const Color(0xFF16A34A))
-                    : (isDark
-                          ? const Color(0xFFD1D5DB)
-                          : const Color(0xFF4B5563)),
-                background: solved
-                    ? (isDark
-                          ? const Color(0xFF123B2A)
-                          : const Color(0xFFF0FDF4))
-                    : AppColors.cardBackground(context),
-                border: solved
-                    ? (isDark
-                          ? const Color(0xFF166534)
-                          : const Color(0xFF86EFAC))
-                    : (isDark
-                          ? const Color(0xFF4B5563)
-                          : const Color(0xFFE5E7EB)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Governance',
-            style: TextStyle(
-              color: Color(0xFF7C3AED),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+                _SmallStatusBadge(
+                  label: _value(status),
+                  color: solved
+                      ? (isDark
+                            ? const Color(0xFF86EFAC)
+                            : const Color(0xFF16A34A))
+                      : (isDark
+                            ? const Color(0xFFD1D5DB)
+                            : const Color(0xFF4B5563)),
+                  background: solved
+                      ? (isDark
+                            ? const Color(0xFF123B2A)
+                            : const Color(0xFFF0FDF4))
+                      : AppColors.cardBackground(context),
+                  border: solved
+                      ? (isDark
+                            ? const Color(0xFF166534)
+                            : const Color(0xFF86EFAC))
+                      : (isDark
+                            ? const Color(0xFF4B5563)
+                            : const Color(0xFFE5E7EB)),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'The private sector stated that cultivation is largely dependent on the weather (rain), and the private sector also observed that the Ministry of Water Resources and...',
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: AppColors.secondaryText(context),
-              fontSize: 12,
-              height: 1.45,
-              fontWeight: FontWeight.w500,
+            const SizedBox(height: 4),
+            Text(
+              _value(_named(item['category'])),
+              style: TextStyle(
+                color: Color(0xFF7C3AED),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 10),
+            Text(
+              _value(
+                htmlToPlainText(
+                  '${item['description'] ?? item['recommendation'] ?? ''}',
+                ),
+              ),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: AppColors.secondaryText(context),
+                fontSize: 12,
+                height: 1.45,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -628,11 +714,7 @@ class _AttachmentTab extends StatelessWidget {
                 for (final path in report!.attachmentPaths!)
                   _AttachmentCard(title: pdfAttachmentName(path), path: path),
               ]
-            : const [
-                _AttachmentCard(title: 'Request Doc'),
-                SizedBox(height: 10),
-                _AttachmentCard(title: 'Approval Report'),
-              ],
+            : [Text(AppLocalizations.of(context).text('noData'))],
       ),
     );
   }

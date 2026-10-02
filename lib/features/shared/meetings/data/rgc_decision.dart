@@ -168,7 +168,8 @@ class RgcDecisionIssue {
   RgcDecisionIssue.fromJson(
     Map<String, dynamic> json, {
     Map<String, dynamic>? decision,
-  }) : status = _string(
+  }) : title = _string(json['title']),
+       status = _string(
          _object(json['issueStatus'])['name'] ??
              json['status'] ??
              decision?['status'],
@@ -177,7 +178,8 @@ class RgcDecisionIssue {
          _object(json['stakeholder'])['name'] ?? json['submittedBy'],
        ),
        submittedByName = _string(
-         _nonEmpty(_object(json['user'])['name']) ??
+         json['submittedByName'] ??
+             _nonEmpty(_object(json['user'])['name']) ??
              _nonEmpty(json['submittedBy']) ??
              _object(json['stakeholder'])['name'],
        ),
@@ -230,7 +232,8 @@ class RgcDecisionIssue {
              decision?['verificationLink'],
        );
 
-  final String status,
+  final String title,
+      status,
       submittedBy,
       submittedByName,
       category,

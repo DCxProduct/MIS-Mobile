@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app_colors.dart';
 import '../../../translations/app_localizations.dart';
 import 'filter_models.dart';
+import 'filter_sheet_header.dart';
 
 export 'filter_models.dart';
 
@@ -73,34 +74,15 @@ class _AppFilterSheetState extends State<AppFilterSheet> {
           top: true,
           child: Column(
             children: [
-              SizedBox(
-                width: double.infinity,
-                height: 58,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Text(
-                      l10n.text('filters'),
-                      style: TextStyle(
-                        color: isDark
-                            ? AppColors.primaryText(context)
-                            : const Color(0xFF181B20),
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Positioned(
-                      right: 6,
-                      child: IconButton(
-                        tooltip: MaterialLocalizations.of(
-                          context,
-                        ).closeButtonTooltip,
-                        onPressed:
-                            widget.onClose ?? () => Navigator.pop(context),
-                        icon: const Icon(Icons.close_rounded, size: 23),
-                      ),
-                    ),
-                  ],
+              FilterSheetHeader(
+                title: l10n.text('filters'),
+                onClose: widget.onClose ?? () => Navigator.pop(context),
+                titleStyle: TextStyle(
+                  color: isDark
+                      ? AppColors.primaryText(context)
+                      : const Color(0xFF181B20),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               Divider(height: 1, color: border),

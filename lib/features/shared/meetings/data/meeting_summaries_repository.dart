@@ -29,8 +29,10 @@ class MeetingSummariesRepository {
   }
 
   Future<MeetingSummary> getSummary(int id) async {
+    if (id <= 0) throw ArgumentError.value(id, 'id', 'Must be positive');
     final data = await _api.get('meeting-summaries/$id');
     try {
+      if (data['id'] != id) throw const FormatException('Invalid summary ID');
       return MeetingSummary(data);
     } on FormatException {
       throw const ApiException(
