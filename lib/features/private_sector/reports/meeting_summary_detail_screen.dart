@@ -1,3 +1,4 @@
+import '../../../core/widgets/editor_content.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_colors.dart';
@@ -493,9 +494,7 @@ class _IssueDetailsSheet extends StatelessWidget {
                   ),
                   const SizedBox(height: 18),
                   Text(
-                    issue?.title.isNotEmpty == true
-                        ? issue!.title
-                        : '—',
+                    issue?.title.isNotEmpty == true ? issue!.title : '—',
                     style: TextStyle(
                       color: AppColors.primaryText(context),
                       fontSize: 15,
@@ -546,12 +545,12 @@ class _IssueDetailsSheet extends StatelessWidget {
                   const SizedBox(height: 20),
                   _ReadMorePanel(
                     title: 'Issues Descriptions',
-                    body: issue?.description,
+                    body: issue?.descriptionHtml ?? issue?.description,
                   ),
                   const SizedBox(height: 18),
                   _ReadMorePanel(
                     title: 'Recommendations',
-                    body: issue?.recommendation,
+                    body: issue?.recommendationHtml ?? issue?.recommendation,
                   ),
                 ],
               ),
@@ -661,60 +660,39 @@ class _DatePill extends StatelessWidget {
 
 class _ReadMorePanel extends StatelessWidget {
   const _ReadMorePanel({required this.title, this.body});
-
   final String title;
   final String? body;
-
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        title,
+        style: TextStyle(
+          color: AppColors.primaryText(context),
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      const SizedBox(height: 10),
+      Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground(context),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: AppColors.border(context)),
+        ),
+        child: ExpandableEditorContent(
+          body?.isNotEmpty == true ? body! : '—',
           style: TextStyle(
-            color: AppColors.primaryText(context),
+            color: AppColors.secondaryText(context),
             fontSize: 12,
-            fontWeight: FontWeight.w700,
+            height: 1.5,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 10),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.cardBackground(context),
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: AppColors.border(context)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                body?.isNotEmpty == true ? body! : '—',
-                style: TextStyle(
-                  color: AppColors.secondaryText(context),
-                  fontSize: 12,
-                  height: 1.5,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 6),
-              InkWell(
-                onTap: () {},
-                child: const Text(
-                  'Read more',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
 }

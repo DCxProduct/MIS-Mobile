@@ -19,6 +19,7 @@ class IssueProgressReport {
     required this.sourceOfVerification,
     required this.attachmentName,
     required this.attachmentSize,
+    this.richText = const {},
   });
 
   final int? progressReportId;
@@ -37,6 +38,7 @@ class IssueProgressReport {
   final String sourceOfVerification;
   final String attachmentName;
   final int? attachmentSize;
+  final Map<String, String> richText;
 
   /// Older issue records keep progress details directly on the issue instead
   /// of returning a linked progressReports entry.
@@ -137,6 +139,37 @@ class IssueProgressReport {
           : issueSourceOfVerification,
     );
     return IssueProgressReport(
+      richText: Map.unmodifiable({
+        'description': value(json['progressSolution']).isNotEmpty
+            ? value(json['progressSolution'])
+            : value(report['progressSolution']).isNotEmpty
+            ? value(report['progressSolution'])
+            : value(json['description']).isNotEmpty
+            ? value(json['description'])
+            : value(report['description']),
+        for (final key in [
+          'indicators',
+          'implementationChallenges',
+          'requests',
+          'nextStep',
+          'rgcDecision',
+        ])
+          key: value(json[key] ?? report[key]),
+        'sourceOfVerification': value(json['sourceOfVerification']).isNotEmpty
+            ? value(json['sourceOfVerification'])
+            : value(report['sourceOfVerification']).isNotEmpty
+            ? value(report['sourceOfVerification'])
+            : issueSourceOfVerification,
+        'referenceName': sourceOfVerification.isNotEmpty
+            ? value(json['sourceOfVerification']).isNotEmpty
+                  ? value(json['sourceOfVerification'])
+                  : value(report['sourceOfVerification']).isNotEmpty
+                  ? value(report['sourceOfVerification'])
+                  : issueSourceOfVerification
+            : value(json['referenceName']).isNotEmpty
+            ? value(json['referenceName'])
+            : value(report['referenceName']),
+      }),
       semester: semester,
       progressReportId: json['progressReportId'] is int
           ? json['progressReportId'] as int

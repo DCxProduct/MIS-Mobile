@@ -1,3 +1,4 @@
+import '../../core/widgets/editor_content.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/app_settings.dart';
@@ -265,7 +266,7 @@ class _ResourceDetailState extends State<_ResourceDetail> {
         ListTile(
           contentPadding: EdgeInsets.zero,
           title: Text(l10n.text(key)),
-          subtitle: Text(text),
+          subtitle: EditorContent(value is String ? value : text),
         ),
       );
     }

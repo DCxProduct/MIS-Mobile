@@ -1,3 +1,4 @@
+import '../../shared/meetings/data/rgc_decision.dart';
 import '../../../core/app_settings.dart';
 import '../../../core/widgets/filters/api_filter_sheet.dart';
 import '../../../core/widgets/filters/api_filter_scope.dart';
@@ -11,7 +12,7 @@ import '../../private_sector/dashboard/tabs/categories_tab.dart';
 import '../../private_sector/dashboard/tabs/overall_tab.dart';
 import '../../private_sector/dashboard/tabs/working_group_tab.dart';
 import '../../../screens/report/plenary_detail_screen.dart';
-import '../../../screens/report/rgc_decision_detail_screen.dart';
+import '../../cdc_section/reports/rgc_decision_details.dart';
 import '../../../screens/report/tabs/report_progress_report_tab.dart';
 import '../../../features/shared/meetings/data/plenary.dart';
 import '../../../features/shared/meetings/widgets/plenaries_loader.dart';
@@ -72,7 +73,9 @@ class _LineMinistryReportsScreenViewState
     final topPadding = MediaQuery.of(context).viewPadding.top;
 
     return ApiFilterScope(
-      selections: {for (var i = 0; i < _filters.length; i++) _resources[i]: _filters[i]},
+      selections: {
+        for (var i = 0; i < _filters.length; i++) _resources[i]: _filters[i],
+      },
       queries: {
         for (var i = 0; i < _filters.length; i++)
           _resources[i]: _filters[i].toQuery(),
@@ -149,15 +152,13 @@ class _RgcDecisionTab extends StatelessWidget {
     return RgcDecisionsLoader(
       builder: (decisions) => Column(
         children: [
-          for (final decision in decisions)
+          for (final decision in RgcDecisionGroup.fromDecisions(decisions))
             _RgcDecisionCard(
+              decisionIds: decision.decisionIds,
+              plenaryName: decision.plenaryName,
               agencyName: decision.agencyName,
               status: decision.status,
-              meetingDate: decision.meetingDate == null
-                  ? '—'
-                  : MaterialLocalizations.of(
-                      context,
-                    ).formatMediumDate(decision.meetingDate!.toLocal()),
+              meetingDate: plenaryDate(decision.meetingDate),
               category: decision.category,
               focalPerson: decision.focalPerson,
               linkCount: '${decision.linkCount} Link',
@@ -170,6 +171,8 @@ class _RgcDecisionTab extends StatelessWidget {
 
 class _RgcDecisionCard extends StatelessWidget {
   const _RgcDecisionCard({
+    required this.decisionIds,
+    required this.plenaryName,
     required this.agencyName,
     required this.status,
     required this.meetingDate,
@@ -178,6 +181,8 @@ class _RgcDecisionCard extends StatelessWidget {
     required this.linkCount,
   });
 
+  final List<int> decisionIds;
+  final String plenaryName;
   final String agencyName;
   final String status;
   final String meetingDate;
@@ -190,11 +195,6 @@ class _RgcDecisionCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context);
     final isKhmer = l10n.language == AppLanguage.khmer;
-    final translatedStatus = status == 'In Progress'
-        ? l10n.text('inProgress')
-        : (status == 'Solved'
-              ? l10n.text('solved')
-              : l10n.text('notAddressed'));
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -238,36 +238,16 @@ class _RgcDecisionCard extends StatelessWidget {
                   ),
                 ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF3E2312)
-                      : const Color(0xFFFFF3E0),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: isDark
-                        ? const Color(0xFFC2410C)
-                        : const Color(0xFFFFCC80),
-                  ),
-                ),
-                child: Text(
-                  translatedStatus,
-                  style: TextStyle(
-                    color: isDark
-                        ? const Color(0xFFFB923C)
-                        : const Color(0xFFF97316),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
+              CdcRgcStatus(status: status),
             ],
           ),
           const SizedBox(height: 12),
+          if (plenaryName.isNotEmpty)
+            _ReportRow(label: l10n.text('plenary'), value: plenaryName),
+          _ReportRow(
+            label: l10n.text('numberOfRgcDecision'),
+            value: '${decisionIds.length}',
+          ),
           _ReportRow(label: l10n.text('meetingDate'), value: meetingDate),
           const SizedBox(height: 8),
           _ReportRow(label: l10n.text('categories'), value: category),
@@ -312,8 +292,10 @@ class _RgcDecisionCard extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) =>
-                        RgcDecisionDetailScreen(agencyName: agencyName),
+                    builder: (_) => CdcRgcDecisionOverviewScreen(
+                      decisionId: decisionIds.first,
+                      additionalDecisionIds: decisionIds.skip(1).toList(),
+                    ),
                   ),
                 );
               },
@@ -357,7 +339,7 @@ class _PlenaryTab extends StatelessWidget {
             _PlenaryCard(
               title: plenary.name,
               status: plenary.status,
-              meetingDate: _formatDate(context, plenary.meetingDate),
+              meetingDate: plenaryDate(plenary.meetingDate),
               numberOfRgcDecision: '${plenary.numberOfRgcDecisions}',
               deadline: _formatDate(context, plenary.deadline),
               attachmentCount: _attachmentLabel(context, plenary),

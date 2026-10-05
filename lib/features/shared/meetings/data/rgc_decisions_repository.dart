@@ -23,18 +23,22 @@ class RgcDecisionsRepository {
   }
 
   Future<RgcDecisionPage> getDecisionsPage({
-    required int stakeholderId,
+    int? stakeholderId,
     int page = 1,
     int limit = 20,
     Map<String, String> filters = const {},
   }) async {
-    if (stakeholderId <= 0 || page <= 0 || limit <= 0) {
-      throw ArgumentError('Ministry, page, and limit must be positive.');
+    if ((stakeholderId != null && stakeholderId <= 0) ||
+        page <= 0 ||
+        limit <= 0) {
+      throw ArgumentError(
+        'Ministry, when supplied, page, and limit must be positive.',
+      );
     }
     final data = await _api.get(
       'rgc-decisions',
       query: {
-        'stakeholderId': '$stakeholderId',
+        if (stakeholderId != null) 'stakeholderId': '$stakeholderId',
         ...filters,
         'page': '$page',
         'limit': '$limit',
@@ -47,33 +51,22 @@ class RgcDecisionsRepository {
     }
   }
 
-  Future<RgcDecisionDetail> getDecision(int id) async {
+  Future<RgcDecisionDetail> getDecision(
+    int id, {
+    bool includePlenaryDetails = false,
+  }) async {
     if (id <= 0) throw ArgumentError.value(id, 'id', 'Must be positive');
     final data = await _api.get('rgc-decisions/$id');
     try {
       final detail = RgcDecisionDetail.fromJson(data);
       if (detail.decision.id != id) throw const FormatException();
-      if (detail.deadline != null) return detail;
-
-      final plenary = data['plenary'];
-      final plenaryId =
-          data['plenaryId'] ??
-          (plenary is Map<String, dynamic> ? plenary['id'] : null);
-      if (plenaryId is! int || plenaryId <= 0) return detail;
-
-      try {
-        final plenaryData = await _api.get('plenaries/$plenaryId');
-        final deadline = plenaryData['deadline'];
-        return RgcDecisionDetail.fromJson(
-          data,
-          plenaryDeadline: deadline is String
-              ? DateTime.tryParse(deadline)
-              : null,
-        );
-      } on ApiException {
-        // Keep the decision readable when its plenary is unavailable.
+      if (detail.deadline != null &&
+          (!includePlenaryDetails ||
+              (detail.decision.plenaryStatus.isNotEmpty &&
+                  detail.decision.plenaryMeetingDate != null))) {
         return detail;
       }
+      return RgcDecisionDetail.fromJson(await _withPlenary(data, {}));
     } on FormatException {
       throw const ApiException(
         'The server returned invalid RGC decision details.',
@@ -95,6 +88,7 @@ class RgcDecisionsRepository {
   Future<List<RgcDecision>> getDecisions({
     Map<String, String> filters = const {},
     bool cdcGpsf = false,
+    bool includePlenaryDetails = false,
   }) async {
     final items = await _api.getAllPages(
       cdcGpsf ? 'rgc-decisions/cdc-gpsf' : 'rgc-decisions',
@@ -102,14 +96,52 @@ class RgcDecisionsRepository {
       objectItems: true,
     );
     try {
+      final plenaries = <int, Future<Map<String, dynamic>>>{};
       return List.unmodifiable(
-        items.map((item) {
-          if (item is! Map<String, dynamic>) throw const FormatException();
-          return RgcDecision(item);
-        }),
+        await Future.wait(
+          items.map((item) async {
+            if (item is! Map<String, dynamic>) throw const FormatException();
+            final decision = RgcDecision(item);
+            if (includePlenaryDetails &&
+                (decision.plenaryStatus.isEmpty ||
+                    decision.plenaryMeetingDate == null)) {
+              return RgcDecision(await _withPlenary(item, plenaries));
+            }
+            return decision;
+          }),
+        ),
       );
     } on FormatException {
       throw const ApiException('The server returned invalid RGC decisions.');
+    }
+  }
+
+  Future<Map<String, dynamic>> _withPlenary(
+    Map<String, dynamic> data,
+    Map<int, Future<Map<String, dynamic>>> plenaries,
+  ) async {
+    final decision = RgcDecision(data);
+    if (decision.plenaryId <= 0) return data;
+    try {
+      // Share one request across ministries/decisions in this list load.
+      // A fresh load fetches fresh metadata rather than keeping a stale cache.
+      final plenary = await plenaries.putIfAbsent(
+        decision.plenaryId,
+        () => _api.get('plenaries/${decision.plenaryId}'),
+      );
+      if (plenary['id'] != decision.plenaryId) return data;
+      final existing = data['plenary'];
+      return {
+        ...data,
+        'plenary': {
+          if (existing is Map<String, dynamic>) ...existing,
+          ...plenary,
+        },
+      };
+    } on ApiException {
+      // The decision remains readable if its plenary is unavailable. Do not
+      // substitute a decision status for the missing plenary status.
+      return data;
     }
   }
 }

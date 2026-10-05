@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import '../../../core/app_colors.dart';
+import '../../../core/text/html_text.dart';
+import '../../../core/widgets/editor_content.dart';
 import '../../../translations/app_localizations.dart';
 
 class CdcDetailInfoValue extends StatelessWidget {
@@ -129,7 +131,17 @@ class _CdcDetailTextPanelState extends State<CdcDetailTextPanel> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (widget.inlineLink && widget.body.isNotEmpty)
+              if (containsEditorHtml(widget.body))
+                EditorContent(
+                  widget.body,
+                  maxLines: _expanded ? null : widget.collapsedLines,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.25,
+                    color: AppColors.primaryText(context),
+                  ),
+                )
+              else if (widget.inlineLink && widget.body.isNotEmpty)
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final style = TextStyle(
@@ -140,7 +152,7 @@ class _CdcDetailTextPanelState extends State<CdcDetailTextPanel> {
                     final linkText = l10n.text(
                       _expanded ? 'showLess' : 'readMore',
                     );
-                    var body = widget.body;
+                    var body = htmlToPlainText(widget.body);
                     if (!_expanded) {
                       final painter = TextPainter(
                         textDirection: Directionality.of(context),
@@ -191,7 +203,7 @@ class _CdcDetailTextPanelState extends State<CdcDetailTextPanel> {
                   },
                 )
               else
-                Text(
+                EditorContent(
                   widget.body,
                   maxLines: _expanded ? null : widget.collapsedLines,
                   overflow: _expanded
@@ -203,7 +215,8 @@ class _CdcDetailTextPanelState extends State<CdcDetailTextPanel> {
                     color: AppColors.primaryText(context),
                   ),
                 ),
-              if (!widget.inlineLink && widget.body.isNotEmpty) ...[
+              if ((!widget.inlineLink || containsEditorHtml(widget.body)) &&
+                  widget.body.isNotEmpty) ...[
                 const SizedBox(height: 5),
                 link,
               ],

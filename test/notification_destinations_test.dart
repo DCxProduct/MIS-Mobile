@@ -80,6 +80,13 @@ void main() {
                             'markReadOnDetail': false,
                             'systemEnabled': true,
                           });
+                        case '/api/v1/plenaries/3':
+                          return ok({
+                            'id': 3,
+                            'status': 'Sent',
+                            'statusCode': 'SENT',
+                            'meetingDate': '2026-09-13T17:00:00.000Z',
+                          });
                         case '/api/v1/rgc-decisions/42':
                           return ok({
                             'id': 42,
@@ -123,16 +130,16 @@ void main() {
         expect(find.byType(CdcRgcDecisionOverviewScreen), findsOneWidget);
         expect(find.text('RGC Decision Details'), findsOneWidget);
         expect(find.text('Oct 3, 2026'), findsOneWidget);
+        expect(find.text('Sep 13, 2026'), findsOneWidget);
+        expect(find.text('Sent'), findsOneWidget);
         expect(find.text('Sep 14, 2026'), findsOneWidget);
-        expect(find.text('Not Addressed'), findsOneWidget);
-        expect(find.text('Sep 3, 2026'), findsOneWidget);
-        expect(find.text('Market Access'), findsOneWidget);
+        expect(find.text('Climate'), findsOneWidget);
         expect(find.text('Actual linked RGC decision'), findsOneWidget);
-        expect(find.text('In Progress'), findsOneWidget);
+        expect(find.text('Not Addressed'), findsOneWidget);
         expect(calls, contains('GET /api/v1/rgc-decisions/42'));
         expect(calls, isNot(contains('GET /api/v1/rgc-decisions/91')));
         expect(calls, isNot(contains('GET /api/v1/rgc-decisions/3')));
-        expect(calls, isNot(contains('GET /api/v1/plenaries/3')));
+        expect(calls, contains('GET /api/v1/plenaries/3'));
         await tester.tap(find.byIcon(Icons.arrow_back));
         await tester.pumpAndSettle();
         expect(
@@ -163,6 +170,11 @@ void main() {
             return ok({
               'id': 42,
               'status': 'Solved',
+              'plenary': {
+                'id': 3,
+                'status': 'Sent',
+                'meetingDate': '2026-09-13T17:00:00.000Z',
+              },
               'deadline': '2026-10-03',
               'issues': [],
             });
@@ -185,7 +197,7 @@ void main() {
     expect(find.text('Retry'), findsOneWidget);
     await tester.tap(find.text('Retry'));
     await tester.pumpAndSettle();
-    expect(find.text('Solved'), findsOneWidget);
+    expect(find.text('Sent'), findsOneWidget);
     expect(find.text('No RGC decisions found.'), findsOneWidget);
     expect(requests, 2);
     expect(tester.takeException(), isNull);

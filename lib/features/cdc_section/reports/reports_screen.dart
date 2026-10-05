@@ -19,93 +19,44 @@ class CdcSectionReportsScreenView extends StatefulWidget {
 
 class _ReportsState extends State<CdcSectionReportsScreenView> {
   CdcDashboardFilters _filters = CdcDashboardFilters();
-  List<RgcMinistry>? _ministries;
   List<RgcDecision> _decisions = [];
-  int? _stakeholderId;
-  int _page = 0;
-  int _totalPages = 0;
   bool _loading = true;
-  bool _loadingMore = false;
   int _loadVersion = 0;
   String? _error;
-  late RgcDecisionsRepository _repository;
+  RgcDecisionsRepository? _repository;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _repository = AppSettings.of(context).rgcDecisions;
-    if (_ministries == null) _loadMinistries();
+    final repository = AppSettings.of(context).rgcDecisions;
+    if (identical(_repository, repository)) return;
+    _repository = repository;
+    _loadDecisions();
   }
 
-  Future<void> _loadMinistries() async {
+  Future<void> _loadDecisions() async {
+    final version = ++_loadVersion;
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      final ministries = await _repository.getMinistries();
-      if (!mounted) return;
+      // Complete pagination before grouping so each ministry/plenary card
+      // contains all its decisions, including those on later API pages.
+      final decisions = await _repository!.getDecisions(
+        includePlenaryDetails: true,
+        filters: _filters.toQuery(),
+      );
+      if (!mounted || version != _loadVersion) return;
       setState(() {
-        _ministries = ministries;
-        _stakeholderId = ministries.isEmpty ? null : ministries.first.id;
+        _decisions = decisions;
         _loading = false;
       });
-      if (_stakeholderId != null) await _loadPage(1);
     } catch (_) {
-      if (mounted) {
+      if (mounted && version == _loadVersion) {
         setState(() {
           _error = 'load';
           _loading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _loadPage(int page) async {
-    final id = _stakeholderId;
-    if (id == null) return;
-    final version = page == 1 ? ++_loadVersion : _loadVersion;
-    final filters = _filters.toQuery();
-    setState(() {
-      if (page == 1) {
-        _loading = true;
-        _decisions = [];
-        _page = 0;
-      } else {
-        _loadingMore = true;
-      }
-      _error = null;
-    });
-    try {
-      final all = _filters.hasLocalFilters
-          ? await _repository.getDecisions(
-              filters: {'stakeholderId': '$id', ...filters},
-            )
-          : null;
-      final result = all == null
-          ? await _repository.getDecisionsPage(
-              stakeholderId: id,
-              page: page,
-              limit: 20,
-              filters: filters,
-            )
-          : null;
-      if (!mounted || id != _stakeholderId || version != _loadVersion) return;
-      setState(() {
-        _decisions = page == 1
-            ? all ?? result!.items
-            : [..._decisions, ...result!.items];
-        _page = page;
-        _totalPages = all != null ? 1 : result!.totalPages;
-        _loading = false;
-        _loadingMore = false;
-      });
-    } catch (_) {
-      if (mounted && id == _stakeholderId && version == _loadVersion) {
-        setState(() {
-          _error = 'load';
-          _loading = false;
-          _loadingMore = false;
         });
       }
     }
@@ -121,15 +72,17 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
     );
     if (!mounted || result == null) return;
     setState(() => _filters = result);
-    await _loadPage(1);
+    await _loadDecisions();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final reports = _decisions
-        .where((decision) => _filters.matchesLocal(decision.filterValues))
-        .toList();
+    final reports = RgcDecisionGroup.fromDecisions(
+      _decisions
+          .where((decision) => _filters.matchesLocal(decision.filterValues))
+          .toList(),
+    );
     return ColoredBox(
       color: AppColors.isDark(context)
           ? AppColors.darkBackground
@@ -144,12 +97,10 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
-                : _error != null && _decisions.isEmpty
+                : _error != null
                 ? Center(
                     child: TextButton(
-                      onPressed: _ministries == null
-                          ? _loadMinistries
-                          : () => _loadPage(1),
+                      onPressed: () => _loadDecisions(),
                       child: Text(l10n.text('retry')),
                     ),
                   )
@@ -161,25 +112,6 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
                     itemBuilder: (context, index) {
                       if (index < reports.length) {
                         return _ReportCard(decision: reports[index]);
-                      }
-                      if (_error != null) {
-                        return Center(
-                          child: TextButton(
-                            onPressed: () => _loadPage(_page + 1),
-                            child: Text(l10n.text('retry')),
-                          ),
-                        );
-                      }
-                      if (_loadingMore) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (_page < _totalPages) {
-                        return Center(
-                          child: TextButton(
-                            onPressed: () => _loadPage(_page + 1),
-                            child: const Text('Load more'),
-                          ),
-                        );
                       }
                       return reports.isEmpty
                           ? Center(child: Text(l10n.text('noRgcDecisions')))
@@ -195,7 +127,7 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
 
 class _ReportCard extends StatelessWidget {
   const _ReportCard({required this.decision});
-  final RgcDecision decision;
+  final RgcDecisionGroup decision;
 
   @override
   Widget build(BuildContext context) {
@@ -228,7 +160,10 @@ class _ReportCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           for (final row in [
-            (l10n.text('meetingDate'), rgcDate(decision.meetingDate)),
+            if (decision.plenaryName.isNotEmpty)
+              (l10n.text('plenary'), decision.plenaryName),
+            (l10n.text('numberOfRgcDecision'), '${decision.decisions.length}'),
+            (l10n.text('meetingDate'), plenaryDate(decision.meetingDate)),
             (l10n.text('categories'), rgcValue(decision.category)),
             (l10n.text('focalPersonHE'), rgcValue(decision.focalPerson)),
           ]) ...[
@@ -279,8 +214,12 @@ class _ReportCard extends StatelessWidget {
             child: FilledButton(
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) =>
-                      CdcRgcDecisionOverviewScreen(decisionId: decision.id),
+                  builder: (_) => CdcRgcDecisionOverviewScreen(
+                    decisionId: decision.decisionIds.first,
+                    additionalDecisionIds: decision.decisionIds
+                        .skip(1)
+                        .toList(),
+                  ),
                 ),
               ),
               style: FilledButton.styleFrom(

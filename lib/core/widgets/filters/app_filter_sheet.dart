@@ -32,6 +32,20 @@ class _AppFilterSheetState extends State<AppFilterSheet> {
   late final FilterSelection _draft = FilterSelection(widget.initial.values);
   final Set<String> _expanded = {};
 
+  void _clearAndClose() {
+    setState(() {
+      _draft.values.clear();
+      _expanded.clear();
+    });
+    final cleared = FilterSelection();
+    widget.onApply?.call(cleared);
+    if (widget.onClose != null) {
+      widget.onClose!();
+    } else if (widget.onApply == null) {
+      Navigator.pop(context, cleared);
+    }
+  }
+
   void _toggle(FilterSection section, String value) {
     setState(() {
       final selected = _draft.values.putIfAbsent(section.id, () => <String>{});
@@ -76,7 +90,7 @@ class _AppFilterSheetState extends State<AppFilterSheet> {
             children: [
               FilterSheetHeader(
                 title: l10n.text('filters'),
-                onClose: widget.onClose ?? () => Navigator.pop(context),
+                onClose: _clearAndClose,
                 titleStyle: TextStyle(
                   color: isDark
                       ? AppColors.primaryText(context)

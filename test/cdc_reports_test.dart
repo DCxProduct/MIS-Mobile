@@ -10,6 +10,7 @@ import 'package:gpsf_app/core/config/module_config.dart';
 import 'package:gpsf_app/core/network/api_client.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/cdc_section/reports/rgc_decision_details.dart';
+import 'package:gpsf_app/features/cdc_section/issues/detail_widgets.dart';
 import 'package:gpsf_app/screens/report/report_screen.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 
@@ -17,7 +18,186 @@ void main() {
   http.Response ok(Object data) =>
       http.Response(jsonEncode({'success': true, 'data': data}), 200);
 
-  testWidgets('CDC decisions use ministry, pages, and selected detail ID', (
+  for (final module in [AppModuleType.cdcSection, AppModuleType.cefp]) {
+    testWidgets('$module shows both MEF and MAFF from the supplied API shape', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final paths = <String>[];
+      final records = [
+        {
+          'id': 2,
+          'plenaryId': 3,
+          'plenary': {'id': 3, 'name': '21th'},
+          'stakeholderId': 4,
+          'stakeholder': {'id': 4, 'name': 'MEF'},
+          'category': 'Climate',
+          'status': 'Not Addressed',
+          'statusCode': 'NOT_ADDRESSED',
+          'meetingDate': '2026-10-02T00:00:00.000Z',
+          'focalPerson': 'H.E. Mr. DITH TINA',
+          'decision': '<p>MEF decision</p>',
+          'verificationLink': 'https://example.com/mef-decision',
+          'issues': [
+            {
+              'id': 10,
+              'description': 'MEF linked issue description',
+              'recommendation': 'MEF linked issue recommendation',
+              'attachment': '/uploads/issues/1788402959624-Issue_reference.pdf',
+            },
+          ],
+        },
+        {
+          'id': 1,
+          'plenaryId': 3,
+          'plenary': {'id': 3, 'name': '21th'},
+          'stakeholderId': 1,
+          'stakeholder': {'id': 1, 'name': 'MAFF'},
+          'category': 'Climate',
+          'status': 'Not Addressed',
+          'statusCode': 'NOT_ADDRESSED',
+          'meetingDate': '2026-09-14T00:00:00.000Z',
+        },
+      ];
+      final settings =
+          AppSettingsController(
+              authRepository: AuthRepository(
+                ApiClient(
+                  client: MockClient((request) async {
+                    paths.add(request.url.path);
+                    switch (request.url.path) {
+                      case '/api/v1/rgc-decisions':
+                        expect(request.url.queryParameters, {
+                          'page': '1',
+                          'limit': '100',
+                        });
+                        return ok({
+                          'items': records,
+                          'meta': {
+                            'total': 2,
+                            'page': 1,
+                            'limit': 20,
+                            'totalPages': 1,
+                          },
+                        });
+                      case '/api/v1/rgc-decisions/2':
+                        return ok(records.first);
+                      case '/api/v1/plenaries/3':
+                        return ok({
+                          'id': 3,
+                          'deadline': '2026-10-05',
+                          'status': 'Sent',
+                          'statusCode': 'SENT',
+                          'meetingDate': '2026-09-13T17:00:00.000Z',
+                        });
+                      default:
+                        throw StateError('Unexpected request ${request.url}');
+                    }
+                  }),
+                ),
+              ),
+            )
+            ..setModuleType(module)
+            ..setLanguage(AppLanguage.english);
+      addTearDown(settings.dispose);
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: const MaterialApp(home: Scaffold(body: ReportScreen())),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('MEF'), findsOneWidget);
+      expect(find.text('MAFF'), findsOneWidget);
+      expect(find.text('Oct 2, 2026'), findsNothing);
+      expect(find.text('Sep 13, 2026'), findsNWidgets(2));
+      expect(find.text('View Details'), findsNWidgets(2));
+      expect(find.text('Sent'), findsNWidgets(2));
+      expect(paths, ['/api/v1/rgc-decisions', '/api/v1/plenaries/3']);
+      await tester.tap(find.text('View Details').first);
+      await tester.pumpAndSettle();
+      expect(find.byType(CdcRgcDecisionOverviewScreen), findsOneWidget);
+      final count = find.ancestor(
+        of: find.text('Number of RGC Decision'),
+        matching: find.byType(CdcDetailInfoValue),
+      );
+      expect(
+        find.descendant(of: count, matching: find.text('1')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: count, matching: find.text('2')),
+        findsNothing,
+      );
+      expect(find.text('Oct 5, 2026'), findsOneWidget);
+      expect(find.text('MEF decision'), findsOneWidget);
+      expect(paths, [
+        '/api/v1/rgc-decisions',
+        '/api/v1/plenaries/3',
+        '/api/v1/rgc-decisions/2',
+        '/api/v1/plenaries/3',
+      ]);
+      await tester.tap(find.text('MEF decision'));
+      await tester.pumpAndSettle();
+      expect(find.text('MEF linked issue description'), findsOneWidget);
+      expect(find.text('MEF linked issue recommendation'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets(
+    'RGC list retries its own endpoint and displays a real empty response',
+    (tester) async {
+      var calls = 0;
+      final settings =
+          AppSettingsController(
+              authRepository: AuthRepository(
+                ApiClient(
+                  client: MockClient((request) async {
+                    expect(request.url.path, '/api/v1/rgc-decisions');
+                    expect(
+                      request.url.queryParameters.containsKey('stakeholderId'),
+                      isFalse,
+                    );
+                    if (++calls == 1) {
+                      return http.Response('{"success":false}', 503);
+                    }
+                    return ok({
+                      'items': [],
+                      'meta': {
+                        'total': 0,
+                        'page': 1,
+                        'limit': 20,
+                        'totalPages': 0,
+                      },
+                    });
+                  }),
+                ),
+              ),
+            )
+            ..setModuleType(AppModuleType.cdcSection)
+            ..setLanguage(AppLanguage.english);
+      addTearDown(settings.dispose);
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: const MaterialApp(home: Scaffold(body: ReportScreen())),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Retry'));
+      await tester.pumpAndSettle();
+      expect(calls, 2);
+      expect(find.text('No RGC decisions found.'), findsOneWidget);
+      expect(find.text('View Details'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('CDC all-ministry pagination and selected detail', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(320, 720);
@@ -77,7 +257,14 @@ void main() {
         ]);
       }
       if (path.endsWith('/plenaries/3')) {
-        return ok({'id': 3, 'deadline': '2026-09-29T17:00:00.000Z'});
+        return ok({
+          'id': 3,
+          'deadline': '2026-09-29T17:00:00.000Z',
+          'meetingDate': '2023-11-12T17:00:00.000Z',
+        });
+      }
+      if (path.endsWith('/plenaries/4')) {
+        return ok({'id': 4, 'meetingDate': '2024-01-23T17:00:00.000Z'});
       }
       if (path.endsWith('/rgc-decisions/179')) {
         return ok({
@@ -120,6 +307,11 @@ void main() {
       if (path.endsWith('/rgc-decisions')) {
         final ministry = request.url.queryParameters['stakeholderId'];
         final page = request.url.queryParameters['page'];
+        final filtered = const [
+          'plenaryId',
+          'categoryId',
+          'status',
+        ].any(request.url.queryParameters.containsKey);
         expect(request.url.queryParameters['limit'], anyOf('20', '100'));
         if (ministry == '13') {
           return ok({
@@ -138,6 +330,7 @@ void main() {
           'items': [
             {
               'id': page == '1' ? 179 : 181,
+              'plenaryId': page == '1' ? 3 : 4,
               'plenary': {'name': page == '1' ? '21th' : '20th'},
               'issues': [
                 {
@@ -153,13 +346,31 @@ void main() {
                   : '5. Improving transportation and infrastructure',
               'dateOfDecision': page == '1' ? '2023-11-13' : '2024-01-24',
               'stakeholder': {'name': 'MPWT'},
+              'stakeholderId': 12,
+              'categoryId': page == '1' ? 7 : 9,
+              'categoryInfo': {
+                'name': page == '1' ? 'Legislation' : 'Transportation',
+              },
               'status': 'In Progress',
-              'meetingDate': '2023-11-13',
+              'statusCode': page == '1' ? 'IN_PROGRESS' : 'NOT_ADDRESSED',
+              'meetingDate': page == '1' ? '2023-11-13' : '2024-01-24',
               'category': 'Legislation',
               'focalPerson': 'Peng Ponea',
             },
+            if (page == '1' && !filtered)
+              {
+                'id': 180,
+                'plenaryId': 4,
+                'plenary': {'id': 4, 'name': '20th'},
+                'stakeholderId': 13,
+                'stakeholder': {'name': 'MAFF'},
+                'categoryId': 8,
+                'categoryInfo': {'name': 'Agriculture'},
+                'status': 'Solved',
+                'statusCode': 'SOLVED',
+              },
           ],
-          'meta': {'totalPages': 2},
+          'meta': {'totalPages': filtered ? 1 : 2},
         });
       }
       return http.Response('Not found', 404);
@@ -179,32 +390,45 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('MPWT'), findsWidgets);
+    expect(find.text('MAFF'), findsOneWidget);
+    expect(
+      requested.any((uri) => uri.path.endsWith('/lookups/ministries')),
+      isFalse,
+    );
     expect(
       requested.any(
         (uri) =>
-            uri.queryParameters['stakeholderId'] == '12' &&
+            !uri.queryParameters.containsKey('stakeholderId') &&
             uri.queryParameters['page'] == '1',
       ),
       isTrue,
     );
 
-    await tester.ensureVisible(find.text('Load more'));
-    await tester.tap(find.text('Load more'));
-    await tester.pumpAndSettle();
-    expect(find.text('View Details'), findsNWidgets(2));
+    // All pages are loaded before grouping; no partial ministry cards.
+    await tester.scrollUntilVisible(find.text('Jan 23, 2024').first, 150);
+    expect(find.text('Jan 23, 2024'), findsWidgets);
     expect(
       requested.any(
         (uri) =>
-            uri.queryParameters['stakeholderId'] == '12' &&
+            !uri.queryParameters.containsKey('stakeholderId') &&
             uri.queryParameters['page'] == '2',
       ),
       isTrue,
     );
 
+    await tester.scrollUntilVisible(find.text('Nov 12, 2023'), -150);
     await tester.tap(find.text('View Details').first);
     await tester.pumpAndSettle();
     expect(find.byType(CdcRgcDecisionOverviewScreen), findsOneWidget);
-    expect(find.text('179'), findsOneWidget);
+    final count = find.ancestor(
+      of: find.text('Number of RGC Decision'),
+      matching: find.byType(CdcDetailInfoValue),
+    );
+    expect(
+      find.descendant(of: count, matching: find.text('1')),
+      findsOneWidget,
+    );
+    expect(find.text('179'), findsNothing);
     expect(find.text('Sep 30, 2026'), findsOneWidget);
     expect(requested.any((uri) => uri.path.endsWith('/plenaries/3')), isTrue);
     expect(find.byIcon(Icons.calendar_month_outlined), findsOneWidget);
@@ -283,11 +507,20 @@ void main() {
       }
 
       await toggleSelection();
-      expect(requested.last.queryParameters[selection.$1], selection.$2);
-      expect(requested.last.queryParameters['page'], '1');
+      final listRequest = requested.lastWhere(
+        (uri) => uri.path.endsWith('/rgc-decisions'),
+      );
+      expect(listRequest.queryParameters[selection.$1], selection.$2);
+      expect(listRequest.queryParameters['page'], '1');
       expect(find.text('View Details'), findsOneWidget);
       await toggleSelection();
-      expect(requested.last.queryParameters.containsKey(selection.$1), isFalse);
+      expect(
+        requested
+            .lastWhere((uri) => uri.path.endsWith('/rgc-decisions'))
+            .queryParameters
+            .containsKey(selection.$1),
+        isFalse,
+      );
     }
     await tester.tap(find.text('Filter'));
     await tester.pumpAndSettle();
@@ -305,5 +538,20 @@ void main() {
       ),
       isTrue,
     );
+    await tester.tap(find.textContaining('Filter').first);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(agencyOption, 150);
+    await tester.tap(agencyOption);
+    await tester.tap(find.text('Apply Filters'));
+    await tester.pumpAndSettle();
+    expect(
+      requested
+          .lastWhere((uri) => uri.path.endsWith('/rgc-decisions'))
+          .queryParameters
+          .containsKey('stakeholderId'),
+      isFalse,
+    );
+    expect(find.text('MPWT'), findsOneWidget);
+    expect(find.text('MAFF'), findsOneWidget);
   });
 }

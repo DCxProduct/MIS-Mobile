@@ -1,3 +1,5 @@
+import '../../../core/text/html_text.dart';
+import '../../../core/widgets/editor_content.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
@@ -180,29 +182,50 @@ class CdcIssueProgressReportDataDetailScreen extends StatelessWidget {
                   flex: 2,
                   child: _ExpandableReferenceName(
                     label: l10n.text('referenceName'),
-                    value: report.referenceName,
+                    value:
+                        report.richText['referenceName'] ??
+                        report.referenceName,
                   ),
                 ),
               ],
             ),
             if (report.description.isNotEmpty) ...[
               const SizedBox(height: 18),
-              _ExpandableProgressText(text: report.description),
+              _ExpandableProgressText(
+                text: report.richText['description'] ?? report.description,
+              ),
             ],
             if (report.indicators.isNotEmpty)
-              section('indicators', report.indicators, 3),
+              section(
+                'indicators',
+                report.richText['indicators'] ?? report.indicators,
+                3,
+              ),
             if (report.implementationChallenges.isNotEmpty)
               section(
                 'implementationChallenges',
-                report.implementationChallenges,
+                report.richText['implementationChallenges'] ??
+                    report.implementationChallenges,
                 3,
               ),
             if (report.requests.isNotEmpty)
-              section('request', report.requests, 3),
+              section(
+                'request',
+                report.richText['requests'] ?? report.requests,
+                3,
+              ),
             if (report.nextStep.isNotEmpty)
-              section('nextStep', report.nextStep, 3),
+              section(
+                'nextStep',
+                report.richText['nextStep'] ?? report.nextStep,
+                3,
+              ),
             if (report.rgcDecision.isNotEmpty)
-              section('rgcDecision', report.rgcDecision, 3),
+              section(
+                'rgcDecision',
+                report.richText['rgcDecision'] ?? report.rgcDecision,
+                3,
+              ),
             for (final path in report.attachmentPaths)
               if (path != documentPath) ...[
                 const SizedBox(height: 12),
@@ -256,13 +279,28 @@ class _ExpandableReferenceNameState extends State<_ExpandableReferenceName> {
         onTap: widget.value.isEmpty
             ? null
             : () => setState(() => _expanded = !_expanded),
-        child: Text(
-          widget.value.isEmpty ? 'â€”' : widget.value,
-          key: const ValueKey('progress-reference-name'),
-          maxLines: _expanded ? null : 2,
-          overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 13, color: AppColors.primaryText(context)),
-        ),
+        child: containsEditorFormatting(widget.value)
+            ? EditorContent(
+                widget.value,
+                key: const ValueKey('progress-reference-name'),
+                maxLines: _expanded ? null : 2,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.primaryText(context),
+                ),
+              )
+            : Text(
+                widget.value.isEmpty ? '—' : htmlToPlainText(widget.value),
+                key: const ValueKey('progress-reference-name'),
+                maxLines: _expanded ? null : 2,
+                overflow: _expanded
+                    ? TextOverflow.visible
+                    : TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.primaryText(context),
+                ),
+              ),
       ),
     ],
   );
@@ -292,17 +330,18 @@ class _ExpandableProgressTextState extends State<_ExpandableProgressText> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final painter = TextPainter(
-          text: TextSpan(text: widget.text, style: style),
+          text: TextSpan(text: htmlToPlainText(widget.text), style: style),
           textDirection: Directionality.of(context),
           textScaler: MediaQuery.textScalerOf(context),
           maxLines: 10,
         )..layout(maxWidth: constraints.maxWidth);
-        final canExpand = painter.didExceedMaxLines;
+        final canExpand =
+            painter.didExceedMaxLines || containsEditorHtml(widget.text);
         painter.dispose();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
+            EditorContent(
               widget.text,
               maxLines: _expanded ? null : 10,
               overflow: _expanded ? TextOverflow.visible : TextOverflow.fade,

@@ -239,7 +239,7 @@ void main() {
   );
 
   testWidgets(
-    'issue Apply sends IDs, reloads all pages, Cancel preserves applied values, Clear removes query',
+    'issue Apply sends IDs and X clears applied filters and reloads all pages',
     (tester) async {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1;
@@ -315,10 +315,24 @@ void main() {
       await tester.tap(find.byIcon(Icons.close_rounded));
       await tester.pumpAndSettle();
       expect(find.text('Filter'), findsOneWidget);
+      expect(requests.last.queryParameters.containsKey('years'), isFalse);
+      expect(find.text('Server page 2'), findsOneWidget);
       await tester.tap(find.text('Filter'));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('filter-years-2031')));
+      final year = find.byKey(const ValueKey('filter-years-2031'));
+      expect(
+        find.descendant(of: year, matching: find.byIcon(Icons.check)),
+        findsNothing,
+      );
+      await tester.tap(year);
       await tester.tap(find.text('Apply Filters'));
+      await tester.pumpAndSettle();
+      expect(requests.last.queryParameters['years'], '2031');
+      expect(find.text('Server filtered issue'), findsOneWidget);
+      await tester.tap(find.text('Filter'));
+      await tester.pumpAndSettle();
+      // X also resets already-applied filters when no draft change is made.
+      await tester.tap(find.byIcon(Icons.close_rounded));
       await tester.pumpAndSettle();
       expect(requests.last.queryParameters.containsKey('years'), isFalse);
       expect(find.text('Server page 2'), findsOneWidget);

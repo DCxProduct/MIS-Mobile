@@ -1,3 +1,4 @@
+import '../../../core/widgets/editor_content.dart';
 import '../../../features/shared/issues/data/working_group_issue.dart';
 import 'package:flutter/material.dart';
 
@@ -18,6 +19,7 @@ class IssueDescriptionsTab extends StatelessWidget {
         _TextPanel(
           title: l10n.text('issuesDescription'),
           body:
+              issue?.descriptionHtml ??
               issue?.description ??
               'The private sector stated that cultivation is largely dependent on the weather (rain), and the private sector also observed that the Ministry of Water Resources and Meteorology often issues announcements regarding weather forecasting nationwide, which results in farmers in each region not receiving clear information.',
         ),
@@ -25,6 +27,7 @@ class IssueDescriptionsTab extends StatelessWidget {
         _TextPanel(
           title: l10n.text('recommendation'),
           body:
+              issue?.recommendationHtml ??
               issue?.recommendation ??
               'The private sector, through the Ministry of Agriculture, Forestry and Fisheries, has requested the Ministry of Water Resources and Meteorology to consider establishing meteorological stations in every province and city to provide farmers with accurate weather information.',
         ),
@@ -61,7 +64,7 @@ class _TextPanel extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: AppColors.border(context)),
           ),
-          child: Text(
+          child: EditorContent(
             body,
             style: TextStyle(
               color: AppColors.secondaryText(context),

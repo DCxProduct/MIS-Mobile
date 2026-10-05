@@ -16,14 +16,18 @@ class CdcSectionIssuesMatrixScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settings = AppSettings.of(context);
+    // CDC and CEFP share /issues; the authenticated role selects the matrix.
+    final issueMatrix =
+        settings.moduleType == AppModuleType.cdcSection ||
+        settings.moduleType == AppModuleType.cefp;
     return LineMinistryIssuesScreenView(
       titleKey: titleKey,
       showTabs: false,
-      cdcMatrix: AppSettings.of(context).moduleType == AppModuleType.cdcSection,
-      staticPreview: AppSettings.of(context).auth.isStaticSession,
+      cdcMatrix: issueMatrix,
+      staticPreview: settings.auth.isStaticSession,
       issueDetailBuilder: (title, category, issue) =>
-          AppSettings.of(context).moduleType == AppModuleType.cdcSection &&
-              issue != null
+          issueMatrix && issue != null
           ? CdcIssueDetailLoader(issueId: issue.id)
           : CdcSectionIssueDetailScreen(
               title: title,

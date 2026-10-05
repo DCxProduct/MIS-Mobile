@@ -27,6 +27,8 @@ class WorkingGroupIssue {
     this.reportsIncluded = false,
     this.issueProgress,
     this.plenaryEscalation,
+    this.descriptionHtml,
+    this.recommendationHtml,
   });
   final int id;
   final bool? plenaryEscalation;
@@ -37,6 +39,7 @@ class WorkingGroupIssue {
       description,
       recommendation;
   final String submittedBy, agency;
+  final String? descriptionHtml, recommendationHtml;
   final String agencyLogo;
   final DateTime? createdAt, meetingDate;
   final int attachmentCount, linkCount;
@@ -175,6 +178,8 @@ class WorkingGroupIssue {
       statusName: string(status['name']),
       description: htmlToPlainText(string(json['description'])),
       recommendation: htmlToPlainText(string(json['recommendation'])),
+      descriptionHtml: string(json['description']),
+      recommendationHtml: string(json['recommendation']),
       submittedBy: stakeholder.isNotEmpty
           ? stakeholder
           : string(object(json['user'])['name']),

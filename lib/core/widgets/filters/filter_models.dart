@@ -1,4 +1,5 @@
-/// Applied values are copied before editing so closing a filter keeps them intact.
+/// Copies applied values for editing; the sheet returns a new selection on apply
+/// or an empty selection when its close button clears the filters.
 class FilterSelection {
   FilterSelection([Map<String, Set<String>>? values])
     : values = {

@@ -1,3 +1,4 @@
+import '../../core/widgets/editor_content.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
@@ -511,8 +512,8 @@ class _DescriptionTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 14),
-      child: Text(
-        _value(htmlToPlainText(description)),
+      child: EditorContent(
+        _value(description),
         style: TextStyle(
           color: AppColors.secondaryText(context),
           fontSize: 12,

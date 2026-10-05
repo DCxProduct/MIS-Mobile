@@ -50,7 +50,7 @@ class _ApiFilterSheetState extends State<ApiFilterSheet> {
             children: [
               FilterSheetHeader(
                 title: l10n.text('filters'),
-                onClose: () => Navigator.pop(context),
+                onClose: () => Navigator.pop(context, FilterSelection()),
                 titleStyle: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,

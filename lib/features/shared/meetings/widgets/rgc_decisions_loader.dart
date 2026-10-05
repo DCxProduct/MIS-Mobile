@@ -76,6 +76,7 @@ class _RgcDecisionsLoaderState extends State<RgcDecisionsLoader> {
     if (_future == null || !mapEquals(_query, query)) {
       _query = Map.of(query);
       _future = AppSettings.of(context).rgcDecisions.getDecisions(
+        includePlenaryDetails: true,
         filters: query,
         cdcGpsf:
             AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat,
@@ -101,6 +102,7 @@ class _RgcDecisionsLoaderState extends State<RgcDecisionsLoader> {
             TextButton(
               onPressed: () => setState(() {
                 _future = AppSettings.of(context).rgcDecisions.getDecisions(
+                  includePlenaryDetails: true,
                   filters: _query ?? const {},
                   cdcGpsf:
                       AppSettings.of(context).moduleType ==

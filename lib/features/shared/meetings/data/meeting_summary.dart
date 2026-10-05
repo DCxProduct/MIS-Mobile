@@ -88,11 +88,14 @@ class MeetingSummaryIssue {
       status = _string(json['status']) ?? '',
       description = htmlToPlainText(_string(json['issueDescription']) ?? ''),
       recommendation = htmlToPlainText(_string(json['recommendation']) ?? ''),
+      descriptionHtml = _string(json['issueDescription']) ?? '',
+      recommendationHtml = _string(json['recommendation']) ?? '',
       attachmentPath = _path(json['issueReference']),
       referencePath = _path(json['referenceDocument']),
       agency = _agency(json['agencies']);
 
   final String title, category, status, description, recommendation, agency;
+  final String descriptionHtml, recommendationHtml;
   final String? attachmentPath, referencePath;
 
   static String? _string(Object? value) => value is String ? value : null;

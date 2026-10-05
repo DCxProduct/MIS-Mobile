@@ -1,3 +1,4 @@
+import '../../../core/widgets/editor_content.dart';
 import '../../shared/meetings/data/meeting_request.dart';
 import '../../shared/issues/data/working_group_issue.dart';
 import '../../shared/issues/widgets/issue_display.dart';
@@ -106,7 +107,7 @@ class _MeetingRequestDetailScreenState
                   const SizedBox(height: 16),
                   switch (_selectedTab) {
                     0 => _DescriptionsView(
-                      description: widget.request?.description,
+                      description: widget.request?.descriptionHtml,
                     ),
                     _ => _AllIssuesView(issues: widget.request?.issues),
                   },
@@ -436,7 +437,7 @@ class _DescriptionsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
+    return EditorContent(
       description ??
           'ខ្ញុំសូមស្នើឱ្យរៀបចំប្រជុំពិសេសមួយដើម្បីដោះស្រាយនិងឆ្លើយតបចំពោះបញ្ហាប្រឈមមធ្យមចំនួន ៥ ដែលកំពុងមានឥទ្ធិពលលើការងាររបស់យើង។ គោលបំណងនៃប្រជុំនេះគឺដើម្បីប្រមូលផ្តុំអ្នកពាក់ព័ន្ធទាំងអស់ រួមទាំងសមាជិកក្រុម និងអ្នកធ្វើសេចក្តីសម្រេច នៅក្នុងបរិយាកាសសហការដែលអាចពិភាក្សាភ្នាប់បញ្ហាទាំងអស់ បញ្ហាមូលហេតុដើម ស្វែងរកដំណោះស្រាយរួម និងកំណត់ផែនការអនុវត្តជាក់ស្តែង។ ប្រជុំនេះនឹងត្រូវរៀបចំជាផ្នែក ៥ ដោយផ្នែកនីមួយៗផ្តោតលើបញ្ហាប្រឈមមធ្យមមួយៗ។ ក្នុងផ្នែកនីមួយៗយើងនឹង៖\n'
               '  1. បង្ហាញសេចក្តីសង្ខេបអំពីបញ្ហាប្រឈម រួមទាំងទិន្នន័យ ឬឧទាហរណ៍ដែលបង្ហាញពីបញ្ហា។\n'
@@ -880,60 +881,80 @@ void _showIssueDetailsSheet(
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
-              RichText(
-                text: TextSpan(
+              if (issue != null)
+                EditorContent(
+                  issue.descriptionHtml ?? issue.description,
                   style: TextStyle(
                     color: AppColors.secondaryText(context),
                     fontSize: 12,
                     height: 1.5,
-                    fontWeight: FontWeight.w500,
                   ),
-                  children: [
-                    TextSpan(
-                      text:
-                          issue?.description ??
-                          'សូមស្នើឡើងរៀបចំប្រជុំពិសេសមួយដើម្បីដោះស្រាយនិងឆ្លើយតបចំពោះបញ្ហាប្រឈមមធ្យមចំនួន ៥ ដែលកំពុងមានឥទ្ធិពលលើការងាររបស់យើង។ គោលបំណងនៃប្រជុំនេះគឺដើម្បីប្រមូលផ្តុំអ្នកពាក់ព័ន្ធទាំងអស់... ',
+                )
+              else
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      color: AppColors.secondaryText(context),
+                      fontSize: 12,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
                     ),
-                    TextSpan(
-                      text: issue == null ? 'Read more' : '',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
+                    children: [
+                      TextSpan(
+                        text:
+                            issue?.description ??
+                            'សូមស្នើឡើងរៀបចំប្រជុំពិសេសមួយដើម្បីដោះស្រាយនិងឆ្លើយតបចំពោះបញ្ហាប្រឈមមធ្យមចំនួន ៥ ដែលកំពុងមានឥទ្ធិពលលើការងាររបស់យើង។ គោលបំណងនៃប្រជុំនេះគឺដើម្បីប្រមូលផ្តុំអ្នកពាក់ព័ន្ធទាំងអស់... ',
                       ),
-                    ),
-                  ],
+                      TextSpan(
+                        text: issue == null ? 'Read more' : '',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
               const SizedBox(height: 18),
               const Text(
                 'Recommendations',
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
-              RichText(
-                text: TextSpan(
+              if (issue != null)
+                EditorContent(
+                  issue.recommendationHtml ?? issue.recommendation,
                   style: TextStyle(
                     color: AppColors.secondaryText(context),
                     fontSize: 12,
                     height: 1.5,
-                    fontWeight: FontWeight.w500,
                   ),
-                  children: [
-                    TextSpan(
-                      text:
-                          issue?.recommendation ??
-                          'ផ្អែកលើការស្នើសុំបណ្តោះអាសន្ន៖ ភ្នាក់ងារតាមដានរដ្ឋបាលនឹងសម្របសម្រួលជាមួយ... ',
+                )
+              else
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      color: AppColors.secondaryText(context),
+                      fontSize: 12,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
                     ),
-                    TextSpan(
-                      text: issue == null ? 'Read more' : '',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
+                    children: [
+                      TextSpan(
+                        text:
+                            issue?.recommendation ??
+                            'ផ្អែកលើការស្នើសុំបណ្តោះអាសន្ន៖ ភ្នាក់ងារតាមដានរដ្ឋបាលនឹងសម្របសម្រួលជាមួយ... ',
                       ),
-                    ),
-                  ],
+                      TextSpan(
+                        text: issue == null ? 'Read more' : '',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ),

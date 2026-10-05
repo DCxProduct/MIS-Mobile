@@ -234,13 +234,17 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
               const SizedBox(height: 16),
               CdcDetailTextPanel(
                 label: l10n.text('issuesDescriptions'),
-                body: issue?.description ?? _description,
+                body:
+                    issue?.descriptionHtml ??
+                    issue?.description ??
+                    _description,
                 collapsedLines: 7,
               ),
               const SizedBox(height: 16),
               CdcDetailTextPanel(
                 label: l10n.text('recommendations'),
                 body:
+                    issue?.recommendationHtml ??
                     issue?.recommendation ??
                     (generalIssue
                         ? 'The private sector, through the Ministry of Agriculture, Forestry and Fisheries, has requested the Ministry of Water Resources and Meteorology to consider establishing meteorological stations in every province and city to provide farmers with accurate weather information.'

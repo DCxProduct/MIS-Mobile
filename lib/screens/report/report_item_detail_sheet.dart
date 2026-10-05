@@ -1,3 +1,4 @@
+import '../../core/widgets/editor_content.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
@@ -29,6 +30,7 @@ Future<void> showReportItemDetail(
 
 Map<String, dynamic> _object(Object? value) =>
     value is Map<String, dynamic> ? value : const {};
+String _rich(Object? value) => value is String ? value : '';
 String _text(Object? value) => value is String ? htmlToPlainText(value) : '';
 String _name(Object? value) => value is String
     ? value
@@ -214,8 +216,8 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
             source['issueStatus'] ?? source['status'] ?? data['status'],
           ),
           'category': _name(source['category'] ?? data['category']),
-          'description': _text(source['description']),
-          'recommendations': _text(
+          'description': _rich(source['description']),
+          'recommendations': _rich(
             source['recommendations'] ?? source['recommendation'],
           ),
           if (RgcDecisionIssue.fromJson(
@@ -223,7 +225,7 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
               ).meetingRequestDocumentPath.isEmpty &&
               widget.requestDocument?.trim().isNotEmpty == true)
             'attachment': widget.requestDocument,
-          'rgcDecision': _text(data['decision']),
+          'rgcDecision': _rich(data['decision']),
           // Progress belongs to the selected report, never progressReports.last
           // from the master decision (which can belong to another semester).
           for (final field in const [
@@ -232,9 +234,9 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
             'implementationChallenges',
             'nextStep',
           ])
-            field: _text(data[field] ?? update[field]),
-          'request': _text(data['requests'] ?? update['requests']),
-          'sourceOfVerification': _text(
+            field: _rich(data[field] ?? update[field]),
+          'request': _rich(data['requests'] ?? update['requests']),
+          'sourceOfVerification': _rich(
             data['sourceOfVerification'] ??
                 update['sourceOfVerification'] ??
                 data['verificationSource'],
@@ -371,11 +373,11 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
       const SizedBox(height: 18),
       _ExpandableText(
         label: l10n.text('descriptions'),
-        text: _value(_text(data['description'])),
+        text: _value(_rich(data['description'])),
       ),
       _ExpandableText(
         label: l10n.text('recommendations'),
-        text: _value(_text(data['recommendation'] ?? data['recommendations'])),
+        text: _value(_rich(data['recommendation'] ?? data['recommendations'])),
       ),
     ];
     for (final entry in const {
@@ -386,7 +388,7 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
       'nextStep': 'nextStep',
       'sourceOfVerification': 'sourceOfVerification',
     }.entries) {
-      final text = _text(data[entry.key] ?? update[entry.key]);
+      final text = _rich(data[entry.key] ?? update[entry.key]);
       if (text.isNotEmpty) {
         children.add(
           _ExpandableText(label: l10n.text(entry.value), text: text),
@@ -465,17 +467,22 @@ class _ExpandableTextState extends State<_ExpandableText> {
                 color: AppColors.secondaryText(context),
               );
               final painter = TextPainter(
-                text: TextSpan(text: widget.text, style: style),
+                text: TextSpan(
+                  text: htmlToPlainText(widget.text),
+                  style: style,
+                ),
                 maxLines: 5,
                 textDirection: Directionality.of(context),
                 textScaler: MediaQuery.textScalerOf(context),
               )..layout(maxWidth: constraints.maxWidth);
-              final overflow = painter.didExceedMaxLines;
+              final overflow =
+                  painter.didExceedMaxLines ||
+                  containsEditorFormatting(widget.text);
               painter.dispose();
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  EditorContent(
                     widget.text,
                     style: style,
                     maxLines: _expanded ? null : 5,

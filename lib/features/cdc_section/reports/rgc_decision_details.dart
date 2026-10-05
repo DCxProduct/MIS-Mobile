@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
 import '../../../core/app_settings.dart';
+import '../../../core/widgets/editor_content.dart';
 import '../../../core/widgets/pdf_attachment_preview.dart';
 import '../../shared/meetings/data/meeting_request.dart';
 import '../../shared/meetings/data/rgc_decision.dart';
@@ -23,6 +24,14 @@ String rgcDate(DateTime? date) {
   // API timestamps are UTC; show their calendar date in Cambodia (UTC+7).
   // Values without a timezone already represent a calendar date.
   final displayDate = date.isUtc ? date.add(const Duration(hours: 7)) : date;
+  return _reportDate(displayDate);
+}
+
+// CDC displays a plenary's calendar date from the API without shifting its day.
+String plenaryDate(DateTime? date) => _reportDate(date);
+
+String _reportDate(DateTime? date) {
+  if (date == null) return '—';
   const months = [
     'Jan',
     'Feb',
@@ -37,14 +46,16 @@ String rgcDate(DateTime? date) {
     'Nov',
     'Dec',
   ];
-  return '${months[displayDate.month - 1]} ${displayDate.day}, ${displayDate.year}';
+  return '${months[date.month - 1]} ${date.day}, ${date.year}';
 }
 
 String rgcValue(String value) => value.trim().isEmpty ? '—' : value;
 
-Color _statusColor(String status) => status.toLowerCase() == 'solved'
-    ? const Color(0xFF00BA36)
-    : const Color(0xFFFF8A00);
+Color _statusColor(String status) => switch (status.toLowerCase()) {
+  'sent' => AppColors.primary,
+  'solved' => const Color(0xFF00BA36),
+  _ => const Color(0xFFFF8A00),
+};
 
 class CdcRgcStatus extends StatelessWidget {
   const CdcRgcStatus({super.key, required this.status, this.fullWidth = false});
@@ -93,21 +104,32 @@ AppBar _appBar(BuildContext context) => AppBar(
 );
 
 class CdcRgcDecisionOverviewScreen extends StatefulWidget {
-  const CdcRgcDecisionOverviewScreen({super.key, required this.decisionId});
+  const CdcRgcDecisionOverviewScreen({
+    super.key,
+    required this.decisionId,
+    this.additionalDecisionIds = const [],
+  });
   final int decisionId;
+  final List<int> additionalDecisionIds;
   @override
   State<CdcRgcDecisionOverviewScreen> createState() => _OverviewState();
 }
 
 class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
-  Future<RgcDecisionDetail>? _detail;
+  Future<List<RgcDecisionDetail>>? _detail;
+
+  Future<List<RgcDecisionDetail>> _loadDetails() {
+    final repository = AppSettings.of(context).rgcDecisions;
+    final ids = {widget.decisionId, ...widget.additionalDecisionIds};
+    return Future.wait(
+      ids.map((id) => repository.getDecision(id, includePlenaryDetails: true)),
+    );
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _detail ??= AppSettings.of(
-      context,
-    ).rgcDecisions.getDecision(widget.decisionId);
+    _detail ??= _loadDetails();
   }
 
   @override
@@ -116,7 +138,7 @@ class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
     return Scaffold(
       backgroundColor: cdcReportBackground(context),
       appBar: _appBar(context),
-      body: FutureBuilder<RgcDecisionDetail>(
+      body: FutureBuilder<List<RgcDecisionDetail>>(
         future: _detail,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -128,9 +150,7 @@ class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
                     Text(l10n.text('rgcDecisionsLoadError')),
                     TextButton(
                       onPressed: () => setState(() {
-                        _detail = AppSettings.of(
-                          context,
-                        ).rgcDecisions.getDecision(widget.decisionId);
+                        _detail = _loadDetails();
                       }),
                       child: Text(l10n.text('retry')),
                     ),
@@ -140,8 +160,11 @@ class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
             }
             return const Center(child: CircularProgressIndicator());
           }
-          final detail = snapshot.data!;
-          final decision = detail.decision;
+          final details = snapshot.data!;
+          final detail = details.first;
+          final decision = RgcDecisionGroup(
+            details.map((detail) => detail.decision),
+          );
           return ListView(
             key: const ValueKey('cdc-rgc-overview'),
             children: [
@@ -163,7 +186,7 @@ class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
                         Expanded(
                           child: CdcDetailInfoValue(
                             label: l10n.text('meetingDate'),
-                            value: rgcDate(decision.meetingDate),
+                            value: plenaryDate(decision.meetingDate),
                           ),
                         ),
                       ],
@@ -174,7 +197,7 @@ class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
                         Expanded(
                           child: CdcDetailInfoValue(
                             label: l10n.text('numberOfRgcDecision'),
-                            value: '${decision.id}',
+                            value: '${details.length}',
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -220,14 +243,15 @@ class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 16, 14, 24),
-                child: detail.issues.isEmpty
+                child: details.every((detail) => detail.issues.isEmpty)
                     ? Center(child: Text(l10n.text('noRgcDecisions')))
                     : Column(
                         children: [
-                          for (final issue in detail.issues) ...[
-                            _DecisionIssueCard(detail: detail, issue: issue),
-                            const SizedBox(height: 14),
-                          ],
+                          for (final detail in details)
+                            for (final issue in detail.issues) ...[
+                              _DecisionIssueCard(detail: detail, issue: issue),
+                              const SizedBox(height: 14),
+                            ],
                         ],
                       ),
               ),
@@ -274,9 +298,7 @@ class _DecisionIssueCard extends StatelessWidget {
                       icon: Icons.calendar_month_outlined,
                       color: const Color(0xFF1890FF),
                       label: l10n.text('meetingDate'),
-                      value: rgcDate(
-                        issue.meetingDate ?? detail.decision.meetingDate,
-                      ),
+                      value: rgcDate(detail.decision.meetingDate),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -286,11 +308,7 @@ class _DecisionIssueCard extends StatelessWidget {
                       icon: Icons.file_copy_outlined,
                       color: const Color(0xFFB437FF),
                       label: l10n.text('categories'),
-                      value: rgcValue(
-                        issue.category.isEmpty
-                            ? detail.decision.category
-                            : issue.category,
-                      ),
+                      value: rgcValue(detail.decision.category),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -300,11 +318,7 @@ class _DecisionIssueCard extends StatelessWidget {
                       icon: Icons.person_outline,
                       color: AppColors.primaryText(context),
                       label: l10n.text('focalPerson'),
-                      value: rgcValue(
-                        issue.focalPerson.isEmpty
-                            ? detail.decision.focalPerson
-                            : issue.focalPerson,
-                      ),
+                      value: rgcValue(detail.decision.focalPerson),
                     ),
                   ),
                 ],
@@ -319,12 +333,7 @@ class _DecisionIssueCard extends StatelessWidget {
               const SizedBox(height: 14),
               Divider(height: 1, color: AppColors.border(context)),
               const SizedBox(height: 14),
-              CdcRgcStatus(
-                status: issue.status.isEmpty
-                    ? detail.decision.status
-                    : issue.status,
-                fullWidth: true,
-              ),
+              CdcRgcStatus(status: detail.decision.status, fullWidth: true),
             ],
           ),
         ),
@@ -663,8 +672,8 @@ class _IssueDetailsState extends State<_CdcRgcDecisionIssuePanel> {
                       decoration: TextDecoration.underline,
                     ),
                   )
-                : Text(
-                    rgcValue(section.$2),
+                : EditorContent(
+                    rgcValue(issue.richText[section.$1] ?? section.$2),
                     style: const TextStyle(fontSize: 12, height: 1.35),
                   ),
           ),

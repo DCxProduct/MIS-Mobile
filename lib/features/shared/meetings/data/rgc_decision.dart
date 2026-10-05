@@ -1,10 +1,16 @@
-import 'package:html/parser.dart' as html_parser;
+import '../../../../core/text/html_text.dart';
 import '../../../../core/widgets/filters/filter_models.dart';
 
 class RgcDecision {
   RgcDecision(Map<String, dynamic> json)
     : id = _int(json['id']),
+      plenaryId = _int(json['plenaryId'] ?? _object(json['plenary'])['id']),
+      stakeholderId = _int(
+        json['stakeholderId'] ?? _object(json['stakeholder'])['id'],
+      ),
       plenaryName = _string(_object(json['plenary'])['name']),
+      plenaryStatus = _string(_object(json['plenary'])['status']),
+      plenaryMeetingDate = _date(_object(json['plenary'])['meetingDate']),
       workingGroups = _workingGroups(json),
       measureCategory = _string(
         json['measureCategory'] is String
@@ -21,10 +27,12 @@ class RgcDecision {
           ? _string(json['category'])
           : _string(_object(json['categoryInfo'])['name']),
       focalPerson = _string(json['focalPerson']),
-      linkCount = _links(json).length;
+      links = Set.unmodifiable(_links(json));
 
-  final int id, linkCount;
-  final String plenaryName, measureCategory;
+  final int id, plenaryId, stakeholderId;
+  final Set<String> links;
+  int get linkCount => links.length;
+  final String plenaryName, plenaryStatus, measureCategory;
   final List<String> workingGroups;
   final DateTime? decisionDate;
   final String agencyName,
@@ -33,7 +41,7 @@ class RgcDecision {
       statusCode,
       category,
       focalPerson;
-  final DateTime? meetingDate;
+  final DateTime? meetingDate, plenaryMeetingDate;
   Map<String, Iterable<String>> get filterValues => {
     'local.workingGroup': workingGroups,
     'local.dateOfDecision': [FilterSelection.dateValue(decisionDate)],
@@ -79,6 +87,52 @@ class RgcDecision {
       }
     }
     return links;
+  }
+}
+
+class RgcDecisionGroup {
+  RgcDecisionGroup(Iterable<RgcDecision> decisions)
+    : decisions = List.unmodifiable(decisions);
+
+  final List<RgcDecision> decisions;
+  List<int> get decisionIds =>
+      decisions.map((decision) => decision.id).toList();
+  String get agencyName => decisions.first.agencyName;
+  String get agencyLogo => decisions.first.agencyLogo;
+  String get plenaryName => decisions.first.plenaryName;
+  DateTime? get meetingDate => decisions
+      .map((decision) => decision.plenaryMeetingDate)
+      .firstWhere((date) => date != null, orElse: () => null);
+  String get category => _distinct((decision) => decision.category);
+  String get focalPerson => _distinct((decision) => decision.focalPerson);
+  // A ministry/plenary group has the plenary's workflow status. Individual
+  // decision and linked issue statuses remain on their respective records.
+  String get status => decisions
+      .map((decision) => decision.plenaryStatus)
+      .firstWhere((status) => status.trim().isNotEmpty, orElse: () => '');
+  int get linkCount =>
+      decisions.expand((decision) => decision.links).toSet().length;
+
+  String _distinct(String Function(RgcDecision) value) => decisions
+      .map(value)
+      .where((value) => value.trim().isNotEmpty)
+      .toSet()
+      .join(', ');
+
+  static List<RgcDecisionGroup> fromDecisions(Iterable<RgcDecision> decisions) {
+    final groups = <(int, int, int), List<RgcDecision>>{};
+    final seen = <int>{};
+    for (final decision in decisions) {
+      if (!seen.add(decision.id)) continue;
+      // Missing identities must not merge unrelated ministries or plenaries.
+      final key = (
+        decision.stakeholderId,
+        decision.plenaryId,
+        decision.stakeholderId > 0 && decision.plenaryId > 0 ? 0 : decision.id,
+      );
+      groups.putIfAbsent(key, () => []).add(decision);
+    }
+    return groups.values.map(RgcDecisionGroup.new).toList();
   }
 }
 
@@ -153,6 +207,10 @@ class RgcDecisionDetail {
   ) sync* {
     final value = json['issues'];
     if (value is List) {
+      if (value.isEmpty &&
+          (json['rgcDecision'] is String || json['decision'] is String)) {
+        yield RgcDecisionIssue.fromJson(json);
+      }
       for (final item in value) {
         if (item is Map<String, dynamic>) {
           yield RgcDecisionIssue.fromJson(item, decision: json);
@@ -199,8 +257,10 @@ class RgcDecisionIssue {
              decision?['category'],
        ),
        focalPerson = _string(json['focalPerson'] ?? decision?['focalPerson']),
-       description = _string(json['description'] ?? json['issuesDescription']),
-       recommendations = _string(
+       description = _plainText(
+         json['description'] ?? json['issuesDescription'],
+       ),
+       recommendations = _plainText(
          json['recommendations'] ?? json['recommendation'],
        ),
        rgcDecision = _plainText(
@@ -220,7 +280,8 @@ class RgcDecisionIssue {
              _report(decision)['implementationChallenges'],
        ),
        request = _plainText(json['request'] ?? _report(decision)['requests']),
-       nextStep = _string(json['nextStep']),
+       nextStep = _plainText(json['nextStep']),
+       richText = _richText(json, decision),
        sourceOfVerification = _plainText(
          json['sourceOfVerification'] ??
              _report(decision)['sourceOfVerification'] ??
@@ -242,6 +303,7 @@ class RgcDecisionIssue {
   final String recommendations, rgcDecision, indicators, progressSolution;
   final String implementationChallenges, request, nextStep;
   final String sourceOfVerification, verificationLink;
+  final Map<String, String> richText;
   final Map<int, String> governmentAgencies;
   final int meetingRequestId;
   final String meetingRequestDocumentPath, meetingRequestDocumentName;
@@ -311,11 +373,43 @@ class RgcDecisionIssue {
   }
 
   static String _plainText(Object? value) {
-    final text = _string(value);
-    return text.contains('<')
-        ? html_parser.parseFragment(text).text ?? ''
-        : text;
+    return htmlToPlainText(_string(value));
   }
+
+  static Map<String, String> _richText(
+    Map<String, dynamic> json,
+    Map<String, dynamic>? decision,
+  ) => Map.unmodifiable({
+    'issuesDescription': _string(
+      json['description'] ?? json['issuesDescription'],
+    ),
+    'recommendations': _string(
+      json['recommendations'] ?? json['recommendation'],
+    ),
+    'rgcDecision': _string(
+      json['rgcDecision'] ?? json['decision'] ?? decision?['decision'],
+    ),
+    'indicators': _string(
+      json['indicators'] ??
+          _report(decision)['indicators'] ??
+          _nonEmpty(decision?['indicatorDescription']) ??
+          decision?['indicatorName'],
+    ),
+    'progressSolution': _string(
+      json['progressSolution'] ?? _report(decision)['progressSolution'],
+    ),
+    'implementationChallenges': _string(
+      json['implementationChallenges'] ??
+          _report(decision)['implementationChallenges'],
+    ),
+    'request': _string(json['request'] ?? _report(decision)['requests']),
+    'nextStep': _string(json['nextStep']),
+    'sourceOfVerification': _string(
+      json['sourceOfVerification'] ??
+          _report(decision)['sourceOfVerification'] ??
+          decision?['verificationSource'],
+    ),
+  });
 }
 
 class RgcDecisionScorecard {

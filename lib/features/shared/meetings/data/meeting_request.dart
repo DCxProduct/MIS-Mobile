@@ -8,6 +8,7 @@ class MeetingRequest {
       title = _string(json['title']),
       status = _string(json['status']),
       description = htmlToPlainText(_string(json['description'])),
+      descriptionHtml = _string(json['description']),
       meetingDate = _date(json['meetingDate']),
       submittedAt = _date(json['submittedAt']),
       submittedBy = _string(_object(json['user'])['name']),
@@ -64,6 +65,7 @@ class MeetingRequest {
   };
   final int id, issuesCount, attachmentCount;
   final String title,
+      descriptionHtml,
       status,
       description,
       submittedBy,

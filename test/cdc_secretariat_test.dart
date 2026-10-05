@@ -96,6 +96,12 @@ void main() {
                         'items': [
                           {
                             'id': 1,
+                            'plenary': {
+                              'id': 3,
+                              'name': '21th',
+                              'status': 'Sent',
+                              'meetingDate': '2026-09-13T17:00:00.000Z',
+                            },
                             'stakeholder': {'name': 'MAFF'},
                             'category': 'Climate',
                             'meetingDate': '2026-09-14T00:00:00.000Z',
@@ -219,7 +225,7 @@ void main() {
     await tester.tap(find.text('RGC Decision').first);
     await tester.pumpAndSettle();
     expect(find.text('MAFF'), findsOneWidget);
-    expect(find.text('Sep 14, 2026'), findsOneWidget);
+    expect(find.text('Sep 13, 2026'), findsOneWidget);
 
     final context = tester.element(find.byType(AppBottomNavBar));
     Navigator.of(context).push(

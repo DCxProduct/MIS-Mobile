@@ -92,12 +92,13 @@ void main() {
   );
 
   test('CEFP repositories stay separate from CDC while sharing UI', () async {
-    final requests = <String>[];
+    final requests = <Uri>[];
     ApiClient api(String module) => ApiClient(
       baseUrl: 'https://$module.example/api/',
       client: MockClient((request) async {
-        requests.add(request.url.host);
-        return http.Response('{"success":true,"data":{"items":[]}}', 200);
+        requests.add(request.url);
+        expect(request.url.path, '/api/issues/17');
+        return http.Response('{"success":true,"data":{"id":17}}', 200);
       }),
     );
     final cefpApi = api('cefp');
@@ -110,20 +111,23 @@ void main() {
     addTearDown(cefpApi.close);
     settings.setModuleType(AppModuleType.cdcSection);
     final cdcIssues = settings.issues;
-    await settings.issues.getIssueMatrix();
+    final cdcMatrix = settings.cdcIssueMatrix;
+    await settings.cdcIssueMatrix.getIssue(17);
     settings.setModuleType(AppModuleType.cefp);
     expect(settings.dashboard, same(cefp.dashboard));
     expect(settings.issues, same(cefp.issues));
+    expect(settings.cdcIssueMatrix, same(cefp.cdcIssueMatrix));
     expect(settings.meetingRequests, same(cefp.meetingRequests));
     expect(settings.meetings, same(cefp.meetings));
     expect(settings.meetingSummaries, same(cefp.meetingSummaries));
     expect(settings.progressReports, same(cefp.progressReports));
     expect(settings.plenaries, same(cefp.plenaries));
     expect(settings.rgcDecisions, same(cefp.rgcDecisions));
-    await settings.issues.getIssueMatrix();
+    await settings.cdcIssueMatrix.getIssue(17);
     settings.setModuleType(AppModuleType.cdcSection);
     expect(settings.issues, same(cdcIssues));
-    expect(requests, ['cdc.example', 'cefp.example']);
+    expect(settings.cdcIssueMatrix, same(cdcMatrix));
+    expect(requests.map((uri) => uri.host), ['cdc.example', 'cefp.example']);
   });
 
   testWidgets('CEFP report renders CDC UI without recursive module routing', (

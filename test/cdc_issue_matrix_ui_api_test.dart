@@ -8,16 +8,18 @@ import 'package:gpsf_app/core/network/api_client.dart';
 import 'package:gpsf_app/core/widgets/pdf_attachment_preview.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/cdc_section/issues/cdc_issues_matrix_screen.dart';
+import 'package:gpsf_app/features/cefp/issues/cdc_issues_matrix_screen.dart';
 import 'package:gpsf_app/features/shared/issues/data/cdc_issue_matrix_repository.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 void main() {
-  for (final empty in [true, false]) {
-    testWidgets('CDC uses CDC endpoints and displays server empty=$empty', (
-      tester,
-    ) async {
+  for (final (module, empty) in [
+    for (final module in [AppModuleType.cdcSection, AppModuleType.cefp])
+      for (final empty in [true, false]) (module, empty),
+  ]) {
+    testWidgets('$module issues API empty=$empty', (tester) async {
       final paths = <String>[];
       final settings =
           AppSettingsController(
@@ -108,17 +110,30 @@ void main() {
               ),
             )
             ..setLanguage(AppLanguage.english)
-            ..setModuleType(AppModuleType.cdcSection);
+            ..setModuleType(module);
       addTearDown(settings.dispose);
       await tester.pumpWidget(
         AppSettings(
           controller: settings,
-          child: const MaterialApp(
-            home: Scaffold(body: CdcSectionIssuesMatrixScreen()),
+          child: MaterialApp(
+            home: Scaffold(
+              body: module == AppModuleType.cefp
+                  ? const CefpIssuesMatrixScreen()
+                  : const CdcSectionIssuesMatrixScreen(),
+            ),
           ),
         ),
       );
       await tester.pumpAndSettle();
+      expect(settings.moduleType, module);
+      expect(
+        find.text(
+          module == AppModuleType.cefp
+              ? 'CEFP Issues Matrix'
+              : 'CDC Issues Matrix',
+        ),
+        findsOneWidget,
+      );
       expect(
         paths,
         unorderedEquals([

@@ -127,16 +127,30 @@ void main() {
       throwsA(isA<ApiException>()),
     );
   });
-  test('formats API dates in Cambodia time', () {
-    expect(rgcDate(DateTime.parse('2026-09-29T17:00:00.000Z')), 'Sep 30, 2026');
-    expect(
-      rgcDate(DateTime.parse('2026-09-30T00:00:00+07:00')),
-      'Sep 30, 2026',
-    );
-    expect(rgcDate(DateTime.parse('2026-09-14T00:00:00.000Z')), 'Sep 14, 2026');
-    expect(rgcDate(DateTime.parse('2026-09-30')), 'Sep 30, 2026');
-    expect(rgcDate(null), '—');
-  });
+  test(
+    'plenary calendar dates match CDC and submission timestamps use Cambodia time',
+    () {
+      final meetingDate = DateTime.parse('2026-09-13T17:00:00.000Z');
+      expect(plenaryDate(meetingDate), 'Sep 13, 2026');
+      expect(rgcDate(meetingDate), 'Sep 14, 2026');
+      expect(plenaryDate(DateTime(2026, 9, 13)), 'Sep 13, 2026');
+      expect(plenaryDate(null), '—');
+      expect(
+        rgcDate(DateTime.parse('2026-09-29T17:00:00.000Z')),
+        'Sep 30, 2026',
+      );
+      expect(
+        rgcDate(DateTime.parse('2026-09-30T00:00:00+07:00')),
+        'Sep 30, 2026',
+      );
+      expect(
+        rgcDate(DateTime.parse('2026-09-14T00:00:00.000Z')),
+        'Sep 14, 2026',
+      );
+      expect(rgcDate(DateTime.parse('2026-09-30')), 'Sep 30, 2026');
+      expect(rgcDate(null), '—');
+    },
+  );
   final response = {
     'success': true,
     'data': {
