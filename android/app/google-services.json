@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "414498727184",
+    "project_id": "gpsf-mis-mobile",
+    "storage_bucket": "gpsf-mis-mobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:414498727184:android:508be966b4d05d61663195",
+        "android_client_info": {
+          "package_name": "com.example.gpsf_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhLQ2lfZSlJebhF464uQxWaJ6i1RVyEt4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

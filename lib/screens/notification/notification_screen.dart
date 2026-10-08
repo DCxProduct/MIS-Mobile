@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
@@ -11,12 +12,14 @@ import '../../translations/app_localizations.dart';
 import 'notification_destination_screen.dart';
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({super.key});
+  const NotificationScreen({super.key, this.initialNotificationId});
+  final int? initialNotificationId;
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
 }
 
-class _NotificationScreenState extends State<NotificationScreen> {
+class _NotificationScreenState extends State<NotificationScreen>
+    with WidgetsBindingObserver {
   NotificationsRepository? _repository;
   final _items = <SystemNotification>[];
   final _readIds = <int>{};
@@ -26,18 +29,54 @@ class _NotificationScreenState extends State<NotificationScreen> {
   String? _error;
   bool _retryMore = false;
   int _request = 0;
+  bool _initialOpenHandled = false;
+  StreamSubscription<void>? _liveSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _repository != null) {
+      _load();
+    }
+  }
+
+  @override
+  void dispose() {
+    _liveSubscription?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final repo = AppSettings.of(context).notifications;
     if (_repository != repo) {
+      _liveSubscription?.cancel();
       _repository = repo;
+      _liveSubscription = repo.liveChanges.listen((_) {
+        if (mounted) _load(background: true);
+      });
       _load();
+    }
+    if (!_initialOpenHandled && widget.initialNotificationId != null) {
+      _initialOpenHandled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _open(
+            SystemNotification.fromJson({'id': widget.initialNotificationId}),
+          );
+        }
+      });
     }
   }
 
-  Future<void> _load({bool more = false}) async {
+  Future<void> _load({bool more = false, bool background = false}) async {
     final request = ++_request;
     _retryMore = more;
     setState(() {
@@ -45,7 +84,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
       _error = null;
     });
     try {
-      final page = await _repository!.getPage(page: more ? _page!.page + 1 : 1);
+      final page = await _repository!.getPage(
+        page: more ? _page!.page + 1 : 1,
+        background: background,
+      );
       if (!mounted || request != _request) return;
       setState(() {
         if (!more) {
@@ -111,9 +153,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 NotificationDestinationScreen(destination: destination),
           ),
         );
+        if (isCurrent()) await _load();
       }
     } catch (error) {
       if (mounted) {
+        // An expired notification can still be visible in an older feed.
+        // Refresh from the server so it disappears instead of staying clickable.
+        if (error is ApiException && error.statusCode == 404) {
+          await _load();
+          if (!mounted) return;
+        }
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(_message(error))));

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/network/api_client.dart';
@@ -8,6 +9,12 @@ import 'system_notification.dart';
 class NotificationsRepository extends ChangeNotifier {
   NotificationsRepository(this._api);
   final ApiClient _api;
+  final _liveChanges = StreamController<void>.broadcast();
+  Stream<void> get liveChanges => _liveChanges.stream;
+  void notifyRealtimeChanged() {
+    if (!_liveChanges.isClosed) _liveChanges.add(null);
+  }
+
   int? unreadCount;
   NotificationPreferences? preferences;
   int _session = 0;
@@ -17,10 +24,12 @@ class NotificationsRepository extends ChangeNotifier {
     int limit = 20,
     String? type,
     bool? isRead,
+    bool background = false,
   }) async {
     final session = _session;
     final response = await _api.getListPage(
-      'system-notifications',
+      'mobile/system-notifications',
+      background: background,
       query: {
         'page': '$page',
         'limit': '$limit',
@@ -55,7 +64,9 @@ class NotificationsRepository extends ChangeNotifier {
 
   Future<SystemNotification> getNotification(int id) async {
     _checkId(id);
-    final envelope = await _api.getObjectPage('system-notifications/$id');
+    final envelope = await _api.getObjectPage(
+      'mobile/system-notifications/$id',
+    );
     try {
       final data = envelope['data'] as Map<String, dynamic>;
       // The backend interceptor lifts a resource's message into the envelope.
@@ -74,9 +85,14 @@ class NotificationsRepository extends ChangeNotifier {
     }
   }
 
-  Future<NotificationPreferences> getPreferences() async {
+  Future<NotificationPreferences> getPreferences({
+    bool background = false,
+  }) async {
     final session = _session;
-    final data = await _api.get('notification-settings/me');
+    final data = await _api.get(
+      'notification-settings/me',
+      background: background,
+    );
     try {
       final result = NotificationPreferences.fromJson(data);
       if (session == _session) {
@@ -91,11 +107,14 @@ class NotificationsRepository extends ChangeNotifier {
     }
   }
 
-  Future<void> refreshBadge() async {
+  Future<void> refreshBadge({bool background = false}) async {
     final session = _session;
     final results = await Future.wait([
-      _api.get('system-notifications/unread-count'),
-      getPreferences(),
+      _api.get(
+        'mobile/system-notifications/unread-count',
+        background: background,
+      ),
+      getPreferences(background: background),
     ]);
     final count = _count((results.first as Map<String, dynamic>)['count']);
     if (session == _session) {
@@ -107,11 +126,11 @@ class NotificationsRepository extends ChangeNotifier {
   Future<void> markRead(int id) async {
     _checkId(id);
     final session = _session;
-    await _api.patchAction('system-notifications/$id/read');
+    await _api.patchAction('mobile/system-notifications/$id/read');
     if (session != _session) return;
     // Refresh rather than decrement: another device may have read the item.
     try {
-      final data = await _api.get('system-notifications/unread-count');
+      final data = await _api.get('mobile/system-notifications/unread-count');
       if (session == _session) unreadCount = _count(data['count']);
     } catch (_) {
       if (session == _session) unreadCount = null;
@@ -137,7 +156,7 @@ class NotificationsRepository extends ChangeNotifier {
 
   Future<void> markAllRead() async {
     final session = _session;
-    await _api.patchAction('system-notifications/read-all');
+    await _api.patchAction('mobile/system-notifications/read-all');
     if (session == _session) {
       unreadCount = 0;
       notifyListeners();
@@ -146,13 +165,13 @@ class NotificationsRepository extends ChangeNotifier {
 
   Future<void> delete(int id) async {
     _checkId(id);
-    await _api.deleteAction('system-notifications/$id');
+    await _api.deleteAction('mobile/system-notifications/$id');
     await refreshBadge();
   }
 
   Future<void> deleteAll() async {
     final session = _session;
-    await _api.deleteAction('system-notifications/all');
+    await _api.deleteAction('mobile/system-notifications/all');
     if (session == _session) {
       unreadCount = 0;
       notifyListeners();
@@ -177,6 +196,7 @@ class NotificationsRepository extends ChangeNotifier {
   @override
   void dispose() {
     _session++;
+    _liveChanges.close();
     super.dispose();
   }
 

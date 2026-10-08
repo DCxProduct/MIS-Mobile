@@ -67,7 +67,10 @@ class NotificationDestination {
       case 'PLENARY_SENT' when ministry:
         id = notification.resourceId('plenaryId');
         if (id != null) route = '/ministry/plenary/plenaries/$id';
-      case 'PROGRESS_REPORT_SENT' when ministry:
+      case 'PROGRESS_REPORT_SENT' ||
+              'PROGRESS_REPORT_COMPLETED' ||
+              'PROGRESS_REPORT_PSWG_REVIEWED'
+          when ministry:
         id = notification.resourceId('progressReportId');
         if (id != null) route = '/ministry/progress-reports/$id';
       case 'PROGRESS_REPORT_SHARED' when pswg:
@@ -138,7 +141,9 @@ class NotificationDestination {
         r'^/ministry/plenary/plenaries/(\d+)$',
         NotificationDestinationKind.plenary,
       ),
-      'PROGRESS_REPORT_SENT' => detail(
+      'PROGRESS_REPORT_SENT' ||
+      'PROGRESS_REPORT_COMPLETED' ||
+      'PROGRESS_REPORT_PSWG_REVIEWED' => detail(
         r'^/ministry/progress-reports/(\d+)$',
         NotificationDestinationKind.progressReport,
       ),

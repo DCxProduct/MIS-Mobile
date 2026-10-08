@@ -61,7 +61,7 @@ void main() {
                     client: MockClient((request) async {
                       calls.add('${request.method} ${request.url.path}');
                       switch (request.url.path) {
-                        case '/api/v1/system-notifications':
+                        case '/api/v1/mobile/system-notifications':
                           return ok(
                             [item],
                             meta: {
@@ -72,7 +72,7 @@ void main() {
                               'unreadCount': 1,
                             },
                           );
-                        case '/api/v1/system-notifications/91':
+                        case '/api/v1/mobile/system-notifications/91':
                           return ok(item);
                         case '/api/v1/notification-settings/me':
                           return ok({
@@ -235,7 +235,7 @@ void main() {
                     client: MockClient((request) async {
                       calls.add('${request.method} ${request.url.path}');
                       switch (request.url.path) {
-                        case '/api/v1/system-notifications':
+                        case '/api/v1/mobile/system-notifications':
                           return ok(
                             [notification],
                             meta: {
@@ -246,7 +246,7 @@ void main() {
                               'unreadCount': 1,
                             },
                           );
-                        case '/api/v1/system-notifications/91':
+                        case '/api/v1/mobile/system-notifications/91':
                           return ok(notification);
                         case '/api/v1/notification-settings/me':
                           return ok({
@@ -352,7 +352,7 @@ void main() {
             client: MockClient((request) async {
               calls.add('${request.method} ${request.url.path}');
               switch (request.url.path) {
-                case '/api/v1/system-notifications':
+                case '/api/v1/mobile/system-notifications':
                   return ok(
                     [notification],
                     meta: {
@@ -363,7 +363,7 @@ void main() {
                       'unreadCount': 1,
                     },
                   );
-                case '/api/v1/system-notifications/91':
+                case '/api/v1/mobile/system-notifications/91':
                   return ok(notification);
                 case '/api/v1/notification-settings/me':
                   return ok({
@@ -581,6 +581,94 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  for (final type in [
+    'PROGRESS_REPORT_COMPLETED',
+    'PROGRESS_REPORT_PSWG_REVIEWED',
+  ]) {
+    testWidgets('$type shows View Detail and opens Ministry report', (
+      tester,
+    ) async {
+      final calls = <String>[];
+      final notification = {
+        'id': 91,
+        'type': type,
+        'title': 'CDC-GPSF',
+        'message': 'Reviewed: Actual ministry report',
+        'isRead': false,
+        'createdAt': '2026-10-05T08:00:00Z',
+        'data': {
+          'progressReportId': 4,
+          'ministryId': 3,
+          'url': '/ministry/progress-reports/4',
+        },
+      };
+      final settings = AppSettingsController(
+        authRepository: AuthRepository(
+          ApiClient(
+            client: MockClient((request) async {
+              calls.add('${request.method} ${request.url.path}');
+              switch (request.url.path) {
+                case '/api/v1/mobile/system-notifications':
+                  return ok(
+                    [notification],
+                    meta: {
+                      'page': 1,
+                      'limit': 20,
+                      'totalPages': 1,
+                      'total': 1,
+                      'unreadCount': 1,
+                    },
+                  );
+                case '/api/v1/mobile/system-notifications/91':
+                  return ok(notification);
+                case '/api/v1/notification-settings/me':
+                  return ok({
+                    'unreadBadge': true,
+                    'markReadOnDetail': false,
+                    'systemEnabled': true,
+                  });
+                case '/api/v1/progress-reports/4/ministries/me':
+                  return ok({
+                    'id': 46,
+                    'progressReportId': 4,
+                    'title': 'Actual ministry report',
+                    'year': 2026,
+                    'semester': 'S2',
+                    'status': type == 'PROGRESS_REPORT_COMPLETED'
+                        ? 'COMPLETED'
+                        : 'PSWG_REVIEWED',
+                    'description': '<p>Actual reviewed report</p>',
+                  });
+                default:
+                  fail('Unexpected review notification request ${request.url}');
+              }
+            }),
+          ),
+        ),
+      )..setLanguage(AppLanguage.english);
+      addTearDown(settings.dispose);
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: const MaterialApp(home: NotificationScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('notification-detail-91')),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const ValueKey('notification-detail-91')));
+      await tester.pumpAndSettle();
+      expect(find.byType(ReportDetailScreen), findsOneWidget);
+      expect(find.text('Actual ministry report'), findsOneWidget);
+      expect(calls, contains('GET /api/v1/mobile/system-notifications/91'));
+      expect(calls, contains('GET /api/v1/progress-reports/4/ministries/me'));
+      expect(calls.where((call) => call.startsWith('PATCH')), isEmpty);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets(
     'progress-report notification uses existing detail UI with actual content and documents',
     (tester) async {
@@ -671,7 +759,7 @@ void main() {
                   client: MockClient((request) async {
                     calls.add('${request.method} ${request.url.path}');
                     switch (request.url.path) {
-                      case '/api/v1/system-notifications':
+                      case '/api/v1/mobile/system-notifications':
                         return ok(
                           [notification],
                           meta: {
@@ -682,7 +770,7 @@ void main() {
                             'unreadCount': 1,
                           },
                         );
-                      case '/api/v1/system-notifications/91':
+                      case '/api/v1/mobile/system-notifications/91':
                         return ok(notification);
                       case '/api/v1/notification-settings/me':
                         return ok({
@@ -813,7 +901,7 @@ void main() {
           ApiClient(
             client: MockClient((request) async {
               calls.add('${request.method} ${request.url.path}');
-              if (request.url.path == '/api/v1/system-notifications') {
+              if (request.url.path == '/api/v1/mobile/system-notifications') {
                 return ok(
                   [item],
                   meta: {
@@ -825,7 +913,8 @@ void main() {
                   },
                 );
               }
-              if (request.url.path == '/api/v1/system-notifications/91') {
+              if (request.url.path ==
+                  '/api/v1/mobile/system-notifications/91') {
                 return ok(item);
               }
               if (request.url.path == '/api/v1/notification-settings/me') {

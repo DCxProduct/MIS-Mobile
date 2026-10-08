@@ -61,6 +61,56 @@ Map<String, dynamic> preferences({bool markRead = false, bool badge = true}) =>
     {'unreadBadge': badge, 'markReadOnDetail': markRead, 'systemEnabled': true};
 
 void main() {
+  for (final type in [
+    'PROGRESS_REPORT_COMPLETED',
+    'PROGRESS_REPORT_PSWG_REVIEWED',
+  ]) {
+    test('$type routes Ministry to its parent progress report', () {
+      for (final url in [null, '/ministry/progress-reports/4']) {
+        final item = SystemNotification.fromJson(
+          notification(
+            type: type,
+            data: {
+              'progressReportId': 4,
+              'ministryId': 3,
+              'assignmentId': 46,
+              'url': ?url,
+            },
+          ),
+        );
+        final destination = NotificationDestination.resolve(
+          item,
+          AppModuleType.lineMinistry,
+        );
+        expect(destination?.kind, NotificationDestinationKind.progressReport);
+        expect(destination?.id, 4);
+        expect(destination?.endpoint, 'progress-reports/4/ministries/me');
+      }
+      expect(
+        NotificationDestination.resolve(
+          SystemNotification.fromJson(notification(type: type, data: const {})),
+          AppModuleType.lineMinistry,
+        ),
+        isNull,
+      );
+      expect(
+        NotificationDestination.resolve(
+          SystemNotification.fromJson(
+            notification(
+              type: type,
+              data: const {
+                'progressReportId': 4,
+                'url': 'https://example.com/ministry/progress-reports/4',
+              },
+            ),
+          ),
+          AppModuleType.lineMinistry,
+        ),
+        isNull,
+      );
+    });
+  }
+
   test('notification routes use the resource ID and recipient URL', () {
     final cases = [
       (
@@ -342,7 +392,7 @@ void main() {
   test('list pages retain metadata, filters and real sender values', () async {
     final api = ApiClient(
       client: MockClient((request) async {
-        expect(request.url.path, '/api/v1/system-notifications');
+        expect(request.url.path, '/api/v1/mobile/system-notifications');
         expect(request.url.queryParameters, {
           'page': '2',
           'limit': '20',
@@ -377,7 +427,7 @@ void main() {
       var wrongId = false;
       final api = ApiClient(
         client: MockClient((request) async {
-          expect(request.url.path, '/api/v1/system-notifications/91');
+          expect(request.url.path, '/api/v1/mobile/system-notifications/91');
           final row = notification()..remove('message');
           if (wrongId) row['id'] = 92;
           return response(row, message: 'Actual detail message');
@@ -419,10 +469,10 @@ void main() {
       expect(
         calls,
         containsAll([
-          'PATCH /api/v1/system-notifications/91/read',
-          'PATCH /api/v1/system-notifications/read-all',
-          'DELETE /api/v1/system-notifications/91',
-          'DELETE /api/v1/system-notifications/all',
+          'PATCH /api/v1/mobile/system-notifications/91/read',
+          'PATCH /api/v1/mobile/system-notifications/read-all',
+          'DELETE /api/v1/mobile/system-notifications/91',
+          'DELETE /api/v1/mobile/system-notifications/all',
           'PATCH /api/v1/notification-settings/me',
         ]),
       );
@@ -464,15 +514,15 @@ void main() {
             client: MockClient((request) async {
               calls.add('${request.method} ${request.url.path}');
               switch (request.url.path) {
-                case '/api/v1/system-notifications':
+                case '/api/v1/mobile/system-notifications':
                   return response([notification()], meta: meta());
-                case '/api/v1/system-notifications/91':
+                case '/api/v1/mobile/system-notifications/91':
                   return response(notification());
                 case '/api/v1/notification-settings/me':
                   return response(preferences(markRead: markRead));
-                case '/api/v1/system-notifications/91/read':
+                case '/api/v1/mobile/system-notifications/91/read':
                   return response({});
-                case '/api/v1/system-notifications/unread-count':
+                case '/api/v1/mobile/system-notifications/unread-count':
                   return response({'count': 0});
                 case '/api/v1/meeting-requests/17':
                   return response({
@@ -502,7 +552,7 @@ void main() {
       expect(find.text('Actual meeting'), findsOneWidget);
       expect(find.text('Live meeting description'), findsOneWidget);
       expect(
-        calls.contains('PATCH /api/v1/system-notifications/91/read'),
+        calls.contains('PATCH /api/v1/mobile/system-notifications/91/read'),
         markRead,
       );
       expect(calls, contains('GET /api/v1/meeting-requests/17'));
@@ -519,7 +569,7 @@ void main() {
         authRepository: AuthRepository(
           ApiClient(
             client: MockClient((request) async {
-              if (request.url.path == '/api/v1/system-notifications') {
+              if (request.url.path == '/api/v1/mobile/system-notifications') {
                 if (request.url.queryParameters['page'] == '1') {
                   page1Calls++;
                   return response([
@@ -534,7 +584,8 @@ void main() {
                   },
                 ], meta: meta(page: 2, totalPages: 2, total: 2));
               }
-              if (request.url.path == '/api/v1/system-notifications/92') {
+              if (request.url.path ==
+                  '/api/v1/mobile/system-notifications/92') {
                 return response({
                   ...notification(type: 'ISSUE_ESCALATED', data: {}),
                   'id': 92,
@@ -704,4 +755,160 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('push tap fetches correct detail outside the first feed page', (
+    tester,
+  ) async {
+    final calls = <String>[];
+    final settings = AppSettingsController(
+      authRepository: AuthRepository(
+        ApiClient(
+          client: MockClient((request) async {
+            calls.add('${request.method} ${request.url.path}');
+            switch (request.url.path) {
+              case '/api/v1/mobile/system-notifications':
+                return response(
+                  [],
+                  meta: meta(total: 0, unread: 0, totalPages: 0),
+                );
+              case '/api/v1/mobile/system-notifications/91':
+                return response(notification());
+              case '/api/v1/notification-settings/me':
+                return response(preferences());
+              case '/api/v1/meeting-requests/17':
+                return response({
+                  'id': 17,
+                  'title': 'Push destination meeting',
+                });
+              default:
+                fail('Unexpected push request ${request.url}');
+            }
+          }),
+        ),
+      ),
+    )..setLanguage(AppLanguage.english);
+    addTearDown(settings.dispose);
+    await tester.pumpWidget(
+      AppSettings(
+        controller: settings,
+        child: const MaterialApp(
+          home: NotificationScreen(initialNotificationId: 91),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Push destination meeting'), findsOneWidget);
+    expect(calls, contains('GET /api/v1/mobile/system-notifications/91'));
+    expect(calls, contains('GET /api/v1/meeting-requests/17'));
+    expect(calls.where((call) => call.startsWith('PATCH')), isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'mobile detail starts retention and resume removes expired rows',
+    (tester) async {
+      var expired = false;
+      final calls = <String>[];
+      final settings = AppSettingsController(
+        authRepository: AuthRepository(
+          ApiClient(
+            client: MockClient((request) async {
+              calls.add('${request.method} ${request.url.path}');
+              switch (request.url.path) {
+                case '/api/v1/mobile/system-notifications':
+                  return response(
+                    expired ? [] : [notification()],
+                    meta: meta(
+                      total: expired ? 0 : 1,
+                      unread: expired ? 0 : 1,
+                      totalPages: expired ? 0 : 1,
+                    ),
+                  );
+                case '/api/v1/mobile/system-notifications/91':
+                  return response(notification());
+                case '/api/v1/notification-settings/me':
+                  return response(preferences());
+                case '/api/v1/meeting-requests/17':
+                  return response({'id': 17, 'title': 'Actual meeting'});
+                default:
+                  fail('Unexpected notification request ${request.url}');
+              }
+            }),
+          ),
+        ),
+      )..setLanguage(AppLanguage.english);
+      addTearDown(settings.dispose);
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: const MaterialApp(home: NotificationScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        calls,
+        isNot(contains('GET /api/v1/mobile/system-notifications/91')),
+      );
+      await tester.tap(find.byKey(const ValueKey('notification-detail-91')));
+      await tester.pumpAndSettle();
+      expect(calls, contains('GET /api/v1/mobile/system-notifications/91'));
+      expect(calls.where((call) => call.startsWith('PATCH')), isEmpty);
+      await tester.tap(find.byIcon(Icons.arrow_back).first);
+      await tester.pumpAndSettle();
+      expect(find.text('A real notification'), findsOneWidget);
+      // The server owns the clock; simulate its response after 168 hours.
+      expired = true;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(find.text('A real notification'), findsNothing);
+      expect(settings.notifications.unreadCount, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('expired detail refreshes the stale feed instead of opening it', (
+    tester,
+  ) async {
+    var expired = false;
+    final settings = AppSettingsController(
+      authRepository: AuthRepository(
+        ApiClient(
+          client: MockClient((request) async {
+            if (request.url.path == '/api/v1/mobile/system-notifications') {
+              return response(
+                expired ? [] : [notification()],
+                meta: meta(total: expired ? 0 : 1, unread: expired ? 0 : 1),
+              );
+            }
+            if (request.url.path == '/api/v1/mobile/system-notifications/91') {
+              expired = true;
+              return http.Response(
+                jsonEncode({
+                  'success': false,
+                  'message': 'Notification not found.',
+                }),
+                404,
+              );
+            }
+            fail('Unexpected request ${request.url}');
+          }),
+        ),
+      ),
+    )..setLanguage(AppLanguage.english);
+    addTearDown(settings.dispose);
+    await tester.pumpWidget(
+      AppSettings(
+        controller: settings,
+        child: const MaterialApp(home: NotificationScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('notification-detail-91')));
+    await tester.pumpAndSettle();
+    expect(find.text('A real notification'), findsNothing);
+    expect(find.byType(NotificationDestinationScreen), findsNothing);
+    expect(settings.notifications.unreadCount, 0);
+    expect(tester.takeException(), isNull);
+  });
 }

@@ -8,6 +8,33 @@
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/lib/main.dart",
       "flutterMode": "debug"
+    },
+    {
+      "name": "GPSF MIS - Notifications (Local Android)",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/lib/main.dart",
+      "flutterMode": "debug",
+      "deviceId": "emulator-5554",
+      "toolArgs": [
+        "--dart-define=MOBILE_FCM_ENABLED=true",
+        "--dart-define=MOBILE_REALTIME_ENABLED=true",
+        "--dart-define=API_BASE_URL=http://10.0.2.2:3001/api/v1"
+      ]
+    },
+    {
+      "name": "GPSF MIS - Notifications (Stage)",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/lib/main.dart",
+      "flutterMode": "debug",
+      "toolArgs": [
+        "--dart-define=MOBILE_FCM_ENABLED=true",
+        "--dart-define=MOBILE_REALTIME_ENABLED=true",
+        "--dart-define=API_BASE_URL=https://admin-mis-stage.datacolabx.com/api/v1"
+      ]
     }
   ]
 }

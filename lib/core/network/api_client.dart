@@ -22,21 +22,28 @@ class ApiClient {
 
   http.Client _client;
   final Uri _baseUri;
+  Uri get serverOrigin => Uri.parse(_baseUri.origin);
 
-  Future<Map<String, dynamic>> get(String path, {Map<String, String>? query}) =>
-      _request(
-        'GET',
-        path,
-        query: query,
-      ).then((data) => data as Map<String, dynamic>);
+  Future<Map<String, dynamic>> get(
+    String path, {
+    Map<String, String>? query,
+    bool background = false,
+  }) => _request(
+    'GET',
+    path,
+    query: query,
+    background: background,
+  ).then((data) => data as Map<String, dynamic>);
 
   Future<Map<String, dynamic>> post(
     String path, {
     required Map<String, dynamic> body,
+    bool background = false,
   }) => _request(
     'POST',
     path,
     body: body,
+    background: background,
   ).then((data) => data as Map<String, dynamic>);
 
   Future<List<dynamic>> getList(String path) async =>
@@ -81,6 +88,7 @@ class ApiClient {
   Future<Map<String, dynamic>> getListPage(
     String path, {
     Map<String, String>? query,
+    bool background = false,
   }) async =>
       await _request(
             'GET',
@@ -88,6 +96,7 @@ class ApiClient {
             query: query,
             expectList: true,
             preserveEnvelope: true,
+            background: background,
           )
           as Map<String, dynamic>;
 
@@ -104,8 +113,8 @@ class ApiClient {
     await _request('PATCH', path, body: body, expectData: false);
   }
 
-  Future<void> deleteAction(String path) async {
-    await _request('DELETE', path, expectData: false);
+  Future<void> deleteAction(String path, {Map<String, dynamic>? body}) async {
+    await _request('DELETE', path, body: body, expectData: false);
   }
 
   Future<Map<String, dynamic>> getObjectPage(
@@ -127,6 +136,7 @@ class ApiClient {
     bool expectList = false,
     bool preserveEnvelope = false,
     bool expectBytes = false,
+    bool background = false,
   }) async {
     if (path.startsWith('/') ||
         path.contains('..') ||
@@ -140,6 +150,7 @@ class ApiClient {
     request.headers['Accept'] = expectBytes
         ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         : 'application/json';
+    if (background) request.headers['x-background-poll'] = '1';
     if (body != null) {
       request.headers['Content-Type'] = 'application/json';
       request.body = jsonEncode(body);
