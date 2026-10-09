@@ -10,8 +10,11 @@ class Plenary {
       statusCode = _string(json['statusCode']),
       numberOfRgcDecisions = _int(json['numberOfRgcDecisions']),
       ministryCount = _listLength(json['ministries']),
-      documentReference = _nullableString(json['documentReference']),
-      attachmentCount = _attachmentCount(json['documentReference']);
+      documentReference = _documentPath(json['documentReference']),
+      documentName = _documentName(json['documentReference']),
+      attachmentCount = _documentPath(json['documentReference']) == null
+          ? 0
+          : 1;
 
   final int id;
   final String name;
@@ -22,7 +25,12 @@ class Plenary {
   final int numberOfRgcDecisions;
   final int ministryCount;
   final String? documentReference;
+  final String? documentName;
   final int attachmentCount;
+
+  bool get isSent =>
+      (statusCode.trim().isEmpty ? status : statusCode).trim().toUpperCase() ==
+      'SENT';
 
   static int _int(Object? value) => value is int ? value : 0;
 
@@ -36,6 +44,10 @@ class Plenary {
 
   static int _listLength(Object? value) => value is List ? value.length : 0;
 
-  static int _attachmentCount(Object? value) =>
-      value is String && value.trim().isNotEmpty ? 1 : 0;
+  static String? _documentPath(Object? value) =>
+      _nullableString(value is Map<String, dynamic> ? value['path'] : value);
+
+  static String? _documentName(Object? value) => value is Map<String, dynamic>
+      ? _nullableString(value['originalName']) ?? _nullableString(value['name'])
+      : null;
 }

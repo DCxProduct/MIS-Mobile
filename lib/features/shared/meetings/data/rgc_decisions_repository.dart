@@ -87,6 +87,7 @@ class RgcDecisionsRepository {
 
   Future<List<RgcDecision>> getDecisions({
     Map<String, String> filters = const {},
+    Map<String, String> headers = const {},
     bool cdcGpsf = false,
     bool includePlenaryDetails = false,
   }) async {
@@ -94,6 +95,7 @@ class RgcDecisionsRepository {
       cdcGpsf ? 'rgc-decisions/cdc-gpsf' : 'rgc-decisions',
       query: filters,
       objectItems: true,
+      headers: headers,
     );
     try {
       final plenaries = <int, Future<Map<String, dynamic>>>{};
@@ -114,6 +116,22 @@ class RgcDecisionsRepository {
     } on FormatException {
       throw const ApiException('The server returned invalid RGC decisions.');
     }
+  }
+
+  Future<List<RgcDecision>> getMinistryPlenaryDecisions({
+    required int plenaryId,
+    required int? userId,
+  }) {
+    if (plenaryId <= 0) {
+      throw ArgumentError.value(plenaryId, 'plenaryId', 'Must be positive');
+    }
+    if (userId == null || userId <= 0) {
+      throw const ApiException('Please sign in again.', statusCode: 401);
+    }
+    return getDecisions(
+      filters: {'plenaryId': '$plenaryId', 'ministryOnly': 'true'},
+      headers: {'x-user-id': '$userId'},
+    );
   }
 
   Future<Map<String, dynamic>> _withPlenary(

@@ -27,11 +27,13 @@ class ApiClient {
   Future<Map<String, dynamic>> get(
     String path, {
     Map<String, String>? query,
+    Map<String, String> headers = const {},
     bool background = false,
   }) => _request(
     'GET',
     path,
     query: query,
+    headers: headers,
     background: background,
   ).then((data) => data as Map<String, dynamic>);
 
@@ -55,14 +57,15 @@ class ApiClient {
     Map<String, String> query = const {},
     bool objectItems = false,
     int limit = 100,
+    Map<String, String> headers = const {},
   }) async {
     final items = <dynamic>[];
     var totalPages = 1;
     for (var page = 1; page <= totalPages; page++) {
       final params = {...query, 'page': '$page', 'limit': '$limit'};
       final response = objectItems
-          ? await getObjectPage(path, query: params)
-          : await getListPage(path, query: params);
+          ? await getObjectPage(path, query: params, headers: headers)
+          : await getListPage(path, query: params, headers: headers);
       final data = response['data'];
       final rows = objectItems && data is Map ? data['items'] : data;
       if (rows is! List) {
@@ -88,12 +91,14 @@ class ApiClient {
   Future<Map<String, dynamic>> getListPage(
     String path, {
     Map<String, String>? query,
+    Map<String, String> headers = const {},
     bool background = false,
   }) async =>
       await _request(
             'GET',
             path,
             query: query,
+            headers: headers,
             expectList: true,
             preserveEnvelope: true,
             background: background,
@@ -120,8 +125,15 @@ class ApiClient {
   Future<Map<String, dynamic>> getObjectPage(
     String path, {
     Map<String, String>? query,
+    Map<String, String> headers = const {},
   }) async =>
-      await _request('GET', path, query: query, preserveEnvelope: true)
+      await _request(
+            'GET',
+            path,
+            query: query,
+            headers: headers,
+            preserveEnvelope: true,
+          )
           as Map<String, dynamic>;
 
   Future<Uint8List> getBytes(String path, {Map<String, String>? query}) async =>
@@ -131,6 +143,7 @@ class ApiClient {
     String method,
     String path, {
     Map<String, String>? query,
+    Map<String, String> headers = const {},
     Map<String, dynamic>? body,
     bool expectData = true,
     bool expectList = false,
@@ -147,6 +160,7 @@ class ApiClient {
       method,
       _baseUri.resolve(path).replace(queryParameters: query),
     );
+    request.headers.addAll(headers);
     request.headers['Accept'] = expectBytes
         ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         : 'application/json';

@@ -88,6 +88,7 @@ const Map<String, String> enTranslations = {
   'meetingRequestDocument': 'Meeting Request Document',
   'descriptions': 'Descriptions',
   'allIssues': 'All Issues',
+  'linkedIssues': 'Linked Issues',
   'calendar': 'Calendar',
   'meetingCalendar': 'Meeting Calendar',
   'issues': 'Issues',

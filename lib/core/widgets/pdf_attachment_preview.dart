@@ -11,7 +11,7 @@ String pdfAttachmentUrl(String path) {
   return '$_fileHost${value.startsWith('/') ? value : '/$value'}';
 }
 
-String pdfAttachmentName(String path) {
+String pdfAttachmentName(String path, {String? fallbackName}) {
   final value = path.split('?').first;
   var name = value.split('/').last.trim();
   try {
@@ -20,6 +20,13 @@ String pdfAttachmentName(String path) {
     // Keep filenames containing a literal percent sign.
   }
   name = name.replaceFirst(RegExp(r'^\d{13}[-_]'), '');
+  if (fallbackName != null &&
+      RegExp(
+        r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.pdf$',
+        caseSensitive: false,
+      ).hasMatch(name)) {
+    return fallbackName;
+  }
   return name.isEmpty ? 'PDF Preview' : name;
 }
 

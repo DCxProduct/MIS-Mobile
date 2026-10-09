@@ -107,6 +107,7 @@ const Map<String, String> kmTranslations = {
   'meetingRequestDocument': 'ឯកសារសំណើកិច្ចប្រជុំ',
   'descriptions': 'ការពិពណ៌នា',
   'allIssues': 'បញ្ហាទាំងអស់',
+  'linkedIssues': 'បញ្ហាដែលបានភ្ជាប់',
   'calendar': 'ប្រតិទិន',
   'meetingCalendar': 'កាលវិភាគកិច្ចប្រជុំ',
   'issues': 'បញ្ហា',

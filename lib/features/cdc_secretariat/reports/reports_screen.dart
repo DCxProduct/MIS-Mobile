@@ -333,6 +333,7 @@ class _PlenaryTab extends StatelessWidget {
         children: [
           for (final plenary in plenaries)
             _PlenaryCard(
+              plenaryId: plenary.id,
               title: plenary.name,
               status: plenary.status,
               meetingDate: plenaryDate(plenary.meetingDate),
@@ -350,6 +351,7 @@ class _PlenaryTab extends StatelessWidget {
 
 class _PlenaryCard extends StatelessWidget {
   const _PlenaryCard({
+    required this.plenaryId,
     required this.title,
     required this.status,
     required this.meetingDate,
@@ -359,6 +361,7 @@ class _PlenaryCard extends StatelessWidget {
     this.documentReference,
   });
 
+  final int plenaryId;
   final String title;
   final String status;
   final String meetingDate;
@@ -484,10 +487,7 @@ class _PlenaryCard extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => PlenaryDetailScreen(
-                      title: title,
-                      documentReference: documentReference,
-                    ),
+                    builder: (_) => PlenaryDetailScreen(plenaryId: plenaryId),
                   ),
                 );
               },

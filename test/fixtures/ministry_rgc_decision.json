@@ -1,0 +1,123 @@
+{
+    "success": true,
+    "statusCode": 200,
+    "message": "OK",
+    "data": {
+        "id": 3,
+        "plenaryId": 3,
+        "plenary": {
+            "id": 3,
+            "name": "21th"
+        },
+        "stakeholderId": 1,
+        "stakeholder": {
+            "id": 1,
+            "name": "MAFF",
+            "logo": "/uploads/stakeholders/1788369688560-MAFF.jpg",
+            "description": "Ministry of Agriculture, Forestry and Fisheries"
+        },
+        "categoryId": 8,
+        "category": "Communication",
+        "categoryInfo": {
+            "id": 8,
+            "name": "Communication"
+        },
+        "indicatorId": 2,
+        "indicator": {
+            "id": 2,
+            "name": "Milestone 2",
+            "description": null
+        },
+        "indicatorName": "Milestone 2",
+        "indicatorDescription": "",
+        "meetingDate": "2026-10-03T00:00:00.000Z",
+        "status": "Not Addressed",
+        "statusCode": "NOT_ADDRESSED",
+        "focalPerson": "H.E. Mr. DITH TINA",
+        "decision": "<p><strong>សេចក្តីសម្រេចរបស់រាជរដ្ឋាភិបាល</strong></p>",
+        "verificationSource": "<p><strong>ប្រភពផ្ទៀងផ្ទាត់</strong></p>",
+        "verificationLink": "https://mis-stage.datacolabx.com/ministry/plenary/plenaries/3?createRgcDecision=1",
+        "submittedToCdcAt": "2026-10-05T02:04:30.637Z",
+        "revisionOpen": false,
+        "saveAsDraft": false,
+        "isDraft": false,
+        "createdBy": {
+            "id": 19,
+            "name": "MAFF",
+            "email": "ministry1@gmail.com"
+        },
+        "issues": [
+            {
+                "id": 5,
+                "title": "ចូលរួមសហគមន៍កសិកម្មទំនើប",
+                "description": "<p><strong>ផ្នែកឯកជន</strong>មើលឃើញអំពីកង្វះការយល់ដឹងរបស់កសិករលើការធ្វើផែនការ ក្នុងការផលិត ដាំដុះ ថវិកា និងការវិភាគការចំណាយលើថ្លៃដើមផលិត ដែលធ្វើអោយកសិករតែងតែលើកឡើងថាពួកគាត់ខាត។ ដូច្នេះផ្នែកឯកជនយល់ឃើញថាការចូលរួមជាមួយ សហគមន៍កសិកម្មទំនើប ដែលជាយន្តការបស់ក្រសួងកសិកម្ម រុក្ខាប្រមាញ់ និងនេសាទ គឺជារឿងចាំបាច់ ទាំងផ្នែកឯកជន ទាំងកសិករផ្ទាល់ ជាពិសេសការចូលរួមផ្គត់ផ្គង់ធាតុចូលកសិកម្ម ក្នុងផ្នែកណាមួយដល់កសិករក្នុងសហគមន៍។</p>",
+                "recommendation": "<p>ផ្នែកឯកជនស្នើសុំ<mark data-color=\"var(--tt-color-highlight-red)\" style=\"background-color: var(--tt-color-highlight-red); color: inherit;\">ក្រសួងកសិកម្មរុក្ខាប្រមាញ់ និងនេសាទ</mark>ធ្វើបទបង្ហាញអំពីនីតិវិធី និងលក្ខខណ្ឌតម្រូវក្នុងការចូលរួមផ្គត់ផ្គង់ធាតុចូលកសិកម្មដល់សហគមន៍កសិកម្មទំនើបដល់ផ្នែកឯកជន ដែលជាអ្នកផ្គត់ផ្គង់ធាតុចូលកសិកម្ម។</p>",
+                "attachment": "/uploads/issues/1788402643476-Issue_reference.pdf",
+                "escalation": null,
+                "issueStatusId": 4,
+                "categoryId": 1,
+                "meetingRequestId": 4,
+                "userId": 5,
+                "stakeholderId": 14,
+                "createdAt": "2026-09-03T02:30:43.493Z",
+                "updatedAt": "2026-09-29T08:42:04.323Z",
+                "deletedAt": null,
+                "issueStatus": {
+                    "id": 4,
+                    "code": "IN_PROGRESS",
+                    "name": "In Progress"
+                },
+                "category": {
+                    "id": 1,
+                    "name": "General"
+                },
+                "meetingRequest": {
+                    "id": 4,
+                    "title": "សំណើសុំរៀបចំកិច្ចប្រជុំពិភាក្សាអំពីការកែលម្អនីតិវិធី និងបទប្បញ្ញត្តិពាក់ព័ន្ធនឹងផលិតផលកសិកម្ម",
+                    "meetings": [
+                        {
+                            "id": 3,
+                            "meetingDate": "2026-09-14T00:00:00.000Z",
+                            "startTime": "1970-01-01T13:00:00.000Z"
+                        }
+                    ]
+                },
+                "stakeholder": {
+                    "id": 14,
+                    "name": "Agriculture & Agro-Industry",
+                    "logo": "/uploads/stakeholders/1790505693513-MAFF.jpg",
+                    "stakeholderType": {
+                        "id": 2,
+                        "name": "Private Sector"
+                    }
+                },
+                "user": {
+                    "id": 5,
+                    "email": "privatesector1@gmail.com",
+                    "name": "PSWG Secretariat A",
+                    "position": "WG A: Agriculture & Agro-Industry",
+                    "avatar": "https://api.dicebear.com/10.x/glass/svg"
+                },
+                "governmentAgencies": [
+                    {
+                        "agencyOrder": 1,
+                        "stakeholder": {
+                            "id": 1,
+                            "name": "MAFF",
+                            "logo": "/uploads/stakeholders/1788369688560-MAFF.jpg",
+                            "stakeholderType": {
+                                "id": 1,
+                                "name": "Ministry"
+                            }
+                        }
+                    }
+                ]
+            }
+        ],
+        "createdAt": "2026-10-03T04:54:48.818Z",
+        "updatedAt": "2026-10-05T02:04:30.638Z",
+        "progressReports": []
+    },
+    "timestamp": "2026-10-09T03:35:11.506Z",
+    "path": "/api/v1/rgc-decisions/3"
+}

@@ -27,6 +27,9 @@ class RgcDecision {
           ? _string(json['category'])
           : _string(_object(json['categoryInfo'])['name']),
       focalPerson = _string(json['focalPerson']),
+      description = htmlToPlainText(
+        _string(json['decision'] ?? json['rgcDecision'] ?? json['description']),
+      ),
       links = Set.unmodifiable(_links(json));
 
   final int id, plenaryId, stakeholderId;
@@ -42,6 +45,7 @@ class RgcDecision {
       category,
       focalPerson;
   final DateTime? meetingDate, plenaryMeetingDate;
+  final String description;
   Map<String, Iterable<String>> get filterValues => {
     'local.workingGroup': workingGroups,
     'local.dateOfDecision': [FilterSelection.dateValue(decisionDate)],
@@ -192,16 +196,31 @@ class RgcDecisionDetail {
            ) ??
            plenaryDeadline,
        approvalReport = _string(json['approvalReport']),
+       decisionContent = _string(json['decision'] ?? json['rgcDecision']),
+       indicatorName = _string(
+         _nonEmpty(json['indicatorName']) ?? _object(json['indicator'])['name'],
+       ),
+       verificationSource = _string(json['verificationSource']),
+       verificationLink = _string(json['verificationLink']),
        issues = List.unmodifiable(_issueList(json));
 
   final RgcDecision decision;
   final DateTime? deadline;
   final String approvalReport;
+  final String decisionContent,
+      indicatorName,
+      verificationSource,
+      verificationLink;
   final List<RgcDecisionIssue> issues;
 
   static DateTime? _date(Object? value) =>
       value is String ? DateTime.tryParse(value) : null;
   static String _string(Object? value) => value is String ? value : '';
+  static Object? _nonEmpty(Object? value) =>
+      value is String && value.trim().isNotEmpty ? value : null;
+  static Map<String, dynamic> _object(Object? value) =>
+      value is Map<String, dynamic> ? value : const {};
+
   static Iterable<RgcDecisionIssue> _issueList(
     Map<String, dynamic> json,
   ) sync* {
