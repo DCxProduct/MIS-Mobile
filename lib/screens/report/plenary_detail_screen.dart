@@ -1,20 +1,44 @@
 import 'package:flutter/material.dart';
 
+import '../../core/app_settings.dart';
 import '../../core/app_colors.dart';
 import '../../core/widgets/pdf_attachment_preview.dart';
+import '../../core/text/html_text.dart';
+import '../../features/shared/meetings/data/plenary.dart';
+import '../../features/shared/meetings/data/rgc_decision.dart';
 
 class PlenaryDetailScreen extends StatelessWidget {
   const PlenaryDetailScreen({
     super.key,
+    this.id,
     required this.title,
     this.documentReference,
+    this.plenary,
+    this.approvalReports,
   });
 
+  final int? id;
   final String title;
   final String? documentReference;
+  final Plenary? plenary;
+  final List<RgcDecisionDetail>? approvalReports;
 
   @override
   Widget build(BuildContext context) {
+    if (id != null) return _ApiPlenaryDetailScreen(id: id!);
+
+    final detailTitle = plenary?.name ?? title;
+    final detailDocument = plenary?.documentReference ?? documentReference;
+    final detailDeadline = plenary == null
+        ? 'June 07, 2025'
+        : _date(plenary!.deadline);
+    final detailMeetingDate = plenary == null
+        ? 'Ouk Sabda ( June 01, 2025 )'
+        : _date(plenary!.meetingDate);
+    final detailDecisionCount =
+        plenary?.numberOfRgcDecisions.toString() ?? '179';
+    final detailStatus = plenary == null ? '• Sent' : '• ${plenary!.status}';
+
     return Scaffold(
       backgroundColor: AppColors.pageBackground(context),
       appBar: AppBar(
@@ -31,7 +55,9 @@ class PlenaryDetailScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Meeting Request Details',
+          detailTitle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: AppColors.primaryText(context),
             fontSize: 15,
@@ -50,18 +76,15 @@ class PlenaryDetailScreen extends StatelessWidget {
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Expanded(
-                  child: _DetailBlock(
-                    label: 'Deadline',
-                    value: 'June 07, 2025',
-                  ),
+                  child: _DetailBlock(label: 'Deadline', value: detailDeadline),
                 ),
                 SizedBox(width: 16),
                 Expanded(
                   child: _DetailBlock(
                     label: 'Meeting Date',
-                    value: 'Ouk Sabda ( June 01, 2025 )',
+                    value: detailMeetingDate,
                   ),
                 ),
               ],
@@ -69,18 +92,18 @@ class PlenaryDetailScreen extends StatelessWidget {
             const SizedBox(height: 14),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Expanded(
                   child: _DetailBlock(
                     label: 'Number of RGC Decision',
-                    value: '179',
+                    value: detailDecisionCount,
                   ),
                 ),
                 SizedBox(width: 16),
                 Expanded(
                   child: _DetailBlock(
                     label: 'Status :',
-                    value: '• Sent',
+                    value: detailStatus,
                     valueColor: Color(0xFF1E73BE),
                   ),
                 ),
@@ -97,10 +120,10 @@ class PlenaryDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             PdfAttachmentPreview(
-              path: documentReference ?? '',
-              name: documentReference == null
+              path: detailDocument ?? '',
+              name: detailDocument == null
                   ? null
-                  : pdfAttachmentName(documentReference!),
+                  : pdfAttachmentName(detailDocument),
               child: Row(
                 children: [
                   const Icon(
@@ -113,9 +136,9 @@ class PlenaryDetailScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        documentReference == null
+                        detailDocument == null
                             ? 'Request Doc'
-                            : pdfAttachmentName(documentReference!),
+                            : pdfAttachmentName(detailDocument),
                         style: TextStyle(
                           color: AppColors.primaryText(context),
                           fontSize: 11,
@@ -136,37 +159,153 @@ class PlenaryDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            const _PlenaryIssueItemCard(
-              meetingDate: 'Jun 20, 2025',
-              category: 'Procedure',
-              focalPerson: 'Dith Tina',
-              description:
-                  'The Ministry of Agriculture, Forestry and Fisheries (MAFF) agreed to have joint inspections and not multiple inspections. Inspections are only conducte...',
-              status: 'Solved',
-            ),
-            const SizedBox(height: 14),
-            const _PlenaryIssueItemCard(
-              meetingDate: 'Jun 20, 2025',
-              category: 'Procedure',
-              focalPerson: 'Dith Tina',
-              description:
-                  'The Ministry of Agriculture, Forestry and Fisheries (MAFF) agreed to have joint inspections and not multiple inspections. Inspections are only conducte...',
-              status: 'Solved',
-            ),
-            const SizedBox(height: 14),
-            const _PlenaryIssueItemCard(
-              meetingDate: 'Jun 20, 2025',
-              category: 'Procedure',
-              focalPerson: 'Dith Tina',
-              description:
-                  'The Ministry of Agriculture, Forestry and Fisheries (MAFF) agreed to have joint inspections and not multiple inspections. Inspections are only conducte...',
-              status: 'Solved',
-            ),
+            ..._approvalCards(),
           ],
         ),
       ),
     );
   }
+
+  List<Widget> _approvalCards() {
+    final reports = approvalReports;
+    if (reports == null) {
+      return const [
+        _PlenaryIssueItemCard(
+          meetingDate: 'Jun 20, 2025',
+          category: 'Procedure',
+          focalPerson: 'Dith Tina',
+          description:
+              'The Ministry of Agriculture, Forestry and Fisheries (MAFF) agreed to have joint inspections and not multiple inspections. Inspections are only conducte...',
+          status: 'Solved',
+        ),
+        SizedBox(height: 14),
+        _PlenaryIssueItemCard(
+          meetingDate: 'Jun 20, 2025',
+          category: 'Procedure',
+          focalPerson: 'Dith Tina',
+          description:
+              'The Ministry of Agriculture, Forestry and Fisheries (MAFF) agreed to have joint inspections and not multiple inspections. Inspections are only conducte...',
+          status: 'Solved',
+        ),
+        SizedBox(height: 14),
+        _PlenaryIssueItemCard(
+          meetingDate: 'Jun 20, 2025',
+          category: 'Procedure',
+          focalPerson: 'Dith Tina',
+          description:
+              'The Ministry of Agriculture, Forestry and Fisheries (MAFF) agreed to have joint inspections and not multiple inspections. Inspections are only conducte...',
+          status: 'Solved',
+        ),
+      ];
+    }
+    if (reports.isEmpty) return const [];
+    final cards = <Widget>[];
+    for (final report in reports) {
+      final issues = report.issues.isEmpty
+          ? <RgcDecisionIssue?>[null]
+          : report.issues;
+      for (final issue in issues) {
+        if (cards.isNotEmpty) cards.add(const SizedBox(height: 14));
+        cards.add(
+          _PlenaryIssueItemCard(
+            meetingDate: _date(report.decision.meetingDate),
+            category: issue?.category.isNotEmpty == true
+                ? issue!.category
+                : report.decision.category,
+            focalPerson: issue?.focalPerson.isNotEmpty == true
+                ? issue!.focalPerson
+                : report.decision.focalPerson,
+            description: htmlToPlainText(
+              issue?.description.isNotEmpty == true
+                  ? issue!.description
+                  : report.approvalReport,
+            ),
+            status: report.decision.status,
+            report: report,
+            issue: issue,
+          ),
+        );
+      }
+    }
+    return cards;
+  }
+
+  static String _date(DateTime? date) {
+    if (date == null) return '—';
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+}
+
+class _ApiPlenaryDetailScreen extends StatefulWidget {
+  const _ApiPlenaryDetailScreen({required this.id});
+
+  final int id;
+
+  @override
+  State<_ApiPlenaryDetailScreen> createState() =>
+      _ApiPlenaryDetailScreenState();
+}
+
+class _ApiPlenaryDetailScreenState extends State<_ApiPlenaryDetailScreen> {
+  Future<_PlenaryApiData>? _future;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _future ??= _load();
+  }
+
+  Future<_PlenaryApiData> _load() async {
+    final settings = AppSettings.of(context);
+    final results = await Future.wait<Object>([
+      settings.plenaries.getPlenary(widget.id),
+      settings.rgcDecisions.getDecisionsByPlenary(widget.id),
+    ]);
+    return _PlenaryApiData(
+      results[0] as Plenary,
+      results[1] as List<RgcDecisionDetail>,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<_PlenaryApiData>(
+      future: _future,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Scaffold(
+            backgroundColor: AppColors.pageBackground(context),
+            appBar: AppBar(title: const Text('Plenary Details')),
+            body: Center(
+              child: snapshot.hasError
+                  ? TextButton(
+                      onPressed: () => setState(() {
+                        _future = _load();
+                      }),
+                      child: const Text('Retry'),
+                    )
+                  : const CircularProgressIndicator(),
+            ),
+          );
+        }
+        final data = snapshot.data!;
+        final plenary = data.plenary;
+        return PlenaryDetailScreen(
+          title: plenary.name,
+          documentReference: plenary.documentReference,
+          plenary: plenary,
+          approvalReports: data.approvalReports,
+        );
+      },
+    );
+  }
+}
+
+class _PlenaryApiData {
+  const _PlenaryApiData(this.plenary, this.approvalReports);
+
+  final Plenary plenary;
+  final List<RgcDecisionDetail> approvalReports;
 }
 
 class _DetailBlock extends StatelessWidget {
@@ -214,6 +353,8 @@ class _PlenaryIssueItemCard extends StatelessWidget {
     required this.focalPerson,
     required this.description,
     required this.status,
+    this.report,
+    this.issue,
   });
 
   final String meetingDate;
@@ -221,6 +362,8 @@ class _PlenaryIssueItemCard extends StatelessWidget {
   final String focalPerson;
   final String description;
   final String status;
+  final RgcDecisionDetail? report;
+  final RgcDecisionIssue? issue;
 
   void _openRgcDecisionBottomSheet(BuildContext context) {
     showModalBottomSheet<void>(
@@ -228,7 +371,11 @@ class _PlenaryIssueItemCard extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return const _RgcDecisionBottomSheet();
+        return _RgcDecisionBottomSheet(
+          status: status,
+          report: report,
+          issue: issue,
+        );
       },
     );
   }
@@ -236,6 +383,7 @@ class _PlenaryIssueItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final statusColor = _statusColor(status);
 
     return InkWell(
       onTap: () => _openRgcDecisionBottomSheet(context),
@@ -297,12 +445,12 @@ class _PlenaryIssueItemCard extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: const Color(0xFF16A34A), width: 1),
+                border: Border.all(color: statusColor, width: 1),
               ),
-              child: const Text(
-                'Solved',
+              child: Text(
+                status,
                 style: TextStyle(
-                  color: Color(0xFF16A34A),
+                  color: statusColor,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
@@ -315,13 +463,44 @@ class _PlenaryIssueItemCard extends StatelessWidget {
   }
 }
 
+Color _statusColor(String status) => switch (status.toLowerCase()) {
+  'solved' => const Color(0xFF16A34A),
+  'in progress' => const Color(0xFFFF8A00),
+  'not addressed' => const Color(0xFFEF4444),
+  _ => const Color(0xFF64748B),
+};
+
 class _RgcDecisionBottomSheet extends StatelessWidget {
-  const _RgcDecisionBottomSheet();
+  const _RgcDecisionBottomSheet({
+    required this.status,
+    this.report,
+    this.issue,
+  });
+
+  final String status;
+  final RgcDecisionDetail? report;
+  final RgcDecisionIssue? issue;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkCard : Colors.white;
+    final decision = report?.decision;
+    final submittedBy = issue?.submittedBy.isNotEmpty == true
+        ? issue!.submittedBy
+        : decision?.agencyName ?? '—';
+    final category = issue?.category.isNotEmpty == true
+        ? issue!.category
+        : decision?.category ?? '—';
+    final focalPerson = issue?.focalPerson.isNotEmpty == true
+        ? issue!.focalPerson
+        : decision?.focalPerson ?? '—';
+    final rgcDecision = issue?.rgcDecision.isNotEmpty == true
+        ? issue!.rgcDecision
+        : decision?.decisionText.isNotEmpty == true
+        ? htmlToPlainText(decision!.decisionText)
+        : '—';
+    final verificationLink = decision?.verificationLink ?? '';
 
     return DraggableScrollableSheet(
       initialChildSize: 0.82,
@@ -370,19 +549,19 @@ class _RgcDecisionBottomSheet extends StatelessWidget {
                   children: [
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Expanded(
                           child: _FieldBlock(
                             label: 'Submitted by',
-                            value: 'Agriculture and Agro-In...',
+                            value: submittedBy,
                           ),
                         ),
                         SizedBox(width: 12),
                         Expanded(
                           child: _FieldBlock(
                             label: 'Status :',
-                            value: '• Solved',
-                            valueColor: Color(0xFF16A34A),
+                            value: '• $status',
+                            valueColor: _statusColor(status),
                           ),
                         ),
                       ],
@@ -390,18 +569,18 @@ class _RgcDecisionBottomSheet extends StatelessWidget {
                     const SizedBox(height: 16),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Expanded(
                           child: _FieldBlock(
                             label: 'Categories',
-                            value: 'Procedure',
+                            value: category,
                           ),
                         ),
                         SizedBox(width: 12),
                         Expanded(
                           child: _FieldBlock(
                             label: 'Focal Person (H.E) :',
-                            value: 'Dith Tina',
+                            value: focalPerson,
                           ),
                         ),
                       ],
@@ -430,7 +609,7 @@ class _RgcDecisionBottomSheet extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        '5. Entrust His Excellency Peng Ponea, Minister of Public Works and Transport to amend the relevant laws and regulations with comprehensive study of technical aspects to determine the type of vehicles and the type of roads that can be used for increasing the weight level of trucks from 40 tons to 45 tons (per truck).',
+                        rgcDecision,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 12,
@@ -462,9 +641,9 @@ class _RgcDecisionBottomSheet extends StatelessWidget {
                               : const Color(0xFFE2E8F0),
                         ),
                       ),
-                      child: const SelectableText(
-                        'https://drive.google.com/file/d/1edtgGRPmhe3RXUP5nOWsJW-xn23rrAPR/view?usp=drive_link',
-                        style: TextStyle(
+                      child: SelectableText(
+                        verificationLink.isEmpty ? '—' : verificationLink,
+                        style: const TextStyle(
                           color: Color(0xFF1E73BE),
                           fontSize: 11,
                           decoration: TextDecoration.underline,

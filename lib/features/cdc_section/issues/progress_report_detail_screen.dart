@@ -5,13 +5,20 @@ import '../../../translations/app_localizations.dart';
 import 'detail_widgets.dart';
 
 class CdcIssueProgressReportDetailScreen extends StatefulWidget {
-  const CdcIssueProgressReportDetailScreen({super.key});
+  const CdcIssueProgressReportDetailScreen({
+    super.key,
+    this.title = 'Climate Issue',
+  });
+
+  final String title;
 
   @override
-  State<CdcIssueProgressReportDetailScreen> createState() => _CdcIssueProgressReportDetailScreenState();
+  State<CdcIssueProgressReportDetailScreen> createState() =>
+      _CdcIssueProgressReportDetailScreenState();
 }
 
-class _CdcIssueProgressReportDetailScreenState extends State<CdcIssueProgressReportDetailScreen> {
+class _CdcIssueProgressReportDetailScreenState
+    extends State<CdcIssueProgressReportDetailScreen> {
   bool _expanded = false;
   static const _description =
       'ខ្ញុំសូមស្នើសុំរៀបចំកិច្ចប្រជុំពិសេសមួយ ដើម្បីដោះស្រាយបញ្ហាប្រឈមចំពោះបញ្ហាបច្ចុប្បន្នចំនួន ៤ ដែលគម្រោងមានឥទ្ធិពលលើការងាររបស់យើង។ គោលបំណងនៃកិច្ចប្រជុំនេះគឺដើម្បីប្រមូលអ្នកពាក់ព័ន្ធទាំងអស់ រួមទាំងសមាជិកក្រុម និងអ្នកធ្វើសេចក្តីសម្រេចនៅក្នុងបរិបទសហការ ដែលអាចពិភាក្សាបញ្ហាទាំងអស់ បញ្ហាឬស្គាល់ហេតុដើម ស្វែងរកដំណោះស្រាយសក្តិសម និងកំណត់ផែនការអនុវត្តជាក់លាក់។ របៀបវារៈនឹងត្រូវរៀបចំជាផ្នែក ៤ ដោយផ្នែកនីមួយៗផ្តោតលើបញ្ហាប្រឈមមួយៗ។ ក្នុងផ្នែកនីមួយៗ យើងនឹង៖\n'
@@ -33,9 +40,21 @@ class _CdcIssueProgressReportDetailScreenState extends State<CdcIssueProgressRep
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        leading: IconButton(tooltip: MaterialLocalizations.of(context).backButtonTooltip, onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back, size: 22)),
-        title: Text(l10n.text('issueDetails'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-        bottom: PreferredSize(preferredSize: const Size.fromHeight(1), child: Divider(height: 1, color: AppColors.border(context))),
+        leading: IconButton(
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back, size: 22),
+        ),
+        title: Text(
+          widget.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(height: 1, color: AppColors.border(context)),
+        ),
       ),
       body: SafeArea(
         top: false,
@@ -45,47 +64,165 @@ class _CdcIssueProgressReportDetailScreenState extends State<CdcIssueProgressRep
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Climate Issue', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              const Text(
+                'Climate Issue',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 16),
-              Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Expanded(flex: 3, child: CdcDetailInfoValue(label: l10n.text('implementationDate'), value: 'June 29, 2025 | 2:00-3:00 PM')),
-                const SizedBox(width: 16),
-                Expanded(flex: 2, child: CdcDetailInfoValue(label: '${l10n.text('status')} :', value: l10n.text('complete'), color: AppColors.accent(context))),
-              ]),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: CdcDetailInfoValue(
+                      label: l10n.text('implementationDate'),
+                      value: 'June 29, 2025 | 2:00-3:00 PM',
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    flex: 2,
+                    child: CdcDetailInfoValue(
+                      label: '${l10n.text('status')} :',
+                      value: l10n.text('complete'),
+                      color: AppColors.accent(context),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 16),
-              Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Expanded(flex: 3, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('${l10n.text('meetingReferenceDocument')} :', style: const TextStyle(fontSize: 12, color: AppColors.mutedText)),
-                  const SizedBox(height: 8),
-                  const Row(children: [
-                    Icon(Icons.picture_as_pdf, size: 18, color: Color(0xFFFF4842)),
-                    SizedBox(width: 8),
-                    Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Request Doc', style: TextStyle(fontSize: 12)), Text('200 KB', style: TextStyle(fontSize: 7, color: AppColors.mutedText))]),
-                  ]),
-                ])),
-                const SizedBox(width: 16),
-                Expanded(flex: 2, child: CdcDetailInfoValue(label: l10n.text('referenceName'), value: 'របាយការណ៍')),
-              ]),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${l10n.text('meetingReferenceDocument')} :',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.mutedText,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Row(
+                          children: [
+                            Icon(
+                              Icons.picture_as_pdf,
+                              size: 18,
+                              color: Color(0xFFFF4842),
+                            ),
+                            SizedBox(width: 8),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Request Doc',
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                                Text(
+                                  '200 KB',
+                                  style: TextStyle(
+                                    fontSize: 7,
+                                    color: AppColors.mutedText,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    flex: 2,
+                    child: CdcDetailInfoValue(
+                      label: l10n.text('referenceName'),
+                      value: 'របាយការណ៍',
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 20),
               AnimatedSize(
                 duration: const Duration(milliseconds: 200),
                 alignment: Alignment.topCenter,
-                child: Stack(children: [
-                  Text(_description, key: const ValueKey('cdc-report-description'), maxLines: _expanded ? null : 13, overflow: TextOverflow.clip, style: TextStyle(fontSize: 13, height: 1.5, color: AppColors.primaryText(context))),
-                  if (!_expanded) Positioned(left: 0, right: 0, bottom: 0, height: 90, child: IgnorePointer(child: DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [background.withValues(alpha: 0), background]))))),
-                ]),
+                child: Stack(
+                  children: [
+                    Text(
+                      _description,
+                      key: const ValueKey('cdc-report-description'),
+                      maxLines: _expanded ? null : 13,
+                      overflow: TextOverflow.clip,
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.5,
+                        color: AppColors.primaryText(context),
+                      ),
+                    ),
+                    if (!_expanded)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        height: 90,
+                        child: IgnorePointer(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  background.withValues(alpha: 0),
+                                  background,
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-              Center(child: TextButton.icon(
-                key: const ValueKey('cdc-report-expand'),
-                onPressed: () => setState(() => _expanded = !_expanded),
-                style: TextButton.styleFrom(foregroundColor: AppColors.accent(context), padding: EdgeInsets.zero, minimumSize: const Size(0, 28), tapTargetSize: MaterialTapTargetSize.shrinkWrap, textStyle: const TextStyle(fontSize: 12)),
-                label: Text(l10n.text(_expanded ? 'showLess' : 'viewDetails')),
-                iconAlignment: IconAlignment.end,
-                icon: Icon(_expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, size: 18),
-              )),
+              Center(
+                child: TextButton.icon(
+                  key: const ValueKey('cdc-report-expand'),
+                  onPressed: () => setState(() => _expanded = !_expanded),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.accent(context),
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 28),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    textStyle: const TextStyle(fontSize: 12),
+                  ),
+                  label: Text(
+                    l10n.text(_expanded ? 'showLess' : 'viewDetails'),
+                  ),
+                  iconAlignment: IconAlignment.end,
+                  icon: Icon(
+                    _expanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    size: 18,
+                  ),
+                ),
+              ),
               const SizedBox(height: 16),
-              for (final label in ['Solution Indicators | សូចនាករដំណោះស្រាយ', 'Challenges | បញ្ហាប្រឈម', 'Requests | សំណូមពរ', l10n.text('rgcDecision')]) ...[
-                CdcDetailTextPanel(label: label, body: _sectionBody, collapsedLines: 3, inlineLink: true),
+              for (final label in [
+                'Solution Indicators | សូចនាករដំណោះស្រាយ',
+                'Challenges | បញ្ហាប្រឈម',
+                'Requests | សំណូមពរ',
+                l10n.text('rgcDecision'),
+              ]) ...[
+                CdcDetailTextPanel(
+                  label: label,
+                  body: _sectionBody,
+                  collapsedLines: 3,
+                  inlineLink: true,
+                ),
                 const SizedBox(height: 16),
               ],
             ],

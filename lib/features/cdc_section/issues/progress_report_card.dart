@@ -90,7 +90,7 @@ class CdcIssueProgressReportCard extends StatelessWidget {
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => report == null
-                      ? const CdcIssueProgressReportDetailScreen()
+                      ? CdcIssueProgressReportDetailScreen(title: issueTitle)
                       : CdcIssueProgressReportDataDetailScreen(
                           report: report!,
                           issueTitle: issueTitle,

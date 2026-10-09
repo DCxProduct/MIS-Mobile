@@ -52,7 +52,9 @@ class _CdcIssueDetailLoaderState extends State<CdcIssueDetailLoader> {
       }
       final l10n = AppLocalizations.of(context);
       return Scaffold(
-        appBar: AppBar(title: Text(l10n.text('issueDetails'))),
+        appBar: AppBar(
+          title: Text(widget.initialIssue?.title ?? l10n.text('issueDetails')),
+        ),
         body: Center(
           child: snapshot.hasError
               ? Column(

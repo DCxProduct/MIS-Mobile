@@ -1,1 +1,6 @@
 #include "Generated.xcconfig"
+
+// Xcode 27 on Apple Silicon simulators should build the arm64 slice only.
+EXCLUDED_ARCHS[sdk=iphonesimulator*] = x86_64
+ARCHS[sdk=iphonesimulator*] = arm64
+ONLY_ACTIVE_ARCH = YES
