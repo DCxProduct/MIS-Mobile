@@ -21,6 +21,7 @@ import '../../features/shared/meetings/widgets/rgc_decisions_loader.dart';
 import '../../features/shared/notifications/data/notification_destination.dart';
 import '../../translations/app_localizations.dart';
 import '../report/progress_report_detail_loader.dart';
+import '../report/plenary_detail_screen.dart';
 
 /// Mobile equivalents of the notification's documented web routes. Detail
 /// requests use the resource ID, never the system-notification ID.
@@ -32,6 +33,9 @@ class NotificationDestinationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return switch (destination.kind) {
+      NotificationDestinationKind.plenary => PlenaryDetailScreen(
+        plenaryId: destination.id!,
+      ),
       NotificationDestinationKind.progressReport => ProgressReportDetailLoader(
         id: destination.id!,
         scope: ProgressReportDetailScope.ministry,

@@ -249,11 +249,19 @@ class FilterCatalogRepository {
     ];
   }
 
-  Future<List<FilterSection>> plenaries() async {
-    final rows = await _allPlenaries();
+  Future<List<FilterSection>> plenaries({bool sentOnly = false}) async {
+    final rows = await _allPlenaries(sentOnly: sentOnly);
     final statuses = {
       for (final row in rows)
-        if (row is Map && row['status'] is String) row['status'] as String,
+        if (row is Map &&
+            row['status'] is String &&
+            (!sentOnly ||
+                (row['statusCode'] ?? row['status'])
+                        .toString()
+                        .trim()
+                        .toUpperCase() ==
+                    'SENT'))
+          row['status'] as String,
     };
     final ministries = await _api.get('plenaries/lookups/ministries');
     return [
@@ -531,8 +539,12 @@ class FilterCatalogRepository {
         ],
       );
 
-  Future<List<dynamic>> _allPlenaries() =>
-      _api.getAllPages('plenaries', objectItems: true);
+  Future<List<dynamic>> _allPlenaries({bool sentOnly = false}) =>
+      _api.getAllPages(
+        'plenaries',
+        objectItems: true,
+        query: {if (sentOnly) 'statuses': 'SENT'},
+      );
 
   FilterSection _section(
     String id,

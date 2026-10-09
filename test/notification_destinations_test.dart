@@ -7,12 +7,15 @@ import 'package:gpsf_app/core/app_settings.dart';
 import 'package:gpsf_app/core/config/module_config.dart';
 import 'package:gpsf_app/core/network/api_client.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
+import 'package:gpsf_app/features/auth/data/auth_user.dart';
 import 'package:gpsf_app/features/private_sector/reports/meeting_summary_detail_screen.dart';
 import 'package:gpsf_app/features/cdc_section/reports/rgc_decision_details.dart';
 import 'package:gpsf_app/features/shared/notifications/data/notification_destination.dart';
 import 'package:gpsf_app/screens/notification/notification_destination_screen.dart';
 import 'package:gpsf_app/screens/notification/notification_screen.dart';
 import 'package:gpsf_app/screens/report/report_detail_screen.dart';
+import 'package:gpsf_app/screens/report/plenary_detail_screen.dart';
+import 'package:gpsf_app/features/line_ministry/reports/ministry_rgc_decision_sheet.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 
 http.Response ok(Object data, {Map<String, dynamic>? meta}) =>
@@ -32,6 +35,191 @@ Widget destinationApp(
 );
 
 void main() {
+  for (final tapDetail in [true, false]) {
+    testWidgets(
+      'ministry plenary notification opens matching detail via ${tapDetail ? 'button' : 'message'}',
+      (tester) async {
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final calls = <Uri>[];
+        final item = {
+          'id': 91,
+          'type': 'PLENARY_SENT',
+          'title': 'CDC G-PSF',
+          'message': 'CDC G-PSF sent the Plenary "19th" to your Ministry.',
+          'isRead': false,
+          'createdAt': '2026-10-08T08:00:00Z',
+          'data': {
+            'plenaryId': 3,
+            if (tapDetail) 'url': '/ministry/plenary/plenaries/3',
+          },
+        };
+        final settings =
+            AppSettingsController(
+                authRepository: AuthRepository(
+                  ApiClient(
+                    client: MockClient((request) async {
+                      calls.add(request.url);
+                      switch (request.url.path) {
+                        case '/api/v1/mobile/system-notifications':
+                          return ok(
+                            [item],
+                            meta: {
+                              'page': 1,
+                              'limit': 20,
+                              'totalPages': 1,
+                              'total': 1,
+                              'unreadCount': 1,
+                            },
+                          );
+                        case '/api/v1/mobile/system-notifications/91':
+                          return ok(item);
+                        case '/api/v1/notification-settings/me':
+                          return ok({
+                            'unreadBadge': true,
+                            'markReadOnDetail': false,
+                            'systemEnabled': true,
+                          });
+                        case '/api/v1/plenaries/3':
+                          return ok({
+                            'id': 3,
+                            'name': '19th',
+                            'status': 'Sent',
+                            'meetingDate': '2026-10-08T00:00:00Z',
+                            'deadline': '2026-10-31T00:00:00Z',
+                            'numberOfRgcDecisions': 1,
+                            'documentReference':
+                                '/uploads/0fdcff7f-1272-42da-ac24-051bdd921866.pdf',
+                          });
+                        case '/api/v1/rgc-decisions':
+                          expect(request.url.queryParameters['plenaryId'], '3');
+                          expect(
+                            request.url.queryParameters['ministryOnly'],
+                            'true',
+                          );
+                          expect(request.url.queryParameters['page'], '1');
+                          expect(request.url.queryParameters['limit'], '100');
+                          expect(request.headers['x-user-id'], '77');
+                          return ok({
+                            'items': [
+                              {
+                                'id': 42,
+                                'plenaryId': 3,
+                                'stakeholder': {'name': 'Actual ministry'},
+                                'category': 'Procedure',
+                                'focalPerson': 'Actual focal person',
+                                'meetingDate': '2026-10-08T00:00:00Z',
+                                'decision': '<p>Actual decision content</p>',
+                                'status': 'In Progress',
+                              },
+                            ],
+                            'meta': {'totalPages': 1},
+                          });
+                        case '/api/v1/rgc-decisions/42':
+                          if (!tapDetail &&
+                              calls
+                                      .where(
+                                        (uri) =>
+                                            uri.path ==
+                                            '/api/v1/rgc-decisions/42',
+                                      )
+                                      .length ==
+                                  1) {
+                            return http.Response('', 503);
+                          }
+                          return ok({
+                            'id': 42,
+                            'plenaryId': 3,
+                            'deadline': '2026-10-31',
+                            'stakeholder': {'name': 'Actual ministry'},
+                            'category': 'Procedure',
+                            'focalPerson': 'Actual focal person',
+                            'status': 'In Progress',
+                            'issues': [
+                              {
+                                'rgcDecision':
+                                    '<p>Full actual decision content</p>',
+                                'verificationLink':
+                                    'https://example.com/actual-evidence',
+                              },
+                            ],
+                          });
+                        default:
+                          fail('Unexpected request ${request.url}');
+                      }
+                    }),
+                  ),
+                ),
+              )
+              ..setLanguage(AppLanguage.english)
+              ..setModuleType(AppModuleType.lineMinistry);
+        settings.setCurrentUser(
+          const AuthUser(
+            id: 77,
+            email: 'ministry@example.com',
+            name: 'Ministry user',
+            isActive: true,
+            roles: ['line_ministry'],
+          ),
+        );
+        addTearDown(settings.dispose);
+        await tester.pumpWidget(
+          AppSettings(
+            controller: settings,
+            child: const MaterialApp(home: NotificationScreen()),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(
+          tapDetail
+              ? find.byKey(const ValueKey('notification-detail-91'))
+              : find.text(item['message'] as String),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(PlenaryDetailScreen), findsOneWidget);
+        expect(find.text('Meeting Request Details'), findsOneWidget);
+        expect(find.text('Oct 31, 2026'), findsOneWidget);
+        expect(find.text('Approval Report.pdf'), findsOneWidget);
+        expect(find.textContaining('0fdcff7f'), findsNothing);
+        expect(find.text('Actual decision content'), findsOneWidget);
+        expect(find.text('Actual focal person'), findsOneWidget);
+        expect(find.text('In Progress'), findsOneWidget);
+        expect(find.text('Solved'), findsNothing);
+        expect(find.text('June 07, 2025'), findsNothing);
+        expect(
+          calls.where((uri) => uri.path == '/api/v1/plenaries/3'),
+          hasLength(1),
+        );
+        await tester.tap(find.text('Actual decision content'));
+        await tester.pumpAndSettle();
+        expect(find.byType(MinistryRgcDecisionSheet), findsOneWidget);
+        if (!tapDetail) {
+          expect(find.text('Full actual decision content'), findsNothing);
+          await tester.tap(find.text('Retry'));
+          await tester.pumpAndSettle();
+        }
+        expect(find.byType(CdcRgcDecisionOverviewScreen), findsNothing);
+        expect(find.text('Full actual decision content'), findsOneWidget);
+        expect(find.text('Actual ministry'), findsOneWidget);
+        expect(find.text('• In Progress'), findsOneWidget);
+        expect(find.text('Link to Verification Source'), findsOneWidget);
+        expect(
+          calls.where((uri) => uri.path == '/api/v1/rgc-decisions/42'),
+          hasLength(tapDetail ? 1 : 2),
+        );
+        await tester.tap(find.byIcon(Icons.arrow_back).last);
+        await tester.pumpAndSettle();
+        expect(find.byType(MinistryRgcDecisionSheet), findsNothing);
+        await tester.tap(find.byType(BackButton));
+        await tester.pumpAndSettle();
+        expect(find.text(item['message'] as String), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   for (final (module, route) in [
     (AppModuleType.cdcSecretariat, '/cdc-gpsf/plenary/plenaries/3'),
     (AppModuleType.lineMinistry, '/ministry/plenary/plenaries/3'),
@@ -128,7 +316,14 @@ void main() {
         await tester.tap(find.text('View Detail'));
         await tester.pumpAndSettle();
         expect(find.byType(CdcRgcDecisionOverviewScreen), findsOneWidget);
-        expect(find.text('RGC Decision Details'), findsOneWidget);
+        expect(
+          find.text(
+            module == AppModuleType.lineMinistry
+                ? 'Meeting Request Details'
+                : 'RGC Decision Details',
+          ),
+          findsOneWidget,
+        );
         expect(find.text('Oct 3, 2026'), findsOneWidget);
         expect(find.text('Sep 13, 2026'), findsOneWidget);
         expect(find.text('Sent'), findsOneWidget);
@@ -140,6 +335,17 @@ void main() {
         expect(calls, isNot(contains('GET /api/v1/rgc-decisions/91')));
         expect(calls, isNot(contains('GET /api/v1/rgc-decisions/3')));
         expect(calls, contains('GET /api/v1/plenaries/3'));
+        await tester.tap(find.text('Actual linked RGC decision'));
+        await tester.pumpAndSettle();
+        if (module == AppModuleType.lineMinistry) {
+          expect(find.byType(MinistryRgcDecisionSheet), findsOneWidget);
+          expect(find.byType(CdcRgcDecisionIssueScreen), findsNothing);
+        } else {
+          expect(find.byType(CdcRgcDecisionIssueScreen), findsOneWidget);
+          expect(find.byType(MinistryRgcDecisionSheet), findsNothing);
+        }
+        await tester.tap(find.byIcon(Icons.arrow_back).last);
+        await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.arrow_back));
         await tester.pumpAndSettle();
         expect(
@@ -500,6 +706,8 @@ void main() {
               }
               if (request.url.path == '/api/v1/rgc-decisions') {
                 expect(request.url.queryParameters['plenaryId'], '3');
+                expect(request.url.queryParameters['ministryOnly'], 'true');
+                expect(request.headers['x-user-id'], '77');
                 return ok({
                   'items': [
                     {
@@ -517,6 +725,15 @@ void main() {
           ),
         ),
       )..setLanguage(AppLanguage.english);
+      settings.setCurrentUser(
+        const AuthUser(
+          id: 77,
+          email: 'ministry@example.com',
+          name: 'Ministry user',
+          isActive: true,
+          roles: ['line_ministry'],
+        ),
+      );
       addTearDown(settings.dispose);
       await tester.pumpWidget(
         destinationApp(
@@ -529,8 +746,8 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Actual plenary'), findsOneWidget);
-      expect(find.text('Actual ministry'), findsOneWidget);
+      expect(find.text('Meeting Request Details'), findsOneWidget);
+      expect(find.text('Climate'), findsOneWidget);
       expect(requests.length, 2);
       expect(tester.takeException(), isNull);
     },

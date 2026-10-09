@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
 import '../../../core/app_settings.dart';
+import '../../../core/config/module_config.dart';
+import '../../line_ministry/reports/ministry_rgc_decision_sheet.dart';
 import '../../../core/widgets/editor_content.dart';
 import '../../../core/widgets/pdf_attachment_preview.dart';
 import '../../shared/meetings/data/meeting_request.dart';
@@ -92,13 +94,15 @@ class CdcRgcStatus extends StatelessWidget {
   }
 }
 
-AppBar _appBar(BuildContext context) => AppBar(
+AppBar _appBar(BuildContext context, {bool ministry = false}) => AppBar(
   backgroundColor: AppColors.cardBackground(context),
   surfaceTintColor: Colors.transparent,
   elevation: 0,
   centerTitle: true,
   title: Text(
-    AppLocalizations.of(context).text('rgcDecisionDetails'),
+    AppLocalizations.of(
+      context,
+    ).text(ministry ? 'meetingRequestDetails' : 'rgcDecisionDetails'),
     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
   ),
 );
@@ -137,7 +141,11 @@ class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: cdcReportBackground(context),
-      appBar: _appBar(context),
+      appBar: _appBar(
+        context,
+        ministry:
+            AppSettings.of(context).moduleType == AppModuleType.lineMinistry,
+      ),
       body: FutureBuilder<List<RgcDecisionDetail>>(
         future: _detail,
         builder: (context, snapshot) {
@@ -278,12 +286,23 @@ class _DecisionIssueCard extends StatelessWidget {
         side: BorderSide(color: AppColors.border(context)),
       ),
       child: InkWell(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) =>
-                CdcRgcDecisionIssueScreen(detail: detail, issue: issue),
-          ),
-        ),
+        onTap: () {
+          if (AppSettings.of(context).moduleType ==
+              AppModuleType.lineMinistry) {
+            showMinistryRgcDecisionSheet(
+              context,
+              decisionId: detail.decision.id,
+              detail: detail,
+            );
+          } else {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) =>
+                    CdcRgcDecisionIssueScreen(detail: detail, issue: issue),
+              ),
+            );
+          }
+        },
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(

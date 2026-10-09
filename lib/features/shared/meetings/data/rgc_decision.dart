@@ -27,8 +27,6 @@ class RgcDecision {
           ? _string(json['category'])
           : _string(_object(json['categoryInfo'])['name']),
       focalPerson = _string(json['focalPerson']),
-      decisionText = _string(json['decision']),
-      verificationLink = _string(json['verificationLink']),
       links = Set.unmodifiable(_links(json));
 
   final int id, plenaryId, stakeholderId;
@@ -42,9 +40,7 @@ class RgcDecision {
       status,
       statusCode,
       category,
-      focalPerson,
-      decisionText,
-      verificationLink;
+      focalPerson;
   final DateTime? meetingDate, plenaryMeetingDate;
   Map<String, Iterable<String>> get filterValues => {
     'local.workingGroup': workingGroups,

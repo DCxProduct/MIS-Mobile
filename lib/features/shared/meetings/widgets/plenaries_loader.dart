@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_settings.dart';
+import '../../../../core/config/module_config.dart';
 import '../../../../translations/app_localizations.dart';
 import '../data/plenary.dart';
 
@@ -18,14 +19,21 @@ class PlenariesLoader extends StatefulWidget {
 class _PlenariesLoaderState extends State<PlenariesLoader> {
   Future<List<Plenary>>? _future;
   Map<String, String>? _query;
+  bool? _sentOnly;
+
+  Future<List<Plenary>> _load() => AppSettings.of(context).plenaries
+      .getPlenaries(filters: _query ?? const {}, sentOnly: _sentOnly ?? false);
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final query = ApiFilterScope.query(context, 'plenaries');
-    if (_future == null || !mapEquals(_query, query)) {
+    final sentOnly =
+        AppSettings.of(context).moduleType == AppModuleType.lineMinistry;
+    if (_future == null || !mapEquals(_query, query) || _sentOnly != sentOnly) {
       _query = Map.of(query);
-      _future = AppSettings.of(context).plenaries.getPlenaries(filters: query);
+      _sentOnly = sentOnly;
+      _future = _load();
     }
   }
 
@@ -46,9 +54,7 @@ class _PlenariesLoaderState extends State<PlenariesLoader> {
             Text(l10n.text('plenariesLoadError')),
             TextButton(
               onPressed: () => setState(() {
-                _future = AppSettings.of(
-                  context,
-                ).plenaries.getPlenaries(filters: _query ?? const {});
+                _future = _load();
               }),
               child: Text(l10n.text('retry')),
             ),

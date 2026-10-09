@@ -116,33 +116,6 @@ class RgcDecisionsRepository {
     }
   }
 
-  Future<List<RgcDecisionDetail>> getDecisionsByPlenary(int plenaryId) async {
-    if (plenaryId <= 0) {
-      throw ArgumentError.value(plenaryId, 'plenaryId', 'Must be positive');
-    }
-    final items = await _api.getAllPages(
-      'rgc-decisions',
-      query: {'plenaryId': '$plenaryId'},
-      objectItems: true,
-    );
-    try {
-      return List.unmodifiable(
-        items.map((item) {
-          if (item is! Map<String, dynamic>) throw const FormatException();
-          final detail = RgcDecisionDetail.fromJson(item);
-          if (detail.decision.plenaryId != plenaryId) {
-            throw const FormatException();
-          }
-          return detail;
-        }),
-      );
-    } on FormatException {
-      throw const ApiException(
-        'The server returned invalid plenary approval reports.',
-      );
-    }
-  }
-
   Future<Map<String, dynamic>> _withPlenary(
     Map<String, dynamic> data,
     Map<int, Future<Map<String, dynamic>>> plenaries,

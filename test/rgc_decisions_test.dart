@@ -16,6 +16,69 @@ import 'package:gpsf_app/screens/report/report_screen.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 
 void main() {
+  test(
+    'ministry plenary scope and login header persist across pages without affecting other lists',
+    () async {
+      final calls = <http.Request>[];
+      final api = ApiClient(
+        client: MockClient((request) async {
+          calls.add(request);
+          final ministry =
+              request.url.queryParameters['ministryOnly'] == 'true';
+          if (ministry) {
+            expect(request.url.queryParameters['plenaryId'], '3');
+            expect(request.url.queryParameters['limit'], '100');
+            expect(request.headers['x-user-id'], '77');
+          } else {
+            expect(request.headers.containsKey('x-user-id'), isFalse);
+            expect(
+              request.url.queryParameters.containsKey('ministryOnly'),
+              isFalse,
+            );
+          }
+          final page = int.parse(request.url.queryParameters['page']!);
+          return http.Response(
+            jsonEncode({
+              'success': true,
+              'data': {
+                'items': [
+                  {'id': page, 'plenaryId': 3},
+                ],
+                'meta': {'totalPages': ministry ? 2 : 1},
+              },
+            }),
+            200,
+          );
+        }),
+      );
+      addTearDown(api.close);
+      final repository = RgcDecisionsRepository(api);
+      final decisions = await repository.getMinistryPlenaryDecisions(
+        plenaryId: 3,
+        userId: 77,
+      );
+      expect(decisions.map((decision) => decision.id), [1, 2]);
+      expect(calls.map((request) => request.url.queryParameters['page']), [
+        '1',
+        '2',
+      ]);
+      await repository.getDecisions(filters: {'plenaryId': '3'});
+      expect(calls, hasLength(3));
+      expect(
+        () =>
+            repository.getMinistryPlenaryDecisions(plenaryId: 3, userId: null),
+        throwsA(
+          isA<ApiException>().having(
+            (error) => error.statusCode,
+            'status',
+            401,
+          ),
+        ),
+      );
+      expect(calls, hasLength(3));
+    },
+  );
+
   testWidgets(
     'CDC detail retains its linked request document and progress content',
     (tester) async {
