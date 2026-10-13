@@ -83,7 +83,8 @@ class _GpsfAppState extends State<GpsfApp> {
     final isDark = brightness == Brightness.dark;
     return ThemeData(
       colorScheme: colorScheme,
-      fontFamily: 'Roboto',
+      fontFamily: 'Times New Roman',
+      fontFamilyFallback: const ['KhBattambang'],
       scaffoldBackgroundColor: isDark
           ? AppColors.darkBackground
           : AppColors.surface,

@@ -9,6 +9,7 @@ import '../../translations/app_localizations.dart';
 import '../../widgets/app_logo.dart';
 import '../../widgets/primary_button.dart';
 import '../loading/loading_screen.dart';
+import '../../translations/app_language.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -80,6 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final settings = AppSettings.of(context);
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
@@ -145,7 +147,40 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 24),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: _isLoading
+                        ? null
+                        : () async {
+                            final done = await Navigator.of(context).push<bool>(
+                              MaterialPageRoute(
+                                builder: (_) => const PasswordRecoveryScreen(),
+                              ),
+                            );
+                            if (!context.mounted || done != true) return;
+                            _passwordController.clear();
+                            setState(() => _errorMessage = null);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  ).text('passwordResetSuccess'),
+                                ),
+                              ),
+                            );
+                          },
+                    child: Text(
+                      l10n.text('forgotPassword'),
+                      style: const TextStyle(
+                        color: Colors.red,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.red,
+                      ),
+                    ),
+                  ),
+                ),
                 if (_errorMessage != null) ...[
                   Container(
                     width: double.infinity,
@@ -185,39 +220,29 @@ class _LoginScreenState extends State<LoginScreen> {
                   isLoading: _isLoading,
                   onPressed: _submit,
                 ),
-                const SizedBox(height: 24),
-                Center(
-                  child: TextButton(
-                    onPressed: _isLoading
-                        ? null
-                        : () async {
-                            final done = await Navigator.of(context).push<bool>(
-                              MaterialPageRoute(
-                                builder: (_) => const PasswordRecoveryScreen(),
-                              ),
-                            );
-                            if (!context.mounted || done != true) return;
-                            _passwordController.clear();
-                            setState(() => _errorMessage = null);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  ).text('passwordResetSuccess'),
-                                ),
-                              ),
-                            );
-                          },
-                    child: Text(
-                      l10n.text('forgotPassword'),
-                      style: const TextStyle(
-                        color: Colors.red,
-                        decoration: TextDecoration.underline,
-                        decorationColor: Colors.red,
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _LanguageButton(
+                        flag: '🇰🇭',
+                        label: l10n.text('khmer'),
+                        selected: settings.language == AppLanguage.khmer,
+                        onPressed: () =>
+                            settings.setLanguage(AppLanguage.khmer),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _LanguageButton(
+                        flag: '🇬🇧',
+                        label: l10n.text('english'),
+                        selected: settings.language == AppLanguage.english,
+                        onPressed: () =>
+                            settings.setLanguage(AppLanguage.english),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -269,6 +294,50 @@ class _FieldLabel extends StatelessWidget {
         color: colors.onSurface,
         fontSize: 15,
         fontWeight: FontWeight.w700,
+      ),
+    );
+  }
+}
+
+class _LanguageButton extends StatelessWidget {
+  const _LanguageButton({
+    required this.flag,
+    required this.label,
+    required this.selected,
+    required this.onPressed,
+  });
+
+  final String flag;
+  final String label;
+  final bool selected;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: selected ? colors.primary : colors.onSurfaceVariant,
+        backgroundColor: selected
+            ? colors.primary.withValues(alpha: 0.08)
+            : Colors.transparent,
+        side: BorderSide(
+          color: selected ? colors.primary : colors.outlineVariant,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(flag, style: const TextStyle(fontSize: 20)),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ],
       ),
     );
   }

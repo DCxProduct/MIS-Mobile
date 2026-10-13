@@ -22,18 +22,22 @@ class PlenariesRepository {
 
   Future<List<Plenary>> getPlenaries({
     Map<String, String> filters = const {},
+    bool sentOnly = false,
   }) async {
     final items = await _api.getAllPages(
       'plenaries',
-      query: filters,
+      query: {...filters, if (sentOnly) 'statuses': 'SENT'},
       objectItems: true,
     );
     try {
+      final plenaries = items.map((item) {
+        if (item is! Map<String, dynamic>) throw const FormatException();
+        return Plenary(item);
+      });
       return List.unmodifiable(
-        items.map((item) {
-          if (item is! Map<String, dynamic>) throw const FormatException();
-          return Plenary(item);
-        }),
+        sentOnly
+            ? plenaries.where((plenary) => plenary.statusCode == 'SENT')
+            : plenaries,
       );
     } on FormatException {
       throw const ApiException('The server returned invalid plenaries.');

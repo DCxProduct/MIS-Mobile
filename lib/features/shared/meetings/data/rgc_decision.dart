@@ -192,11 +192,24 @@ class RgcDecisionDetail {
            ) ??
            plenaryDeadline,
        approvalReport = _string(json['approvalReport']),
+       decisionContent = _string(json['decision']),
+       indicatorName = _string(
+         json['indicatorName'] ??
+             (json['indicator'] is Map<String, dynamic>
+                 ? (json['indicator'] as Map<String, dynamic>)['name']
+                 : null),
+       ),
+       verificationSource = _string(json['verificationSource']),
+       verificationLink = _string(json['verificationLink']),
        issues = List.unmodifiable(_issueList(json));
 
   final RgcDecision decision;
   final DateTime? deadline;
   final String approvalReport;
+  final String decisionContent,
+      indicatorName,
+      verificationSource,
+      verificationLink;
   final List<RgcDecisionIssue> issues;
 
   static DateTime? _date(Object? value) =>
