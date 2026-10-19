@@ -1,3 +1,5 @@
+import '../../../../core/text/document_metadata.dart';
+
 class ProgressReport {
   ProgressReport(Map<String, dynamic> json)
     : details = Map.unmodifiable(json),
@@ -89,6 +91,29 @@ class ProgressReport {
       _string(
         _object(_object(details['progressReport'])['requestDocument'])['path'],
       );
+  Map<String, String> get documentNames {
+    final names = <String, String>{};
+    void collect(Object? value) {
+      if (value is Map) {
+        final path = _string(value['path']);
+        final name = documentOriginalName(value);
+        if (path != null && name.isNotEmpty) {
+          names.putIfAbsent(path, () => name);
+        }
+        for (final nested in value.values) {
+          collect(nested);
+        }
+      } else if (value is List) {
+        for (final nested in value) {
+          collect(nested);
+        }
+      }
+    }
+
+    collect(details);
+    return names;
+  }
+
   List<Map<String, dynamic>> get openIssues => _objects(details['openIssues']);
   List<Map<String, dynamic>> get rgcDecisions =>
       _objects(details['rgcDecisions']);
@@ -186,8 +211,8 @@ class ProgressReport {
       _object(json['progressReport'])['requestDocument'],
     ];
     for (final candidate in candidates) {
-      final name = _string(_object(candidate)['name']);
-      if (name != null && name.isNotEmpty) return name;
+      final name = documentOriginalName(candidate);
+      if (name.isNotEmpty) return name;
     }
     return '';
   }

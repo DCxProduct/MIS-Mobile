@@ -650,7 +650,10 @@ class _LineMinistryIssueListCard extends StatelessWidget {
             PdfAttachmentPreview(
               path: issue?.attachmentPath ?? '',
               name: issue?.attachmentPath.isNotEmpty == true
-                  ? pdfAttachmentName(issue!.attachmentPath)
+                  ? pdfAttachmentName(
+                      issue!.attachmentPath,
+                      name: issue!.attachmentName,
+                    )
                   : null,
               child: Container(
                 padding: const EdgeInsets.symmetric(

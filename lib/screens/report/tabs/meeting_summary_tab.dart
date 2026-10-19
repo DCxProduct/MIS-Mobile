@@ -191,7 +191,11 @@ class _MeetingSummaryCard extends StatelessWidget {
                       : summary.attachmentPaths.first,
                   name: summary.attachmentPaths.isEmpty
                       ? null
-                      : pdfAttachmentName(summary.attachmentPaths.first),
+                      : pdfAttachmentName(
+                          summary.attachmentPaths.first,
+                          name: summary
+                              .attachmentNames[summary.attachmentPaths.first],
+                        ),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,

@@ -278,7 +278,7 @@ class _PdfBlock extends StatelessWidget {
     final path = request?.letterPath ?? '';
     return PdfAttachmentPreview(
       path: path,
-      name: request?.letterName,
+      name: pdfAttachmentName(path, name: request?.letterName),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -304,11 +304,7 @@ class _PdfBlock extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      request == null
-                          ? AppLocalizations.of(context).text('requestDocument')
-                          : (request!.letterName.isEmpty
-                                ? '—'
-                                : request!.letterName),
+                      pdfAttachmentName(path, name: request?.letterName),
                       style: TextStyle(
                         color: AppColors.primaryText(context),
                         fontSize: 11,
@@ -317,7 +313,7 @@ class _PdfBlock extends StatelessWidget {
                     ),
                     Text(
                       request == null
-                          ? '200 KB'
+                          ? '—'
                           : (request!.letterSize == null
                                 ? '—'
                                 : '${(request!.letterSize! / 1024).toStringAsFixed(0)} KB'),
@@ -786,9 +782,10 @@ void _showIssueDetailsSheet(
                         const SizedBox(height: 4),
                         PdfAttachmentPreview(
                           path: issue?.attachmentPath ?? '',
-                          name: issue?.attachmentPath == null
-                              ? null
-                              : pdfAttachmentName(issue!.attachmentPath),
+                          name: pdfAttachmentName(
+                            issue?.attachmentPath ?? '',
+                            name: issue?.attachmentName,
+                          ),
                           child: Row(
                             children: [
                               Icon(
@@ -799,11 +796,10 @@ void _showIssueDetailsSheet(
                               SizedBox(width: 6),
                               Flexible(
                                 child: Text(
-                                  issue == null
-                                      ? AppLocalizations.of(
-                                          context,
-                                        ).text('requestDocument')
-                                      : '${issue.attachmentCount} ${AppLocalizations.of(context).text('attachmentsLabel')}',
+                                  pdfAttachmentName(
+                                    issue?.attachmentPath ?? '',
+                                    name: issue?.attachmentName,
+                                  ),
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,

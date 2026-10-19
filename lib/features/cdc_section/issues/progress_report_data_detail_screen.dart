@@ -41,7 +41,7 @@ class CdcIssueProgressReportDataDetailScreen extends StatelessWidget {
         : '';
     final documentName = hasMeetingDocument
         ? meetingDocumentName
-        : report.attachmentName;
+        : report.attachmentNames[documentPath] ?? '';
 
     Widget section(String labelKey, String text, int lines) => Padding(
       padding: const EdgeInsets.only(top: 18),
@@ -231,13 +231,20 @@ class CdcIssueProgressReportDataDetailScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 PdfAttachmentPreview(
                   path: path,
+                  name: pdfAttachmentName(
+                    path,
+                    name: report.attachmentNames[path],
+                  ),
                   child: ListTile(
                     leading: const Icon(
                       Icons.picture_as_pdf,
                       color: Color(0xFFFF4842),
                     ),
                     title: Text(
-                      pdfAttachmentName(path),
+                      pdfAttachmentName(
+                        path,
+                        name: report.attachmentNames[path],
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

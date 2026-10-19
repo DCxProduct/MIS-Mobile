@@ -1,3 +1,4 @@
+import '../../core/text/document_metadata.dart';
 import '../../core/widgets/editor_content.dart';
 import 'package:flutter/material.dart';
 
@@ -278,9 +279,15 @@ class _ResourceDetailState extends State<_ResourceDetail> {
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.description_outlined),
-          title: Text(pdfAttachmentName(path)),
+          title: Text(
+            pdfAttachmentName(path, name: documentOriginalName(value)),
+          ),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () => previewPdfAttachment(context, path),
+          onTap: () => previewPdfAttachment(
+            context,
+            path,
+            name: documentOriginalName(value),
+          ),
         ),
       );
     }

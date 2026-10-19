@@ -1,3 +1,4 @@
+import '../../../../core/text/document_metadata.dart';
 import '../../../../core/text/html_text.dart';
 import '../../../../core/widgets/filters/filter_models.dart';
 
@@ -374,7 +375,7 @@ class RgcDecisionIssue {
 
   static String _documentName(Map<String, dynamic> json) {
     final document = _object(_meetingDocument(json));
-    return _string(document['originalName'] ?? document['name']);
+    return documentOriginalName(document);
   }
 
   static DateTime? _meetingDate(Map<String, dynamic> json) {

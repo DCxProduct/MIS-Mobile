@@ -222,7 +222,7 @@ class _DocumentBlock extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    AppLocalizations.of(context).text('requestDocument'),
+                    '—',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -232,14 +232,6 @@ class _DocumentBlock extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 1),
-                  const Text(
-                    '200 KB',
-                    style: TextStyle(
-                      color: AppColors.mutedText,
-                      fontSize: 7,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
                 ],
               ),
             ),

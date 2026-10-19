@@ -349,7 +349,7 @@ class _DocumentInfoBlock extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    AppLocalizations.of(context).text('requestDocument'),
+                    '—',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -359,14 +359,6 @@ class _DocumentInfoBlock extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 1),
-                  const Text(
-                    '200 KB',
-                    style: TextStyle(
-                      color: AppColors.mutedText,
-                      fontSize: 7,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -609,62 +601,8 @@ class _AttachmentTab extends StatelessWidget {
   const _AttachmentTab();
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Column(
-        children: [
-          _AttachmentCard(
-            title: AppLocalizations.of(context).text('requestDocument'),
-          ),
-          SizedBox(height: 10),
-          _AttachmentCard(
-            title: AppLocalizations.of(context).text('approvalReport'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AttachmentCard extends StatelessWidget {
-  const _AttachmentCard({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground(context),
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: AppColors.border(context)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.picture_as_pdf, color: Color(0xFFE53935), size: 18),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                color: AppColors.primaryText(context),
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          const Text(
-            '200 KB',
-            style: TextStyle(
-              color: AppColors.mutedText,
-              fontSize: 9,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 12),
+    child: Text(AppLocalizations.of(context).text('noData')),
+  );
 }

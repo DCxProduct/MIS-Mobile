@@ -235,7 +235,7 @@ const Map<String, String> kmTranslations = {
   'both': 'ទាំងពីរ',
   'sent': 'បានផ្ញើ',
   'draft': 'ព្រាង',
-  'scheduled': 'បានគ្រោងទុក',
+  'scheduled': 'បានកំណត់កាលបរិច្ឆេទ',
   'searchIssues': 'ស្វែងរកបញ្ហា...',
   'filter': 'តម្រង',
   'apply': 'អនុវត្ត',

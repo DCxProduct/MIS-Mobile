@@ -118,19 +118,7 @@ class _CdcIssueProgressReportDetailScreenState
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  ).text('requestDocument'),
-                                  style: TextStyle(fontSize: 12),
-                                ),
-                                Text(
-                                  '200 KB',
-                                  style: TextStyle(
-                                    fontSize: 7,
-                                    color: AppColors.mutedText,
-                                  ),
-                                ),
+                                Text('—', style: TextStyle(fontSize: 12)),
                               ],
                             ),
                           ],

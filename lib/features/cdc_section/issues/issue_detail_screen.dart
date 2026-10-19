@@ -162,9 +162,7 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                                   children: [
                                     Text(
                                       issue == null
-                                          ? AppLocalizations.of(
-                                              context,
-                                            ).text('requestDocument')
+                                          ? '—'
                                           : documentPath.isEmpty
                                           ? '—'
                                           : documentName.isNotEmpty
@@ -174,14 +172,6 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(fontSize: 12),
                                     ),
-                                    if (issue == null)
-                                      const Text(
-                                        '200 KB',
-                                        style: TextStyle(
-                                          fontSize: 7,
-                                          color: AppColors.mutedText,
-                                        ),
-                                      ),
                                     if (!generalIssue &&
                                         issue?.attachmentSize != null &&
                                         documentPath.isNotEmpty)

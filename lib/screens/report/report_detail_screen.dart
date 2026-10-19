@@ -141,11 +141,15 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
       1 => _IssueListTab(
         items: widget.report?.openIssues ?? const [],
         requestDocument: widget.report?.requestDocument,
+        requestDocumentName:
+            widget.report?.documentNames[widget.report?.requestDocument],
       ),
       2 => _IssueListTab(
         items: widget.report?.rgcDecisions ?? const [],
         type: ProgressReportItemType.rgcDecision,
         requestDocument: widget.report?.requestDocument,
+        requestDocumentName:
+            widget.report?.documentNames[widget.report?.requestDocument],
       ),
       _ => _AttachmentTab(report: widget.report),
     };
@@ -193,6 +197,7 @@ class _MaffInfoSection extends StatelessWidget {
         _DocumentInfoBlock(
           label: AppLocalizations.of(context).text('approvalReport'),
           path: report?.approvalDocument,
+          name: report?.documentNames[report?.approvalDocument],
         ),
       ],
     );
@@ -250,6 +255,7 @@ class _CdcInfoSection extends StatelessWidget {
                   context,
                 ).text('meetingRequestDocument'),
                 path: report?.requestDocument,
+                name: report?.documentNames[report?.requestDocument],
               ),
             ),
           ],
@@ -392,10 +398,11 @@ class _PersonInfoBlock extends StatelessWidget {
 }
 
 class _DocumentInfoBlock extends StatelessWidget {
-  const _DocumentInfoBlock({required this.label, this.path});
+  const _DocumentInfoBlock({required this.label, this.path, this.name});
 
   final String label;
   final String? path;
+  final String? name;
 
   @override
   Widget build(BuildContext context) {
@@ -404,7 +411,7 @@ class _DocumentInfoBlock extends StatelessWidget {
     }
     return PdfAttachmentPreview(
       path: path ?? '',
-      name: path == null ? null : pdfAttachmentName(path!),
+      name: path == null ? null : pdfAttachmentName(path!, name: name),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -426,7 +433,7 @@ class _DocumentInfoBlock extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      pdfAttachmentName(path!),
+                      pdfAttachmentName(path!, name: name),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -532,10 +539,12 @@ class _IssueListTab extends StatelessWidget {
     required this.items,
     this.type = ProgressReportItemType.issue,
     this.requestDocument,
+    this.requestDocumentName,
   });
   final List<Map<String, dynamic>> items;
   final ProgressReportItemType type;
   final String? requestDocument;
+  final String? requestDocumentName;
 
   @override
   Widget build(BuildContext context) {
@@ -552,6 +561,7 @@ class _IssueListTab extends StatelessWidget {
                       item: item,
                       type: type,
                       requestDocument: requestDocument,
+                      requestDocumentName: requestDocumentName,
                     ),
                   ),
               ],
@@ -565,10 +575,12 @@ class _ReportIssueCard extends StatelessWidget {
     required this.item,
     required this.type,
     this.requestDocument,
+    this.requestDocumentName,
   });
   final Map<String, dynamic> item;
   final ProgressReportItemType type;
   final String? requestDocument;
+  final String? requestDocumentName;
 
   @override
   Widget build(BuildContext context) {
@@ -583,6 +595,7 @@ class _ReportIssueCard extends StatelessWidget {
         item: item,
         type: type,
         requestDocument: requestDocument,
+        requestDocumentName: requestDocumentName,
       ),
       borderRadius: BorderRadius.circular(8),
       child: Container(
@@ -715,7 +728,13 @@ class _AttachmentTab extends StatelessWidget {
         children: report?.attachmentPaths?.isNotEmpty == true
             ? [
                 for (final path in report!.attachmentPaths!)
-                  _AttachmentCard(title: pdfAttachmentName(path), path: path),
+                  _AttachmentCard(
+                    title: pdfAttachmentName(
+                      path,
+                      name: report!.documentNames[path],
+                    ),
+                    path: path,
+                  ),
               ]
             : [Text(AppLocalizations.of(context).text('noData'))],
       ),

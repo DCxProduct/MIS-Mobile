@@ -297,21 +297,13 @@ class _DocumentField extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    AppLocalizations.of(context).text('requestDocument'),
+                    '—',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const Text(
-                    '200 KB',
-                    style: TextStyle(
-                      color: AppColors.mutedText,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],

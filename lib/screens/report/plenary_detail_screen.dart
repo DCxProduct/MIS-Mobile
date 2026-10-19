@@ -9,10 +9,12 @@ class PlenaryDetailScreen extends StatelessWidget {
     super.key,
     required this.title,
     this.documentReference,
+    this.documentReferenceName,
   });
 
   final String title;
   final String? documentReference;
+  final String? documentReferenceName;
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +105,10 @@ class PlenaryDetailScreen extends StatelessWidget {
               path: documentReference ?? '',
               name: documentReference == null
                   ? null
-                  : pdfAttachmentName(documentReference!),
+                  : pdfAttachmentName(
+                      documentReference!,
+                      name: documentReferenceName,
+                    ),
               child: Row(
                 children: [
                   const Icon(
@@ -112,30 +117,33 @@ class PlenaryDetailScreen extends StatelessWidget {
                     size: 18,
                   ),
                   const SizedBox(width: 6),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        documentReference == null
-                            ? AppLocalizations.of(
-                                context,
-                              ).text('requestDocument')
-                            : pdfAttachmentName(documentReference!),
-                        style: TextStyle(
-                          color: AppColors.primaryText(context),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          pdfAttachmentName(
+                            documentReference ?? '',
+                            name: documentReferenceName,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: AppColors.primaryText(context),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
-                      const Text(
-                        'PDF',
-                        style: TextStyle(
-                          color: AppColors.mutedText,
-                          fontSize: 7,
-                          fontWeight: FontWeight.w500,
+                        const Text(
+                          'PDF',
+                          style: TextStyle(
+                            color: AppColors.mutedText,
+                            fontSize: 7,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),

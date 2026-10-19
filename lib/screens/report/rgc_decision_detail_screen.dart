@@ -103,21 +103,11 @@ class RgcDecisionDetailScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                AppLocalizations.of(
-                                  context,
-                                ).text('requestDocument'),
+                                '—',
                                 style: TextStyle(
                                   color: AppColors.primaryText(context),
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const Text(
-                                '200 KB',
-                                style: TextStyle(
-                                  color: AppColors.mutedText,
-                                  fontSize: 7,
-                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],

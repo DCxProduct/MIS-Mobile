@@ -11,23 +11,24 @@ String pdfAttachmentUrl(String path) {
   return '$_fileHost${value.startsWith('/') ? value : '/$value'}';
 }
 
-String pdfAttachmentName(String path, {String? fallbackName}) {
-  final value = path.split('?').first;
-  var name = value.split('/').last.trim();
+String pdfAttachmentName(String path, {String? name, String? fallbackName}) {
+  if (name?.trim().isNotEmpty == true) return name!.trim();
+  final value = path.split(RegExp(r'[?#]')).first;
+  var filename = value.split('/').last.trim();
   try {
-    name = Uri.decodeComponent(name);
+    filename = Uri.decodeComponent(filename);
   } on ArgumentError {
     // Keep filenames containing a literal percent sign.
   }
-  name = name.replaceFirst(RegExp(r'^\d{13}[-_]'), '');
+  filename = filename.replaceFirst(RegExp(r'^\d{13}[-_]'), '');
   if (fallbackName != null &&
       RegExp(
         r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.pdf$',
         caseSensitive: false,
-      ).hasMatch(name)) {
+      ).hasMatch(filename)) {
     return fallbackName;
   }
-  return name.isEmpty ? 'PDF Preview' : name;
+  return filename.isEmpty ? '—' : filename;
 }
 
 Future<void> previewPdfAttachment(
@@ -39,9 +40,7 @@ Future<void> previewPdfAttachment(
     MaterialPageRoute<void>(
       builder: (_) => PdfAttachmentViewerScreen(
         url: pdfAttachmentUrl(path),
-        name: name?.trim().isNotEmpty == true
-            ? name!.trim()
-            : pdfAttachmentName(path),
+        name: pdfAttachmentName(path, name: name),
       ),
     ),
   );

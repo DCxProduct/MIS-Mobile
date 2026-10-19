@@ -1,3 +1,5 @@
+import '../../../../core/text/document_metadata.dart';
+
 class Plenary {
   Plenary(Map<String, dynamic> json)
     : id = _int(json['id']),
@@ -10,7 +12,8 @@ class Plenary {
       statusCode = _string(json['statusCode']),
       numberOfRgcDecisions = _int(json['numberOfRgcDecisions']),
       ministryCount = _listLength(json['ministries']),
-      documentReference = _nullableString(json['documentReference']),
+      documentReference = _documentPath(json['documentReference']),
+      documentReferenceName = documentOriginalName(json['documentReference']),
       attachmentCount = _attachmentCount(json['documentReference']);
 
   final int id;
@@ -22,6 +25,7 @@ class Plenary {
   final int numberOfRgcDecisions;
   final int ministryCount;
   final String? documentReference;
+  final String documentReferenceName;
   final int attachmentCount;
 
   static int _int(Object? value) => value is int ? value : 0;
@@ -36,6 +40,9 @@ class Plenary {
 
   static int _listLength(Object? value) => value is List ? value.length : 0;
 
+  static String? _documentPath(Object? value) =>
+      _nullableString(value is Map ? value['path'] : value);
+
   static int _attachmentCount(Object? value) =>
-      value is String && value.trim().isNotEmpty ? 1 : 0;
+      _documentPath(value) == null ? 0 : 1;
 }

@@ -341,6 +341,7 @@ class _PlenaryTab extends StatelessWidget {
               attachmentCount:
                   '${plenary.attachmentCount} ${AppLocalizations.of(context).text('attachmentsLabel')}',
               documentReference: plenary.documentReference,
+              documentReferenceName: plenary.documentReferenceName,
             ),
         ],
       ),
@@ -357,6 +358,7 @@ class _PlenaryCard extends StatelessWidget {
     required this.deadline,
     required this.attachmentCount,
     this.documentReference,
+    this.documentReferenceName,
   });
 
   final String title;
@@ -366,6 +368,7 @@ class _PlenaryCard extends StatelessWidget {
   final String deadline;
   final String attachmentCount;
   final String? documentReference;
+  final String? documentReferenceName;
 
   @override
   Widget build(BuildContext context) {
@@ -445,7 +448,10 @@ class _PlenaryCard extends StatelessWidget {
             path: documentReference ?? '',
             name: documentReference == null
                 ? null
-                : pdfAttachmentName(documentReference!),
+                : pdfAttachmentName(
+                    documentReference!,
+                    name: documentReferenceName,
+                  ),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
@@ -487,6 +493,7 @@ class _PlenaryCard extends StatelessWidget {
                     builder: (_) => PlenaryDetailScreen(
                       title: title,
                       documentReference: documentReference,
+                      documentReferenceName: documentReferenceName,
                     ),
                   ),
                 );

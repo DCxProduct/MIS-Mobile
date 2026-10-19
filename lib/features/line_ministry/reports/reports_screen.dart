@@ -339,6 +339,8 @@ class _PlenaryTab extends StatelessWidget {
             _PlenaryCard(
               title: plenary.name,
               status: plenary.status,
+              documentReference: plenary.documentReference,
+              documentReferenceName: plenary.documentReferenceName,
               meetingDate: plenaryDate(plenary.meetingDate),
               numberOfRgcDecision: '${plenary.numberOfRgcDecisions}',
               deadline: _formatDate(context, plenary.deadline),
@@ -367,8 +369,11 @@ class _PlenaryCard extends StatelessWidget {
     required this.numberOfRgcDecision,
     required this.deadline,
     required this.attachmentCount,
+    this.documentReference,
+    this.documentReferenceName,
   });
 
+  final String? documentReference, documentReferenceName;
   final String title;
   final String status;
   final String meetingDate;
@@ -480,7 +485,11 @@ class _PlenaryCard extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => PlenaryDetailScreen(title: title),
+                    builder: (_) => PlenaryDetailScreen(
+                      title: title,
+                      documentReference: documentReference,
+                      documentReferenceName: documentReferenceName,
+                    ),
                   ),
                 );
               },

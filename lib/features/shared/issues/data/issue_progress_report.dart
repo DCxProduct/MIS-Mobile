@@ -1,3 +1,4 @@
+import '../../../../core/text/document_metadata.dart';
 import '../../../../core/text/html_text.dart';
 
 /// A progress report attached to a working-group issue detail response.
@@ -20,6 +21,7 @@ class IssueProgressReport {
     required this.attachmentName,
     required this.attachmentSize,
     this.richText = const {},
+    this.attachmentNames = const {},
   });
 
   final int? progressReportId;
@@ -28,6 +30,7 @@ class IssueProgressReport {
   final DateTime? implementationDate;
   final String referenceName;
   final List<String> attachmentPaths;
+  final Map<String, String> attachmentNames;
   final String description;
   final String indicators;
   final String implementationChallenges;
@@ -114,6 +117,7 @@ class IssueProgressReport {
         ? report['attachment'] as Map<String, dynamic>
         : const <String, dynamic>{};
     final paths = <String>{};
+    final names = <String, String>{};
     for (final file in [
       json['attachment'],
       json['referenceDocument'],
@@ -121,13 +125,21 @@ class IssueProgressReport {
       report['requestDocument'],
     ]) {
       final location = path(file);
-      if (location.isNotEmpty) paths.add(location);
+      if (location.isNotEmpty) {
+        paths.add(location);
+        final name = documentOriginalName(file);
+        if (name.isNotEmpty) names[location] = name;
+      }
     }
     for (final files in [json['attachments'], report['attachments']]) {
       if (files is List) {
         for (final file in files) {
           final location = path(file);
-          if (location.isNotEmpty) paths.add(location);
+          if (location.isNotEmpty) {
+            paths.add(location);
+            final name = documentOriginalName(file);
+            if (name.isNotEmpty) names[location] = name;
+          }
         }
       }
     }
@@ -186,6 +198,7 @@ class IssueProgressReport {
                   : value(report['referenceName']),
             ),
       attachmentPaths: List.unmodifiable(paths),
+      attachmentNames: Map.unmodifiable(names),
       description: htmlToPlainText(
         value(json['progressSolution']).isNotEmpty
             ? value(json['progressSolution'])
@@ -213,7 +226,7 @@ class IssueProgressReport {
         json['linkToVerificationSource'] ?? report['linkToVerificationSource'],
       ),
       sourceOfVerification: sourceOfVerification,
-      attachmentName: value(attachment['originalName'] ?? attachment['name']),
+      attachmentName: documentOriginalName(attachment),
       attachmentSize: attachment['size'] is int
           ? attachment['size'] as int
           : null,

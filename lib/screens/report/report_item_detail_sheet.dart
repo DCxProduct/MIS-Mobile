@@ -1,3 +1,4 @@
+import '../../core/text/document_metadata.dart';
 import '../../core/widgets/editor_content.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +17,7 @@ Future<void> showReportItemDetail(
   required Map<String, dynamic> item,
   required ProgressReportItemType type,
   String? requestDocument,
+  String? requestDocumentName,
 }) => showModalBottomSheet<void>(
   context: context,
   isScrollControlled: true,
@@ -25,6 +27,7 @@ Future<void> showReportItemDetail(
     item: item,
     type: type,
     requestDocument: requestDocument,
+    requestDocumentName: requestDocumentName,
   ),
 );
 
@@ -48,10 +51,12 @@ class _ReportItemDetailSheet extends StatefulWidget {
     required this.item,
     required this.type,
     this.requestDocument,
+    this.requestDocumentName,
   });
   final Map<String, dynamic> item;
   final ProgressReportItemType type;
   final String? requestDocument;
+  final String? requestDocumentName;
   @override
   State<_ReportItemDetailSheet> createState() => _ReportItemDetailSheetState();
 }
@@ -161,7 +166,7 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
       final metadata = _object(value);
       final path = (value is String ? value : _text(metadata['path'])).trim();
       if (path.isEmpty) return;
-      final name = _text(metadata['originalName'] ?? metadata['name']);
+      final name = documentOriginalName(metadata);
       documents.putIfAbsent(
         path,
         () => name.isEmpty ? pdfAttachmentName(path) : name,
@@ -175,7 +180,12 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
       addDocument(linkedRequest['meetingRequestLetter']);
       addDocument(linkedRequest['documentReference']);
     }
-    if (documents.isEmpty) addDocument(widget.requestDocument);
+    if (documents.isEmpty) {
+      addDocument({
+        'path': widget.requestDocument,
+        'name': widget.requestDocumentName,
+      });
+    }
     if (documents.isEmpty) {
       for (final item in linked) {
         addDocument(item['attachment']);
@@ -224,7 +234,10 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
                 source,
               ).meetingRequestDocumentPath.isEmpty &&
               widget.requestDocument?.trim().isNotEmpty == true)
-            'attachment': widget.requestDocument,
+            'attachment': {
+              'path': widget.requestDocument,
+              'name': widget.requestDocumentName,
+            },
           'rgcDecision': _rich(data['decision']),
           // Progress belongs to the selected report, never progressReports.last
           // from the master decision (which can belong to another semester).

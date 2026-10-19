@@ -188,6 +188,7 @@ class _IssueInfoGrid extends StatelessWidget {
                     context,
                   ).text('meetingRequestDocument'),
                   path: issue!.meetingRequestDocumentPath ?? '',
+                  name: issue!.meetingRequestDocumentName,
                 ),
               )
             else
@@ -278,16 +279,17 @@ class _AgencyLogo extends StatelessWidget {
 }
 
 class _DocumentBlock extends StatelessWidget {
-  const _DocumentBlock({required this.label, this.path});
+  const _DocumentBlock({required this.label, this.path, this.name});
 
   final String label;
   final String? path;
+  final String? name;
 
   @override
   Widget build(BuildContext context) {
     return PdfAttachmentPreview(
       path: path ?? '',
-      name: path == null ? null : pdfAttachmentName(path!),
+      name: pdfAttachmentName(path ?? '', name: name),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -315,9 +317,7 @@ class _DocumentBlock extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      path == null || path!.isEmpty
-                          ? AppLocalizations.of(context).text('requestDocument')
-                          : pdfAttachmentName(path!),
+                      pdfAttachmentName(path ?? '', name: name),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -327,14 +327,6 @@ class _DocumentBlock extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 1),
-                    const Text(
-                      '200 KB',
-                      style: TextStyle(
-                        color: AppColors.mutedText,
-                        fontSize: 7,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
                   ],
                 ),
               ),

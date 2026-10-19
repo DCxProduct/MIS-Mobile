@@ -1,3 +1,4 @@
+import '../../../../core/text/document_metadata.dart';
 import '../../../../core/text/html_text.dart';
 import 'issue_progress_report.dart';
 import '../../../../core/widgets/filters/filter_models.dart';
@@ -195,14 +196,12 @@ class WorkingGroupIssue {
           : date(meetings.first['meetingDate']),
       attachmentCount: string(attachment['path']).isEmpty ? 0 : 1,
       attachmentPath: string(attachment['path']),
-      attachmentName: string(attachment['originalName'] ?? attachment['name']),
+      attachmentName: documentOriginalName(attachment),
       attachmentSize: attachment['size'] is int
           ? attachment['size'] as int
           : null,
       meetingRequestDocumentPath: meetingRequestDocumentPath,
-      meetingRequestDocumentName: meetingDocument is Map<String, dynamic>
-          ? string(meetingDocument['originalName'] ?? meetingDocument['name'])
-          : '',
+      meetingRequestDocumentName: documentOriginalName(meetingDocument),
       progressReports: List.unmodifiable(reports),
       reportsIncluded: json.containsKey('progressReports'),
       issueProgress: issueProgress,

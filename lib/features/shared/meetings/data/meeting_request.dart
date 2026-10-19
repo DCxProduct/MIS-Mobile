@@ -1,3 +1,4 @@
+import '../../../../core/text/document_metadata.dart';
 import '../../../../core/widgets/filters/filter_models.dart';
 import '../../../../core/text/html_text.dart';
 import '../../issues/data/working_group_issue.dart';
@@ -29,7 +30,7 @@ class MeetingRequest {
           .map((entry) => _string(_object(entry)['stakeholder']?['name']))
           .where((name) => name.isNotEmpty)
           .join(', '),
-      letterName = _string(_object(json['meetingRequestLetter'])['name']),
+      letterName = documentOriginalName(json['meetingRequestLetter']),
       letterPath = _string(_object(json['meetingRequestLetter'])['path']),
       meetingReferencePath = _string(json['meetingReference']),
       letterSize = _object(json['meetingRequestLetter'])['size'] as int?,
