@@ -1,3 +1,4 @@
+import '../../../../translations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_colors.dart';
@@ -90,7 +91,7 @@ class LineMinistryIssueCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              status,
+              AppLocalizations.of(context).status(status),
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,

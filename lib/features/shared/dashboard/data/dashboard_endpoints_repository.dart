@@ -21,7 +21,10 @@ class DashboardEndpointsRepository {
 
   Future<List<Map<String, dynamic>>> getSavedDashboards({
     required DashboardScope scope,
-  }) => _records('dashboards/${scope.name}/saved');
+  }) => _records(
+    'dashboards/${scope.name}/saved',
+    query: const {'finalOnly': 'true'},
+  );
 
   Future<DashboardSnapshot> getFinalDashboard({
     required DashboardScope scope,
@@ -66,10 +69,13 @@ class DashboardEndpointsRepository {
 
   // Saved report/dropdown records retain all fields without guessing IDs,
   // year/semester labels, or agency-specific response field names.
-  Future<List<Map<String, dynamic>>> _records(String endpoint) async {
+  Future<List<Map<String, dynamic>>> _records(
+    String endpoint, {
+    Map<String, String>? query,
+  }) async {
     final Object? data = wrappedListEndpoints.contains(endpoint)
-        ? (await _api.get(endpoint))['items']
-        : await _api.getList(endpoint);
+        ? (await _api.get(endpoint, query: query))['items']
+        : await _api.getList(endpoint, query: query);
     if (data is! List || data.any((item) => item is! Map<String, dynamic>)) {
       throw ApiException(
         'The server returned an invalid dashboard list.',

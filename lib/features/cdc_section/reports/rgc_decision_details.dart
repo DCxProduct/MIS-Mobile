@@ -84,7 +84,7 @@ class CdcRgcStatus extends StatelessWidget {
             const SizedBox(width: 4),
           ],
           Text(
-            rgcValue(status),
+            AppLocalizations.of(context).status(rgcValue(status)),
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 11, color: color),
           ),
@@ -212,7 +212,9 @@ class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
                         Expanded(
                           child: CdcDetailInfoValue(
                             label: l10n.text('status'),
-                            value: rgcValue(decision.status),
+                            value: AppLocalizations.of(
+                              context,
+                            ).status(rgcValue(decision.status)),
                             color: _statusColor(decision.status),
                           ),
                         ),
@@ -547,7 +549,7 @@ class _IssueDetailsState extends State<_CdcRgcDecisionIssuePanel> {
             Expanded(
               child: CdcDetailInfoValue(
                 label: l10n.text('status'),
-                value: rgcValue(
+                value: l10n.status(
                   issue.status.isEmpty ? detail.decision.status : issue.status,
                 ),
                 color: _statusColor(issue.status),

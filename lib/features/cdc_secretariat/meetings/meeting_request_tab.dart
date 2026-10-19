@@ -260,7 +260,7 @@ class _StatusBadge extends StatelessWidget {
       _ => (
         label: status == 'SCHEDULED'
             ? AppLocalizations.of(context).text('scheduled')
-            : (status.isEmpty ? '—' : status),
+            : AppLocalizations.of(context).status(status),
         color: isDark ? const Color(0xFF75BFFF) : const Color(0xFF1675C6),
         background: isDark ? const Color(0xFF142E45) : const Color(0xFFF0F8FF),
         border: isDark ? const Color(0xFF356992) : const Color(0xFFB8DCFA),

@@ -23,13 +23,11 @@ String issueDateWithTime(BuildContext context, DateTime? date) {
 }
 
 String issueStatusLabel(BuildContext context, WorkingGroupIssue issue) {
-  final key = switch (issue.statusCode.toUpperCase()) {
-    'SOLVED' => 'solved',
-    'IN_PROGRESS' => 'inProgress',
-    'NOT_ADDRESSED' => 'notAddressed',
-    _ => null,
-  };
-  return key == null
-      ? (issue.statusName.isEmpty ? '—' : issue.statusName)
-      : AppLocalizations.of(context).text(key);
+  final l10n = AppLocalizations.of(context);
+  final code = issue.statusCode.trim();
+  final label = l10n.status(code);
+  return code.isEmpty || label == code ? l10n.status(issue.statusName) : label;
 }
+
+String meetingRequestStatusLabel(BuildContext context, String status) =>
+    AppLocalizations.of(context).status(status);

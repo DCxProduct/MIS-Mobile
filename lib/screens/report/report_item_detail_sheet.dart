@@ -295,7 +295,7 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
           Expanded(
             child: _Info(
               label: l10n.text('status'),
-              value: status,
+              value: AppLocalizations.of(context).status(status),
               color: status == 'Solved'
                   ? Colors.green
                   : const Color(0xFFFF4842),

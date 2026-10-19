@@ -1,3 +1,4 @@
+import '../../../../translations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_colors.dart';
@@ -7,12 +8,14 @@ class LineMinistryMeetingCard extends StatelessWidget {
   const LineMinistryMeetingCard({
     super.key,
     required this.title,
+    required this.meetingId,
     required this.group,
     required this.date,
     required this.totalIssues,
     required this.status,
   });
 
+  final int meetingId;
   final String title;
   final String group;
   final String date;
@@ -27,7 +30,8 @@ class LineMinistryMeetingCard extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (_) => LineMinistryMeetingDetailScreen(title: title),
+            builder: (_) =>
+                LineMinistryMeetingDetailScreen(meetingId: meetingId),
           ),
         );
       },
@@ -108,7 +112,7 @@ class LineMinistryMeetingCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  status,
+                  AppLocalizations.of(context).status(status),
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,

@@ -96,7 +96,7 @@ class _ProgressReportCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           _ReportDateRow(
-            label: 'Deadline',
+            label: AppLocalizations.of(context).text('deadline'),
             value: _date(context, report.deadline),
           ),
           const SizedBox(height: 9),

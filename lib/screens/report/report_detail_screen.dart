@@ -64,7 +64,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Progress Report Details',
+          AppLocalizations.of(context).text('progressReportDetails'),
           style: TextStyle(
             color: AppColors.primaryText(context),
             fontSize: 15,
@@ -104,7 +104,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                 children: [
                   Expanded(
                     child: _InfoBlock(
-                      label: 'Year',
+                      label: AppLocalizations.of(context).text('year'),
                       value: widget.report!.year == 0
                           ? '—'
                           : '${widget.report!.year}',
@@ -112,7 +112,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                   ),
                   Expanded(
                     child: _InfoBlock(
-                      label: 'Semester',
+                      label: AppLocalizations.of(context).text('semester'),
                       value: _value(widget.report!.semester),
                     ),
                   ),
@@ -182,7 +182,7 @@ class _MaffInfoSection extends StatelessWidget {
             const SizedBox(width: 18),
             Expanded(
               child: _PersonInfoBlock(
-                label: 'Prepare by',
+                label: AppLocalizations.of(context).text('prepareBy'),
                 name: _value(report?.preparedBy),
                 date: '',
               ),
@@ -191,7 +191,7 @@ class _MaffInfoSection extends StatelessWidget {
         ),
         const SizedBox(height: 13),
         _DocumentInfoBlock(
-          label: 'Approval Report',
+          label: AppLocalizations.of(context).text('approvalReport'),
           path: report?.approvalDocument,
         ),
       ],
@@ -211,7 +211,7 @@ class _CdcInfoSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _SectionHeader(title: 'CDC Info'),
+        _SectionHeader(title: AppLocalizations.of(context).text('cdcInfo')),
         const SizedBox(height: 11),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,14 +219,14 @@ class _CdcInfoSection extends StatelessWidget {
             Expanded(
               child: _InfoBlock(
                 label: l10n.text('status'),
-                value: _value(report?.cdcStatus),
+                value: l10n.status(_value(report?.cdcStatus)),
                 valueColor: const Color(0xFFFF8A00),
               ),
             ),
             const SizedBox(width: 18),
             Expanded(
               child: _PersonInfoBlock(
-                label: 'Review by',
+                label: AppLocalizations.of(context).text('reviewBy'),
                 name: _value(report?.reviewedBy),
                 date: '',
               ),
@@ -239,14 +239,16 @@ class _CdcInfoSection extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoBlock(
-                label: 'Last Update',
+                label: AppLocalizations.of(context).text('lastUpdate'),
                 value: _formatDate(report?.updatedAt),
               ),
             ),
             SizedBox(width: 18),
             Expanded(
               child: _DocumentInfoBlock(
-                label: 'Meeting Request Document:',
+                label: AppLocalizations.of(
+                  context,
+                ).text('meetingRequestDocument'),
                 path: report?.requestDocument,
               ),
             ),
@@ -258,14 +260,14 @@ class _CdcInfoSection extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoBlock(
-                label: 'Meeting Date & Time',
+                label: AppLocalizations.of(context).text('meetingDateTime'),
                 value: _meetingTime(report),
               ),
             ),
             SizedBox(width: 18),
             Expanded(
               child: _PersonInfoBlock(
-                label: 'Review by',
+                label: AppLocalizations.of(context).text('reviewBy'),
                 name: _value(report?.reviewedBy),
                 date: '',
               ),
@@ -611,7 +613,7 @@ class _ReportIssueCard extends StatelessWidget {
                   ),
                 ),
                 _SmallStatusBadge(
-                  label: _value(status),
+                  label: AppLocalizations.of(context).status(_value(status)),
                   color: solved
                       ? (isDark
                             ? const Color(0xFF86EFAC)

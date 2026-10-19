@@ -1,3 +1,4 @@
+import '../../translations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
@@ -34,7 +35,7 @@ class _MeetingRequestDetailScreenState
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Meeting Request Details',
+          AppLocalizations.of(context).text('meetingRequestDetails'),
           style: TextStyle(
             color: colors.onSurface,
             fontSize: 15,
@@ -75,11 +76,18 @@ class _MeetingRequestDetailScreenState
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: const [
-                        _PersonChip(label: 'Submitted By', name: 'Sabada'),
+                      children: [
+                        _PersonChip(
+                          label: AppLocalizations.of(
+                            context,
+                          ).text('submittedBy'),
+                          name: 'Sabada',
+                        ),
                         SizedBox(width: 10),
                         _PersonChip(
-                          label: 'Submitted Date',
+                          label: AppLocalizations.of(
+                            context,
+                          ).text('submittedDate'),
                           name: 'Jun 24 2025',
                         ),
                       ],
@@ -114,18 +122,18 @@ class _FigmaInfoGrid extends StatelessWidget {
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Expanded(
               child: _DetailInfoBlock(
-                label: 'Private Sector WG',
+                label: AppLocalizations.of(context).text('privateSectorWG'),
                 value: 'PSWG-A',
               ),
             ),
             SizedBox(width: 16),
             Expanded(
               child: _DetailInfoBlock(
-                label: 'Status :',
-                value: 'Submitted',
+                label: AppLocalizations.of(context).text('status'),
+                value: AppLocalizations.of(context).text('submitted'),
                 valueColor: Color(0xFF16A34A),
               ),
             ),
@@ -134,15 +142,21 @@ class _FigmaInfoGrid extends StatelessWidget {
         const SizedBox(height: 14),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Expanded(
               child: _DetailInfoBlock(
-                label: 'Co-Chair request by',
+                label: AppLocalizations.of(context).text('coChairRequestBy'),
                 value: 'H.E. Kit Meng',
               ),
             ),
             SizedBox(width: 16),
-            Expanded(child: _PdfBlock(label: 'Meeting Request Document:')),
+            Expanded(
+              child: _PdfBlock(
+                label: AppLocalizations.of(
+                  context,
+                ).text('meetingRequestDocument'),
+              ),
+            ),
           ],
         ),
       ],
@@ -219,7 +233,7 @@ class _PdfBlock extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Request Doc',
+                  AppLocalizations.of(context).text('requestDocument'),
                   style: TextStyle(
                     color: AppColors.primaryText(context),
                     fontSize: 11,
@@ -297,7 +311,10 @@ class _DetailTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labels = ['Descriptions', 'All Issues'];
+    final labels = [
+      AppLocalizations.of(context).text('descriptions'),
+      AppLocalizations.of(context).text('allIssues'),
+    ];
 
     return Container(
       decoration: BoxDecoration(
@@ -462,7 +479,7 @@ class _IssueCard extends StatelessWidget {
                     border: Border.all(color: statusBorder),
                   ),
                   child: Text(
-                    status,
+                    AppLocalizations.of(context).status(status),
                     style: TextStyle(
                       color: statusColor,
                       fontSize: 11,
@@ -541,7 +558,7 @@ void _showIssueDetailsSheet(
               const SizedBox(height: 14),
               Center(
                 child: Text(
-                  'Issues Details',
+                  AppLocalizations.of(context).text('issuesDetails'),
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 16,
@@ -566,9 +583,9 @@ void _showIssueDetailsSheet(
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
-                          'Submitted by',
+                          AppLocalizations.of(context).text('submittedBy'),
                           style: TextStyle(
                             color: AppColors.mutedText,
                             fontSize: 11,
@@ -591,8 +608,8 @@ void _showIssueDetailsSheet(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Status :',
+                        Text(
+                          AppLocalizations.of(context).text('status'),
                           style: TextStyle(
                             color: AppColors.mutedText,
                             fontSize: 11,
@@ -601,7 +618,7 @@ void _showIssueDetailsSheet(
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '• $status',
+                          '• ${AppLocalizations.of(context).status(status)}',
                           style: TextStyle(
                             color: status == 'Solved'
                                 ? const Color(0xFF16A34A)
@@ -623,8 +640,8 @@ void _showIssueDetailsSheet(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Categories',
+                        Text(
+                          AppLocalizations.of(context).text('categories'),
                           style: TextStyle(
                             color: AppColors.mutedText,
                             fontSize: 11,
@@ -647,8 +664,10 @@ void _showIssueDetailsSheet(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Meeting Request Document:',
+                        Text(
+                          AppLocalizations.of(
+                            context,
+                          ).text('meetingRequestDocument'),
                           style: TextStyle(
                             color: AppColors.mutedText,
                             fontSize: 11,
@@ -657,7 +676,7 @@ void _showIssueDetailsSheet(
                         ),
                         const SizedBox(height: 4),
                         Row(
-                          children: const [
+                          children: [
                             Icon(
                               Icons.picture_as_pdf,
                               color: Color(0xFFE53935),
@@ -665,7 +684,9 @@ void _showIssueDetailsSheet(
                             ),
                             SizedBox(width: 6),
                             Text(
-                              'Request Doc',
+                              AppLocalizations.of(
+                                context,
+                              ).text('requestDocument'),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
@@ -699,11 +720,13 @@ void _showIssueDetailsSheet(
                               : const Color(0xFFE2E8F0),
                         ),
                       ),
-                      child: const Text.rich(
+                      child: Text.rich(
                         TextSpan(
                           children: [
                             TextSpan(
-                              text: 'Submitted By : ',
+                              text: AppLocalizations.of(
+                                context,
+                              ).text('submittedBy'),
                               style: TextStyle(color: AppColors.mutedText),
                             ),
                             TextSpan(
@@ -732,11 +755,13 @@ void _showIssueDetailsSheet(
                               : const Color(0xFFE2E8F0),
                         ),
                       ),
-                      child: const Text.rich(
+                      child: Text.rich(
                         TextSpan(
                           children: [
                             TextSpan(
-                              text: 'Submitted Date : ',
+                              text: AppLocalizations.of(
+                                context,
+                              ).text('submittedDate'),
                               style: TextStyle(color: AppColors.mutedText),
                             ),
                             TextSpan(
@@ -752,8 +777,8 @@ void _showIssueDetailsSheet(
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Issues Descriptions',
+              Text(
+                AppLocalizations.of(context).text('issuesDescriptions'),
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
@@ -765,13 +790,13 @@ void _showIssueDetailsSheet(
                     height: 1.5,
                     fontWeight: FontWeight.w500,
                   ),
-                  children: const [
+                  children: [
                     TextSpan(
                       text:
                           'សូមស្នើឡើងរៀបចំប្រជុំពិសេសមួយដើម្បីដោះស្រាយនិងឆ្លើយតបចំពោះបញ្ហាប្រឈមមធ្យមចំនួន ៥ ដែលកំពុងមានឥទ្ធិពលលើការងាររបស់យើង។ គោលបំណងនៃប្រជុំនេះគឺដើម្បីប្រមូលផ្តុំអ្នកពាក់ព័ន្ធទាំងអស់... ',
                     ),
                     TextSpan(
-                      text: 'Read more',
+                      text: AppLocalizations.of(context).text('readMore'),
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w700,
@@ -781,8 +806,8 @@ void _showIssueDetailsSheet(
                 ),
               ),
               const SizedBox(height: 18),
-              const Text(
-                'Recommendations',
+              Text(
+                AppLocalizations.of(context).text('recommendations'),
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
@@ -794,13 +819,13 @@ void _showIssueDetailsSheet(
                     height: 1.5,
                     fontWeight: FontWeight.w500,
                   ),
-                  children: const [
+                  children: [
                     TextSpan(
                       text:
                           'ផ្អែកលើការស្នើសុំបណ្តោះអាសន្ន៖ ភ្នាក់ងារតាមដានរដ្ឋបាលនឹងសម្របសម្រួលជាមួយ... ',
                     ),
                     TextSpan(
-                      text: 'Read more',
+                      text: AppLocalizations.of(context).text('readMore'),
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w700,

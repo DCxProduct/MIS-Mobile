@@ -45,7 +45,7 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Issue Details',
+          AppLocalizations.of(context).text('issueDetails'),
           style: TextStyle(
             color: AppColors.primaryText(context),
             fontSize: 15,
@@ -87,14 +87,18 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
                     child: Row(
                       children: [
                         _DatePill(
-                          label: 'Submitted Date',
+                          label: AppLocalizations.of(
+                            context,
+                          ).text('submittedDate'),
                           value: widget.issue == null
                               ? 'July 24, 2025'
                               : issueDate(context, widget.issue!.createdAt),
                         ),
                         SizedBox(width: 10),
                         _DatePill(
-                          label: 'Meeting Date',
+                          label: AppLocalizations.of(
+                            context,
+                          ).text('meetingDate'),
                           value: widget.issue == null
                               ? 'June 29, 2025 2:00PM5:00PM'
                               : issueDate(context, widget.issue!.meetingDate),
@@ -145,7 +149,7 @@ class _IssueInfoGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoBlock(
-                label: 'Government Agency :',
+                label: AppLocalizations.of(context).text('governmentAgency'),
                 value: issue == null
                     ? 'MAFF'
                     : issue!.agency.isEmpty
@@ -157,9 +161,9 @@ class _IssueInfoGrid extends StatelessWidget {
             SizedBox(width: 20),
             Expanded(
               child: _InfoBlock(
-                label: 'Status :',
+                label: AppLocalizations.of(context).text('status'),
                 value: issue == null
-                    ? 'In Progress'
+                    ? AppLocalizations.of(context).text('inProgress')
                     : issueStatusLabel(context, issue!),
                 valueColor: Color(0xFFFF8A00),
               ),
@@ -171,19 +175,28 @@ class _IssueInfoGrid extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: _InfoBlock(label: 'Category', value: category),
+              child: _InfoBlock(
+                label: AppLocalizations.of(context).text('category'),
+                value: category,
+              ),
             ),
             const SizedBox(width: 20),
             if (issue != null)
               Expanded(
                 child: _DocumentBlock(
-                  label: 'Meeting Request Document:',
+                  label: AppLocalizations.of(
+                    context,
+                  ).text('meetingRequestDocument'),
                   path: issue!.meetingRequestDocumentPath ?? '',
                 ),
               )
             else
-              const Expanded(
-                child: _DocumentBlock(label: 'Meeting Request Document:'),
+              Expanded(
+                child: _DocumentBlock(
+                  label: AppLocalizations.of(
+                    context,
+                  ).text('meetingRequestDocument'),
+                ),
               ),
           ],
         ),
@@ -303,7 +316,7 @@ class _DocumentBlock extends StatelessWidget {
                   children: [
                     Text(
                       path == null || path!.isEmpty
-                          ? 'Request Doc'
+                          ? AppLocalizations.of(context).text('requestDocument')
                           : pdfAttachmentName(path!),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -386,7 +399,8 @@ class _IssueDetailTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labels = ['Descriptions', 'Progress Report'];
+    final l10n = AppLocalizations.of(context);
+    final labels = [l10n.text('descriptions'), l10n.text('progressReport')];
 
     return Container(
       decoration: BoxDecoration(

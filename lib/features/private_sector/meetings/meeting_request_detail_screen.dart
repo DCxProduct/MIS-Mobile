@@ -45,7 +45,7 @@ class _MeetingRequestDetailScreenState
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Meeting Request Details',
+          AppLocalizations.of(context).text('meetingRequestDetails'),
           style: TextStyle(
             color: colors.onSurface,
             fontSize: 15,
@@ -88,14 +88,20 @@ class _MeetingRequestDetailScreenState
                     child: Row(
                       children: [
                         _PersonChip(
-                          label: 'Submitted By',
+                          label: AppLocalizations.of(
+                            context,
+                          ).text('submittedBy'),
                           name: widget.request?.submittedBy ?? 'Sabada',
                         ),
-                        SizedBox(width: 10),
-                        _PersonChip(
-                          label: 'Received by',
-                          name: widget.request == null ? 'Sambath' : '—',
-                        ),
+                        if (widget.request?.receivedBy.isNotEmpty == true) ...[
+                          const SizedBox(width: 10),
+                          _PersonChip(
+                            label: AppLocalizations.of(
+                              context,
+                            ).text('receivedBy'),
+                            name: widget.request!.receivedBy,
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -134,7 +140,7 @@ class _PrivateSectorInfoGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _DetailInfoBlock(
-                label: 'Submitted Date:',
+                label: AppLocalizations.of(context).text('submittedDate'),
                 value: request == null
                     ? 'Aug 10, 2025'
                     : issueDate(context, request!.submittedAt),
@@ -143,12 +149,11 @@ class _PrivateSectorInfoGrid extends StatelessWidget {
             SizedBox(width: 16),
             Expanded(
               child: _DetailInfoBlock(
-                label: 'Status :',
-                value: request == null
-                    ? 'Submitted'
-                    : (request!.status == 'SCHEDULED'
-                          ? AppLocalizations.of(context).text('scheduled')
-                          : request!.status),
+                label: AppLocalizations.of(context).text('status'),
+                value: meetingRequestStatusLabel(
+                  context,
+                  request?.status ?? 'SUBMITTED',
+                ),
                 valueColor: Color(0xFF16A34A),
               ),
             ),
@@ -162,8 +167,8 @@ class _PrivateSectorInfoGrid extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Government Agency :',
+                  Text(
+                    AppLocalizations.of(context).text('governmentAgency'),
                     style: TextStyle(
                       color: AppColors.mutedText,
                       fontSize: 12,
@@ -211,7 +216,9 @@ class _PrivateSectorInfoGrid extends StatelessWidget {
             const SizedBox(width: 16),
             Expanded(
               child: _PdfBlock(
-                label: 'Meeting Request Document:',
+                label: AppLocalizations.of(
+                  context,
+                ).text('meetingRequestDocument'),
                 request: request,
               ),
             ),
@@ -298,7 +305,7 @@ class _PdfBlock extends StatelessWidget {
                   children: [
                     Text(
                       request == null
-                          ? 'Request Doc'
+                          ? AppLocalizations.of(context).text('requestDocument')
                           : (request!.letterName.isEmpty
                                 ? '—'
                                 : request!.letterName),
@@ -385,7 +392,8 @@ class _DetailTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labels = ['Descriptions', 'All Issues'];
+    final l10n = AppLocalizations.of(context);
+    final labels = [l10n.text('descriptions'), l10n.text('allIssues')];
 
     return Container(
       decoration: BoxDecoration(
@@ -513,7 +521,9 @@ class _IssueCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final isSolved = status == 'Solved';
+    final isSolved = issue == null
+        ? status == 'Solved'
+        : issue!.statusCode.toUpperCase() == 'SOLVED';
     final statusColor = isSolved
         ? (isDark ? const Color(0xFF86EFAC) : const Color(0xFF16A34A))
         : (isDark ? const Color(0xFFD1D5DB) : const Color(0xFF6B7280));
@@ -572,7 +582,7 @@ class _IssueCard extends StatelessWidget {
                     border: Border.all(color: statusBorder),
                   ),
                   child: Text(
-                    status,
+                    AppLocalizations.of(context).status(status),
                     style: TextStyle(
                       color: statusColor,
                       fontSize: 11,
@@ -653,7 +663,7 @@ void _showIssueDetailsSheet(
               const SizedBox(height: 14),
               Center(
                 child: Text(
-                  'Issues Details',
+                  AppLocalizations.of(context).text('issuesDetails'),
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 16,
@@ -680,7 +690,7 @@ void _showIssueDetailsSheet(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Submitted by',
+                          AppLocalizations.of(context).text('submittedBy'),
                           style: TextStyle(
                             color: AppColors.mutedText,
                             fontSize: 11,
@@ -703,8 +713,8 @@ void _showIssueDetailsSheet(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Status :',
+                        Text(
+                          AppLocalizations.of(context).text('status'),
                           style: TextStyle(
                             color: AppColors.mutedText,
                             fontSize: 11,
@@ -713,9 +723,13 @@ void _showIssueDetailsSheet(
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '• $status',
+                          '• ${AppLocalizations.of(context).status(status)}',
                           style: TextStyle(
-                            color: status == 'Solved'
+                            color:
+                                (issue == null
+                                    ? status == 'Solved'
+                                    : issue.statusCode.toUpperCase() ==
+                                          'SOLVED')
                                 ? const Color(0xFF16A34A)
                                 : const Color(0xFFFF4842),
                             fontSize: 12,
@@ -735,8 +749,8 @@ void _showIssueDetailsSheet(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Categories',
+                        Text(
+                          AppLocalizations.of(context).text('categories'),
                           style: TextStyle(
                             color: AppColors.mutedText,
                             fontSize: 11,
@@ -759,8 +773,10 @@ void _showIssueDetailsSheet(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Meeting Request Document:',
+                        Text(
+                          AppLocalizations.of(
+                            context,
+                          ).text('meetingRequestDocument'),
                           style: TextStyle(
                             color: AppColors.mutedText,
                             fontSize: 11,
@@ -784,7 +800,9 @@ void _showIssueDetailsSheet(
                               Flexible(
                                 child: Text(
                                   issue == null
-                                      ? 'Request Doc'
+                                      ? AppLocalizations.of(
+                                          context,
+                                        ).text('requestDocument')
                                       : '${issue.attachmentCount} ${AppLocalizations.of(context).text('attachmentsLabel')}',
                                   style: TextStyle(
                                     fontSize: 11,
@@ -825,7 +843,8 @@ void _showIssueDetailsSheet(
                         TextSpan(
                           children: [
                             TextSpan(
-                              text: 'Submitted By : ',
+                              text:
+                                  '${AppLocalizations.of(context).text('submittedBy')} : ',
                               style: TextStyle(color: AppColors.mutedText),
                             ),
                             TextSpan(
@@ -858,7 +877,8 @@ void _showIssueDetailsSheet(
                         TextSpan(
                           children: [
                             TextSpan(
-                              text: 'Submitted Date : ',
+                              text:
+                                  '${AppLocalizations.of(context).text('submittedDate')} : ',
                               style: TextStyle(color: AppColors.mutedText),
                             ),
                             TextSpan(
@@ -876,8 +896,8 @@ void _showIssueDetailsSheet(
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Issues Descriptions',
+              Text(
+                AppLocalizations.of(context).text('issuesDescriptions'),
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
@@ -906,7 +926,9 @@ void _showIssueDetailsSheet(
                             'សូមស្នើឡើងរៀបចំប្រជុំពិសេសមួយដើម្បីដោះស្រាយនិងឆ្លើយតបចំពោះបញ្ហាប្រឈមមធ្យមចំនួន ៥ ដែលកំពុងមានឥទ្ធិពលលើការងាររបស់យើង។ គោលបំណងនៃប្រជុំនេះគឺដើម្បីប្រមូលផ្តុំអ្នកពាក់ព័ន្ធទាំងអស់... ',
                       ),
                       TextSpan(
-                        text: issue == null ? 'Read more' : '',
+                        text: issue == null
+                            ? AppLocalizations.of(context).text('readMore')
+                            : '',
                         style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w700,
@@ -916,8 +938,8 @@ void _showIssueDetailsSheet(
                   ),
                 ),
               const SizedBox(height: 18),
-              const Text(
-                'Recommendations',
+              Text(
+                AppLocalizations.of(context).text('recommendations'),
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
@@ -946,7 +968,9 @@ void _showIssueDetailsSheet(
                             'ផ្អែកលើការស្នើសុំបណ្តោះអាសន្ន៖ ភ្នាក់ងារតាមដានរដ្ឋបាលនឹងសម្របសម្រួលជាមួយ... ',
                       ),
                       TextSpan(
-                        text: issue == null ? 'Read more' : '',
+                        text: issue == null
+                            ? AppLocalizations.of(context).text('readMore')
+                            : '',
                         style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w700,

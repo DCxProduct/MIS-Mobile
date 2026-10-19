@@ -107,7 +107,7 @@ class _CdcIssueProgressReportDetailScreenState
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Row(
+                        Row(
                           children: [
                             Icon(
                               Icons.picture_as_pdf,
@@ -119,7 +119,9 @@ class _CdcIssueProgressReportDetailScreenState
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Request Doc',
+                                  AppLocalizations.of(
+                                    context,
+                                  ).text('requestDocument'),
                                   style: TextStyle(fontSize: 12),
                                 ),
                                 Text(
@@ -212,9 +214,9 @@ class _CdcIssueProgressReportDetailScreenState
               ),
               const SizedBox(height: 16),
               for (final label in [
-                'Solution Indicators | សូចនាករដំណោះស្រាយ',
-                'Challenges | បញ្ហាប្រឈម',
-                'Requests | សំណូមពរ',
+                l10n.text('solutionIndicators'),
+                l10n.text('challenges'),
+                l10n.text('requests'),
                 l10n.text('rgcDecision'),
               ]) ...[
                 CdcDetailTextPanel(

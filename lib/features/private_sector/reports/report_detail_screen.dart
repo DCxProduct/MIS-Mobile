@@ -33,7 +33,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Progress Report Details',
+          AppLocalizations.of(context).text('progressReportDetails'),
           style: TextStyle(
             color: AppColors.primaryText(context),
             fontSize: 15,
@@ -103,7 +103,7 @@ class _MaffInfoSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _SectionHeader(title: 'MAFF Info'),
+        _SectionHeader(title: AppLocalizations.of(context).text('maffInfo')),
         const SizedBox(height: 11),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,9 +115,9 @@ class _MaffInfoSection extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 18),
-            const Expanded(
+            Expanded(
               child: _PersonInfoBlock(
-                label: 'Prepare by',
+                label: AppLocalizations.of(context).text('prepareBy'),
                 name: 'Ouk Sabda',
                 date: 'June 01, 2025',
               ),
@@ -125,7 +125,9 @@ class _MaffInfoSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 13),
-        const _DocumentInfoBlock(label: 'Approval Report'),
+        _DocumentInfoBlock(
+          label: AppLocalizations.of(context).text('approvalReport'),
+        ),
       ],
     );
   }
@@ -141,7 +143,7 @@ class _CdcInfoSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _SectionHeader(title: 'CDC Info'),
+        _SectionHeader(title: AppLocalizations.of(context).text('cdcInfo')),
         const SizedBox(height: 11),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,9 +156,9 @@ class _CdcInfoSection extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 18),
-            const Expanded(
+            Expanded(
               child: _PersonInfoBlock(
-                label: 'Review by',
+                label: AppLocalizations.of(context).text('reviewBy'),
                 name: 'Seng Phanat',
                 date: 'June 01, 2025',
               ),
@@ -164,32 +166,39 @@ class _CdcInfoSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 14),
-        const Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _InfoBlock(label: 'Last Update', value: '2025'),
-            ),
-            SizedBox(width: 18),
-            Expanded(
-              child: _DocumentInfoBlock(label: 'Meeting Request Document:'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
-        const Row(
+        Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: _InfoBlock(
-                label: 'Meeting Date & Time',
+                label: AppLocalizations.of(context).text('lastUpdate'),
+                value: '2025',
+              ),
+            ),
+            SizedBox(width: 18),
+            Expanded(
+              child: _DocumentInfoBlock(
+                label: AppLocalizations.of(
+                  context,
+                ).text('meetingRequestDocument'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _InfoBlock(
+                label: AppLocalizations.of(context).text('meetingDateTime'),
                 value: 'September 22, 2025,\n2:00PM-5:00PM',
               ),
             ),
             SizedBox(width: 18),
             Expanded(
               child: _PersonInfoBlock(
-                label: 'Review by',
+                label: AppLocalizations.of(context).text('reviewBy'),
                 name: 'Seng Phanat',
                 date: 'June 01, 2025',
               ),
@@ -340,7 +349,7 @@ class _DocumentInfoBlock extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Request Doc',
+                    AppLocalizations.of(context).text('requestDocument'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -604,10 +613,14 @@ class _AttachmentTab extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
-        children: const [
-          _AttachmentCard(title: 'Request Doc'),
+        children: [
+          _AttachmentCard(
+            title: AppLocalizations.of(context).text('requestDocument'),
+          ),
           SizedBox(height: 10),
-          _AttachmentCard(title: 'Approval Report'),
+          _AttachmentCard(
+            title: AppLocalizations.of(context).text('approvalReport'),
+          ),
         ],
       ),
     );

@@ -48,8 +48,12 @@ class ApiClient {
     background: background,
   ).then((data) => data as Map<String, dynamic>);
 
-  Future<List<dynamic>> getList(String path) async =>
-      await _request('GET', path, expectList: true) as List<dynamic>;
+  Future<List<dynamic>> getList(
+    String path, {
+    Map<String, String>? query,
+  }) async =>
+      await _request('GET', path, query: query, expectList: true)
+          as List<dynamic>;
 
   /// List endpoints in this API expose totalPages in their pagination metadata.
   Future<List<dynamic>> getAllPages(

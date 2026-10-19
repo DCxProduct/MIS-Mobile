@@ -15,21 +15,7 @@ class DashboardRepository {
     String? year,
   }) async {
     if (progressReportId == null && year != null) {
-      final saved =
-          (await _api.getList('dashboards/${scope.name}/saved'))
-              .whereType<Map>()
-              .where(
-                (row) =>
-                    '${row['year']}' == year && row['progressReportId'] is int,
-              )
-              .toList()
-            ..sort((a, b) => '${b['semester']}'.compareTo('${a['semester']}'));
-      if (saved.isEmpty) {
-        throw const ApiException(
-          'No published dashboard for the selected year.',
-        );
-      }
-      progressReportId = saved.first['progressReportId'] as int;
+      progressReportId = await resolveReportId(scope: scope, year: year);
     }
     final data = await _api.get(
       progressReportId == null
@@ -41,6 +27,29 @@ class DashboardRepository {
     } on FormatException {
       throw const ApiException('The server returned invalid dashboard data.');
     }
+  }
+
+  /// A year without a semester uses the latest finalized semester.
+  Future<int> resolveReportId({
+    required DashboardScope scope,
+    required String year,
+  }) async {
+    final saved =
+        (await _api.getList(
+              'dashboards/${scope.name}/saved',
+              query: const {'finalOnly': 'true'},
+            ))
+            .whereType<Map>()
+            .where(
+              (row) =>
+                  '${row['year']}' == year && row['progressReportId'] is int,
+            )
+            .toList()
+          ..sort((a, b) => '${b['semester']}'.compareTo('${a['semester']}'));
+    if (saved.isEmpty) {
+      throw const ApiException('No published dashboard for the selected year.');
+    }
+    return saved.first['progressReportId'] as int;
   }
 
   Future<List<WorkingGroupSummary>> getWorkingGroups() async {

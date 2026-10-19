@@ -50,8 +50,8 @@ class _ProgressReportCard extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Text(
-                'Implementation Date',
+              Text(
+                AppLocalizations.of(context).text('implementationDate'),
                 style: TextStyle(
                   color: AppColors.mutedText,
                   fontSize: 12,
@@ -72,8 +72,8 @@ class _ProgressReportCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              const Text(
-                'Reference Name',
+              Text(
+                AppLocalizations.of(context).text('referenceName'),
                 style: TextStyle(
                   color: AppColors.mutedText,
                   fontSize: 12,

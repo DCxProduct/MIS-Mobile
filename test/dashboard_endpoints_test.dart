@@ -28,6 +28,12 @@ void main() {
         client: MockClient((request) async {
           expect(request.method, 'GET');
           requests.add(request.url.path);
+          expect(
+            request.url.queryParameters,
+            request.url.path.endsWith('/saved')
+                ? {'finalOnly': 'true'}
+                : isEmpty,
+          );
           return http.Response(
             jsonEncode({
               'success': true,

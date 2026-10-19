@@ -1,3 +1,4 @@
+import '../../translations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
@@ -30,7 +31,7 @@ class ProfileDetailScreen extends StatelessWidget {
           ),
         ),
         title: Text(
-          'Profile',
+          AppLocalizations.of(context).text('profile'),
           style: TextStyle(
             color: AppColors.primaryText(context),
             fontSize: 16,
@@ -45,41 +46,43 @@ class ProfileDetailScreen extends StatelessWidget {
           children: [
             const _ProfileCard(),
             const SizedBox(height: 20),
-            const _SectionTitle(title: 'Personal information'),
+            _SectionTitle(
+              title: AppLocalizations.of(context).text('personalInformation'),
+            ),
             const SizedBox(height: 10),
-            const _InfoCard(
+            _InfoCard(
               children: [
                 _InfoItem(
                   icon: Icons.person_outline_rounded,
-                  label: 'Gender',
+                  label: AppLocalizations.of(context).text('gender'),
                   value: 'Male',
                 ),
                 _InfoItem(
                   icon: Icons.calendar_month_outlined,
-                  label: 'Date of birth',
+                  label: AppLocalizations.of(context).text('dateOfBirth'),
                   value: '09 March 2000',
                 ),
                 _InfoItem(
                   icon: Icons.location_on_outlined,
-                  label: 'Address',
+                  label: AppLocalizations.of(context).text('address'),
                   value: 'Phumi Ti 1, Sangkat Ti 1, Khan Toul Kouk',
                   showDivider: false,
                 ),
               ],
             ),
             const SizedBox(height: 20),
-            const _SectionTitle(title: 'Contact'),
+            _SectionTitle(title: AppLocalizations.of(context).text('contact')),
             const SizedBox(height: 10),
             _InfoCard(
               children: [
-                const _InfoItem(
+                _InfoItem(
                   icon: Icons.phone_outlined,
-                  label: 'Phone',
+                  label: AppLocalizations.of(context).text('phone'),
                   value: '016 446 646',
                 ),
                 _InfoItem(
                   icon: Icons.email_outlined,
-                  label: 'Email',
+                  label: AppLocalizations.of(context).text('email'),
                   value: email,
                   showDivider: false,
                 ),

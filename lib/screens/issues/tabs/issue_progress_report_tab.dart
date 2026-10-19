@@ -1,3 +1,4 @@
+import '../../../translations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
@@ -48,8 +49,8 @@ class _ProgressReportCard extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Text(
-                'Implementation Date',
+              Text(
+                AppLocalizations.of(context).text('implementationDate'),
                 style: TextStyle(
                   color: AppColors.mutedText,
                   fontSize: 12,
@@ -70,8 +71,8 @@ class _ProgressReportCard extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Text(
-                'Reference Name',
+              Text(
+                AppLocalizations.of(context).text('referenceName'),
                 style: TextStyle(
                   color: AppColors.mutedText,
                   fontSize: 12,
@@ -139,9 +140,9 @@ class _ProgressReportCard extends StatelessWidget {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   Text(
-                    'View Details',
+                    AppLocalizations.of(context).text('viewDetails'),
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                   SizedBox(width: 4),

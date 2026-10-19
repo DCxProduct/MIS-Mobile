@@ -419,7 +419,7 @@ class _PlenaryCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  translatedStatus,
+                  AppLocalizations.of(context).status(translatedStatus),
                   style: TextStyle(
                     color: isDark
                         ? const Color(0xFF86EFAC)

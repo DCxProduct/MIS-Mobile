@@ -19,7 +19,9 @@ List<FilterSection> cdcFilterSections(
     'Draft' => l10n.text('draft'),
     'Drafted' => l10n.text('drafted'),
     'New Submission' => l10n.text('newSubmission'),
-    _ => value,
+    'Yes' => l10n.text('yes'),
+    'No' => l10n.text('no'),
+    _ => groups['status']?.contains(value) == true ? l10n.status(value) : value,
   };
 
   return [

@@ -1,3 +1,4 @@
+import '../../translations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
@@ -26,7 +27,7 @@ class MeetingSummaryDetailScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Meeting Summary Details',
+          AppLocalizations.of(context).text('meetingSummaryDetails'),
           style: TextStyle(
             color: AppColors.primaryText(context),
             fontSize: 15,
@@ -106,21 +107,21 @@ class _SummaryInfoGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: _InfoBlock(
-                label: 'Meeting Time',
+                label: AppLocalizations.of(context).text('meetingTime'),
                 value: '2:00 PM - 4:00 PM',
               ),
             ),
             SizedBox(width: 24),
             Expanded(
               child: _InfoBlock(
-                label: 'Schedule Meeting :',
+                label: AppLocalizations.of(context).text('scheduleMeeting'),
                 value: 'September 22, 2025',
               ),
             ),
@@ -131,10 +132,19 @@ class _SummaryInfoGrid extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: _InfoBlock(label: 'Location', value: 'Chbar Ompov'),
+              child: _InfoBlock(
+                label: AppLocalizations.of(context).text('location'),
+                value: 'Chbar Ompov',
+              ),
             ),
             SizedBox(width: 24),
-            Expanded(child: _DocumentBlock(label: 'Meeting Request Document:')),
+            Expanded(
+              child: _DocumentBlock(
+                label: AppLocalizations.of(
+                  context,
+                ).text('meetingRequestDocument'),
+              ),
+            ),
           ],
         ),
       ],
@@ -212,7 +222,7 @@ class _DocumentBlock extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Request Doc',
+                    AppLocalizations.of(context).text('requestDocument'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -245,7 +255,7 @@ class _AllIssuesTabHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       height: 40,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -253,7 +263,7 @@ class _AllIssuesTabHeader extends StatelessWidget {
         children: [
           Center(
             child: Text(
-              'All Issues',
+              AppLocalizations.of(context).text('allIssues'),
               style: TextStyle(
                 color: AppColors.primary,
                 fontSize: 12,
@@ -311,7 +321,7 @@ class _ClimateIssueCard extends StatelessWidget {
                     border: Border.all(color: AppColors.border(context)),
                   ),
                   child: Text(
-                    'Not Addressed',
+                    AppLocalizations.of(context).text('notAddressed'),
                     style: TextStyle(
                       color: AppColors.secondaryText(context),
                       fontSize: 12,
@@ -386,7 +396,7 @@ class _IssueDetailsSheet extends StatelessWidget {
                   const SizedBox(height: 14),
                   Center(
                     child: Text(
-                      'Issues Details',
+                      AppLocalizations.of(context).text('issuesDetails'),
                       style: TextStyle(
                         color: AppColors.primaryText(context),
                         fontSize: 15,
@@ -410,15 +420,27 @@ class _IssueDetailsSheet extends StatelessWidget {
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: const [
-                        _DatePill(label: 'Submitted By', value: 'Sabada'),
+                      children: [
+                        _DatePill(
+                          label: AppLocalizations.of(
+                            context,
+                          ).text('submittedBy'),
+                          value: 'Sabada',
+                        ),
                         SizedBox(width: 10),
                         _DatePill(
-                          label: 'Submitted Date',
+                          label: AppLocalizations.of(
+                            context,
+                          ).text('submittedDate'),
                           value: 'Jun 24 2025',
                         ),
                         SizedBox(width: 10),
-                        _DatePill(label: 'Government Agency', value: 'MAFF'),
+                        _DatePill(
+                          label: AppLocalizations.of(
+                            context,
+                          ).text('governmentAgency'),
+                          value: 'MAFF',
+                        ),
                         SizedBox(width: 10),
                         _DatePill(
                           label: "Gov't Second Agency",
@@ -443,9 +465,15 @@ class _IssueDetailsSheet extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const _ReadMorePanel(title: 'Issues Descriptions'),
+                  _ReadMorePanel(
+                    title: AppLocalizations.of(
+                      context,
+                    ).text('issuesDescriptions'),
+                  ),
                   const SizedBox(height: 18),
-                  const _ReadMorePanel(title: 'Recommendations'),
+                  _ReadMorePanel(
+                    title: AppLocalizations.of(context).text('recommendations'),
+                  ),
                 ],
               ),
             ),
@@ -461,20 +489,24 @@ class _IssueSheetInfoGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: _InfoBlock(
-                label: 'Submitted by',
+                label: AppLocalizations.of(context).text('submittedBy'),
                 value: 'Agriculture and Agro-In...',
               ),
             ),
             SizedBox(width: 18),
             Expanded(
-              child: _InfoBlock(label: 'Status :', value: '• Not Addressed'),
+              child: _InfoBlock(
+                label: AppLocalizations.of(context).text('status'),
+                value:
+                    '• ${AppLocalizations.of(context).status('Not Addressed')}',
+              ),
             ),
           ],
         ),
@@ -483,10 +515,19 @@ class _IssueSheetInfoGrid extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: _InfoBlock(label: 'Categories', value: 'Legislation'),
+              child: _InfoBlock(
+                label: AppLocalizations.of(context).text('categories'),
+                value: 'Legislation',
+              ),
             ),
             SizedBox(width: 18),
-            Expanded(child: _DocumentBlock(label: 'Meeting Request Document:')),
+            Expanded(
+              child: _DocumentBlock(
+                label: AppLocalizations.of(
+                  context,
+                ).text('meetingRequestDocument'),
+              ),
+            ),
           ],
         ),
       ],
@@ -578,8 +619,8 @@ class _ReadMorePanel extends StatelessWidget {
               const SizedBox(height: 6),
               InkWell(
                 onTap: () {},
-                child: const Text(
-                  'Read more',
+                child: Text(
+                  AppLocalizations.of(context).text('readMore'),
                   style: TextStyle(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w700,

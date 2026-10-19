@@ -26,7 +26,7 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Progress Report Details',
+          AppLocalizations.of(context).text('progressReportDetails'),
           style: TextStyle(
             color: AppColors.primaryText(context),
             fontSize: 15,
@@ -58,8 +58,8 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
             label: AppLocalizations.of(context).text('viewDetails'),
           ),
           const SizedBox(height: 18),
-          const _SectionTitle(
-            title: 'Solution Indicators | សូចនាករនៃដំណោះស្រាយ',
+          _SectionTitle(
+            title: AppLocalizations.of(context).text('solutionIndicators'),
           ),
           const SizedBox(height: 8),
           const _ReadMoreCard(
@@ -67,8 +67,8 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
                 'ត្រូវការសម្របសម្រួលរវាងក្រុមការងារនិងស្ថាប័នពាក់ព័ន្ធដើម្បីអនុវត្តសេចក្តីសម្រេចនេះឱ្យមានប្រសិទ្ធភាព។',
           ),
           const SizedBox(height: 16),
-          const _SectionTitle(
-            title: 'Solution Indicators | សូចនាករនៃដំណោះស្រាយ',
+          _SectionTitle(
+            title: AppLocalizations.of(context).text('solutionIndicators'),
           ),
           const SizedBox(height: 8),
           const _ReadMoreCard(
@@ -76,21 +76,23 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
                 'ត្រូវការសម្របសម្រួលរវាងក្រុមការងារនិងស្ថាប័នពាក់ព័ន្ធដើម្បីអនុវត្តសេចក្តីសម្រេចនេះឱ្យមានប្រសិទ្ធភាព។',
           ),
           const SizedBox(height: 16),
-          const _SectionTitle(title: 'Challenges | បញ្ហាប្រឈម'),
+          _SectionTitle(title: AppLocalizations.of(context).text('challenges')),
           const SizedBox(height: 8),
           const _ReadMoreCard(
             body:
                 'ត្រូវការសម្របសម្រួលរវាងក្រុមការងារនិងស្ថាប័នពាក់ព័ន្ធដើម្បីអនុវត្តសេចក្តីសម្រេចនេះឱ្យមានប្រសិទ្ធភាព។',
           ),
           const SizedBox(height: 16),
-          const _SectionTitle(title: 'Requests | សំណូមពរ'),
+          _SectionTitle(title: AppLocalizations.of(context).text('requests')),
           const SizedBox(height: 8),
           const _ReadMoreCard(
             body:
                 'ត្រូវការសម្របសម្រួលរវាងក្រុមការងារនិងស្ថាប័នពាក់ព័ន្ធដើម្បីអនុវត្តសេចក្តីសម្រេចនេះឱ្យមានប្រសិទ្ធភាព។',
           ),
           const SizedBox(height: 16),
-          const _SectionTitle(title: 'RGC Decision'),
+          _SectionTitle(
+            title: AppLocalizations.of(context).text('rgcDecision'),
+          ),
           const SizedBox(height: 8),
           const _ReadMoreCard(
             body:
@@ -114,9 +116,9 @@ class _ReportInfoGrid extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Expanded(
+            Expanded(
               child: _InfoBlock(
-                label: 'Implementation Date',
+                label: AppLocalizations.of(context).text('implementationDate'),
                 value: 'Oct 23, 2025 | 2:00-3:00 PM',
               ),
             ),
@@ -134,8 +136,12 @@ class _ReportInfoGrid extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Expanded(
-              child: _DocumentInfoBlock(label: 'Meeting Reference Document :'),
+            Expanded(
+              child: _DocumentInfoBlock(
+                label: AppLocalizations.of(
+                  context,
+                ).text('meetingReferenceDocument'),
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -216,7 +222,7 @@ class _DocumentInfoBlock extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Request Doc',
+                    AppLocalizations.of(context).text('requestDocument'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -338,8 +344,8 @@ class _ReadMoreCard extends StatelessWidget {
           children: [
             TextSpan(text: body),
             const TextSpan(text: '  '),
-            const TextSpan(
-              text: 'Read more',
+            TextSpan(
+              text: AppLocalizations.of(context).text('readMore'),
               style: TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w700,

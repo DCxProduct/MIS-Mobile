@@ -41,9 +41,19 @@ class _CdcSectionDashboardScreenViewState
                     ))
             : ApiFilterSheet(
                 initial: tab == 0 ? _plenaryFilters : _workingGroupFilters,
-                load: () => AppSettings.of(
-                  context,
-                ).filters.dashboard(tab == 0 ? 'plenary' : 'pswg'),
+                load: () => AppSettings.of(context).filters.dashboard(
+                  tab == 0 ? 'plenary' : 'pswg',
+                  progressReportId: int.tryParse(
+                    (tab == 0 ? _plenaryFilters : _workingGroupFilters)
+                            .toQuery()['progressReportId'] ??
+                        '',
+                  ),
+                  year:
+                      (tab == 0
+                              ? _plenaryFilters
+                              : _workingGroupFilters)['local.year']
+                          .firstOrNull,
+                ),
               ),
       ),
     );

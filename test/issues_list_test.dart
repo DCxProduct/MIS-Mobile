@@ -13,6 +13,7 @@ import 'package:gpsf_app/features/shared/issues/data/issues_repository.dart';
 import 'package:gpsf_app/features/shared/issues/widgets/wg_issues_list.dart';
 import 'package:gpsf_app/screens/issues/issues_screen.dart';
 import 'package:gpsf_app/translations/app_language.dart';
+import 'package:gpsf_app/translations/app_localizations.dart';
 
 void main() {
   final fixture = File('test/fixtures/wg_issues.json').readAsStringSync();
@@ -134,6 +135,87 @@ void main() {
       expect(find.text('ស្នើសុំអន្តរាគមន៍ជួយប្រមូលទិញត្រី'), findsOneWidget);
     });
   }
+
+  testWidgets('ministry issue list and details follow language changes', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var listCalls = 0;
+    final settings = AppSettingsController(
+      authRepository: AuthRepository(
+        ApiClient(
+          client: MockClient((request) async {
+            if (request.url.path.endsWith('/summary/my')) {
+              return http.Response(
+                File('test/fixtures/wg_issue_summary.json').readAsStringSync(),
+                200,
+              );
+            }
+            listCalls++;
+            return http.Response.bytes(utf8.encode(fixture), 200);
+          }),
+        ),
+      ),
+    )..setModuleType(AppModuleType.lineMinistry);
+    addTearDown(settings.dispose);
+    await tester.pumpWidget(
+      AppSettings(
+        controller: settings,
+        child: const MaterialApp(home: Scaffold(body: IssuesScreen())),
+      ),
+    );
+    await tester.pumpAndSettle();
+    for (final language in [
+      AppLanguage.khmer,
+      AppLanguage.english,
+      AppLanguage.khmer,
+    ]) {
+      settings.setLanguage(language);
+      await tester.pumpAndSettle();
+      final l10n = AppLocalizations(language);
+      expect(find.text(l10n.text('submissionDate')), findsWidgets);
+      expect(find.text(l10n.text('submittedBy')), findsWidgets);
+    }
+    await tester.ensureVisible(find.text(title));
+    await tester.tap(find.text(title));
+    await tester.pumpAndSettle();
+    for (final language in [
+      AppLanguage.khmer,
+      AppLanguage.english,
+      AppLanguage.khmer,
+    ]) {
+      settings.setLanguage(language);
+      await tester.pumpAndSettle();
+      final l10n = AppLocalizations(language);
+      for (final key in [
+        'issueDetails',
+        'governmentAgency',
+        'status',
+        'category',
+        'meetingRequestDocument',
+        'descriptions',
+        'progressReport',
+        'issuesDescription',
+        'recommendation',
+      ]) {
+        expect(find.text(l10n.text(key)), findsOneWidget);
+      }
+      expect(
+        find.textContaining(l10n.text('submittedDate'), findRichText: true),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining(l10n.text('meetingDate'), findRichText: true),
+        findsOneWidget,
+      );
+      expect(find.text(title), findsOneWidget);
+    }
+    expect(listCalls, 1);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('retry returns empty state without demo cards', (tester) async {
     var calls = 0;

@@ -7,9 +7,10 @@ import '../../../shared/meetings/widgets/meetings_loader.dart';
 import '../meeting_request_detail_screen.dart';
 
 class CalendarTab extends StatefulWidget {
-  const CalendarTab({super.key, this.initialMeetingId});
+  const CalendarTab({super.key, this.initialMeetingId, this.detailBuilder});
 
   final int? initialMeetingId;
+  final Widget Function(CalendarMeeting meeting)? detailBuilder;
 
   @override
   State<CalendarTab> createState() => _CalendarTabState();
@@ -103,10 +104,12 @@ class _CalendarTabState extends State<CalendarTab> {
               meeting: meeting,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => MeetingRequestDetailScreen(
-                    title: meeting.details.title,
-                    request: meeting.details,
-                  ),
+                  builder: (_) =>
+                      widget.detailBuilder?.call(meeting) ??
+                      MeetingRequestDetailScreen(
+                        title: meeting.details.title,
+                        request: meeting.details,
+                      ),
                 ),
               ),
             ),

@@ -12,6 +12,7 @@ class MeetingRequest {
       meetingDate = _date(json['meetingDate']),
       submittedAt = _date(json['submittedAt']),
       submittedBy = _string(_object(json['user'])['name']),
+      receivedBy = _personName(json['receivedBy']),
       groupNames = (_object(json['user'])['stakeholders'] as List? ?? [])
           .map((entry) => _string(_object(entry)['stakeholder']?['name']))
           .where((name) => name.isNotEmpty)
@@ -69,6 +70,7 @@ class MeetingRequest {
       status,
       description,
       submittedBy,
+      receivedBy,
       group,
       agencies,
       letterName,
@@ -84,6 +86,9 @@ class MeetingRequest {
   static int _int(Object? value) => value is int ? value : 0;
 
   static String _string(Object? value) => value is String ? value : '';
+
+  static String _personName(Object? value) =>
+      (value is String ? value : _string(_object(value)['name'])).trim();
 
   static DateTime? _date(dynamic value) =>
       value is String ? DateTime.tryParse(value) : null;

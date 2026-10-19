@@ -105,7 +105,7 @@ class CdcIssueProgressReportDataDetailScreen extends StatelessWidget {
                     flex: 2,
                     child: CdcDetailInfoValue(
                       label: '${l10n.text('status')}:',
-                      value: issueStatus,
+                      value: l10n.status(issueStatus),
                       color: AppColors.accent(context),
                     ),
                   ),

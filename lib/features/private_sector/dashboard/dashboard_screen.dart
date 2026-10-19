@@ -175,7 +175,11 @@ class DashboardPageState extends State<DashboardPage> {
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
           initial: _dashboardFilters[tab],
-          load: () => catalogs.dashboard(tab == 0 ? 'plenary' : 'pswg'),
+          load: () => catalogs.dashboard(
+            tab == 0 ? 'plenary' : 'pswg',
+            progressReportId: _reportId,
+            year: _dashboardFilters[tab]['local.year'].firstOrNull,
+          ),
         ),
       ),
     );

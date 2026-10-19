@@ -37,13 +37,21 @@ class _MeetingSummaryDetailScreenState
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Meeting Summary Details')),
+            appBar: AppBar(
+              title: Text(
+                AppLocalizations.of(context).text('meetingSummaryDetails'),
+              ),
+            ),
             body: const Center(child: CircularProgressIndicator()),
           );
         }
         if (snapshot.hasError || snapshot.data == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Meeting Summary Details')),
+            appBar: AppBar(
+              title: Text(
+                AppLocalizations.of(context).text('meetingSummaryDetails'),
+              ),
+            ),
             body: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -88,7 +96,7 @@ class _MeetingSummaryDetailScreenState
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Meeting Summary Details',
+          AppLocalizations.of(context).text('meetingSummaryDetails'),
           style: TextStyle(
             color: AppColors.primaryText(context),
             fontSize: 15,
@@ -186,7 +194,7 @@ class _SummaryInfoGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoBlock(
-                label: 'Meeting Time',
+                label: AppLocalizations.of(context).text('meetingTime'),
                 value: summary.detailDate == null
                     ? '—'
                     : MaterialLocalizations.of(context).formatTimeOfDay(
@@ -197,7 +205,7 @@ class _SummaryInfoGrid extends StatelessWidget {
             SizedBox(width: 24),
             Expanded(
               child: _InfoBlock(
-                label: 'Schedule Meeting :',
+                label: AppLocalizations.of(context).text('scheduleMeeting'),
                 value: summary.detailDate == null
                     ? '—'
                     : MaterialLocalizations.of(
@@ -213,14 +221,16 @@ class _SummaryInfoGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoBlock(
-                label: 'Location',
+                label: AppLocalizations.of(context).text('location'),
                 value: summary.location.isEmpty ? '—' : summary.location,
               ),
             ),
             SizedBox(width: 24),
             Expanded(
               child: _DocumentBlock(
-                label: 'Meeting Request Document:',
+                label: AppLocalizations.of(
+                  context,
+                ).text('meetingRequestDocument'),
                 path:
                     summary.requestDocumentPath ?? summary.meetingDocumentPath,
               ),
@@ -306,7 +316,7 @@ class _DocumentBlock extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Request Doc',
+                      AppLocalizations.of(context).text('requestDocument'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -340,7 +350,7 @@ class _AllIssuesTabHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       height: 40,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -348,7 +358,7 @@ class _AllIssuesTabHeader extends StatelessWidget {
         children: [
           Center(
             child: Text(
-              'All Issues',
+              AppLocalizations.of(context).text('allIssues'),
               style: TextStyle(
                 color: AppColors.primary,
                 fontSize: 12,
@@ -407,7 +417,7 @@ class _ClimateIssueCard extends StatelessWidget {
                     border: Border.all(color: AppColors.border(context)),
                   ),
                   child: Text(
-                    issue?.status.isNotEmpty == true ? issue!.status : '—',
+                    AppLocalizations.of(context).status(issue?.status ?? ''),
                     style: TextStyle(
                       color: AppColors.secondaryText(context),
                       fontSize: 12,
@@ -484,7 +494,7 @@ class _IssueDetailsSheet extends StatelessWidget {
                   const SizedBox(height: 14),
                   Center(
                     child: Text(
-                      'Issues Details',
+                      AppLocalizations.of(context).text('issuesDetails'),
                       style: TextStyle(
                         color: AppColors.primaryText(context),
                         fontSize: 15,
@@ -510,15 +520,27 @@ class _IssueDetailsSheet extends StatelessWidget {
                     child: Row(
                       children: [
                         _DatePill(
-                          label: 'Submitted By',
+                          label: AppLocalizations.of(
+                            context,
+                          ).text('submittedBy'),
                           name: issue?.agency.isNotEmpty == true
                               ? issue!.agency
                               : '—',
                         ),
                         SizedBox(width: 10),
-                        _DatePill(label: 'Submitted Date', name: 'Jun 24 2025'),
+                        _DatePill(
+                          label: AppLocalizations.of(
+                            context,
+                          ).text('submittedDate'),
+                          name: 'Jun 24 2025',
+                        ),
                         SizedBox(width: 10),
-                        _DatePill(label: 'Government Agency', name: 'MAFF'),
+                        _DatePill(
+                          label: AppLocalizations.of(
+                            context,
+                          ).text('governmentAgency'),
+                          name: 'MAFF',
+                        ),
                         SizedBox(width: 10),
                         _DatePill(
                           label: "Gov't Second Agency",
@@ -544,12 +566,14 @@ class _IssueDetailsSheet extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   _ReadMorePanel(
-                    title: 'Issues Descriptions',
+                    title: AppLocalizations.of(
+                      context,
+                    ).text('issuesDescriptions'),
                     body: issue?.descriptionHtml ?? issue?.description,
                   ),
                   const SizedBox(height: 18),
                   _ReadMorePanel(
-                    title: 'Recommendations',
+                    title: AppLocalizations.of(context).text('recommendations'),
                     body: issue?.recommendationHtml ?? issue?.recommendation,
                   ),
                 ],
@@ -576,16 +600,16 @@ class _IssueSheetInfoGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoBlock(
-                label: 'Submitted by',
+                label: AppLocalizations.of(context).text('submittedBy'),
                 value: issue?.agency.isNotEmpty == true ? issue!.agency : '—',
               ),
             ),
             SizedBox(width: 18),
             Expanded(
               child: _InfoBlock(
-                label: 'Status :',
+                label: AppLocalizations.of(context).text('status'),
                 value:
-                    '• ${issue?.status.isNotEmpty == true ? issue!.status : '—'}',
+                    '• ${AppLocalizations.of(context).status(issue?.status ?? '')}',
               ),
             ),
           ],
@@ -596,7 +620,7 @@ class _IssueSheetInfoGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoBlock(
-                label: 'Categories',
+                label: AppLocalizations.of(context).text('categories'),
                 value: issue?.category.isNotEmpty == true
                     ? issue!.category
                     : '—',
@@ -605,7 +629,9 @@ class _IssueSheetInfoGrid extends StatelessWidget {
             SizedBox(width: 18),
             Expanded(
               child: _DocumentBlock(
-                label: 'Meeting Request Document:',
+                label: AppLocalizations.of(
+                  context,
+                ).text('meetingRequestDocument'),
                 path: issue?.attachmentPath ?? issue?.referencePath,
               ),
             ),

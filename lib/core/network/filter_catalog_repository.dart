@@ -2,29 +2,56 @@ import '../../features/shared/meetings/data/meeting_request.dart';
 import '../../features/shared/meetings/data/meeting_summary.dart';
 import '../../features/shared/meetings/data/calendar_meeting.dart';
 import '../../features/shared/issues/data/cdc_issue_matrix_repository.dart';
+import '../../features/shared/dashboard/data/dashboard_repository.dart';
 import '../../features/shared/meetings/data/rgc_decision.dart';
 import '../widgets/filters/filter_models.dart';
 import 'api_client.dart';
 
-/// Catalogs and query keys are endpoint-specific. Display labels never serve
-/// as foreign keys, and options never come from the currently loaded page.
+/// Catalogs and query keys are endpoint-specific. Dashboard dimensions use
+/// names for local matching against their snapshot's aggregate rows.
 class FilterCatalogRepository {
   FilterCatalogRepository(this._api);
   final ApiClient _api;
 
-  Future<List<FilterSection>> dashboard(String scope) async {
-    final responses = await Future.wait([
-      _api.getList('dashboards/$scope/saved'),
-      _api.get('dashboards/$scope/live'),
-    ]);
-    final rows = responses[0] as List;
-    final snapshot = responses[1] as Map;
+  Future<List<FilterSection>> dashboard(
+    String scope, {
+    int? progressReportId,
+    String? year,
+  }) async {
+    final dashboardScope = DashboardScope.values.byName(scope);
+    final rows = await _api.getList(
+      'dashboards/$scope/saved',
+      query: const {'finalOnly': 'true'},
+    );
+    if (progressReportId == null && year != null) {
+      final reports =
+          rows
+              .whereType<Map>()
+              .where(
+                (row) =>
+                    '${row['year']}' == year && row['progressReportId'] is int,
+              )
+              .toList()
+            ..sort((a, b) => '${b['semester']}'.compareTo('${a['semester']}'));
+      if (reports.isEmpty) {
+        throw const ApiException(
+          'No published dashboard for the selected year.',
+        );
+      }
+      progressReportId = reports.first['progressReportId'] as int;
+    }
+    final snapshot = await _api.get(
+      progressReportId == null
+          ? 'dashboards/${dashboardScope.name}/live'
+          : 'progress-reports/$progressReportId/dashboards/${dashboardScope.name}/final',
+    );
     List<FilterOption> breakdown(String key, String nameKey) => [
       for (final row in snapshot[key] as List)
         if (row is Map && row[nameKey] is String)
           FilterOption(
             value: row[nameKey] as String,
             label: row[nameKey] as String,
+            khmerLabel: row[nameKey.replaceFirst('Name', 'KhName')] as String?,
           ),
     ];
     return [

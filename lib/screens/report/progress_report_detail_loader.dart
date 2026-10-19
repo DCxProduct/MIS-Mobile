@@ -54,7 +54,11 @@ class _ProgressReportDetailLoaderState
       }
       final l10n = AppLocalizations.of(context);
       return Scaffold(
-        appBar: AppBar(title: const Text('Progress Report Details')),
+        appBar: AppBar(
+          title: Text(
+            AppLocalizations.of(context).text('progressReportDetails'),
+          ),
+        ),
         body: snapshot.hasError
             ? Center(
                 child: Column(

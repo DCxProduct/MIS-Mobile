@@ -20,10 +20,11 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : const Color(0xFFFAFAFA),
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : const Color(0xFFFAFAFA),
       appBar: AppBar(
         backgroundColor: isDark ? AppColors.darkBackground : Colors.white,
         elevation: 0,
@@ -38,7 +39,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Issue Details',
+          AppLocalizations.of(context).text('issueDetails'),
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 16,
@@ -81,7 +82,9 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
             maxLines: _expandDescription ? 100 : 12,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: isDark ? AppColors.secondaryText(context) : const Color(0xFF334155),
+              color: isDark
+                  ? AppColors.secondaryText(context)
+                  : const Color(0xFF334155),
               fontSize: 12,
               height: 1.55,
               fontWeight: FontWeight.w400,
@@ -96,7 +99,9 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  _expandDescription ? 'View Less' : 'View Details',
+                  AppLocalizations.of(
+                    context,
+                  ).text(_expandDescription ? 'viewLess' : 'viewDetails'),
                   style: const TextStyle(
                     color: Color(0xFF1E73BE),
                     fontSize: 12,
@@ -118,7 +123,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
 
           // 1. SOLUTION INDICATORS | សូចនាករដំណោះស្រាយ
           _SectionBlock(
-            title: 'Solution Indicators | សូចនាករដំណោះស្រាយ',
+            title: AppLocalizations.of(context).text('solutionIndicators'),
             content:
                 'ផ្នែកឯកជនស្នើស្រាវជ្រាវសម្រួលក្នុងឆន្ទានុសិទ្ធិរបស់ក្រសួងកសិកម្មរុក្ខាប្រមាញ់ និងនេសាទដើម្បីផ្តល់ព័ត៌មានស្តីពីសេរីភាពនៃការវិនិយោគ និងការសម្របសម្រួលការនាំចេញបន្ថែមវិញ។',
             isExpanded: _expandSolution,
@@ -130,7 +135,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
 
           // 2. CHALLENGES | បញ្ហាប្រឈម
           _SectionBlock(
-            title: 'Challenges | បញ្ហាប្រឈម',
+            title: AppLocalizations.of(context).text('challenges'),
             content:
                 'ផ្នែកឯកជនស្នើស្រាវជ្រាវសម្រួលក្នុងឆន្ទានុសិទ្ធិរបស់ក្រសួងកសិកម្មរុក្ខាប្រមាញ់ និងនេសាទដើម្បីផ្តល់ព័ត៌មានស្តីពីសេរីភាពនៃការវិនិយោគ និងការសម្របសម្រួលការនាំចេញបន្ថែមវិញ។',
             isExpanded: _expandChallenges,
@@ -142,7 +147,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
 
           // 3. REQUESTS | សំណូមពរ
           _SectionBlock(
-            title: 'Requests | សំណូមពរ',
+            title: AppLocalizations.of(context).text('requests'),
             content:
                 'ផ្នែកឯកជនស្នើស្រាវជ្រាវសម្រួលក្នុងឆន្ទានុសិទ្ធិរបស់ក្រសួងកសិកម្មរុក្ខាប្រមាញ់ និងនេសាទដើម្បីផ្តល់ព័ត៌មានស្តីពីសេរីភាពនៃការវិនិយោគ និងការសម្របសម្រួលការនាំចេញបន្ថែមវិញ។',
             isExpanded: _expandRequests,
@@ -154,7 +159,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
 
           // 4. RGC DECISION
           _SectionBlock(
-            title: 'RGC Decision',
+            title: AppLocalizations.of(context).text('rgcDecision'),
             content:
                 'ផ្នែកឯកជនស្នើស្រាវជ្រាវសម្រួលក្នុងឆន្ទានុសិទ្ធិរបស់ក្រសួងកសិកម្មរុក្ខាប្រមាញ់ និងនេសាទដើម្បីផ្តល់ព័ត៌មានស្តីពីសេរីភាពនៃការវិនិយោគ និងការសម្របសម្រួលការនាំចេញបន្ថែមវិញ។',
             isExpanded: _expandRgcDecision,
@@ -178,18 +183,18 @@ class _ReportInfoGrid extends StatelessWidget {
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Expanded(
               child: _InfoField(
-                label: 'Implementation Date',
+                label: AppLocalizations.of(context).text('implementationDate'),
                 value: 'June 29, 2025 | 2:00-3:00PM',
               ),
             ),
             SizedBox(width: 16),
             Expanded(
               child: _InfoField(
-                label: 'Status :',
-                value: 'Complete',
+                label: AppLocalizations.of(context).text('status'),
+                value: AppLocalizations.of(context).text('complete'),
                 valueColor: Color(0xFF1E73BE),
               ),
             ),
@@ -198,16 +203,18 @@ class _ReportInfoGrid extends StatelessWidget {
         const SizedBox(height: 14),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Expanded(
               child: _DocumentField(
-                label: 'Meeting Reference Document :',
+                label: AppLocalizations.of(
+                  context,
+                ).text('meetingReferenceDocument'),
               ),
             ),
             SizedBox(width: 16),
             Expanded(
               child: _InfoField(
-                label: 'Reference Name',
+                label: AppLocalizations.of(context).text('referenceName'),
                 value: 'របាយការណ៍',
               ),
             ),
@@ -219,11 +226,7 @@ class _ReportInfoGrid extends StatelessWidget {
 }
 
 class _InfoField extends StatelessWidget {
-  const _InfoField({
-    required this.label,
-    required this.value,
-    this.valueColor,
-  });
+  const _InfoField({required this.label, required this.value, this.valueColor});
 
   final String label;
   final String value;
@@ -283,14 +286,18 @@ class _DocumentField extends StatelessWidget {
         const SizedBox(height: 5),
         Row(
           children: [
-            const Icon(Icons.picture_as_pdf, color: Color(0xFFEF4444), size: 18),
+            const Icon(
+              Icons.picture_as_pdf,
+              color: Color(0xFFEF4444),
+              size: 18,
+            ),
             const SizedBox(width: 6),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Request Doc',
+                    AppLocalizations.of(context).text('requestDocument'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -377,7 +384,9 @@ class _SectionBlock extends StatelessWidget {
               InkWell(
                 onTap: onReadMoreToggle,
                 child: Text(
-                  isExpanded ? 'Show less' : 'Read more',
+                  AppLocalizations.of(
+                    context,
+                  ).text(isExpanded ? 'showLess' : 'readMore'),
                   style: const TextStyle(
                     color: Color(0xFF1E73BE),
                     fontSize: 12,

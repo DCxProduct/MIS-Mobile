@@ -118,7 +118,7 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                     flex: 2,
                     child: CdcDetailInfoValue(
                       label: '${l10n.text('status')} :',
-                      value: status,
+                      value: AppLocalizations.of(context).status(status),
                       color: statusColor,
                     ),
                   ),
@@ -162,7 +162,9 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                                   children: [
                                     Text(
                                       issue == null
-                                          ? 'Request Doc'
+                                          ? AppLocalizations.of(
+                                              context,
+                                            ).text('requestDocument')
                                           : documentPath.isEmpty
                                           ? '—'
                                           : documentName.isNotEmpty

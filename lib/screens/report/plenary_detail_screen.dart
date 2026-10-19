@@ -1,3 +1,4 @@
+import '../../translations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
@@ -31,7 +32,7 @@ class PlenaryDetailScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Meeting Request Details',
+          AppLocalizations.of(context).text('meetingRequestDetails'),
           style: TextStyle(
             color: AppColors.primaryText(context),
             fontSize: 15,
@@ -50,17 +51,17 @@ class PlenaryDetailScreen extends StatelessWidget {
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Expanded(
                   child: _DetailBlock(
-                    label: 'Deadline',
+                    label: AppLocalizations.of(context).text('deadline'),
                     value: 'June 07, 2025',
                   ),
                 ),
                 SizedBox(width: 16),
                 Expanded(
                   child: _DetailBlock(
-                    label: 'Meeting Date',
+                    label: AppLocalizations.of(context).text('meetingDate'),
                     value: 'Ouk Sabda ( June 01, 2025 )',
                   ),
                 ),
@@ -69,17 +70,19 @@ class PlenaryDetailScreen extends StatelessWidget {
             const SizedBox(height: 14),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Expanded(
                   child: _DetailBlock(
-                    label: 'Number of RGC Decision',
+                    label: AppLocalizations.of(
+                      context,
+                    ).text('numberOfRgcDecision'),
                     value: '179',
                   ),
                 ),
                 SizedBox(width: 16),
                 Expanded(
                   child: _DetailBlock(
-                    label: 'Status :',
+                    label: AppLocalizations.of(context).text('status'),
                     value: '• Sent',
                     valueColor: Color(0xFF1E73BE),
                   ),
@@ -87,8 +90,8 @@ class PlenaryDetailScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Approval Report',
+            Text(
+              AppLocalizations.of(context).text('approvalReport'),
               style: TextStyle(
                 color: AppColors.mutedText,
                 fontSize: 12,
@@ -114,7 +117,9 @@ class PlenaryDetailScreen extends StatelessWidget {
                     children: [
                       Text(
                         documentReference == null
-                            ? 'Request Doc'
+                            ? AppLocalizations.of(
+                                context,
+                              ).text('requestDocument')
                             : pdfAttachmentName(documentReference!),
                         style: TextStyle(
                           color: AppColors.primaryText(context),
@@ -257,7 +262,7 @@ class _PlenaryIssueItemCard extends StatelessWidget {
                 Expanded(
                   child: _MetaItem(
                     icon: Icons.calendar_month_outlined,
-                    label: 'Meeting Date',
+                    label: AppLocalizations.of(context).text('meetingDate'),
                     value: meetingDate,
                     color: const Color(0xFF1E73BE),
                   ),
@@ -265,7 +270,7 @@ class _PlenaryIssueItemCard extends StatelessWidget {
                 Expanded(
                   child: _MetaItem(
                     icon: Icons.grid_view_outlined,
-                    label: 'Categories',
+                    label: AppLocalizations.of(context).text('categories'),
                     value: category,
                     color: const Color(0xFF7C3AED),
                   ),
@@ -273,7 +278,7 @@ class _PlenaryIssueItemCard extends StatelessWidget {
                 Expanded(
                   child: _MetaItem(
                     icon: Icons.person_outline,
-                    label: 'Focal Person',
+                    label: AppLocalizations.of(context).text('focalPerson'),
                     value: focalPerson,
                     color: const Color(0xFF059669),
                   ),
@@ -299,8 +304,8 @@ class _PlenaryIssueItemCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: const Color(0xFF16A34A), width: 1),
               ),
-              child: const Text(
-                'Solved',
+              child: Text(
+                AppLocalizations.of(context).text('solved'),
                 style: TextStyle(
                   color: Color(0xFF16A34A),
                   fontSize: 13,
@@ -349,7 +354,7 @@ class _RgcDecisionBottomSheet extends StatelessWidget {
                     ),
                     Expanded(
                       child: Text(
-                        'RGC Decision',
+                        AppLocalizations.of(context).text('rgcDecision'),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
@@ -370,18 +375,21 @@ class _RgcDecisionBottomSheet extends StatelessWidget {
                   children: [
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Expanded(
                           child: _FieldBlock(
-                            label: 'Submitted by',
+                            label: AppLocalizations.of(
+                              context,
+                            ).text('submittedBy'),
                             value: 'Agriculture and Agro-In...',
                           ),
                         ),
                         SizedBox(width: 12),
                         Expanded(
                           child: _FieldBlock(
-                            label: 'Status :',
-                            value: '• Solved',
+                            label: AppLocalizations.of(context).text('status'),
+                            value:
+                                '• ${AppLocalizations.of(context).status('Solved')}',
                             valueColor: Color(0xFF16A34A),
                           ),
                         ),
@@ -390,17 +398,21 @@ class _RgcDecisionBottomSheet extends StatelessWidget {
                     const SizedBox(height: 16),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Expanded(
                           child: _FieldBlock(
-                            label: 'Categories',
+                            label: AppLocalizations.of(
+                              context,
+                            ).text('categories'),
                             value: 'Procedure',
                           ),
                         ),
                         SizedBox(width: 12),
                         Expanded(
                           child: _FieldBlock(
-                            label: 'Focal Person (H.E) :',
+                            label: AppLocalizations.of(
+                              context,
+                            ).text('focalPersonHE'),
                             value: 'Dith Tina',
                           ),
                         ),
@@ -408,7 +420,7 @@ class _RgcDecisionBottomSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'RGC Decision',
+                      AppLocalizations.of(context).text('rgcDecision'),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 13,
@@ -441,7 +453,9 @@ class _RgcDecisionBottomSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Link to Verification Source',
+                      AppLocalizations.of(
+                        context,
+                      ).text('linkToVerificationSource'),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 13,

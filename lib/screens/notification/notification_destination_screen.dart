@@ -422,7 +422,9 @@ class _DecisionList extends StatelessWidget {
           Card(
             child: ListTile(
               title: Text(decision.agencyName),
-              subtitle: Text('${decision.category}\n${decision.status}'),
+              subtitle: Text(
+                '${decision.category}\n${AppLocalizations.of(context).status(decision.status)}',
+              ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).push<void>(
                 MaterialPageRoute(

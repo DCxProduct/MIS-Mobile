@@ -596,7 +596,7 @@ class _LineMinistryIssueListCard extends StatelessWidget {
                     border: Border.all(color: statusBorder),
                   ),
                   child: Text(
-                    '• $status',
+                    '• ${AppLocalizations.of(context).status(status)}',
                     style: TextStyle(
                       color: statusColor,
                       fontSize: 11,
@@ -612,7 +612,7 @@ class _LineMinistryIssueListCard extends StatelessWidget {
                 Expanded(
                   child: _MetaInfo(
                     icon: Icons.calendar_month_outlined,
-                    label: 'Submission Date',
+                    label: AppLocalizations.of(context).text('submissionDate'),
                     value: submissionDate,
                     iconColor: AppColors.primary,
                     iconBackground: const Color(0xFFDDEEFF),
@@ -622,7 +622,7 @@ class _LineMinistryIssueListCard extends StatelessWidget {
                 Expanded(
                   child: _MetaInfo(
                     icon: Icons.person_outline,
-                    label: 'Submitted by',
+                    label: AppLocalizations.of(context).text('submittedBy'),
                     value: submittedBy,
                     iconColor: const Color(0xFFB642FF),
                     iconBackground: const Color(0xFFF2DDFF),

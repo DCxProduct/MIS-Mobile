@@ -355,7 +355,6 @@ class _PlenaryTab extends StatelessWidget {
   }
 
   static String _attachmentLabel(BuildContext context, Plenary plenary) {
-    if (plenary.attachmentCount == 2) return '2 Attachement';
     return '${plenary.attachmentCount} ${AppLocalizations.of(context).text('attachmentsLabel')}';
   }
 }
@@ -424,7 +423,7 @@ class _PlenaryCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  translatedStatus,
+                  AppLocalizations.of(context).status(translatedStatus),
                   style: TextStyle(
                     color: isDark
                         ? const Color(0xFF86EFAC)
@@ -914,16 +913,16 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
             child: Column(
               children: [
                 DonutChartWidget(
-                  slices: const [
+                  slices: [
                     DonutChartData(
                       percentage: 0.9273,
                       color: Color(0xFF10B981),
-                      label: 'Solved',
+                      label: AppLocalizations.of(context).text('solved'),
                     ),
                     DonutChartData(
                       percentage: 0.0727,
                       color: Color(0xFFF59E0B),
-                      label: 'In Progress',
+                      label: AppLocalizations.of(context).text('inProgress'),
                     ),
                   ],
                   centerTitle: l10n.text('totalIssues'),
@@ -1013,16 +1012,16 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
             child: Column(
               children: [
                 DonutChartWidget(
-                  slices: const [
+                  slices: [
                     DonutChartData(
                       percentage: 0.923,
                       color: Color(0xFFF97316),
-                      label: 'Mid Progress',
+                      label: AppLocalizations.of(context).text('midProgress'),
                     ),
                     DonutChartData(
                       percentage: 0.077,
                       color: Color(0xFFFDE68A),
-                      label: 'Early Progress',
+                      label: AppLocalizations.of(context).text('earlyProgress'),
                     ),
                   ],
                   centerTitle: l10n.text('inProgress'),
@@ -1035,12 +1034,15 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
+                  children: [
                     Row(
                       children: [
                         Icon(Icons.square, color: Color(0xFFF97316), size: 10),
                         SizedBox(width: 6),
-                        Text('Mid Progress', style: TextStyle(fontSize: 12)),
+                        Text(
+                          AppLocalizations.of(context).text('midProgress'),
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ],
                     ),
                     Text(
@@ -1055,12 +1057,15 @@ class _ReportDashboardTabState extends State<_ReportDashboardTab> {
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
+                  children: [
                     Row(
                       children: [
                         Icon(Icons.square, color: Color(0xFFFDE68A), size: 10),
                         SizedBox(width: 6),
-                        Text('Early Progress', style: TextStyle(fontSize: 12)),
+                        Text(
+                          AppLocalizations.of(context).text('earlyProgress'),
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ],
                     ),
                     Text(

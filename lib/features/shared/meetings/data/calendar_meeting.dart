@@ -22,6 +22,19 @@ class CalendarMeeting {
     ];
     final issues = <int, Map<String, dynamic>>{};
     final agencies = <String, dynamic>{};
+    // Detail responses may include issues/agencies directly as well as through
+    // linked meeting requests. Merge both sources instead of dropping either.
+    for (final raw in [
+      ...json['issues'] as List? ?? [],
+      for (final link in json['linkedIssues'] as List? ?? []) link['issue'],
+    ]) {
+      final issue = raw as Map<String, dynamic>;
+      issues[issue['id'] as int] = issue;
+    }
+    for (final agency in json['governmentAgencies'] as List? ?? []) {
+      agencies['${agency['stakeholder']['id'] ?? agency['stakeholder']['name']}'] =
+          agency;
+    }
     for (final request in requests) {
       for (final raw in [
         ...request['issues'] as List? ?? [],
@@ -39,22 +52,30 @@ class CalendarMeeting {
             agency;
       }
     }
-    final document = json['documentReference'];
+    final firstRequest = requests.isEmpty
+        ? const <String, dynamic>{}
+        : requests.first;
+    final document =
+        json['documentReference'] ?? firstRequest['meetingRequestLetter'];
+    final user =
+        (json['user'] ?? firstRequest['user']) as Map<String, dynamic>?;
+    final group = json['workingGroupName'] ?? firstRequest['privateSectorWG'];
     final details = MeetingRequest({
       ...json,
-      'submittedAt': null,
+      'receivedBy': json['receivedBy'] ?? firstRequest['receivedBy'],
+      'submittedAt':
+          json['submittedAt'] ??
+          json['createdAt'] ??
+          firstRequest['submittedAt'],
       'user': {
-        ...?json['user'] as Map<String, dynamic>?,
-        'stakeholders': [
-          {
-            'stakeholder': {
-              'name':
-                  json['workingGroupName'] ??
-                  (requests.isEmpty ? '' : requests.first['privateSectorWG']) ??
-                  '',
-            },
-          },
-        ],
+        ...?user,
+        'stakeholders': (group == null
+            ? (user?['stakeholders'] ?? [])
+            : [
+                {
+                  'stakeholder': {'name': group},
+                },
+              ]),
       },
       'governmentAgencies': agencies.values.toList(),
       'issues': issues.values.toList(),

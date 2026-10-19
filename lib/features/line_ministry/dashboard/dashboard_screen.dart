@@ -34,7 +34,13 @@ class _LineMinistryDashboardScreenState
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
           initial: _filters,
-          load: () => catalogs.dashboard('pswg'),
+          load: () => catalogs.dashboard(
+            'pswg',
+            progressReportId: int.tryParse(
+              _filters.toQuery()['progressReportId'] ?? '',
+            ),
+            year: _filters['local.year'].firstOrNull,
+          ),
         ),
       ),
     );

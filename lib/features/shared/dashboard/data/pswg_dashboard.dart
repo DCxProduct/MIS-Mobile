@@ -43,8 +43,34 @@ class PswgDashboard {
                 : 0,
           ),
     ];
+    final filteredCards = {...cards};
+    if (statuses.isNotEmpty &&
+        [
+          'solved',
+          'inProgress',
+          'notAddressed',
+        ].every((key) => cards[key] != null)) {
+      for (final entry in const {
+        'SOLVED': 'solved',
+        'IN_PROGRESS': 'inProgress',
+        'NOT_ADDRESSED': 'notAddressed',
+      }.entries) {
+        if (!statuses.contains(entry.key)) filteredCards[entry.value] = 0;
+      }
+      filteredCards['totalIssues'] =
+          filteredCards['solved']! +
+          filteredCards['inProgress']! +
+          filteredCards['notAddressed']!;
+      if (!statuses.contains('IN_PROGRESS')) {
+        for (final key in ['midProgress', 'earlyProgress']) {
+          if (filteredCards[key] != null) filteredCards[key] = 0;
+        }
+      }
+    }
+    // These are independent aggregate breakdowns. They cannot be joined across
+    // dimensions without issue-level data.
     return PswgDashboard(
-      cards: cards,
+      cards: Map.unmodifiable(filteredCards),
       workingGroups: filterRows(workingGroups, 'local.workingGroup'),
       agencies: filterRows(agencies, 'local.primaryAgency'),
       categories: filterRows(categories, 'local.category'),

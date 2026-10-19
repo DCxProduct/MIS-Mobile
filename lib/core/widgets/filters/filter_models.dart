@@ -49,11 +49,13 @@ class FilterOption {
   const FilterOption({
     required this.value,
     required this.label,
+    this.khmerLabel,
     this.enabled = true,
     this.year,
   });
   final String value;
   final String label;
+  final String? khmerLabel;
   final bool enabled;
 
   /// Reporting year for dashboard period options.

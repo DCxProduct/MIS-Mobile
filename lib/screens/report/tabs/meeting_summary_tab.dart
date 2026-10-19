@@ -319,7 +319,7 @@ class _StatusBadge extends StatelessWidget {
         ),
       ),
       child: Text(
-        status,
+        AppLocalizations.of(context).status(status),
         style: TextStyle(
           color: shared ? const Color(0xFF1475A8) : AppColors.mutedText,
           fontSize: 10,

@@ -271,7 +271,10 @@ class _LineMinistryMeetingCalendarTab extends StatelessWidget {
             ),
           )
         else
-          const CalendarTab(),
+          CalendarTab(
+            detailBuilder: (meeting) =>
+                LineMinistryMeetingDetailScreen(meetingId: meeting.details.id),
+          ),
       ],
     );
   }
@@ -295,7 +298,7 @@ class _LineMinistryCalendarListCard extends StatelessWidget {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (_) =>
-                LineMinistryMeetingDetailScreen(title: meeting.details.title),
+                LineMinistryMeetingDetailScreen(meetingId: meeting.details.id),
           ),
         );
       },
@@ -688,7 +691,7 @@ class _StatusBadge extends StatelessWidget {
       _ => (
         label: status == 'SCHEDULED'
             ? AppLocalizations.of(context).text('scheduled')
-            : (status.isEmpty ? '—' : status),
+            : AppLocalizations.of(context).status(status),
         color: isDark ? const Color(0xFF75BFFF) : const Color(0xFF1675C6),
         background: isDark ? const Color(0xFF142E45) : const Color(0xFFF0F8FF),
         border: isDark ? const Color(0xFF356992) : const Color(0xFFB8DCFA),

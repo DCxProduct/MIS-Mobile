@@ -12,6 +12,7 @@ import 'package:gpsf_app/features/shared/meetings/data/meeting_requests_reposito
 import 'package:gpsf_app/features/shared/meetings/widgets/meeting_requests_list.dart';
 import 'package:gpsf_app/screens/meeting/meeting_screen.dart';
 import 'package:gpsf_app/translations/app_language.dart';
+import 'package:gpsf_app/translations/app_localizations.dart';
 
 void main() {
   final fixture = File(
@@ -94,6 +95,71 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+  testWidgets('ministry request details follow language changes', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var calls = 0;
+    final settings = AppSettingsController(
+      authRepository: AuthRepository(
+        ApiClient(
+          client: MockClient((_) async {
+            calls++;
+            return http.Response(
+              fixture.replaceAll('SCHEDULED', 'COMPLETED'),
+              200,
+            );
+          }),
+        ),
+      ),
+    )..setModuleType(AppModuleType.lineMinistry);
+    addTearDown(settings.dispose);
+    await tester.pumpWidget(
+      AppSettings(
+        controller: settings,
+        child: const MaterialApp(home: Scaffold(body: MeetingScreen())),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('សំណើសុំរៀបចំកិច្ចប្រជុំ'));
+    await tester.pumpAndSettle();
+    for (final language in [
+      AppLanguage.khmer,
+      AppLanguage.english,
+      AppLanguage.khmer,
+    ]) {
+      settings.setLanguage(language);
+      await tester.pumpAndSettle();
+      final l10n = AppLocalizations(language);
+      for (final key in [
+        'meetingRequestDetails',
+        'submittedDate',
+        'status',
+        'governmentAgency',
+        'meetingRequestDocument',
+        'descriptions',
+        'allIssues',
+        'completed',
+      ]) {
+        expect(find.text(l10n.text(key)), findsOneWidget);
+      }
+      expect(
+        find.text(
+          '${l10n.text('submittedBy')} : PSWG Secretariat A',
+          findRichText: true,
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Meeting description & details'), findsOneWidget);
+      expect(find.text('meeting_request_latter.pdf'), findsOneWidget);
+      expect(find.text('COMPLETED'), findsNothing);
+    }
+    expect(calls, 1);
+    expect(tester.takeException(), isNull);
+  });
   testWidgets('failed request retries and empty response has no demo cards', (
     tester,
   ) async {

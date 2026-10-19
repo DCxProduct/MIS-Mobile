@@ -1,3 +1,4 @@
+import '../../translations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
@@ -27,7 +28,7 @@ class RgcDecisionDetailScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'RGC Decision',
+          AppLocalizations.of(context).text('rgcDecision'),
           style: TextStyle(
             color: AppColors.primaryText(context),
             fontSize: 15,
@@ -46,18 +47,19 @@ class RgcDecisionDetailScreen extends StatelessWidget {
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Expanded(
                   child: _DetailBlock(
-                    label: 'Submitted by',
+                    label: AppLocalizations.of(context).text('submittedBy'),
                     value: 'Agriculture and Agro-In...',
                   ),
                 ),
                 SizedBox(width: 16),
                 Expanded(
                   child: _DetailBlock(
-                    label: 'Status :',
-                    value: '• Not Addressed',
+                    label: AppLocalizations.of(context).text('status'),
+                    value:
+                        '• ${AppLocalizations.of(context).status('Not Addressed')}',
                     valueColor: Color(0xFFEF4444),
                   ),
                 ),
@@ -67,9 +69,9 @@ class RgcDecisionDetailScreen extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Expanded(
+                Expanded(
                   child: _DetailBlock(
-                    label: 'Categories',
+                    label: AppLocalizations.of(context).text('categories'),
                     value: 'Legislation',
                   ),
                 ),
@@ -78,8 +80,10 @@ class RgcDecisionDetailScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Meeting Request Document:',
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        ).text('meetingRequestDocument'),
                         style: TextStyle(
                           color: AppColors.mutedText,
                           fontSize: 11,
@@ -99,7 +103,9 @@ class RgcDecisionDetailScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Request Doc',
+                                AppLocalizations.of(
+                                  context,
+                                ).text('requestDocument'),
                                 style: TextStyle(
                                   color: AppColors.primaryText(context),
                                   fontSize: 11,
@@ -127,72 +133,103 @@ class RgcDecisionDetailScreen extends StatelessWidget {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children: const [
-                  _MetaChip(label: 'Submitted By : Sabada'),
+                children: [
+                  _MetaChip(
+                    label:
+                        '${AppLocalizations.of(context).text('submittedBy')} : Sabada',
+                  ),
                   SizedBox(width: 8),
-                  _MetaChip(label: 'Submitted Date : Jun 24 2025'),
+                  _MetaChip(
+                    label:
+                        '${AppLocalizations.of(context).text('submittedDate')} : Jun 24 2025',
+                  ),
                   SizedBox(width: 8),
-                  _MetaChip(label: 'Government Agency : MAFF'),
+                  _MetaChip(
+                    label:
+                        '${AppLocalizations.of(context).text('governmentAgency')} : MAFF',
+                  ),
                   SizedBox(width: 8),
-                  _MetaChip(label: "Gov't Second Agency : Not Data"),
+                  _MetaChip(
+                    label:
+                        "${AppLocalizations.of(context).text('governmentSecondAgency')} : ${AppLocalizations.of(context).text('noData')}",
+                  ),
                   SizedBox(width: 8),
-                  _MetaChip(label: "Gov't Third Agency : Not Data"),
+                  _MetaChip(
+                    label:
+                        "${AppLocalizations.of(context).text('governmentThirdAgency')} : ${AppLocalizations.of(context).text('noData')}",
+                  ),
                   SizedBox(width: 8),
-                  _MetaChip(label: "Gov't Fourth Agency : Not Data"),
+                  _MetaChip(
+                    label:
+                        "${AppLocalizations.of(context).text('governmentFourthAgency')} : ${AppLocalizations.of(context).text('noData')}",
+                  ),
                   SizedBox(width: 8),
-                  _MetaChip(label: "Gov't Fifth Agency : Not Data"),
+                  _MetaChip(
+                    label:
+                        "${AppLocalizations.of(context).text('governmentFifthAgency')} : ${AppLocalizations.of(context).text('noData')}",
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
-            const _SectionBlock(
-              title: 'Issues Description',
+            _SectionBlock(
+              title: AppLocalizations.of(context).text('issuesDescription'),
               content: '',
               minHeight: 50,
             ),
             const SizedBox(height: 16),
-            const _SectionBlock(
-              title: 'Recommendations',
+            _SectionBlock(
+              title: AppLocalizations.of(context).text('recommendations'),
               content: '',
               minHeight: 50,
             ),
             const SizedBox(height: 16),
-            const _SectionBlock(
-              title: 'RGC Decision',
+            _SectionBlock(
+              title: AppLocalizations.of(context).text('rgcDecision'),
               content:
                   '5. Entrust His Excellency Peng Ponea, Minister of Public Works and Transport to amend the relevant laws and regulations with comprehensive study of technical aspects to determine the type of vehicles and the type of roads that can be used for increasing the weight level of trucks from 40 tons to 45 tons (per truck).',
             ),
             const SizedBox(height: 16),
-            const _SectionBlock(
-              title: 'Indicators',
+            _SectionBlock(
+              title: AppLocalizations.of(context).text('indicators'),
               content: '',
               minHeight: 50,
             ),
             const SizedBox(height: 16),
-            const _SectionBlock(
-              title: 'Progress Solution',
+            _SectionBlock(
+              title: AppLocalizations.of(context).text('progressSolution'),
               content: '',
               minHeight: 50,
             ),
             const SizedBox(height: 16),
-            const _SectionBlock(
-              title: 'Implementation Challenges',
+            _SectionBlock(
+              title: AppLocalizations.of(
+                context,
+              ).text('implementationChallenges'),
               content: '',
               minHeight: 50,
             ),
             const SizedBox(height: 16),
-            const _SectionBlock(title: 'Request', content: '', minHeight: 50),
+            _SectionBlock(
+              title: AppLocalizations.of(context).text('request'),
+              content: '',
+              minHeight: 50,
+            ),
             const SizedBox(height: 16),
-            const _SectionBlock(title: 'Next Step', content: '', minHeight: 50),
+            _SectionBlock(
+              title: AppLocalizations.of(context).text('nextStep'),
+              content: '',
+              minHeight: 50,
+            ),
             const SizedBox(height: 16),
-            const _SectionBlock(
-              title: 'Source of Verification',
+            _SectionBlock(
+              title: AppLocalizations.of(context).text('sourceOfVerification'),
               content:
                   'Announement No. 002 Dated on 27-02-2024 និង កំណត់ហេតុស្តីពីកិច្ចប្រជុំអន្តរក្រសួងស្តីពីការដោះស្រាយបញ្ហាប្រឈមពាក់ព័ន្ធនឹងការគ្រប់គ្រងលើវិស័យដឹកជញ្ជូនផ្លូវគោក ក្រសួងសាធារណការ និងដឹកជញ្ជូន និងក្រសួងអភិវឌ្ឍន៍ជនបទ',
             ),
             const SizedBox(height: 16),
             Text(
-              'Link to Verification Source',
+              AppLocalizations.of(context).text('linkToVerificationSource'),
               style: TextStyle(
                 color: AppColors.primaryText(context),
                 fontSize: 13,
