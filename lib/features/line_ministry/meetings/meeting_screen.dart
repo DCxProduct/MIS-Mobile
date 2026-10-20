@@ -1,3 +1,4 @@
+import '../../shared/issues/widgets/issue_agency_logo.dart';
 import '../../../core/app_settings.dart';
 import '../../../core/widgets/filters/api_filter_sheet.dart';
 import '../../../core/widgets/filters/api_filter_scope.dart';
@@ -285,9 +286,8 @@ class _LineMinistryCalendarListCard extends StatelessWidget {
 
   final CalendarMeeting meeting;
 
-  static String _date(BuildContext context, DateTime? value) => value == null
-      ? '—'
-      : MaterialLocalizations.of(context).formatMediumDate(value.toLocal());
+  static String _date(BuildContext context, DateTime? value) =>
+      value == null ? '—' : issueDateWithYear(context, value.toLocal());
 
   @override
   Widget build(BuildContext context) {
@@ -319,21 +319,7 @@ class _LineMinistryCalendarListCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF216AAA), Color(0xFF1EA45B)],
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.account_balance,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                ),
+                IssueAgencyLogo(path: meeting.details.agencyLogo),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -370,6 +356,7 @@ class _LineMinistryCalendarListCard extends StatelessWidget {
                 Expanded(
                   child: _MeetingInfo(
                     icon: Icons.calendar_month_outlined,
+                    fitValue: true,
                     label: AppLocalizations.of(context).text('meetingDate'),
                     value: _date(context, meeting.date),
                   ),
@@ -488,21 +475,7 @@ class _LineMinistryMeetingCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF216AAA), Color(0xFF1EA45B)],
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.account_balance,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                ),
+                IssueAgencyLogo(path: request.agencyLogo),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -538,6 +511,7 @@ class _LineMinistryMeetingCard extends StatelessWidget {
                 Expanded(
                   child: _MeetingInfo(
                     icon: Icons.calendar_month_outlined,
+                    fitValue: true,
                     label: AppLocalizations.of(context).text('meetingDate'),
                     value: date,
                   ),
@@ -595,6 +569,7 @@ class _MeetingInfo extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
+    this.fitValue = false,
     this.iconColor = AppColors.primary,
     this.iconBackground = const Color(0xFFDDEEFF),
   });
@@ -602,12 +577,23 @@ class _MeetingInfo extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+  final bool fitValue;
   final Color iconColor;
   final Color iconBackground;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final valueText = Text(
+      value,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.onSurface,
+        fontSize: 11,
+        fontWeight: FontWeight.w400,
+      ),
+    );
     return Row(
       children: [
         Container(
@@ -637,16 +623,13 @@ class _MeetingInfo extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+              fitValue
+                  ? FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: valueText,
+                    )
+                  : valueText,
             ],
           ),
         ),

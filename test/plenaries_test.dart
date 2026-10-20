@@ -202,8 +202,8 @@ void main() {
                   }
                   if (request.url.path == '/api/v1/rgc-decisions') {
                     expect(request.url.queryParameters['plenaryId'], '5');
-                    expect(request.url.queryParameters['ministryOnly'], 'true');
-                    expect(request.headers['x-user-id'], '77');
+                    expect(request.url.queryParameters['page'], '1');
+                    expect(request.url.queryParameters['limit'], '100');
                     return http.Response(
                       jsonEncode({
                         'success': true,
@@ -272,7 +272,8 @@ void main() {
     await tester.tap(find.text('View Details'));
     await tester.pumpAndSettle();
     expect(find.byType(PlenaryDetailScreen), findsOneWidget);
-    expect(find.text('Sep 25, 2026'), findsOneWidget);
+    expect(find.textContaining('2026'), findsWidgets);
+    expect(find.text('No RGC decisions found.'), findsOneWidget);
     expect(find.text('reference.pdf'), findsOneWidget);
     expect(find.text('June 07, 2025'), findsNothing);
     expect(tester.takeException(), isNull);

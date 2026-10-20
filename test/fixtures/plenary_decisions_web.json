@@ -1,0 +1,65 @@
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "OK",
+  "data": {
+    "items": [
+      {
+        "id": 4,
+        "plenaryId": 6,
+        "plenary": {
+          "id": 6,
+          "name": "វេទិការាជរដ្ឋាភិបាល-ផ្នែកឯកជន លើកទី 22"
+        },
+        "stakeholderId": 2,
+        "stakeholder": {
+          "id": 2,
+          "name": "MoT",
+          "logo": "/uploads/stakeholders/1788369678073-MoT.png",
+          "description": "Ministry of Tourism"
+        },
+        "categoryId": 4,
+        "category": "Taxation",
+        "categoryInfo": {
+          "id": 4,
+          "name": "Taxation"
+        },
+        "indicatorId": 1,
+        "indicator": {
+          "id": 1,
+          "name": "Milestone 1",
+          "description": null
+        },
+        "indicatorName": "Milestone 1",
+        "indicatorDescription": "",
+        "meetingDate": "2026-10-19T00:00:00.000Z",
+        "status": "Not Addressed",
+        "statusCode": "NOT_ADDRESSED",
+        "focalPerson": "ឯកឧត្តម ហួត ហាក់",
+        "decision": "<p>ស្នើសុំរាជរដ្ឋាភិបាលពិនិត្យ និងគាំទ្រការរៀបចំវិធានការលើកទឹកចិត្តសមស្របសម្រាប់ក្រុមហ៊ុនអាកាសចរណ៍ដែលបើក ឬពង្រីកជើងហោះហើរត្រង់មកកម្ពុជា។ ស្ថាប័នពាក់ព័ន្ធត្រូវសម្របសម្រួលលើថ្លៃសេវា នីតិវិធី និងការផ្សព្វផ្សាយគោលដៅទេសចរណ៍ ដើម្បីបង្កើនការតភ្ជាប់ផ្លូវអាកាស និងទាក់ទាញភ្ញៀវទេសចរអន្តរជាតិ។</p>",
+        "verificationSource": "<ul><li><p>កំណត់ហេតុកិច្ចប្រជុំរបស់ក្រសួងទេសចរណ៍ និងភាគីពាក់ព័ន្ធ</p></li><li><p>របាយការណ៍ពីរដ្ឋលេខាធិការដ្ឋានអាកាសចរណ៍ស៊ីវិល</p></li><li><p>ទិន្នន័យជើងហោះហើរពីអាកាសយានដ្ឋានអន្តរជាតិ</p></li><li><p>លិខិត ឬមតិយោបល់ពីក្រុមហ៊ុនអាកាសចរណ៍ និងសមាគមទេសចរណ៍</p></li></ul>",
+        "verificationLink": "https://gpsf.datacolabx.com/working-groups/tourism",
+        "submittedToCdcAt": "2026-10-19T03:46:31.998Z",
+        "revisionOpen": false,
+        "saveAsDraft": false,
+        "isDraft": false,
+        "issues": [
+          {
+            "id": 17,
+            "title": "Problems on direct flights to Cambodia"
+          }
+        ],
+        "createdAt": "2026-10-19T03:44:15.257Z",
+        "updatedAt": "2026-10-19T03:46:31.999Z"
+      }
+    ],
+    "meta": {
+      "total": 1,
+      "page": 1,
+      "limit": 100,
+      "totalPages": 1
+    }
+  },
+  "timestamp": "2026-10-19T07:55:04.605Z",
+  "path": "/api/v1/rgc-decisions?plenaryId=6&page=1&limit=100"
+}

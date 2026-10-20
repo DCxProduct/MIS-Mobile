@@ -12,6 +12,10 @@ class MeetingSummary {
       issueCount = json['issueCount'] as int? ?? 0,
       meetingRequestCount = json['meetingRequestCount'] as int? ?? 0,
       governmentAgency = json['governmentAgency'] as String? ?? '',
+      agencyLogo =
+          _string(json['governmentAgencyLogo']) ??
+          _string(_object(json['meetingRequest'])['governmentAgencyLogo']) ??
+          '',
       pswg = json['pswg'] as String? ?? '',
       status = json['status'] as String? ?? '',
       meetingPswg = json['meetingPswg'] as String? ?? '',
@@ -21,7 +25,14 @@ class MeetingSummary {
           _string(_object(json['meeting'])['title']) ??
           _string(json['summaryTitle']) ??
           '',
-      location = _string(_object(json['meeting'])['location']) ?? '',
+      location =
+          _string(_object(json['meeting'])['location']) ??
+          _string(json['location']) ??
+          '',
+      startTime =
+          _string(_object(json['meeting'])['startTime']) ??
+          _string(json['startTime']) ??
+          '',
       detailDate =
           _date(_object(json['meeting'])['meetingDate']) ??
           _date(json['meetingDate']),
@@ -38,7 +49,7 @@ class MeetingSummary {
         _object(json['meetingRequest'])['meetingRequestLetter'],
       ),
       attachmentNames = _attachmentNames(json),
-      issues = _issues(json['issues']);
+      issues = _issues(json);
 
   Map<String, Iterable<String>> get filterValues => {
     'local.status': [status],
@@ -48,11 +59,11 @@ class MeetingSummary {
     'local.issueCount': ['$issueCount'],
   };
   final int id;
-  final String title, governmentAgency, pswg, status, meetingPswg;
+  final String title, governmentAgency, agencyLogo, pswg, status, meetingPswg;
   final DateTime? date;
   final int issueCount, meetingRequestCount, attachmentCount;
   final List<String> attachmentPaths;
-  final String detailTitle, location;
+  final String detailTitle, location, startTime;
   final DateTime? detailDate;
   final String? meetingDocumentPath, requestDocumentPath;
   final String? meetingDocumentName, requestDocumentName;
@@ -62,30 +73,44 @@ class MeetingSummary {
   static Map<String, dynamic> _object(Object? value) =>
       value is Map<String, dynamic> ? value : const <String, dynamic>{};
 
-  static String? _string(Object? value) => value is String ? value : null;
+  static String? _string(Object? value) =>
+      value is String && value.trim().isNotEmpty ? value.trim() : null;
 
   static DateTime? _date(Object? value) =>
       value is String ? DateTime.tryParse(value) : null;
 
   static String? _path(Object? value) =>
-      value is String ? value : _string(_object(value)['path']);
+      value is String ? _string(value) : _string(_object(value)['path']);
 
-  static Map<String, String> _attachmentNames(Map<String, dynamic> json) => {
+  static Map<String, String> _attachmentNames(Map<String, dynamic> json) {
+    final names = <String, String>{};
     for (final document in [
       json['meetingRequest'],
       json['meetingSummary'],
       _object(json['meeting'])['documentReference'],
       _object(json['meetingRequest'])['meetingRequestLetter'],
-    ])
-      if (_path(document) case final path?)
-        path: documentOriginalName(document),
-  };
+    ]) {
+      final path = _path(document);
+      if (path != null) names[path] = documentOriginalName(document);
+    }
+    return names;
+  }
 
-  static List<MeetingSummaryIssue> _issues(Object? value) {
+  static List<MeetingSummaryIssue> _issues(Map<String, dynamic> json) {
+    final value = json['issues'];
     if (value is! List) return const [];
+    final meeting = _object(json['meeting']);
+    // The summary API's issue rows omit these fields. The web issue dialog
+    // receives the scheduling ministry user and meeting date from the parent.
+    final sentBy = _string(_object(meeting['user'])['name']);
+    final meetingDate = _date(meeting['meetingDate']);
     return List.unmodifiable(
       value.whereType<Map<String, dynamic>>().map(
-        (item) => MeetingSummaryIssue(item),
+        (item) => MeetingSummaryIssue(
+          item,
+          summarySentBy: sentBy,
+          summaryMeetingDate: meetingDate,
+        ),
       ),
     );
   }
@@ -97,37 +122,141 @@ class MeetingSummary {
 }
 
 class MeetingSummaryIssue {
-  MeetingSummaryIssue(Map<String, dynamic> json)
-    : title = _string(json['issue']) ?? _string(json['title']) ?? '',
-      category = _string(json['category']) ?? '',
-      status = _string(json['status']) ?? '',
-      description = htmlToPlainText(_string(json['issueDescription']) ?? ''),
-      recommendation = htmlToPlainText(_string(json['recommendation']) ?? ''),
-      descriptionHtml = _string(json['issueDescription']) ?? '',
-      recommendationHtml = _string(json['recommendation']) ?? '',
-      attachmentPath = _path(json['issueReference']),
-      referencePath = _path(json['referenceDocument']),
-      attachmentName = documentOriginalName(json['issueReference']),
-      referenceName = documentOriginalName(json['referenceDocument']),
-      agency = _agency(json['agencies']);
+  factory MeetingSummaryIssue(
+    Map<String, dynamic> json, {
+    String? summarySentBy,
+    DateTime? summaryMeetingDate,
+  }) {
+    // Some responses embed the issue relation; others flatten its fields.
+    final source = {
+      ..._object(json['issue']),
+      for (final entry in json.entries)
+        if (entry.value != null) entry.key: entry.value,
+    };
+    final description = _firstText([
+      source['issueDescription'],
+      source['description'],
+    ]);
+    final recommendation = _firstText([
+      source['recommendation'],
+      source['recommendations'],
+    ]);
+    final attachment = _document(
+      source['issueReference'],
+      source['attachment'],
+    );
+    final reference = _document(source['referenceDocument'], null);
+    final agencies = _agencies(
+      source['agencies'] is List && (source['agencies'] as List).isNotEmpty
+          ? source['agencies']
+          : source['governmentAgencies'],
+    );
+    return MeetingSummaryIssue._(
+      title: _firstText([
+        source['issue'] is String ? source['issue'] : null,
+        source['title'],
+      ]),
+      category: _name(source['category']),
+      status: _firstText([
+        _object(source['issueStatus'])['code'],
+        source['status'] is String ? source['status'] : null,
+        _object(source['status'])['code'],
+        _object(source['issueStatus'])['name'],
+        _object(source['status'])['name'],
+      ]),
+      descriptionHtml: description,
+      recommendationHtml: recommendation,
+      submittedBy: _firstText([
+        source['submittedByName'],
+        _name(source['submittedBy']),
+        _object(source['user'])['name'],
+        _object(source['stakeholder'])['name'],
+        summarySentBy,
+      ]),
+      submittedDate:
+          _firstDate([
+            source['submittedDate'],
+            source['submittedAt'],
+            source['createdAt'],
+          ]) ??
+          summaryMeetingDate,
+      governmentAgencies: agencies,
+      attachmentPath: _path(attachment),
+      referencePath: _path(reference),
+      attachmentName: documentOriginalName(attachment),
+      referenceName: documentOriginalName(reference),
+    );
+  }
 
-  final String title, category, status, description, recommendation, agency;
+  MeetingSummaryIssue._({
+    required this.title,
+    required this.category,
+    required this.status,
+    required this.descriptionHtml,
+    required this.recommendationHtml,
+    required this.submittedBy,
+    required this.submittedDate,
+    required this.governmentAgencies,
+    required this.attachmentPath,
+    required this.referencePath,
+    required this.attachmentName,
+    required this.referenceName,
+  });
+
+  final String title, category, status, submittedBy;
   final String descriptionHtml, recommendationHtml;
+  String get description => htmlToPlainText(descriptionHtml);
+  String get recommendation => htmlToPlainText(recommendationHtml);
+  final DateTime? submittedDate;
+  final Map<int, String> governmentAgencies;
+  String get agency => governmentAgencies[1] ?? '';
   final String? attachmentPath, referencePath;
   final String? attachmentName, referenceName;
 
-  static String? _string(Object? value) => value is String ? value : null;
-
   static Map<String, dynamic> _object(Object? value) =>
-      value is Map<String, dynamic> ? value : const <String, dynamic>{};
+      value is Map<String, dynamic> ? value : const {};
 
-  static String? _path(Object? value) =>
-      value is String ? value : _string(_object(value)['path']);
+  static String _name(Object? value) => value is String
+      ? value.trim()
+      : _firstText([
+          _object(value)['name'],
+          _object(_object(value)['stakeholder'])['name'],
+        ]);
 
-  static String _agency(Object? value) {
-    if (value is List && value.isNotEmpty) {
-      return _string(_object(value.first)['name']) ?? '';
+  static String _firstText(List<Object?> values) => values
+      .whereType<String>()
+      .map((value) => value.trim())
+      .firstWhere((value) => value.isNotEmpty, orElse: () => '');
+
+  static DateTime? _firstDate(List<Object?> values) {
+    for (final value in values.whereType<String>()) {
+      final date = DateTime.tryParse(value);
+      if (date != null) return date;
     }
-    return '';
+    return null;
+  }
+
+  static String? _path(Object? value) {
+    final path = value is String
+        ? value.trim()
+        : _firstText([_object(value)['path']]);
+    return path.isEmpty ? null : path;
+  }
+
+  static Object? _document(Object? preferred, Object? fallback) =>
+      _path(preferred) != null ? preferred : fallback;
+
+  static Map<int, String> _agencies(Object? value) {
+    if (value is! List) return const {};
+    final agencies = <int, String>{};
+    for (var index = 0; index < value.length; index++) {
+      final entry = value[index];
+      final name = _name(entry);
+      final order = _object(entry)['order'] ?? _object(entry)['agencyOrder'];
+      if (name.isNotEmpty) {
+        agencies[order is int && order > 0 ? order : index + 1] = name;
+      }
+    }
+    return Map.unmodifiable(agencies);
   }
 }

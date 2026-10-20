@@ -1,0 +1,36 @@
+{
+  "id": 4,
+  "status": "SUBMITTED",
+  "meeting": {
+    "id": 10,
+    "title": "Tourism meeting",
+    "meetingDate": "2026-09-14T00:00:00.000Z",
+    "startTime": "1970-01-01T09:00:00.000Z",
+    "location": "Meeting room",
+    "user": {"id": 7, "name": "MoT"}
+  },
+  "meetingRequest": {
+    "id": 3,
+    "submittedBy": "PSWG Secretariat",
+    "requestedDate": "2026-09-13T08:00:00.000Z",
+    "governmentAgency": "MoT",
+    "pswg": "Tourism"
+  },
+  "createdBy": {"id": 8, "name": "Summary editor"},
+  "issues": [
+    {
+      "id": 9,
+      "issue": "Problems on direct flights to Cambodia",
+      "category": "Taxation",
+      "status": "IN_PROGRESS",
+      "issueDescription": "<p>Issue description</p>",
+      "recommendation": "<p>Recommendation</p>",
+      "issueReference": {"path": "/uploads/issue.pdf", "name": "Issue_reference.pdf"},
+      "referenceDocument": null,
+      "agencies": [
+        {"order": 3, "id": 13, "name": "Third agency"},
+        {"order": 1, "id": 7, "name": "MoT"}
+      ]
+    }
+  ]
+}

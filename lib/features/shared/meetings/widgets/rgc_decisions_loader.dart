@@ -68,19 +68,38 @@ class RgcDecisionsLoader extends StatefulWidget {
 class _RgcDecisionsLoaderState extends State<RgcDecisionsLoader> {
   Future<List<RgcDecision>>? _future;
   Map<String, String>? _query;
+  int? _userId;
+  AppModuleType? _module;
+
+  Future<List<RgcDecision>> _load() async {
+    final settings = AppSettings.of(context);
+    if (settings.moduleType == AppModuleType.lineMinistry) {
+      return settings.rgcDecisions.getMinistryDecisions(
+        userId: settings.currentUser?.id,
+        filters: _query ?? const {},
+        includePlenaryDetails: true,
+      );
+    }
+    return settings.rgcDecisions.getDecisions(
+      includePlenaryDetails: true,
+      filters: _query ?? const {},
+      cdcGpsf: settings.moduleType == AppModuleType.cdcSecretariat,
+    );
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final query = ApiFilterScope.query(context, 'rgc-decisions');
-    if (_future == null || !mapEquals(_query, query)) {
+    final settings = AppSettings.of(context);
+    if (_future == null ||
+        !mapEquals(_query, query) ||
+        _userId != settings.currentUser?.id ||
+        _module != settings.moduleType) {
       _query = Map.of(query);
-      _future = AppSettings.of(context).rgcDecisions.getDecisions(
-        includePlenaryDetails: true,
-        filters: query,
-        cdcGpsf:
-            AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat,
-      );
+      _userId = settings.currentUser?.id;
+      _module = settings.moduleType;
+      _future = _load();
     }
   }
 
@@ -101,13 +120,7 @@ class _RgcDecisionsLoaderState extends State<RgcDecisionsLoader> {
             Text(l10n.text('rgcDecisionsLoadError')),
             TextButton(
               onPressed: () => setState(() {
-                _future = AppSettings.of(context).rgcDecisions.getDecisions(
-                  includePlenaryDetails: true,
-                  filters: _query ?? const {},
-                  cdcGpsf:
-                      AppSettings.of(context).moduleType ==
-                      AppModuleType.cdcSecretariat,
-                );
+                _future = _load();
               }),
               child: Text(l10n.text('retry')),
             ),

@@ -10,8 +10,14 @@ import 'report_detail_screen.dart';
 
 /// Loads the complete detail rather than rendering a partial list record.
 class ProgressReportDetailLoader extends StatefulWidget {
-  const ProgressReportDetailLoader({super.key, required this.id, this.scope});
+  const ProgressReportDetailLoader({
+    super.key,
+    required this.id,
+    this.scope,
+    this.ministryId,
+  });
   final int id;
+  final int? ministryId;
   final ProgressReportDetailScope? scope;
 
   @override
@@ -25,6 +31,12 @@ class _ProgressReportDetailLoaderState
 
   Future<ProgressReport> _load() {
     final settings = AppSettings.of(context);
+    if (widget.ministryId != null) {
+      return settings.progressReports.getMinistryDetail(
+        widget.id,
+        widget.ministryId!,
+      );
+    }
     final scope =
         widget.scope ??
         switch (settings.moduleType) {
@@ -46,7 +58,8 @@ class _ProgressReportDetailLoaderState
   Widget build(BuildContext context) => FutureBuilder<ProgressReport>(
     future: _future,
     builder: (context, snapshot) {
-      if (snapshot.hasData) {
+      if (snapshot.connectionState == ConnectionState.done &&
+          snapshot.hasData) {
         return ReportDetailScreen(
           title: snapshot.data!.title,
           report: snapshot.data!,

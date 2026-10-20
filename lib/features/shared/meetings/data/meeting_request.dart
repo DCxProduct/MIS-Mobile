@@ -14,6 +14,7 @@ class MeetingRequest {
       submittedAt = _date(json['submittedAt']),
       submittedBy = _string(_object(json['user'])['name']),
       receivedBy = _personName(json['receivedBy']),
+      agencyLogo = _agencyLogo(json),
       groupNames = (_object(json['user'])['stakeholders'] as List? ?? [])
           .map((entry) => _string(_object(entry)['stakeholder']?['name']))
           .where((name) => name.isNotEmpty)
@@ -72,6 +73,7 @@ class MeetingRequest {
       description,
       submittedBy,
       receivedBy,
+      agencyLogo,
       group,
       agencies,
       letterName,
@@ -87,6 +89,20 @@ class MeetingRequest {
   static int _int(Object? value) => value is int ? value : 0;
 
   static String _string(Object? value) => value is String ? value : '';
+
+  static String _agencyLogo(Map<String, dynamic> json) {
+    final direct = _string(json['governmentAgencyLogo']).trim();
+    if (direct.isNotEmpty) return direct;
+    final agencies = (json['governmentAgencies'] as List? ?? [])
+        .map(_object)
+        .toList();
+    if (agencies.isEmpty) return '';
+    final primary = agencies.firstWhere(
+      (entry) => entry['agencyOrder'] == 1,
+      orElse: () => agencies.first,
+    );
+    return _string(_object(primary['stakeholder'])['logo']).trim();
+  }
 
   static String _personName(Object? value) =>
       (value is String ? value : _string(_object(value)['name'])).trim();

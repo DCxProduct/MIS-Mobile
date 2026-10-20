@@ -1,3 +1,5 @@
+import '../../../features/shared/issues/widgets/issue_agency_logo.dart';
+import '../../../features/shared/issues/widgets/issue_display.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
@@ -90,21 +92,11 @@ class _MeetingSummaryCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  alignment: Alignment.center,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF1E73BE), Color(0xFF1EA45B)],
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.account_balance,
-                    color: Colors.white,
-                    size: 17,
-                  ),
+                IssueAgencyLogo(
+                  path: summary.agencyLogo,
+                  size: 32,
+                  iconSize: 17,
+                  fallbackColors: const [Color(0xFF1E73BE), Color(0xFF1EA45B)],
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -239,9 +231,8 @@ class _MeetingSummaryCard extends StatelessWidget {
     );
   }
 
-  static String _date(BuildContext context, DateTime? value) => value == null
-      ? '—'
-      : MaterialLocalizations.of(context).formatMediumDate(value.toLocal());
+  static String _date(BuildContext context, DateTime? value) =>
+      issueDateWithYear(context, value?.toLocal());
 }
 
 class _MeetingSummaryMeta extends StatelessWidget {
@@ -288,14 +279,17 @@ class _MeetingSummaryMeta extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],

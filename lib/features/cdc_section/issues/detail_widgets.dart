@@ -99,20 +99,16 @@ class _CdcDetailTextPanelState extends State<CdcDetailTextPanel> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final link = TextButton(
-      onPressed: () => setState(() => _expanded = !_expanded),
-      style: TextButton.styleFrom(
-        foregroundColor: AppColors.accent(context),
-        padding: EdgeInsets.zero,
-        minimumSize: const Size(0, 20),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        alignment: Alignment.centerLeft,
-        textStyle: const TextStyle(
-          fontSize: 13,
-          decoration: TextDecoration.underline,
-        ),
+    final linkStyle = TextButton.styleFrom(
+      foregroundColor: AppColors.accent(context),
+      padding: EdgeInsets.zero,
+      minimumSize: const Size(0, 20),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      alignment: Alignment.centerLeft,
+      textStyle: const TextStyle(
+        fontSize: 13,
+        decoration: TextDecoration.underline,
       ),
-      child: Text(l10n.text(_expanded ? 'showLess' : 'readMore')),
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,17 +127,9 @@ class _CdcDetailTextPanelState extends State<CdcDetailTextPanel> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (containsEditorHtml(widget.body))
-                EditorContent(
-                  widget.body,
-                  maxLines: _expanded ? null : widget.collapsedLines,
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.25,
-                    color: AppColors.primaryText(context),
-                  ),
-                )
-              else if (widget.inlineLink && widget.body.isNotEmpty)
+              if (widget.inlineLink &&
+                  !containsEditorHtml(widget.body) &&
+                  widget.body.isNotEmpty)
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final style = TextStyle(
@@ -149,6 +137,19 @@ class _CdcDetailTextPanelState extends State<CdcDetailTextPanel> {
                       height: 1.25,
                       color: AppColors.primaryText(context),
                     );
+                    final fullBody = htmlToPlainText(widget.body);
+                    final fullPainter = TextPainter(
+                      text: TextSpan(
+                        text: fullBody,
+                        style: DefaultTextStyle.of(context).style.merge(style),
+                      ),
+                      textDirection: Directionality.of(context),
+                      textScaler: MediaQuery.textScalerOf(context),
+                      maxLines: widget.collapsedLines,
+                    )..layout(maxWidth: constraints.maxWidth);
+                    final canExpand = fullPainter.didExceedMaxLines;
+                    fullPainter.dispose();
+                    if (!canExpand) return Text(fullBody, style: style);
                     final linkText = l10n.text(
                       _expanded ? 'showLess' : 'readMore',
                     );
@@ -203,23 +204,16 @@ class _CdcDetailTextPanelState extends State<CdcDetailTextPanel> {
                   },
                 )
               else
-                EditorContent(
+                ExpandableEditorContent(
                   widget.body,
-                  maxLines: _expanded ? null : widget.collapsedLines,
-                  overflow: _expanded
-                      ? TextOverflow.visible
-                      : TextOverflow.ellipsis,
+                  collapsedLines: widget.collapsedLines,
+                  buttonStyle: linkStyle,
                   style: TextStyle(
                     fontSize: 13,
                     height: 1.25,
                     color: AppColors.primaryText(context),
                   ),
                 ),
-              if ((!widget.inlineLink || containsEditorHtml(widget.body)) &&
-                  widget.body.isNotEmpty) ...[
-                const SizedBox(height: 5),
-                link,
-              ],
             ],
           ),
         ),

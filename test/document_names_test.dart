@@ -56,6 +56,34 @@ void main() {
     },
   );
 
+  test('plenary URL originalName overrides UUID and preserves PDF URL', () {
+    const uuid = '97e8fc9e-ef27-4f39-b64f-fd0f955deaba.pdf';
+    for (final filename in [
+      'Approval report 2026.pdf',
+      'របាយការណ៍អនុម័ត ២០២៦.pdf',
+      'Report + budget & plan.pdf',
+    ]) {
+      final path =
+          '/uploads/plenaries/$uuid?originalName=${Uri.encodeComponent(filename)}#page=1';
+      final plenary = Plenary({'id': 6, 'documentReference': path});
+      expect(plenary.documentReference, path);
+      expect(plenary.documentReferenceName, filename);
+      expect(pdfAttachmentName(path), filename);
+      expect(
+        pdfAttachmentName(path, name: 'Explicit name.pdf'),
+        'Explicit name.pdf',
+      );
+      expect(pdfAttachmentUrl(path), contains(path));
+      final object = Plenary({
+        'id': 6,
+        'documentReference': {'path': path},
+      });
+      expect(object.documentReferenceName, filename);
+    }
+    expect(pdfAttachmentName('/uploads/$uuid?originalName='), uuid);
+    expect(pdfAttachmentName('/uploads/$uuid?originalName=%ZZ'), '%ZZ');
+  });
+
   test('models retain names with the exact documents they belong to', () {
     final report = ProgressReport({
       'id': 1,

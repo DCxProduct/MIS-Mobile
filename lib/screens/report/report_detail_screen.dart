@@ -1,3 +1,4 @@
+import '../../features/shared/issues/widgets/issue_display.dart';
 import '../../core/widgets/editor_content.dart';
 import 'package:flutter/material.dart';
 
@@ -18,20 +19,35 @@ String _named(Object? value) => value is Map
     ? value
     : '';
 
-String _formatDate(DateTime? date) {
-  if (date == null) return '—';
-  final local = date.toLocal();
-  return '${local.day}/${local.month}/${local.year}';
-}
+String _formatDate(BuildContext context, DateTime? date) =>
+    issueDateWithYear(context, date?.toLocal());
 
-String _meetingTime(ProgressReport? report) {
+String _meetingTime(BuildContext context, ProgressReport? report) {
   final meeting = report?.latestMeeting ?? const <String, dynamic>{};
   final rawDate = meeting['meetingDate'];
   final date = rawDate is String ? DateTime.tryParse(rawDate) : null;
   if (date == null) return '—';
-  final time = meeting['startTime'];
-  return '${_formatDate(date)}${time is String && time.isNotEmpty ? '\n$time' : ''}';
+  String clock(Object? raw) {
+    if (raw is! String || raw.trim().isEmpty) return '';
+    final iso = DateTime.tryParse(raw);
+    final match = RegExp(r'^(\d{1,2}):(\d{2})').firstMatch(raw);
+    final hour = iso?.hour ?? (match == null ? null : int.tryParse(match[1]!));
+    final minute =
+        iso?.minute ?? (match == null ? null : int.tryParse(match[2]!));
+    if (hour == null || minute == null || hour > 23 || minute > 59) return '';
+    return MaterialLocalizations.of(
+      context,
+    ).formatTimeOfDay(TimeOfDay(hour: hour, minute: minute));
+  }
+
+  final start = clock(meeting['startTime']);
+  final end = clock(meeting['endTime']);
+  return '${_formatDate(context, date)}${start.isEmpty ? '' : '\n$start${end.isEmpty ? '' : '–$end'}'}';
 }
+
+String _reportStatus(BuildContext context, String? raw) => AppLocalizations.of(
+  context,
+).status(_value(raw).replaceFirst(RegExp(r'^CDC_'), ''));
 
 class ReportDetailScreen extends StatefulWidget {
   const ReportDetailScreen({super.key, required this.title, this.report});
@@ -71,16 +87,6 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.more_horiz,
-              color: AppColors.primaryText(context),
-              size: 22,
-            ),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: SafeArea(
         top: false,
@@ -89,37 +95,16 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
           children: [
             Text(
               widget.report?.ministry.isNotEmpty == true
-                  ? widget.report!.ministry
+                  ? widget.report!.ministryDisplayName
                   : widget.title,
               style: TextStyle(
                 color: AppColors.primaryText(context),
-                fontSize: 20,
+                fontSize: 14,
                 height: 1.22,
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 14),
-            if (widget.report != null) ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: _InfoBlock(
-                      label: AppLocalizations.of(context).text('year'),
-                      value: widget.report!.year == 0
-                          ? '—'
-                          : '${widget.report!.year}',
-                    ),
-                  ),
-                  Expanded(
-                    child: _InfoBlock(
-                      label: AppLocalizations.of(context).text('semester'),
-                      value: _value(widget.report!.semester),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-            ],
             _MaffInfoSection(title: widget.title, report: widget.report),
             const SizedBox(height: 9),
             _CdcInfoSection(report: widget.report),
@@ -170,8 +155,14 @@ class _MaffInfoSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SectionHeader(
-          title:
-              '${report?.ministry.isNotEmpty == true ? report!.ministry : 'Ministry'} Info',
+          title: AppLocalizations.of(context)
+              .text('ministryInfo')
+              .replaceAll(
+                '{ministry}',
+                report?.ministry.isNotEmpty == true
+                    ? report!.ministry
+                    : l10n.text('governmentAgency'),
+              ),
         ),
         const SizedBox(height: 11),
         Row(
@@ -180,7 +171,7 @@ class _MaffInfoSection extends StatelessWidget {
             Expanded(
               child: _InfoBlock(
                 label: l10n.text('submittedDate'),
-                value: _formatDate(report?.submittedAt),
+                value: _formatDate(context, report?.submittedAt),
               ),
             ),
             const SizedBox(width: 18),
@@ -188,7 +179,9 @@ class _MaffInfoSection extends StatelessWidget {
               child: _PersonInfoBlock(
                 label: AppLocalizations.of(context).text('prepareBy'),
                 name: _value(report?.preparedBy),
-                date: '',
+                date: report?.submittedAt == null
+                    ? ''
+                    : _formatDate(context, report?.submittedAt),
               ),
             ),
           ],
@@ -224,8 +217,16 @@ class _CdcInfoSection extends StatelessWidget {
             Expanded(
               child: _InfoBlock(
                 label: l10n.text('status'),
-                value: l10n.status(_value(report?.cdcStatus)),
-                valueColor: const Color(0xFFFF8A00),
+                value: report?.cdcStatus.isNotEmpty == true
+                    ? '• ${_reportStatus(context, report?.cdcStatus)}'
+                    : '—',
+                valueColor: switch (report?.cdcStatus.toUpperCase()) {
+                  'COMPLETED' ||
+                  'SOLVED' ||
+                  'APPROVED' => const Color(0xFF16A34A),
+                  'REJECTED' || 'NOT_ADDRESSED' => const Color(0xFFE53935),
+                  _ => const Color(0xFFFF8A00),
+                },
               ),
             ),
             const SizedBox(width: 18),
@@ -233,7 +234,9 @@ class _CdcInfoSection extends StatelessWidget {
               child: _PersonInfoBlock(
                 label: AppLocalizations.of(context).text('reviewBy'),
                 name: _value(report?.reviewedBy),
-                date: '',
+                date: report?.reviewedAt == null
+                    ? ''
+                    : _formatDate(context, report?.reviewedAt),
               ),
             ),
           ],
@@ -245,7 +248,7 @@ class _CdcInfoSection extends StatelessWidget {
             Expanded(
               child: _InfoBlock(
                 label: AppLocalizations.of(context).text('lastUpdate'),
-                value: _formatDate(report?.updatedAt),
+                value: _formatDate(context, report?.updatedAt),
               ),
             ),
             SizedBox(width: 18),
@@ -267,7 +270,7 @@ class _CdcInfoSection extends StatelessWidget {
             Expanded(
               child: _InfoBlock(
                 label: AppLocalizations.of(context).text('meetingDateTime'),
-                value: _meetingTime(report),
+                value: _meetingTime(context, report),
               ),
             ),
             SizedBox(width: 18),
@@ -275,7 +278,9 @@ class _CdcInfoSection extends StatelessWidget {
               child: _PersonInfoBlock(
                 label: AppLocalizations.of(context).text('reviewBy'),
                 name: _value(report?.reviewedBy),
-                date: '',
+                date: report?.reviewedAt == null
+                    ? ''
+                    : _formatDate(context, report?.reviewedAt),
               ),
             ),
           ],
@@ -385,7 +390,7 @@ class _PersonInfoBlock extends StatelessWidget {
                   text: '  ( $date )',
                   style: const TextStyle(
                     color: AppColors.mutedText,
-                    fontSize: 9,
+                    fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -434,12 +439,12 @@ class _DocumentInfoBlock extends StatelessWidget {
                   children: [
                     Text(
                       pdfAttachmentName(path!, name: name),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: AppColors.primaryText(context),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -472,42 +477,46 @@ class _ReportDetailTabs extends StatelessWidget {
       l10n.text('attachment'),
     ];
 
-    return SizedBox(
-      height: 40,
-      child: Row(
-        children: List.generate(labels.length, (index) {
-          final selected = selectedIndex == index;
-          return Expanded(
-            child: InkWell(
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.border(context))),
+      ),
+      height: 44,
+      child: SingleChildScrollView(
+        key: const ValueKey('progress-detail-tabs'),
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: List.generate(labels.length, (index) {
+            final selected = selectedIndex == index;
+            return InkWell(
               onTap: () => onSelected(index),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    labels[index],
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
+              child: Container(
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
                       color: selected
                           ? AppColors.accent(context)
-                          : AppColors.mutedText,
-                      fontSize: 12,
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                          : Colors.transparent,
+                      width: 2,
                     ),
                   ),
-                  const SizedBox(height: 9),
-                  Container(
-                    height: 2,
+                ),
+                child: Text(
+                  labels[index],
+                  style: TextStyle(
                     color: selected
                         ? AppColors.accent(context)
-                        : Colors.transparent,
+                        : AppColors.mutedText,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
                   ),
-                ],
+                ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }
@@ -525,7 +534,7 @@ class _DescriptionTab extends StatelessWidget {
         _value(description),
         style: TextStyle(
           color: AppColors.secondaryText(context),
-          fontSize: 12,
+          fontSize: 13,
           height: 1.62,
           fontWeight: FontWeight.w500,
         ),
@@ -618,6 +627,8 @@ class _ReportIssueCard extends StatelessWidget {
                         '${item['title'] ?? item['decision'] ?? ''}',
                       ),
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: AppColors.primaryText(context),
                       fontSize: 14,

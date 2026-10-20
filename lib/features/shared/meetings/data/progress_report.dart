@@ -1,5 +1,50 @@
 import '../../../../core/text/document_metadata.dart';
 
+class ProgressReportScheduleEntry {
+  const ProgressReportScheduleEntry({
+    required this.isMeeting,
+    required this.number,
+    required this.date,
+  });
+
+  final bool isMeeting;
+  // Zero is the original deadline; revision deadlines and meetings start at 1.
+  final int number;
+  final DateTime? date;
+}
+
+class ProgressReportMinistry {
+  ProgressReportMinistry.fromJson(Map<String, dynamic> json)
+    : ministryId = json['ministryId'] is int ? json['ministryId'] as int : 0,
+      name = _string(_object(json['ministry'])['name']),
+      description = _string(_object(json['ministry'])['description']),
+      logo = _string(_object(json['ministry'])['logo']),
+      status = _string(json['status']).trim().toUpperCase(),
+      issues = json['issues'] is int ? json['issues'] as int : 0,
+      attachment = _string(_object(json['attachment'])['path']),
+      attachmentName = documentOriginalName(json['attachment']),
+      requestDocument = _string(_object(json['requestDocument'])['path']),
+      requestDocumentName = documentOriginalName(json['requestDocument']) {
+    if (ministryId <= 0 || name.trim().isEmpty) throw const FormatException();
+  }
+  bool get submittedToCdc => const {
+    'SUBMITTED',
+    'RETURNED',
+    'UPDATING',
+    'RESUBMITTED',
+    'CDC_RE_REVIEWING',
+    'CDC_UNDER_REVIEW',
+    'COMPLETED',
+  }.contains(status.toUpperCase());
+
+  final int ministryId, issues;
+  final String name, description, logo, status;
+  final String attachment, attachmentName, requestDocument, requestDocumentName;
+
+  static Map _object(Object? value) => value is Map ? value : const {};
+  static String _string(Object? value) => value is String ? value : '';
+}
+
 class ProgressReport {
   ProgressReport(Map<String, dynamic> json)
     : details = Map.unmodifiable(json),
@@ -48,6 +93,82 @@ class ProgressReport {
   final String title, semester, status, reportStatus, ministry, attachmentName;
   final List<String>? attachmentPaths;
   final DateTime? deadline, firstMeeting, secondMeeting, secondDeadline;
+
+  List<ProgressReportScheduleEntry> get schedule {
+    List<Map<String, dynamic>> sorted(String key) {
+      final rows = _objects(
+        details[key] ?? _object(details['progressReport'])[key],
+      ).toList();
+      rows.sort((a, b) => (_int(a['id']) ?? 0).compareTo(_int(b['id']) ?? 0));
+      return rows;
+    }
+
+    final meetings = sorted('meetings');
+    final deadlines = sorted('deadlines');
+    final rows = <ProgressReportScheduleEntry>[];
+    void addDeadline(int index) => rows.add(
+      ProgressReportScheduleEntry(
+        isMeeting: false,
+        number: index,
+        date: _date(deadlines[index]['date'] ?? deadlines[index]['deadline']),
+      ),
+    );
+    if (deadlines.isNotEmpty) addDeadline(0);
+    for (var i = 0; i < meetings.length || i + 1 < deadlines.length; i++) {
+      if (i < meetings.length) {
+        rows.add(
+          ProgressReportScheduleEntry(
+            isMeeting: true,
+            number: i + 1,
+            date: _date(meetings[i]['meetingDate']),
+          ),
+        );
+      }
+      if (i + 1 < deadlines.length) addDeadline(i + 1);
+    }
+    return rows;
+  }
+
+  String get draftSemesterDocument =>
+      _string(
+        _object(
+          details['draftSemesterReport'] ??
+              _object(details['progressReport'])['draftSemesterReport'],
+        )['path'],
+      ) ??
+      '';
+
+  String get finalSemesterDocument =>
+      _string(
+        _object(
+          details['finalSemesterReport'] ??
+              _object(details['progressReport'])['finalSemesterReport'],
+        )['path'],
+      ) ??
+      '';
+
+  // Web uses the earliest-created deadline for the report overview.
+  DateTime? get initialDeadline {
+    final source =
+        details['deadlines'] ?? _object(details['progressReport'])['deadlines'];
+    final deadlines = _objects(source);
+    if (deadlines.isEmpty) return null;
+    deadlines.sort(
+      (a, b) => (_int(a['id']) ?? 0).compareTo(_int(b['id']) ?? 0),
+    );
+    return _date(deadlines.first['date'] ?? deadlines.first['deadline']);
+  }
+
+  String get ministryDisplayName {
+    final description = _string(_object(details['ministry'])['description']);
+    return description?.trim().isNotEmpty == true
+        ? description!.trim()
+        : ministry;
+  }
+
+  DateTime? get reviewedAt => _date(
+    _object(details['cdcInformation'])['reviewedAt'] ?? details['reviewedAt'],
+  );
 
   String get description =>
       _string(details['description']) ??
@@ -199,6 +320,13 @@ class ProgressReport {
     add(_object(json['progressReport'])['requestDocument']);
     add(_object(json['progressReport'])['draftSemesterReport']);
     add(_object(json['progressReport'])['finalSemesterReport']);
+    // Meeting documents belong to this report as well as its semester PDFs.
+    for (final source in [json, _object(json['progressReport'])]) {
+      for (final meeting in _objects(source['meetings'])) {
+        add(meeting['documentReference']);
+      }
+      add(_object(source['latestMeeting'])['documentReference']);
+    }
     return paths;
   }
 

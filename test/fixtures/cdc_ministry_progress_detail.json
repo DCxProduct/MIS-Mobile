@@ -1,0 +1,482 @@
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "OK",
+  "data": {
+    "id": 2,
+    "progressReportId": 2,
+    "ministryId": 1,
+    "issues": 3,
+    "attachment": {
+      "path": "/uploads/ministry-progress-reports/1788407199672-Issue_solution_reference.pdf",
+      "name": "Issue_solution_reference.pdf",
+      "size": 1947246,
+      "mimeType": "application/pdf"
+    },
+    "status": "COMPLETED",
+    "userId": 19,
+    "ministry": {
+      "id": 1,
+      "name": "MAFF",
+      "description": "Ministry of Agriculture, Forestry and Fisheries",
+      "logo": "/uploads/stakeholders/1788369688560-MAFF.jpg",
+      "relatedStakeholderId": 14
+    },
+    "preparedBy": {
+      "id": 19,
+      "name": "MAFF",
+      "position": "Ministry of Agriculture, Forestry and Fisheries"
+    },
+    "reviewedBy": {
+      "id": 2,
+      "name": "CDC G-PSF Secretariat",
+      "position": "CDC G-PSF "
+    },
+    "submittedAt": "2026-09-03T04:13:31.271Z",
+    "progressReport": {
+      "id": 2,
+      "title": "ចំណងជើងរបាយការណ៍ **",
+      "description": "ការពិពណ៌នា **",
+      "year": 2026,
+      "semester": "S2",
+      "status": "SENT",
+      "requestDocument": {
+        "path": "/uploads/progress-reports/1788405806726-Approval_progress_report.pdf",
+        "name": "Approval_progress_report.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "draftSemesterReport": {
+        "path": "/uploads/progress-reports/1788409002117-Issue_reference.pdf",
+        "name": "Issue_reference.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "finalSemesterReport": {
+        "path": "/uploads/progress-reports/1789375688168-Progress_report_update_rgc_desision_ducument.pdf",
+        "name": "Progress_report_update_rgc_desision_ducument.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "deadlines": [
+        {
+          "sentAt": null,
+          "id": 2,
+          "progressReportId": 2,
+          "deadline": "2026-12-15",
+          "status": "SENT",
+          "createdAt": "2026-09-03T03:23:26.831Z",
+          "updatedAt": "2026-09-03T03:24:43.141Z",
+          "deletedAt": null
+        },
+        {
+          "sentAt": null,
+          "id": 3,
+          "progressReportId": 2,
+          "deadline": "2026-09-29",
+          "status": "SENT",
+          "createdAt": "2026-09-03T04:10:09.111Z",
+          "updatedAt": "2026-09-03T04:10:09.593Z",
+          "deletedAt": null
+        },
+        {
+          "sentAt": null,
+          "id": 4,
+          "progressReportId": 2,
+          "deadline": "2026-09-24",
+          "status": "SENT",
+          "createdAt": "2026-09-03T04:12:25.308Z",
+          "updatedAt": "2026-09-03T04:12:25.722Z",
+          "deletedAt": null
+        },
+        {
+          "sentAt": "2026-09-14T08:44:43.478Z",
+          "id": 6,
+          "progressReportId": 2,
+          "deadline": "2026-09-15",
+          "status": "SENT",
+          "createdAt": "2026-09-14T08:44:43.002Z",
+          "updatedAt": "2026-09-14T08:44:43.479Z",
+          "deletedAt": null
+        }
+      ],
+      "activeDeadline": {
+        "sentAt": "2026-09-14T08:44:43.478Z",
+        "id": 6,
+        "progressReportId": 2,
+        "deadline": "2026-09-15T00:00:00.000Z",
+        "status": "SENT",
+        "createdAt": "2026-09-14T08:44:43.002Z",
+        "updatedAt": "2026-09-14T08:44:43.479Z",
+        "deletedAt": null
+      },
+      "meetings": [
+        {
+          "id": 1,
+          "progressReportId": 2,
+          "title": "ចំណងជើងរបាយការណ៍ ** | 2026",
+          "description": "ការពិពណ៌នា *",
+          "meetingDate": "2026-09-03",
+          "startTime": "12:00:00",
+          "location": "CDC",
+          "documentReference": {
+            "path": "/uploads/progress-report-meetings/1788407626462-Issue_reference.pdf",
+            "name": "Issue_reference.pdf",
+            "size": 1947246,
+            "mimeType": "application/pdf"
+          },
+          "status": "SENT",
+          "userId": 2,
+          "createdAt": "2026-09-03T03:53:46.507Z",
+          "updatedAt": "2026-09-03T03:53:46.919Z",
+          "deletedAt": null
+        },
+        {
+          "id": 2,
+          "progressReportId": 2,
+          "title": "ចំណងជើងរបាយការណ៍ ** | 2026",
+          "description": "ការពិពណ៌នា *",
+          "meetingDate": "2026-09-04",
+          "startTime": "12:00:00",
+          "location": "CDC",
+          "documentReference": {
+            "path": "/uploads/progress-report-meetings/1788408733482-meeting_request_latter.pdf",
+            "name": "meeting_request_latter.pdf",
+            "size": 1947246,
+            "mimeType": "application/pdf"
+          },
+          "status": "SENT",
+          "userId": 2,
+          "createdAt": "2026-09-03T04:12:13.511Z",
+          "updatedAt": "2026-09-03T04:12:14.137Z",
+          "deletedAt": null
+        },
+        {
+          "id": 3,
+          "progressReportId": 2,
+          "title": "ចំណងជើងរបាយការណ៍ ** | 2026",
+          "description": "<p><strong>ការពិពណ៌នា</strong></p>",
+          "meetingDate": "2026-09-14",
+          "startTime": "12:00:00",
+          "location": "CDC",
+          "documentReference": {
+            "path": "/uploads/progress-report-meetings/1789375435453-Progress_report_final_semester.pdf",
+            "name": "Progress_report_final_semester.pdf",
+            "size": 1947246,
+            "mimeType": "application/pdf"
+          },
+          "status": "SENT",
+          "userId": 2,
+          "createdAt": "2026-09-14T08:43:55.493Z",
+          "updatedAt": "2026-09-14T08:43:55.953Z",
+          "deletedAt": null
+        }
+      ],
+      "latestMeeting": {
+        "id": 3,
+        "progressReportId": 2,
+        "title": "ចំណងជើងរបាយការណ៍ ** | 2026",
+        "description": "<p><strong>ការពិពណ៌នា</strong></p>",
+        "meetingDate": "2026-09-14",
+        "startTime": "12:00:00",
+        "location": "CDC",
+        "documentReference": {
+          "path": "/uploads/progress-report-meetings/1789375435453-Progress_report_final_semester.pdf",
+          "name": "Progress_report_final_semester.pdf",
+          "size": 1947246,
+          "mimeType": "application/pdf"
+        },
+        "status": "SENT",
+        "userId": 2,
+        "createdAt": "2026-09-14T08:43:55.493Z",
+        "updatedAt": "2026-09-14T08:43:55.953Z",
+        "deletedAt": null
+      }
+    },
+    "createdAt": "2026-09-03T03:24:43.141Z",
+    "updatedAt": "2026-10-05T03:55:04.575Z",
+    "deletedAt": null,
+    "ministryInformation": {
+      "submittedAt": "2026-09-03T04:13:31.271Z",
+      "preparedBy": {
+        "id": 19,
+        "name": "MAFF",
+        "position": "Ministry of Agriculture, Forestry and Fisheries"
+      },
+      "approvalProgressReport": {
+        "path": "/uploads/ministry-progress-reports/1788407199672-Issue_solution_reference.pdf",
+        "name": "Issue_solution_reference.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      }
+    },
+    "openIssues": [
+      {
+        "id": 1,
+        "title": "កង្វះទីផ្សារស្ថិរភាពសម្រាប់លក់ផលិតផលកសិកម្មក្នុងស្រុក",
+        "description": "កសិករ និងអាជីវកម្មកសិកម្មមួយចំនួនប្រឈមនឹងការលំបាកក្នុងការស្វែងរកទីផ្សារដែលមានស្ថិរភាពសម្រាប់លក់ផលិតផលកសិកម្ម ជាពិសេសនៅរដូវប្រមូលផលដែលមានបរិមាណផលិតផលច្រើន។ កង្វះការតភ្ជាប់រវាងកសិករ អ្នកប្រមូលទិញ សហគ្រាសកែច្នៃ និងទីផ្សារ បានធ្វើឱ្យតម្លៃផលិតផលមានការប្រែប្រួលខ្លាំង និងកសិករមានអំណាចចរចាតម្លៃទាប។ បញ្ហានេះប៉ះពាល់ដល់ប្រាក់ចំណូលរបស់កសិករ និងនិរន្តរភាពនៃផលិតកម្មកសិកម្មក្នុងស្រុក។",
+        "recommendation": "ស្នើឱ្យក្រសួង និងស្ថាប័នពាក់ព័ន្ធពង្រឹងការតភ្ជាប់ទីផ្សាររវាងកសិករ សហគមន៍កសិកម្ម អ្នកប្រមូលទិញ សហគ្រាសកែច្នៃ និងអ្នកចែកចាយ ដោយជំរុញការអនុវត្តកសិកម្មតាមកិច្ចសន្យា បង្កើតប្រព័ន្ធព័ត៌មានទីផ្សារ និងតម្លៃឱ្យបានទូលំទូលាយ និងគាំទ្រការស្វែងរកទីផ្សារថ្មីៗ ដើម្បីធានាទីផ្សារមានស្ថិរភាព កាត់បន្ថយការប្រែប្រួលតម្លៃ និងបង្កើនប្រាក់ចំណូលរបស់កសិករ។",
+        "status": {
+          "id": 4,
+          "code": "IN_PROGRESS",
+          "name": "In Progress"
+        },
+        "category": {
+          "id": 7,
+          "name": "Market Access"
+        },
+        "workingGroup": {
+          "id": 14,
+          "name": "Agriculture & Agro-Industry",
+          "logo": "/uploads/stakeholders/1790505693513-MAFF.jpg"
+        },
+        "governmentAgencies": [
+          {
+            "agencyOrder": 1,
+            "stakeholder": {
+              "id": 1,
+              "name": "MAFF",
+              "description": "Ministry of Agriculture, Forestry and Fisheries",
+              "logo": "/uploads/stakeholders/1788369688560-MAFF.jpg"
+            }
+          },
+          {
+            "agencyOrder": 2,
+            "stakeholder": {
+              "id": 4,
+              "name": "MEF",
+              "description": "Ministry of Economy and Finance",
+              "logo": "/uploads/stakeholders/1788369650792-MEF.png"
+            }
+          },
+          {
+            "agencyOrder": 3,
+            "stakeholder": {
+              "id": 3,
+              "name": "MISTI",
+              "description": "Minister of Industry, Science, Technology & Innovation",
+              "logo": "/uploads/stakeholders/1788369667932-misti-logo.png"
+            }
+          },
+          {
+            "agencyOrder": 4,
+            "stakeholder": {
+              "id": 12,
+              "name": "MLMUPC",
+              "description": "Ministry of Land Management, Urban Planning and Construction",
+              "logo": "/uploads/stakeholders/1788369560175-MLMUPC.jpg"
+            }
+          },
+          {
+            "agencyOrder": 5,
+            "stakeholder": {
+              "id": 9,
+              "name": "MME",
+              "description": "Ministry of Mines and Energy",
+              "logo": "/uploads/stakeholders/1788369594942-MME.png"
+            }
+          }
+        ],
+        "createdAt": "2026-09-02T17:24:20.656Z",
+        "updatedAt": "2026-10-01T14:20:45.419Z",
+        "progressUpdate": {
+          "id": 1,
+          "progressReportId": 2,
+          "ministryId": 1,
+          "issueId": 1,
+          "issueResolveId": 1,
+          "issueStatus": {
+            "id": 4,
+            "code": "IN_PROGRESS",
+            "name": "In Progress"
+          },
+          "indicators": "ប្រមូលទិញ និងសហគ្រាសកែច្នៃ ព្រមទាំងជំរុញការអនុវត្តកសិកម្មតាមកិច្ចសន្យា និងការផ្តល់ព័ត៌មានទីផ្សារឱ្យបានទូលំទូលាយ។",
+          "progressSolution": "ប្រមូលទិញ និងសហគ្រាសកែច្នៃ ព្រមទាំងជំរុញការអនុវត្តកសិកម្មតាមកិច្ចសន្យា និងការផ្តល់ព័ត៌មានទីផ្សារឱ្យបានទូលំទូលាយ។",
+          "implementationChallenges": "ប្រមូលទិញ និងសហគ្រាសកែច្នៃ ព្រមទាំងជំរុញការអនុវត្តកសិកម្មតាមកិច្ចសន្យា និងការផ្តល់ព័ត៌មានទីផ្សារឱ្យបានទូលំទូលាយ។",
+          "requests": "ប្រមូលទិញ និងសហគ្រាសកែច្នៃ ព្រមទាំងជំរុញការអនុវត្តកសិកម្មតាមកិច្ចសន្យា និងការផ្តល់ព័ត៌មានទីផ្សារឱ្យបានទូលំទូលាយ។",
+          "sourceOfVerification": "ប្រមូលទិញ និងសហគ្រាសកែច្នៃ ព្រមទាំងជំរុញការអនុវត្តកសិកម្មតាមកិច្ចសន្យា និងការផ្តល់ព័ត៌មានទីផ្សារឱ្យបានទូលំទូលាយ។",
+          "linkToVerificationSource": "https://mis-stage.datacolabx.com/ministry/progress-reports/2",
+          "rgcDecision": "ឯកភាពឱ្យក្រសួងកសិកម្ម រុក្ខាប្រមាញ់ និងនេសាទ សហការជាមួយក្រសួង ស្ថាប័នពាក់ព័ន្ធ និងវិស័យឯកជន ពង្រឹងការតភ្ជាប់ទីផ្សាររវាងកសិករ សហគមន៍កសិកម្ម អ្នកប្រមូលទិញ និងសហគ្រាសកែច្នៃ ព្រមទាំងជំរុញការអនុវត្តកសិកម្មតាមកិច្ចសន្យា និងការផ្តល់ព័ត៌មានទីផ្សារឱ្យបានទូលំទូលាយ។",
+          "nextStep": "រៀបចំបញ្ជីផលិតផលកសិកម្មអាទិភាព និងតំបន់ផលិតកម្ម ប្រមូលព័ត៌មានអំពីតម្រូវការទីផ្សារ និងអ្នកទិញ និងរៀបចំកិច្ចប្រជុំផ្គូផ្គងអាជីវកម្មរវាងកសិករ សហគមន៍កសិកម្ម អ្នកប្រមូលទិញ និងសហគ្រាសកែច្នៃ។",
+          "dateOfIssueSolution": "2026-09-03",
+          "attachment": {
+            "path": "/uploads/progress-report-updates/1788407190662-Issue_reference.pdf",
+            "name": "Issue_reference.pdf",
+            "size": 1947246,
+            "mimeType": "application/pdf"
+          },
+          "relatedIssues": [
+            {
+              "id": 1,
+              "ministryId": 1,
+              "issueId": 1,
+              "progressReportIssueComments": []
+            }
+          ],
+          "relatedPlenaryDecisions": [],
+          "updatedBy": {
+            "id": 19,
+            "name": "MAFF"
+          },
+          "createdAt": "2026-09-03T03:46:30.676Z",
+          "updatedAt": "2026-09-03T03:46:30.676Z"
+        },
+        "cdcComment": null
+      },
+      {
+        "id": 5,
+        "title": "ចូលរួមសហគមន៍កសិកម្មទំនើប",
+        "description": "<p><strong>ផ្នែកឯកជន</strong>មើលឃើញអំពីកង្វះការយល់ដឹងរបស់កសិករលើការធ្វើផែនការ ក្នុងការផលិត ដាំដុះ ថវិកា និងការវិភាគការចំណាយលើថ្លៃដើមផលិត ដែលធ្វើអោយកសិករតែងតែលើកឡើងថាពួកគាត់ខាត។ ដូច្នេះផ្នែកឯកជនយល់ឃើញថាការចូលរួមជាមួយ សហគមន៍កសិកម្មទំនើប ដែលជាយន្តការបស់ក្រសួងកសិកម្ម រុក្ខាប្រមាញ់ និងនេសាទ គឺជារឿងចាំបាច់ ទាំងផ្នែកឯកជន ទាំងកសិករផ្ទាល់ ជាពិសេសការចូលរួមផ្គត់ផ្គង់ធាតុចូលកសិកម្ម ក្នុងផ្នែកណាមួយដល់កសិករក្នុងសហគមន៍។</p>",
+        "recommendation": "<p>ផ្នែកឯកជនស្នើសុំ<mark data-color=\"var(--tt-color-highlight-red)\" style=\"background-color: var(--tt-color-highlight-red); color: inherit;\">ក្រសួងកសិកម្មរុក្ខាប្រមាញ់ និងនេសាទ</mark>ធ្វើបទបង្ហាញអំពីនីតិវិធី និងលក្ខខណ្ឌតម្រូវក្នុងការចូលរួមផ្គត់ផ្គង់ធាតុចូលកសិកម្មដល់សហគមន៍កសិកម្មទំនើបដល់ផ្នែកឯកជន ដែលជាអ្នកផ្គត់ផ្គង់ធាតុចូលកសិកម្ម។</p>",
+        "status": {
+          "id": 4,
+          "code": "IN_PROGRESS",
+          "name": "In Progress"
+        },
+        "category": {
+          "id": 1,
+          "name": "General"
+        },
+        "workingGroup": {
+          "id": 14,
+          "name": "Agriculture & Agro-Industry",
+          "logo": "/uploads/stakeholders/1790505693513-MAFF.jpg"
+        },
+        "governmentAgencies": [
+          {
+            "agencyOrder": 1,
+            "stakeholder": {
+              "id": 1,
+              "name": "MAFF",
+              "description": "Ministry of Agriculture, Forestry and Fisheries",
+              "logo": "/uploads/stakeholders/1788369688560-MAFF.jpg"
+            }
+          }
+        ],
+        "createdAt": "2026-09-03T02:30:43.493Z",
+        "updatedAt": "2026-09-29T08:42:04.323Z",
+        "progressUpdate": null,
+        "cdcComment": null
+      },
+      {
+        "id": 10,
+        "title": "ការយឺតយ៉ាវក្នុងដំណើរការចេញវិញ្ញាបនបត្រផលិតផលកសិកម្ម",
+        "description": "វិស័យឯកជនជួបប្រទះការយឺតយ៉ាវក្នុងការស្នើសុំវិញ្ញាបនបត្រសម្រាប់ផលិតផលកសិកម្ម ជាពិសេសសម្រាប់ការនាំចេញ។ ដំណើរការនេះត្រូវការឯកសារច្រើន និងការសម្របសម្រួលជាមួយស្ថាប័នពាក់ព័ន្ធជាច្រើន ដែលធ្វើឱ្យចំណាយពេលវេលាច្រើន។",
+        "recommendation": "ស្នើឱ្យមានការកែលម្អដំណើរការចេញវិញ្ញាបនបត្រ ដោយរៀបចំបញ្ជីឯកសារឱ្យច្បាស់លាស់ កាត់បន្ថយការស្នើសុំឯកសារដដែលៗ និងកំណត់រយៈពេលស្តង់ដារសម្រាប់ដំណើរការអនុម័ត។",
+        "status": {
+          "id": 4,
+          "code": "IN_PROGRESS",
+          "name": "In Progress"
+        },
+        "category": {
+          "id": 1,
+          "name": "General"
+        },
+        "workingGroup": {
+          "id": 14,
+          "name": "Agriculture & Agro-Industry",
+          "logo": "/uploads/stakeholders/1790505693513-MAFF.jpg"
+        },
+        "governmentAgencies": [
+          {
+            "agencyOrder": 1,
+            "stakeholder": {
+              "id": 1,
+              "name": "MAFF",
+              "description": "Ministry of Agriculture, Forestry and Fisheries",
+              "logo": "/uploads/stakeholders/1788369688560-MAFF.jpg"
+            }
+          },
+          {
+            "agencyOrder": 2,
+            "stakeholder": {
+              "id": 4,
+              "name": "MEF",
+              "description": "Ministry of Economy and Finance",
+              "logo": "/uploads/stakeholders/1788369650792-MEF.png"
+            }
+          },
+          {
+            "agencyOrder": 3,
+            "stakeholder": {
+              "id": 3,
+              "name": "MISTI",
+              "description": "Minister of Industry, Science, Technology & Innovation",
+              "logo": "/uploads/stakeholders/1788369667932-misti-logo.png"
+            }
+          }
+        ],
+        "createdAt": "2026-09-03T02:35:59.659Z",
+        "updatedAt": "2026-09-14T08:38:28.823Z",
+        "progressUpdate": null,
+        "cdcComment": null
+      }
+    ],
+    "rgcDecisions": [
+      {
+        "id": 3,
+        "cdcInProgressStatus": null,
+        "meetingDate": "2026-10-03",
+        "status": "NOT_ADDRESSED",
+        "focalPerson": "H.E. Mr. DITH TINA",
+        "decision": "<p><strong>សេចក្តីសម្រេចរបស់រាជរដ្ឋាភិបាល</strong></p>",
+        "category": {
+          "id": 8,
+          "name": "Communication"
+        },
+        "verificationSource": "<p><strong>ប្រភពផ្ទៀងផ្ទាត់</strong></p>",
+        "verificationLink": "https://mis-stage.datacolabx.com/ministry/plenary/plenaries/3?createRgcDecision=1",
+        "submittedToCdcAt": "2026-10-05T02:04:30.637Z",
+        "issues": [
+          {
+            "id": 5,
+            "title": "ចូលរួមសហគមន៍កសិកម្មទំនើប",
+            "workingGroup": {
+              "id": 14,
+              "name": "Agriculture & Agro-Industry",
+              "logo": "/uploads/stakeholders/1790505693513-MAFF.jpg"
+            }
+          }
+        ],
+        "hasProgressUpdate": false,
+        "progressUpdate": null,
+        "cdcComment": null,
+        "createdAt": "2026-10-03T04:54:48.818Z",
+        "updatedAt": "2026-10-05T02:04:30.638Z"
+      },
+      {
+        "id": 1,
+        "cdcInProgressStatus": null,
+        "meetingDate": "2026-09-14",
+        "status": "IN_PROGRESS",
+        "focalPerson": "H.E. Mr. DITH TINA",
+        "decision": "<p><strong>សេចក្តីសម្រេចរបស់រាជរដ្ឋាភិបាល</strong></p>",
+        "category": {
+          "id": 5,
+          "name": "Climate"
+        },
+        "verificationSource": "<p><strong>ប្រភពផ្ទៀងផ្ទាត់</strong></p>",
+        "verificationLink": "https://mis-stage.datacolabx.com/ministry/plenary/plenaries/3?createRgcDecision=1",
+        "submittedToCdcAt": "2026-10-01T03:13:21.816Z",
+        "issues": [
+          {
+            "id": 1,
+            "title": "កង្វះទីផ្សារស្ថិរភាពសម្រាប់លក់ផលិតផលកសិកម្មក្នុងស្រុក",
+            "workingGroup": {
+              "id": 14,
+              "name": "Agriculture & Agro-Industry",
+              "logo": "/uploads/stakeholders/1790505693513-MAFF.jpg"
+            }
+          }
+        ],
+        "hasProgressUpdate": false,
+        "progressUpdate": null,
+        "cdcComment": null,
+        "createdAt": "2026-09-14T08:56:49.866Z",
+        "updatedAt": "2026-10-03T02:08:32.151Z"
+      }
+    ]
+  },
+  "timestamp": "2026-10-19T09:17:59.789Z",
+  "path": "/api/v1/progress-reports/2/ministries/1"
+}

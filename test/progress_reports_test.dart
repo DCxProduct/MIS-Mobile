@@ -216,14 +216,23 @@ void main() {
           findsOneWidget,
         );
         expect(find.text('approval.pdf'), findsOneWidget);
+        expect(find.textContaining('12:00:00'), findsNothing);
+        expect(find.byIcon(Icons.more_horiz), findsNothing);
         expect(find.text('request.pdf'), findsOneWidget);
         await tester.scrollUntilVisible(
           find.text('Actual ministry description'),
           150,
+          scrollable: find
+              .descendant(
+                of: find.byType(ReportDetailScreen),
+                matching: find.byType(Scrollable),
+              )
+              .first,
         );
         await tester.tap(find.text('All Issues'));
         await tester.pumpAndSettle();
         expect(find.text('Actual ministry issue'), findsOneWidget);
+        await tester.ensureVisible(find.text('RGC Decision'));
         await tester.tap(find.text('RGC Decision'));
         await tester.pumpAndSettle();
         expect(find.text('Actual ministry decision'), findsOneWidget);

@@ -149,6 +149,82 @@ void main() {
     );
   }
 
+  for (final inline in [false, true]) {
+    for (final body in ['សំណើ', '<p><strong>សំណើ</strong></p>', '']) {
+      testWidgets(
+        'short ministry content hides Read more: inline=$inline, $body',
+        (tester) async {
+          final settings = AppSettingsController()
+            ..setLanguage(AppLanguage.khmer);
+          addTearDown(settings.dispose);
+          await tester.pumpWidget(
+            AppSettings(
+              controller: settings,
+              child: MaterialApp(
+                home: Scaffold(
+                  body: SizedBox(
+                    width: 320,
+                    child: CdcDetailTextPanel(
+                      label: 'សំណើ',
+                      body: body,
+                      collapsedLines: 3,
+                      inlineLink: inline,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(find.text('អានបន្ថែម', findRichText: true), findsNothing);
+          expect(find.byType(TextButton), findsNothing);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
+  testWidgets('Read more follows rendered overflow as width and content change', (
+    tester,
+  ) async {
+    final settings = AppSettingsController()..setLanguage(AppLanguage.english);
+    addTearDown(settings.dispose);
+    Widget page(String content, double width) => AppSettings(
+      controller: settings,
+      child: MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: SizedBox(
+              width: width,
+              child: ExpandableEditorContent(
+                content,
+                collapsedLines: 3,
+                style: const TextStyle(fontSize: 14, height: 1.4),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    const content =
+        'One two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen.';
+    await tester.pumpWidget(page(content, 600));
+    await tester.pumpAndSettle();
+    expect(find.text('Read more'), findsNothing);
+    await tester.pumpWidget(page(content, 150));
+    await tester.pumpAndSettle();
+    expect(find.text('Read more'), findsOneWidget);
+    await tester.tap(find.text('Read more'));
+    await tester.pumpAndSettle();
+    expect(find.text('Show less'), findsOneWidget);
+    await tester.pumpWidget(page('<p><strong>Short update</strong></p>', 150));
+    await tester.pumpAndSettle();
+    expect(find.text('Read more'), findsNothing);
+    expect(find.text('Show less'), findsNothing);
+    expect(find.text('Short update', findRichText: true), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('formatted read more expands and collapses on a mobile width', (
     tester,
   ) async {

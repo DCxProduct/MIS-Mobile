@@ -1,3 +1,4 @@
+import '../../shared/issues/widgets/issue_display.dart';
 import '../../../core/widgets/editor_content.dart';
 import 'package:flutter/material.dart';
 
@@ -185,6 +186,21 @@ class _SummaryInfoGrid extends StatelessWidget {
 
   final MeetingSummary summary;
 
+  String _meetingTime(BuildContext context) {
+    final raw = summary.startTime.trim();
+    // The web calendar treats ISO startTime as a stored clock time (UTC hours).
+    final date = DateTime.tryParse(raw)?.toUtc();
+    final clock = RegExp(r'^(\d{1,2}):(\d{2})(?::\d{2})?$').firstMatch(raw);
+    final int? hour =
+        date?.hour ?? (clock == null ? null : int.tryParse(clock[1]!));
+    final int? minute =
+        date?.minute ?? (clock == null ? null : int.tryParse(clock[2]!));
+    if (hour == null || minute == null || hour > 23 || minute > 59) return '—';
+    return MaterialLocalizations.of(
+      context,
+    ).formatTimeOfDay(TimeOfDay(hour: hour, minute: minute));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -195,22 +211,17 @@ class _SummaryInfoGrid extends StatelessWidget {
             Expanded(
               child: _InfoBlock(
                 label: AppLocalizations.of(context).text('meetingTime'),
-                value: summary.detailDate == null
-                    ? '—'
-                    : MaterialLocalizations.of(context).formatTimeOfDay(
-                        TimeOfDay.fromDateTime(summary.detailDate!.toLocal()),
-                      ),
+                value: _meetingTime(context),
               ),
             ),
             SizedBox(width: 24),
             Expanded(
               child: _InfoBlock(
                 label: AppLocalizations.of(context).text('scheduleMeeting'),
-                value: summary.detailDate == null
-                    ? '—'
-                    : MaterialLocalizations.of(
-                        context,
-                      ).formatMediumDate(summary.detailDate!.toLocal()),
+                value: issueDateWithYear(
+                  context,
+                  summary.detailDate?.toLocal(),
+                ),
               ),
             ),
           ],
@@ -519,44 +530,35 @@ class _IssueDetailsSheet extends StatelessWidget {
                           label: AppLocalizations.of(
                             context,
                           ).text('submittedBy'),
-                          name: issue?.agency.isNotEmpty == true
-                              ? issue!.agency
+                          name: issue?.submittedBy.isNotEmpty == true
+                              ? issue!.submittedBy
                               : '—',
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         _DatePill(
                           label: AppLocalizations.of(
                             context,
                           ).text('submittedDate'),
-                          name: 'Jun 24 2025',
-                        ),
-                        SizedBox(width: 10),
-                        _DatePill(
-                          label: AppLocalizations.of(
+                          name: issueDateWithYear(
                             context,
-                          ).text('governmentAgency'),
-                          name: 'MAFF',
+                            issue?.submittedDate?.toLocal(),
+                          ),
                         ),
-                        SizedBox(width: 10),
-                        _DatePill(
-                          label: "Gov't Second Agency",
-                          name: 'Not Data',
-                        ),
-                        SizedBox(width: 10),
-                        _DatePill(
-                          label: "Gov't Third Agency",
-                          name: 'Not Data',
-                        ),
-                        SizedBox(width: 10),
-                        _DatePill(
-                          label: "Gov't Fourth Agency",
-                          name: 'Not Data',
-                        ),
-                        SizedBox(width: 10),
-                        _DatePill(
-                          label: "Gov't Fifth Agency",
-                          name: 'Not Data',
-                        ),
+                        for (final order in [1, 2, 3, 4, 5]) ...[
+                          const SizedBox(width: 10),
+                          _DatePill(
+                            label: AppLocalizations.of(context).text(
+                              switch (order) {
+                                1 => 'governmentAgency',
+                                2 => 'governmentSecondAgency',
+                                3 => 'governmentThirdAgency',
+                                4 => 'governmentFourthAgency',
+                                _ => 'governmentFifthAgency',
+                              },
+                            ),
+                            name: issue?.governmentAgencies[order] ?? '—',
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -597,7 +599,9 @@ class _IssueSheetInfoGrid extends StatelessWidget {
             Expanded(
               child: _InfoBlock(
                 label: AppLocalizations.of(context).text('submittedBy'),
-                value: issue?.agency.isNotEmpty == true ? issue!.agency : '—',
+                value: issue?.submittedBy.isNotEmpty == true
+                    ? issue!.submittedBy
+                    : '—',
               ),
             ),
             SizedBox(width: 18),

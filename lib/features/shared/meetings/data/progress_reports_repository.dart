@@ -9,6 +9,54 @@ class ProgressReportsRepository {
   ProgressReportsRepository(this._api);
   final ApiClient _api;
 
+  Future<List<ProgressReportMinistry>> getMinistries(int reportId) async {
+    if (reportId <= 0) throw ArgumentError.value(reportId, 'reportId');
+    final rows = await _api.getAllPages(
+      'progress-reports/$reportId/ministries',
+    );
+    try {
+      return List.unmodifiable(
+        rows.map(
+          (row) => ProgressReportMinistry.fromJson(row as Map<String, dynamic>),
+        ),
+      );
+    } on FormatException {
+      throw const ApiException(
+        'The server returned invalid report ministries.',
+      );
+    } on TypeError {
+      throw const ApiException(
+        'The server returned invalid report ministries.',
+      );
+    }
+  }
+
+  Future<ProgressReport> getMinistryDetail(int reportId, int ministryId) async {
+    if (reportId <= 0 || ministryId <= 0) {
+      throw ArgumentError('Report and ministry IDs must be positive.');
+    }
+    final data = await _api.get(
+      'progress-reports/$reportId/ministries/$ministryId',
+    );
+    if (data['progressReportId'] != reportId ||
+        data['ministryId'] != ministryId) {
+      throw const ApiException(
+        'The server returned a different ministry report.',
+      );
+    }
+    try {
+      return ProgressReport(data);
+    } on FormatException {
+      throw const ApiException(
+        'The server returned invalid ministry report details.',
+      );
+    } on TypeError {
+      throw const ApiException(
+        'The server returned invalid ministry report details.',
+      );
+    }
+  }
+
   Future<Map<String, dynamic>> getItemDetail(
     Map<String, dynamic> item, {
     required ProgressReportItemType type,

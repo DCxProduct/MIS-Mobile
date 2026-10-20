@@ -2,21 +2,28 @@ import 'package:flutter/material.dart';
 
 /// Shows the responsible ministry logo, with a fallback for unavailable images.
 class IssueAgencyLogo extends StatelessWidget {
-  const IssueAgencyLogo({super.key, required this.path});
+  const IssueAgencyLogo({
+    super.key,
+    required this.path,
+    this.size = 34,
+    this.iconSize = 18,
+    this.fallbackColors = const [Color(0xFF216AAA), Color(0xFF1EA45B)],
+  });
   final String path;
+  final double size;
+  final double iconSize;
+  final List<Color> fallbackColors;
 
   @override
   Widget build(BuildContext context) {
     final fallback = Container(
-      width: 34,
-      height: 34,
-      decoration: const BoxDecoration(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(
-          colors: [Color(0xFF216AAA), Color(0xFF1EA45B)],
-        ),
+        gradient: LinearGradient(colors: fallbackColors),
       ),
-      child: const Icon(Icons.account_balance, color: Colors.white, size: 18),
+      child: Icon(Icons.account_balance, color: Colors.white, size: iconSize),
     );
     if (path.trim().isEmpty) return fallback;
     const baseUrl = String.fromEnvironment(
@@ -32,8 +39,8 @@ class IssueAgencyLogo extends StatelessWidget {
     return ClipOval(
       child: Image.network(
         url.toString(),
-        width: 34,
-        height: 34,
+        width: size,
+        height: size,
         fit: BoxFit.cover,
         errorBuilder: (_, error, stackTrace) => fallback,
         loadingBuilder: (_, child, progress) =>

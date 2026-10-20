@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show OverflowBoxFit;
+import 'package:flutter/rendering.dart' show OverflowBoxFit, RenderProxyBox;
 import 'package:flutter/services.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,6 +16,7 @@ class EditorContent extends StatelessWidget {
     this.maxLines,
     this.overflow = TextOverflow.clip,
     this.textAlign,
+    this.onOverflowChanged,
   });
 
   final String data;
@@ -23,18 +24,40 @@ class EditorContent extends StatelessWidget {
   final int? maxLines;
   final TextOverflow overflow;
   final TextAlign? textAlign;
+  final ValueChanged<bool>? onOverflowChanged;
 
   @override
   Widget build(BuildContext context) {
     final text = htmlToPlainText(data);
     final html = sanitizedEditorHtml(data);
     if (!containsEditorFormatting(html)) {
-      return Text(
+      final content = Text(
         text,
         style: style,
         maxLines: maxLines,
         overflow: overflow,
         textAlign: textAlign,
+      );
+      if (onOverflowChanged == null || maxLines == null) return content;
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final painter = TextPainter(
+            text: TextSpan(
+              text: text,
+              style: DefaultTextStyle.of(context).style.merge(style),
+            ),
+            maxLines: maxLines,
+            textDirection: Directionality.of(context),
+            textScaler: MediaQuery.textScalerOf(context),
+            textAlign: textAlign ?? TextAlign.start,
+          )..layout(maxWidth: constraints.maxWidth);
+          final overflowed = painter.didExceedMaxLines;
+          painter.dispose();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) onOverflowChanged?.call(overflowed);
+          });
+          return content;
+        },
       );
     }
     final effectiveStyle = DefaultTextStyle.of(context).style.merge(style);
@@ -109,10 +132,58 @@ class EditorContent extends StatelessWidget {
           minHeight: 0,
           maxHeight: double.infinity,
           fit: OverflowBoxFit.deferToChild,
-          child: content,
+          child: onOverflowChanged == null
+              ? content
+              : _EditorOverflowReporter(
+                  maxHeight: lineHeight * maxLines!,
+                  onChanged: onOverflowChanged!,
+                  child: content,
+                ),
         ),
       ),
     );
+  }
+}
+
+class _EditorOverflowReporter extends SingleChildRenderObjectWidget {
+  const _EditorOverflowReporter({
+    required this.maxHeight,
+    required this.onChanged,
+    required super.child,
+  });
+  final double maxHeight;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  _RenderEditorOverflowReporter createRenderObject(BuildContext context) =>
+      _RenderEditorOverflowReporter(maxHeight, onChanged);
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderEditorOverflowReporter renderObject,
+  ) {
+    renderObject.maxHeight = maxHeight;
+    renderObject.onChanged = onChanged;
+    renderObject.markNeedsLayout();
+  }
+}
+
+class _RenderEditorOverflowReporter extends RenderProxyBox {
+  _RenderEditorOverflowReporter(this.maxHeight, this.onChanged);
+  double maxHeight;
+  ValueChanged<bool> onChanged;
+  bool? _lastOverflow;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    final overflowed = size.height > maxHeight + .5;
+    if (_lastOverflow != overflowed) {
+      _lastOverflow = overflowed;
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => onChanged(overflowed),
+      );
+    }
   }
 }
 
@@ -122,10 +193,12 @@ class ExpandableEditorContent extends StatefulWidget {
     super.key,
     this.style,
     this.collapsedLines = 5,
+    this.buttonStyle,
   });
   final String data;
   final TextStyle? style;
   final int collapsedLines;
+  final ButtonStyle? buttonStyle;
   @override
   State<ExpandableEditorContent> createState() =>
       _ExpandableEditorContentState();
@@ -133,19 +206,22 @@ class ExpandableEditorContent extends StatefulWidget {
 
 class _ExpandableEditorContentState extends State<ExpandableEditorContent> {
   bool _expanded = false;
+  bool _canExpand = false;
+
+  @override
+  void didUpdateWidget(covariant ExpandableEditorContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.data != widget.data) _expanded = false;
+  }
+
+  void _overflowChanged(bool value) {
+    if (mounted && _canExpand != value) setState(() => _canExpand = value);
+  }
+
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
       final style = DefaultTextStyle.of(context).style.merge(widget.style);
-      final painter = TextPainter(
-        text: TextSpan(text: htmlToPlainText(widget.data), style: style),
-        textDirection: Directionality.of(context),
-        textScaler: MediaQuery.textScalerOf(context),
-        maxLines: widget.collapsedLines,
-      )..layout(maxWidth: constraints.maxWidth);
-      final canExpand =
-          painter.didExceedMaxLines || containsEditorHtml(widget.data);
-      painter.dispose();
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -154,9 +230,11 @@ class _ExpandableEditorContentState extends State<ExpandableEditorContent> {
             style: style,
             maxLines: _expanded ? null : widget.collapsedLines,
             overflow: TextOverflow.ellipsis,
+            onOverflowChanged: _overflowChanged,
           ),
-          if (canExpand)
+          if (_canExpand)
             TextButton(
+              style: widget.buttonStyle,
               onPressed: () => setState(() => _expanded = !_expanded),
               child: Text(
                 AppLocalizations.of(

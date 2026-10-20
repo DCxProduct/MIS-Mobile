@@ -1,3 +1,6 @@
+import '../../../screens/report/tabs/report_progress_report_tab.dart';
+import '../../shared/issues/widgets/issue_agency_logo.dart';
+import 'progress_report_ministries_screen.dart';
 import '../../shared/meetings/data/rgc_decision.dart';
 import '../../../core/app_settings.dart';
 import '../../../core/widgets/filters/api_filter_sheet.dart';
@@ -26,7 +29,7 @@ class CdcSecretariatReportsScreenView extends StatefulWidget {
 
 class _CdcReportsState extends State<CdcSecretariatReportsScreenView> {
   int _tab = 0;
-  final _filters = List.generate(3, (_) => FilterSelection());
+  final _filters = List.generate(4, (_) => FilterSelection());
   Future<void> _openFilters() async {
     final tab = _tab;
     final catalogs = AppSettings.of(context).filters;
@@ -36,8 +39,9 @@ class _CdcReportsState extends State<CdcSecretariatReportsScreenView> {
         builder: (_) => ApiFilterSheet(
           initial: _filters[tab],
           load: switch (tab) {
-            0 => () => catalogs.dashboard('plenary'),
-            1 => catalogs.plenaries,
+            0 => catalogs.progressReports,
+            1 => () => catalogs.dashboard('plenary'),
+            2 => catalogs.plenaries,
             _ => () => catalogs.rgc(cdcGpsf: true),
           },
         ),
@@ -51,11 +55,16 @@ class _CdcReportsState extends State<CdcSecretariatReportsScreenView> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return ApiFilterScope(
-      selections: {'rgc-decisions': _filters[2], 'dashboard': _filters[0]},
+      selections: {
+        'progress-reports': _filters[0],
+        'rgc-decisions': _filters[3],
+        'dashboard': _filters[1],
+      },
       queries: {
-        'dashboard': _filters[0].toQuery(),
-        'plenaries': _filters[1].toQuery(),
-        'rgc-decisions': _filters[2].toQuery(),
+        'progress-reports': _filters[0].toQuery(),
+        'dashboard': _filters[1].toQuery(),
+        'plenaries': _filters[2].toQuery(),
+        'rgc-decisions': _filters[3].toQuery(),
       },
       child: ColoredBox(
         color: AppColors.isDark(context)
@@ -77,7 +86,14 @@ class _CdcReportsState extends State<CdcSecretariatReportsScreenView> {
                     children: [
                       Expanded(
                         child: Text(
-                          l10n.text(['report', 'plenary', 'rgcDecision'][_tab]),
+                          l10n.text(
+                            [
+                              'progressReport',
+                              'report',
+                              'plenary',
+                              'rgcDecision',
+                            ][_tab],
+                          ),
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
@@ -117,19 +133,17 @@ class _CdcReportsState extends State<CdcSecretariatReportsScreenView> {
               ),
             ),
             Expanded(
-              child: IndexedStack(
-                index: _tab,
-                children: [
-                  for (final child in const [
-                    _ReportDashboardTab(),
-                    _PlenaryTab(),
-                    _RgcDecisionTab(),
-                  ])
-                    SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(16, 18, 16, 100),
-                      child: child,
-                    ),
-                ],
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 18, 16, 100),
+                child: switch (_tab) {
+                  0 => ReportProgressReportTab(
+                    detailBuilder: (report) =>
+                        CdcProgressReportMinistriesScreen(report: report),
+                  ),
+                  1 => const _ReportDashboardTab(),
+                  2 => const _PlenaryTab(),
+                  _ => const _RgcDecisionTab(),
+                },
               ),
             ),
           ],
@@ -152,6 +166,7 @@ class _RgcDecisionTab extends StatelessWidget {
               decisionIds: decision.decisionIds,
               plenaryName: decision.plenaryName,
               agencyName: decision.agencyName,
+              agencyLogo: decision.agencyLogo,
               status: decision.status,
               meetingDate: plenaryDate(decision.meetingDate),
               category: decision.category,
@@ -170,6 +185,7 @@ class _RgcDecisionCard extends StatelessWidget {
     required this.decisionIds,
     required this.plenaryName,
     required this.agencyName,
+    required this.agencyLogo,
     required this.status,
     required this.meetingDate,
     required this.category,
@@ -180,6 +196,7 @@ class _RgcDecisionCard extends StatelessWidget {
   final List<int> decisionIds;
   final String plenaryName;
   final String agencyName;
+  final String agencyLogo;
   final String status;
   final String meetingDate;
   final String category;
@@ -210,18 +227,14 @@ class _RgcDecisionCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF1E73BE),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.account_balance_outlined,
-                      color: Colors.white,
-                      size: 14,
-                    ),
+                  IssueAgencyLogo(
+                    path: agencyLogo,
+                    size: 24,
+                    iconSize: 14,
+                    fallbackColors: const [
+                      Color(0xFF1E73BE),
+                      Color(0xFF1E73BE),
+                    ],
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -333,6 +346,7 @@ class _PlenaryTab extends StatelessWidget {
         children: [
           for (final plenary in plenaries)
             _PlenaryCard(
+              plenaryId: plenary.id,
               title: plenary.name,
               status: plenary.status,
               meetingDate: plenaryDate(plenary.meetingDate),
@@ -351,6 +365,7 @@ class _PlenaryTab extends StatelessWidget {
 
 class _PlenaryCard extends StatelessWidget {
   const _PlenaryCard({
+    required this.plenaryId,
     required this.title,
     required this.status,
     required this.meetingDate,
@@ -361,6 +376,7 @@ class _PlenaryCard extends StatelessWidget {
     this.documentReferenceName,
   });
 
+  final int plenaryId;
   final String title;
   final String status;
   final String meetingDate;
@@ -491,6 +507,7 @@ class _PlenaryCard extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => PlenaryDetailScreen(
+                      plenaryId: plenaryId,
                       title: title,
                       documentReference: documentReference,
                       documentReferenceName: documentReferenceName,
@@ -1057,64 +1074,69 @@ class _ReportTabs extends StatelessWidget {
   const _ReportTabs({required this.selectedIndex, required this.onSelected});
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Container(
-      height: 38,
+      height: 42,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: AppColors.cardBackground(context),
         border: Border.all(color: AppColors.border(context)),
         borderRadius: BorderRadius.circular(9),
       ),
-      child: Row(
-        children: [
-          for (var index = 0; index < 3; index++)
-            Expanded(
-              child: InkWell(
+      child: SingleChildScrollView(
+        key: const ValueKey('cdc-report-tabs'),
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            for (var index = 0; index < 4; index++)
+              InkWell(
                 onTap: () => onSelected(index),
                 borderRadius: BorderRadius.circular(6),
                 child: Container(
                   alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
                     color: selectedIndex == index
                         ? AppColors.accent(context)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.event_note_outlined,
-                          size: 15,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.event_note_outlined,
+                        size: 16,
+                        color: selectedIndex == index
+                            ? Colors.white
+                            : AppColors.mutedText,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        l10n.text(
+                          [
+                            'progressReport',
+                            'dashboard',
+                            'plenaries',
+                            'rgcDecision',
+                          ][index],
+                        ),
+                        style: TextStyle(
+                          fontSize: 14,
                           color: selectedIndex == index
                               ? Colors.white
                               : AppColors.mutedText,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          l10n.text(
-                            ['dashboard', 'plenaries', 'rgcDecision'][index],
-                          ),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: selectedIndex == index
-                                ? Colors.white
-                                : AppColors.mutedText,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

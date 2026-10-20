@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
+import '../text/document_metadata.dart';
+
 const _fileHost = 'https://admin-mis-stage.datacolabx.com';
 
 String pdfAttachmentUrl(String path) {
@@ -13,6 +15,8 @@ String pdfAttachmentUrl(String path) {
 
 String pdfAttachmentName(String path, {String? name, String? fallbackName}) {
   if (name?.trim().isNotEmpty == true) return name!.trim();
+  final originalName = documentOriginalName(path);
+  if (originalName.isNotEmpty) return originalName;
   final value = path.split(RegExp(r'[?#]')).first;
   var filename = value.split('/').last.trim();
   try {

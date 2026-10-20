@@ -11,6 +11,7 @@ import 'package:gpsf_app/core/config/module_config.dart';
 import 'package:gpsf_app/core/network/api_client.dart';
 import 'package:gpsf_app/core/widgets/pdf_attachment_preview.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
+import 'package:gpsf_app/features/auth/data/auth_user.dart';
 import 'package:gpsf_app/features/shared/meetings/data/rgc_decisions_repository.dart';
 import 'package:gpsf_app/screens/report/report_screen.dart';
 import 'package:gpsf_app/translations/app_language.dart';
@@ -469,6 +470,12 @@ void main() {
           )
           ..setLanguage(AppLanguage.english)
           ..setModuleType(AppModuleType.lineMinistry);
+    settings.currentUser = const AuthUser(
+      id: 77,
+      email: 'test@example.com',
+      name: 'Test ministry',
+      isActive: true,
+    );
     addTearDown(settings.dispose);
 
     await tester.pumpWidget(

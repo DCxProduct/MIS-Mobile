@@ -107,6 +107,7 @@ class _MeetingRequestCard extends StatelessWidget {
                 Expanded(
                   child: _MeetingInfo(
                     icon: Icons.calendar_month_outlined,
+                    fitValue: true,
                     label: AppLocalizations.of(context).text('meetingDate'),
                     value: date,
                   ),
@@ -164,6 +165,7 @@ class _MeetingInfo extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
+    this.fitValue = false,
     this.iconColor = AppColors.primary,
     this.iconBackground = const Color(0xFFDDEEFF),
   });
@@ -171,12 +173,23 @@ class _MeetingInfo extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+  final bool fitValue;
   final Color iconColor;
   final Color iconBackground;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final valueText = Text(
+      value,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.onSurface,
+        fontSize: 11,
+        fontWeight: FontWeight.w400,
+      ),
+    );
     return Row(
       children: [
         Container(
@@ -206,16 +219,13 @@ class _MeetingInfo extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+              fitValue
+                  ? FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: valueText,
+                    )
+                  : valueText,
             ],
           ),
         ),

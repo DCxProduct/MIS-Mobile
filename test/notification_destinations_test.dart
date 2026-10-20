@@ -629,8 +629,8 @@ void main() {
       expect(find.text('Actual meeting room'), findsOneWidget);
       expect(find.text('Actual summary issue'), findsOneWidget);
       expect(find.text('Second summary issue'), findsOneWidget);
-      expect(find.text('IN_PROGRESS'), findsOneWidget);
-      expect(find.text('SOLVED'), findsOneWidget);
+      expect(find.text('In Progress'), findsOneWidget);
+      expect(find.text('Solved'), findsOneWidget);
       expect(calls.where((call) => call.contains('meeting-summaries')), [
         'GET /api/v1/meeting-summaries/26',
       ]);

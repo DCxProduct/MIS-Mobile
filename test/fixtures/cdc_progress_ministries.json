@@ -1,0 +1,210 @@
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "OK",
+  "data": [
+    {
+      "id": 2,
+      "ministryId": 1,
+      "ministry": {
+        "id": 1,
+        "name": "MAFF",
+        "description": "Ministry of Agriculture, Forestry and Fisheries",
+        "logo": "/uploads/stakeholders/1788369688560-MAFF.jpg"
+      },
+      "status": "COMPLETED",
+      "attachment": {
+        "path": "/uploads/ministry-progress-reports/1788407199672-Issue_solution_reference.pdf",
+        "name": "Issue_solution_reference.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "requestDocument": {
+        "path": "/uploads/progress-reports/1788405806726-Approval_progress_report.pdf",
+        "name": "Approval_progress_report.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "issues": 3
+    },
+    {
+      "id": 3,
+      "ministryId": 4,
+      "ministry": {
+        "id": 4,
+        "name": "MEF",
+        "description": "Ministry of Economy and Finance",
+        "logo": "/uploads/stakeholders/1788369650792-MEF.png"
+      },
+      "status": "REQUESTED",
+      "attachment": null,
+      "requestDocument": {
+        "path": "/uploads/progress-reports/1788405806745-Issue_reference.pdf",
+        "name": "Issue_reference.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "issues": 0
+    },
+    {
+      "id": 4,
+      "ministryId": 3,
+      "ministry": {
+        "id": 3,
+        "name": "MISTI",
+        "description": "Minister of Industry, Science, Technology & Innovation",
+        "logo": "/uploads/stakeholders/1788369667932-misti-logo.png"
+      },
+      "status": "REQUESTED",
+      "attachment": null,
+      "requestDocument": {
+        "path": "/uploads/progress-reports/1788405806756-Issue_solution_reference.pdf",
+        "name": "Issue_solution_reference.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "issues": 0
+    },
+    {
+      "id": 5,
+      "ministryId": 12,
+      "ministry": {
+        "id": 12,
+        "name": "MLMUPC",
+        "description": "Ministry of Land Management, Urban Planning and Construction",
+        "logo": "/uploads/stakeholders/1788369560175-MLMUPC.jpg"
+      },
+      "status": "REQUESTED",
+      "attachment": null,
+      "requestDocument": {
+        "path": "/uploads/progress-reports/1788405806764-meeting_request_latter.pdf",
+        "name": "meeting_request_latter.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "issues": 0
+    },
+    {
+      "id": 6,
+      "ministryId": 9,
+      "ministry": {
+        "id": 9,
+        "name": "MME",
+        "description": "Ministry of Mines and Energy",
+        "logo": "/uploads/stakeholders/1788369594942-MME.png"
+      },
+      "status": "REQUESTED",
+      "attachment": null,
+      "requestDocument": {
+        "path": "/uploads/progress-reports/1788405806773-plenary_document_reference.pdf",
+        "name": "plenary_document_reference.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "issues": 0
+    },
+    {
+      "id": 7,
+      "ministryId": 7,
+      "ministry": {
+        "id": 7,
+        "name": "MoC",
+        "description": "Ministry of Commerce",
+        "logo": "/uploads/stakeholders/1788369618124-MoC.jpg"
+      },
+      "status": "REQUESTED",
+      "attachment": null,
+      "requestDocument": {
+        "path": "/uploads/progress-reports/1788405806796-Progress_report_meeting_reference.pdf",
+        "name": "Progress_report_meeting_reference.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "issues": 0
+    },
+    {
+      "id": 8,
+      "ministryId": 10,
+      "ministry": {
+        "id": 10,
+        "name": "MoEYS",
+        "description": "Ministry of Education, Youth and Sport",
+        "logo": "/uploads/stakeholders/1788369568414-MoEYS.svg.png"
+      },
+      "status": "REQUESTED",
+      "attachment": null,
+      "requestDocument": {
+        "path": "/uploads/progress-reports/1788405806803-meeting_request_latter.pdf",
+        "name": "meeting_request_latter.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "issues": 0
+    },
+    {
+      "id": 9,
+      "ministryId": 11,
+      "ministry": {
+        "id": 11,
+        "name": "MoH",
+        "description": "Ministry of Health",
+        "logo": "/uploads/stakeholders/1788369583936-MoH.png"
+      },
+      "status": "REQUESTED",
+      "attachment": null,
+      "requestDocument": {
+        "path": "/uploads/progress-reports/1788405806806-Issue_solution_reference.pdf",
+        "name": "Issue_solution_reference.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "issues": 0
+    },
+    {
+      "id": 10,
+      "ministryId": 8,
+      "ministry": {
+        "id": 8,
+        "name": "MoLVT",
+        "description": "Ministry of Labour and Vocational Training",
+        "logo": "/uploads/stakeholders/1788369606451-MoLVT.png"
+      },
+      "status": "REQUESTED",
+      "attachment": null,
+      "requestDocument": {
+        "path": "/uploads/progress-reports/1788405806808-Meeting_summary_ reference.pdf",
+        "name": "Meeting_summary_ reference.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "issues": 0
+    },
+    {
+      "id": 11,
+      "ministryId": 2,
+      "ministry": {
+        "id": 2,
+        "name": "MoT",
+        "description": "Ministry of Tourism",
+        "logo": "/uploads/stakeholders/1788369678073-MoT.png"
+      },
+      "status": "REQUESTED",
+      "attachment": null,
+      "requestDocument": {
+        "path": "/uploads/progress-reports/1788405806811-plenary_document_reference.pdf",
+        "name": "plenary_document_reference.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "issues": 1
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 13,
+    "totalPages": 2
+  },
+  "timestamp": "2026-10-19T09:10:31.339Z",
+  "path": "/api/v1/progress-reports/2/ministries"
+}

@@ -1,3 +1,5 @@
+import '../../shared/issues/widgets/issue_display.dart';
+import '../../shared/issues/widgets/issue_agency_logo.dart';
 import '../../shared/meetings/data/rgc_decision.dart';
 import '../../../core/app_settings.dart';
 import '../../../core/widgets/filters/api_filter_sheet.dart';
@@ -157,6 +159,7 @@ class _RgcDecisionTab extends StatelessWidget {
               decisionIds: decision.decisionIds,
               plenaryName: decision.plenaryName,
               agencyName: decision.agencyName,
+              agencyLogo: decision.agencyLogo,
               status: decision.status,
               meetingDate: plenaryDate(decision.meetingDate),
               category: decision.category,
@@ -174,6 +177,7 @@ class _RgcDecisionCard extends StatelessWidget {
     required this.decisionIds,
     required this.plenaryName,
     required this.agencyName,
+    required this.agencyLogo,
     required this.status,
     required this.meetingDate,
     required this.category,
@@ -184,6 +188,7 @@ class _RgcDecisionCard extends StatelessWidget {
   final List<int> decisionIds;
   final String plenaryName;
   final String agencyName;
+  final String agencyLogo;
   final String status;
   final String meetingDate;
   final String category;
@@ -214,18 +219,14 @@ class _RgcDecisionCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF1E73BE),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.account_balance_outlined,
-                      color: Colors.white,
-                      size: 14,
-                    ),
+                  IssueAgencyLogo(
+                    path: agencyLogo,
+                    size: 24,
+                    iconSize: 14,
+                    fallbackColors: const [
+                      Color(0xFF1E73BE),
+                      Color(0xFF1E73BE),
+                    ],
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -337,6 +338,7 @@ class _PlenaryTab extends StatelessWidget {
         children: [
           for (final plenary in plenaries)
             _PlenaryCard(
+              plenaryId: plenary.id,
               title: plenary.name,
               status: plenary.status,
               documentReference: plenary.documentReference,
@@ -353,7 +355,7 @@ class _PlenaryTab extends StatelessWidget {
 
   static String _formatDate(BuildContext context, DateTime? value) {
     if (value == null) return '-';
-    return MaterialLocalizations.of(context).formatMediumDate(value.toLocal());
+    return issueDateWithYear(context, value.toLocal());
   }
 
   static String _attachmentLabel(BuildContext context, Plenary plenary) {
@@ -363,6 +365,7 @@ class _PlenaryTab extends StatelessWidget {
 
 class _PlenaryCard extends StatelessWidget {
   const _PlenaryCard({
+    required this.plenaryId,
     required this.title,
     required this.status,
     required this.meetingDate,
@@ -374,6 +377,7 @@ class _PlenaryCard extends StatelessWidget {
   });
 
   final String? documentReference, documentReferenceName;
+  final int plenaryId;
   final String title;
   final String status;
   final String meetingDate;
@@ -486,6 +490,7 @@ class _PlenaryCard extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => PlenaryDetailScreen(
+                      plenaryId: plenaryId,
                       title: title,
                       documentReference: documentReference,
                       documentReferenceName: documentReferenceName,

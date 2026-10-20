@@ -612,6 +612,7 @@ class _LineMinistryIssueListCard extends StatelessWidget {
                 Expanded(
                   child: _MetaInfo(
                     icon: Icons.calendar_month_outlined,
+                    fitValue: true,
                     label: AppLocalizations.of(context).text('submissionDate'),
                     value: submissionDate,
                     iconColor: AppColors.primary,
@@ -698,6 +699,7 @@ class _MetaInfo extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
+    this.fitValue = false,
     required this.iconColor,
     required this.iconBackground,
   });
@@ -705,12 +707,23 @@ class _MetaInfo extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+  final bool fitValue;
   final Color iconColor;
   final Color iconBackground;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final valueText = Text(
+      value,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.onSurface,
+        fontSize: 11,
+        fontWeight: FontWeight.w500,
+      ),
+    );
 
     return Row(
       children: [
@@ -741,16 +754,13 @@ class _MetaInfo extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              fitValue
+                  ? FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: valueText,
+                    )
+                  : valueText,
             ],
           ),
         ),

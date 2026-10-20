@@ -108,12 +108,27 @@ void main() {
       addTearDown(settings.dispose);
       await tester.pumpWidget(app(settings));
       await tester.pumpAndSettle();
-      await tester.scrollUntilVisible(find.text('All Issues'), 150);
+      await tester.scrollUntilVisible(
+        find.text('All Issues'),
+        150,
+        scrollable: find
+            .descendant(
+              of: find.byType(ReportDetailScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
       await tester.tap(find.text('All Issues'));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('report-issue-5')),
         150,
+        scrollable: find
+            .descendant(
+              of: find.byType(ReportDetailScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first,
       );
       await tester.tap(find.byKey(const ValueKey('report-issue-5')));
       await tester.pumpAndSettle();
@@ -124,7 +139,10 @@ void main() {
       final formatted = MaterialLocalizations.of(
         tester.element(find.byType(ReportDetailScreen)),
       ).formatMediumDate(DateTime(2026, 9, 3));
-      expect(inSheet(find.text('Submitted Date: $formatted')), findsOneWidget);
+      expect(
+        inSheet(find.text('Submitted Date: $formatted 2026')),
+        findsOneWidget,
+      );
       final pdf = tester.widget<PdfAttachmentPreview>(
         inSheet(find.byType(PdfAttachmentPreview)),
       );
@@ -229,12 +247,27 @@ void main() {
         app(settings, requestDocument: '/uploads/report_request.pdf'),
       );
       await tester.pumpAndSettle();
-      await tester.scrollUntilVisible(find.text('RGC Decision'), 150);
+      await tester.scrollUntilVisible(
+        find.text('RGC Decision'),
+        150,
+        scrollable: find
+            .descendant(
+              of: find.byType(ReportDetailScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
       await tester.tap(find.text('RGC Decision'));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('report-rgcDecision-7')),
         150,
+        scrollable: find
+            .descendant(
+              of: find.byType(ReportDetailScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first,
       );
       await tester.tap(find.byKey(const ValueKey('report-rgcDecision-7')));
       await tester.pumpAndSettle();
@@ -336,12 +369,27 @@ void main() {
       addTearDown(settings.dispose);
       await tester.pumpWidget(app(settings));
       await tester.pumpAndSettle();
-      await tester.scrollUntilVisible(find.text('All Issues'), 150);
+      await tester.scrollUntilVisible(
+        find.text('All Issues'),
+        150,
+        scrollable: find
+            .descendant(
+              of: find.byType(ReportDetailScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
       await tester.tap(find.text('All Issues'));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('report-issue-5')),
         150,
+        scrollable: find
+            .descendant(
+              of: find.byType(ReportDetailScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first,
       );
       await tester.tap(find.byKey(const ValueKey('report-issue-5')));
       await tester.pumpAndSettle();
@@ -400,12 +448,27 @@ void main() {
         addTearDown(settings.dispose);
         await tester.pumpWidget(app(settings, requestDocument: document));
         await tester.pumpAndSettle();
-        await tester.scrollUntilVisible(find.text('RGC Decision'), 150);
+        await tester.scrollUntilVisible(
+          find.text('RGC Decision'),
+          150,
+          scrollable: find
+              .descendant(
+                of: find.byType(ReportDetailScreen),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
         await tester.tap(find.text('RGC Decision'));
         await tester.pumpAndSettle();
         await tester.scrollUntilVisible(
           find.byKey(const ValueKey('report-rgcDecision-7')),
           150,
+          scrollable: find
+              .descendant(
+                of: find.byType(ReportDetailScreen),
+                matching: find.byType(Scrollable),
+              )
+              .first,
         );
         await tester.tap(find.byKey(const ValueKey('report-rgcDecision-7')));
         await tester.pumpAndSettle();

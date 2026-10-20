@@ -10,7 +10,7 @@ class RgcDecision {
         json['stakeholderId'] ?? _object(json['stakeholder'])['id'],
       ),
       plenaryName = _string(_object(json['plenary'])['name']),
-      plenaryStatus = _string(_object(json['plenary'])['status']),
+      plenaryStatus = _plenaryStatus(json),
       plenaryMeetingDate = _date(_object(json['plenary'])['meetingDate']),
       workingGroups = _workingGroups(json),
       measureCategory = _string(
@@ -28,20 +28,37 @@ class RgcDecision {
           ? _string(json['category'])
           : _string(_object(json['categoryInfo'])['name']),
       focalPerson = _string(json['focalPerson']),
+      content = htmlToPlainText(_string(json['decision'])),
+      decisionHtml = _string(json['decision']),
+      indicatorName = _string(
+        json['indicatorName'] ?? _object(json['indicator'])['name'],
+      ),
+      verificationSource = _string(json['verificationSource']),
+      issueTitles = List.unmodifiable(
+        (json['issues'] is List ? json['issues'] as List : const [])
+            .map((issue) => _string(_object(issue)['title']))
+            .where((title) => title.trim().isNotEmpty),
+      ),
+      verificationLink = _string(json['verificationLink']),
       links = Set.unmodifiable(_links(json));
 
   final int id, plenaryId, stakeholderId;
   final Set<String> links;
   int get linkCount => links.length;
   final String plenaryName, plenaryStatus, measureCategory;
-  final List<String> workingGroups;
+  final List<String> workingGroups, issueTitles;
   final DateTime? decisionDate;
   final String agencyName,
       agencyLogo,
       status,
       statusCode,
       category,
-      focalPerson;
+      focalPerson,
+      content,
+      decisionHtml,
+      indicatorName,
+      verificationSource,
+      verificationLink;
   final DateTime? meetingDate, plenaryMeetingDate;
   Map<String, Iterable<String>> get filterValues => {
     'local.workingGroup': workingGroups,
@@ -57,6 +74,12 @@ class RgcDecision {
 
   static DateTime? _date(Object? value) =>
       value is String ? DateTime.tryParse(value) : null;
+
+  static String _plenaryStatus(Map<String, dynamic> json) {
+    final plenary = _object(json['plenary']);
+    final label = _string(plenary['status']).trim();
+    return label.isNotEmpty ? label : _string(plenary['statusCode']).trim();
+  }
 
   static List<String> _workingGroups(Map<String, dynamic> json) {
     final names = <String>{};

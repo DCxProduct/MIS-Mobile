@@ -1,3 +1,4 @@
+import '../../../features/shared/issues/widgets/issue_display.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
@@ -12,9 +13,11 @@ class ReportProgressReportTab extends StatelessWidget {
     this.years = const {},
     this.semesters = const {},
     this.statuses = const {},
+    this.detailBuilder,
   });
 
   final Set<String> years, semesters, statuses;
+  final Widget Function(ProgressReport)? detailBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +32,8 @@ class ReportProgressReportTab extends StatelessWidget {
         }
         return Column(
           children: [
-            for (final report in filtered) _ProgressReportCard(report: report),
+            for (final report in filtered)
+              _ProgressReportCard(report: report, detailBuilder: detailBuilder),
           ],
         );
       },
@@ -55,7 +59,8 @@ class ReportProgressReportTab extends StatelessWidget {
 }
 
 class _ProgressReportCard extends StatelessWidget {
-  const _ProgressReportCard({required this.report});
+  const _ProgressReportCard({required this.report, this.detailBuilder});
+  final Widget Function(ProgressReport)? detailBuilder;
   final ProgressReport report;
 
   @override
@@ -79,7 +84,7 @@ class _ProgressReportCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   report.title.isEmpty
-                      ? 'Semester ${report.semester}'
+                      ? '${AppLocalizations.of(context).text('semester')} ${report.semester}'
                       : report.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -101,17 +106,17 @@ class _ProgressReportCard extends StatelessWidget {
           ),
           const SizedBox(height: 9),
           _ReportDateRow(
-            label: '1st Meeting',
+            label: AppLocalizations.of(context).text('firstMeeting'),
             value: _date(context, report.firstMeeting),
           ),
           const SizedBox(height: 9),
           _ReportDateRow(
-            label: '2nd Deadline',
+            label: AppLocalizations.of(context).text('secondDeadline'),
             value: _date(context, report.secondDeadline),
           ),
           const SizedBox(height: 9),
           _ReportDateRow(
-            label: '2nd Meeting',
+            label: AppLocalizations.of(context).text('secondMeeting'),
             value: _date(context, report.secondMeeting),
           ),
           const SizedBox(height: 12),
@@ -121,7 +126,9 @@ class _ProgressReportCard extends StatelessWidget {
             child: FilledButton(
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => ProgressReportDetailLoader(id: report.id),
+                  builder: (_) =>
+                      detailBuilder?.call(report) ??
+                      ProgressReportDetailLoader(id: report.id),
                 ),
               ),
               style: FilledButton.styleFrom(
@@ -148,9 +155,8 @@ class _ProgressReportCard extends StatelessWidget {
     );
   }
 
-  static String _date(BuildContext context, DateTime? value) => value == null
-      ? '—'
-      : MaterialLocalizations.of(context).formatMediumDate(value.toLocal());
+  static String _date(BuildContext context, DateTime? value) =>
+      value == null ? '—' : issueDateWithYear(context, value.toLocal());
 }
 
 class _Tag extends StatelessWidget {
@@ -179,21 +185,31 @@ class _ReportDateRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      Text(
-        label,
-        style: const TextStyle(
-          color: AppColors.mutedText,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
+      Expanded(
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.mutedText,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
-      const Spacer(),
-      Text(
-        value,
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onSurface,
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
+      const SizedBox(width: 8),
+      Expanded(
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
         ),
       ),
     ],

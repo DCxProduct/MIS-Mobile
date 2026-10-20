@@ -1,3 +1,4 @@
+import '../../features/shared/issues/widgets/issue_display.dart';
 import '../../core/text/document_metadata.dart';
 import '../../core/widgets/editor_content.dart';
 import 'package:flutter/material.dart';
@@ -379,7 +380,7 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
           _Chip(text: '${l10n.text('submittedBy')}: ${_value(person)}'),
           _Chip(
             text:
-                '${l10n.text('submittedDate')}: ${date == null ? '—' : MaterialLocalizations.of(context).formatMediumDate(date)}',
+                '${l10n.text('submittedDate')}: ${issueDateWithYear(context, date)}',
           ),
         ],
       ),
@@ -445,15 +446,10 @@ class _Chip extends StatelessWidget {
   );
 }
 
-class _ExpandableText extends StatefulWidget {
+class _ExpandableText extends StatelessWidget {
   const _ExpandableText({required this.label, required this.text});
   final String label, text;
-  @override
-  State<_ExpandableText> createState() => _ExpandableTextState();
-}
 
-class _ExpandableTextState extends State<_ExpandableText> {
-  bool _expanded = false;
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 16),
@@ -461,7 +457,7 @@ class _ExpandableTextState extends State<_ExpandableText> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          widget.label,
+          label,
           style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
@@ -472,49 +468,13 @@ class _ExpandableTextState extends State<_ExpandableText> {
             border: Border.all(color: AppColors.border(context)),
             borderRadius: BorderRadius.circular(6),
           ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final style = TextStyle(
-                fontSize: 12,
-                height: 1.5,
-                color: AppColors.secondaryText(context),
-              );
-              final painter = TextPainter(
-                text: TextSpan(
-                  text: htmlToPlainText(widget.text),
-                  style: style,
-                ),
-                maxLines: 5,
-                textDirection: Directionality.of(context),
-                textScaler: MediaQuery.textScalerOf(context),
-              )..layout(maxWidth: constraints.maxWidth);
-              final overflow =
-                  painter.didExceedMaxLines ||
-                  containsEditorFormatting(widget.text);
-              painter.dispose();
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  EditorContent(
-                    widget.text,
-                    style: style,
-                    maxLines: _expanded ? null : 5,
-                    overflow: _expanded
-                        ? TextOverflow.visible
-                        : TextOverflow.ellipsis,
-                  ),
-                  if (overflow)
-                    TextButton(
-                      onPressed: () => setState(() => _expanded = !_expanded),
-                      child: Text(
-                        AppLocalizations.of(
-                          context,
-                        ).text(_expanded ? 'showLess' : 'readMore'),
-                      ),
-                    ),
-                ],
-              );
-            },
+          child: ExpandableEditorContent(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              height: 1.5,
+              color: AppColors.secondaryText(context),
+            ),
           ),
         ),
       ],

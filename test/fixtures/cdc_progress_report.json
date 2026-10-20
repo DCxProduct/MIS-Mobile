@@ -1,0 +1,284 @@
+{
+    "success": true,
+    "statusCode": 200,
+    "message": "OK",
+    "data": {
+        "id": 2,
+        "title": "ចំណងជើងរបាយការណ៍ **",
+        "description": "ការពិពណ៌នា **",
+        "year": 2026,
+        "semester": "S2",
+        "status": "SENT",
+        "attachment": null,
+        "deadlines": [
+            {
+                "id": 2,
+                "sentAt": null,
+                "date": "2026-12-15",
+                "status": "SENT"
+            },
+            {
+                "id": 3,
+                "sentAt": null,
+                "date": "2026-09-29",
+                "status": "SENT"
+            },
+            {
+                "id": 4,
+                "sentAt": null,
+                "date": "2026-09-24",
+                "status": "SENT"
+            },
+            {
+                "id": 6,
+                "sentAt": "2026-09-14T08:44:43.478Z",
+                "date": "2026-09-15",
+                "status": "SENT"
+            }
+        ],
+        "activeDeadline": {
+            "id": 6,
+            "sentAt": "2026-09-14T08:44:43.478Z",
+            "date": "2026-09-15",
+            "status": "SENT"
+        },
+        "meetings": [
+            {
+                "id": 1,
+                "title": "ចំណងជើងរបាយការណ៍ ** | 2026",
+                "meetingDate": "2026-09-03",
+                "startTime": "12:00:00",
+                "status": "SENT"
+            },
+            {
+                "id": 2,
+                "title": "ចំណងជើងរបាយការណ៍ ** | 2026",
+                "meetingDate": "2026-09-04",
+                "startTime": "12:00:00",
+                "status": "SENT"
+            },
+            {
+                "id": 3,
+                "title": "ចំណងជើងរបាយការណ៍ ** | 2026",
+                "meetingDate": "2026-09-14",
+                "startTime": "12:00:00",
+                "status": "SENT"
+            }
+        ],
+        "draftSemesterReport": {
+            "path": "/uploads/progress-reports/1788409002117-Issue_reference.pdf",
+            "name": "Issue_reference.pdf",
+            "size": 1947246,
+            "mimeType": "application/pdf"
+        },
+        "finalSemesterReport": {
+            "path": "/uploads/progress-reports/1789375688168-Progress_report_update_rgc_desision_ducument.pdf",
+            "name": "Progress_report_update_rgc_desision_ducument.pdf",
+            "size": 1947246,
+            "mimeType": "application/pdf"
+        },
+        "draftSemesterReportStatus": "SENT",
+        "finalSemesterReportStatus": "SENT",
+        "ministryDocuments": [
+            {
+                "id": 2,
+                "ministryId": 1,
+                "ministry": {
+                    "id": 1,
+                    "name": "MAFF",
+                    "logo": "/uploads/stakeholders/1788369688560-MAFF.jpg"
+                },
+                "document": {
+                    "path": "/uploads/progress-reports/1788405806726-Approval_progress_report.pdf",
+                    "name": "Approval_progress_report.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                }
+            },
+            {
+                "id": 3,
+                "ministryId": 4,
+                "ministry": {
+                    "id": 4,
+                    "name": "MEF",
+                    "logo": "/uploads/stakeholders/1788369650792-MEF.png"
+                },
+                "document": {
+                    "path": "/uploads/progress-reports/1788405806745-Issue_reference.pdf",
+                    "name": "Issue_reference.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                }
+            },
+            {
+                "id": 4,
+                "ministryId": 3,
+                "ministry": {
+                    "id": 3,
+                    "name": "MISTI",
+                    "logo": "/uploads/stakeholders/1788369667932-misti-logo.png"
+                },
+                "document": {
+                    "path": "/uploads/progress-reports/1788405806756-Issue_solution_reference.pdf",
+                    "name": "Issue_solution_reference.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                }
+            },
+            {
+                "id": 5,
+                "ministryId": 12,
+                "ministry": {
+                    "id": 12,
+                    "name": "MLMUPC",
+                    "logo": "/uploads/stakeholders/1788369560175-MLMUPC.jpg"
+                },
+                "document": {
+                    "path": "/uploads/progress-reports/1788405806764-meeting_request_latter.pdf",
+                    "name": "meeting_request_latter.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                }
+            },
+            {
+                "id": 6,
+                "ministryId": 9,
+                "ministry": {
+                    "id": 9,
+                    "name": "MME",
+                    "logo": "/uploads/stakeholders/1788369594942-MME.png"
+                },
+                "document": {
+                    "path": "/uploads/progress-reports/1788405806773-plenary_document_reference.pdf",
+                    "name": "plenary_document_reference.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                }
+            },
+            {
+                "id": 7,
+                "ministryId": 7,
+                "ministry": {
+                    "id": 7,
+                    "name": "MoC",
+                    "logo": "/uploads/stakeholders/1788369618124-MoC.jpg"
+                },
+                "document": {
+                    "path": "/uploads/progress-reports/1788405806796-Progress_report_meeting_reference.pdf",
+                    "name": "Progress_report_meeting_reference.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                }
+            },
+            {
+                "id": 8,
+                "ministryId": 10,
+                "ministry": {
+                    "id": 10,
+                    "name": "MoEYS",
+                    "logo": "/uploads/stakeholders/1788369568414-MoEYS.svg.png"
+                },
+                "document": {
+                    "path": "/uploads/progress-reports/1788405806803-meeting_request_latter.pdf",
+                    "name": "meeting_request_latter.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                }
+            },
+            {
+                "id": 9,
+                "ministryId": 11,
+                "ministry": {
+                    "id": 11,
+                    "name": "MoH",
+                    "logo": "/uploads/stakeholders/1788369583936-MoH.png"
+                },
+                "document": {
+                    "path": "/uploads/progress-reports/1788405806806-Issue_solution_reference.pdf",
+                    "name": "Issue_solution_reference.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                }
+            },
+            {
+                "id": 10,
+                "ministryId": 8,
+                "ministry": {
+                    "id": 8,
+                    "name": "MoLVT",
+                    "logo": "/uploads/stakeholders/1788369606451-MoLVT.png"
+                },
+                "document": {
+                    "path": "/uploads/progress-reports/1788405806808-Meeting_summary_ reference.pdf",
+                    "name": "Meeting_summary_ reference.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                }
+            },
+            {
+                "id": 11,
+                "ministryId": 2,
+                "ministry": {
+                    "id": 2,
+                    "name": "MoT",
+                    "logo": "/uploads/stakeholders/1788369678073-MoT.png"
+                },
+                "document": {
+                    "path": "/uploads/progress-reports/1788405806811-plenary_document_reference.pdf",
+                    "name": "plenary_document_reference.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                }
+            },
+            {
+                "id": 12,
+                "ministryId": 6,
+                "ministry": {
+                    "id": 6,
+                    "name": "MPWT",
+                    "logo": "/uploads/stakeholders/1788369626691-MPWT.jpg"
+                },
+                "document": {
+                    "path": "/uploads/progress-reports/1788405806813-Meeting_summary_ reference.pdf",
+                    "name": "Meeting_summary_ reference.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                }
+            },
+            {
+                "id": 13,
+                "ministryId": 5,
+                "ministry": {
+                    "id": 5,
+                    "name": "NBC",
+                    "logo": "/uploads/stakeholders/1788369638028-NBC.png"
+                },
+                "document": {
+                    "path": "/uploads/progress-reports/1788405806815-plenary_document_reference.pdf",
+                    "name": "plenary_document_reference.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                }
+            },
+            {
+                "id": 14,
+                "ministryId": 13,
+                "ministry": {
+                    "id": 13,
+                    "name": "NBFSA",
+                    "logo": "/uploads/stakeholders/1788369549654-NBFSA.jpeg"
+                },
+                "document": {
+                    "path": "/uploads/progress-reports/1788405806818-Progress_report_update_issue_ducument.pdf",
+                    "name": "Progress_report_update_issue_ducument.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                }
+            }
+        ],
+        "createdAt": "2026-09-03T03:23:26.831Z",
+        "updatedAt": "2026-09-14T08:48:08.179Z"
+    },
+    "timestamp": "2026-10-19T09:05:06.960Z",
+    "path": "/api/v1/progress-reports/2"
+}

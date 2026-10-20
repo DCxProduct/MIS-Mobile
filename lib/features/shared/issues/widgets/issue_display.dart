@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../translations/app_localizations.dart';
 import '../data/working_group_issue.dart';
 
-String issueDate(BuildContext context, DateTime? date) => date == null
-    ? '—'
-    : MaterialLocalizations.of(context).formatMediumDate(date);
+String issueDate(BuildContext context, DateTime? date) =>
+    issueDateWithYear(context, date);
 
 String issueDateWithYear(BuildContext context, DateTime? date) {
   if (date == null) return '—';
