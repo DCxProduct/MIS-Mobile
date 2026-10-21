@@ -89,7 +89,8 @@ void main() {
               authRepository: AuthRepository(
                 ApiClient(
                   client: MockClient((request) async {
-                    if (request.url.path.endsWith('/summary/my')) {
+                    if (request.url.path.endsWith('/summary/my') ||
+                        request.url.path.endsWith('/issue-matrix/summary')) {
                       return http.Response(
                         File(
                           'test/fixtures/wg_issue_summary.json',
@@ -148,7 +149,8 @@ void main() {
       authRepository: AuthRepository(
         ApiClient(
           client: MockClient((request) async {
-            if (request.url.path.endsWith('/summary/my')) {
+            if (request.url.path.endsWith('/summary/my') ||
+                request.url.path.endsWith('/issue-matrix/summary')) {
               return http.Response(
                 File('test/fixtures/wg_issue_summary.json').readAsStringSync(),
                 200,

@@ -1,4 +1,5 @@
 import '../../../core/app_settings.dart';
+import '../../../core/config/module_config.dart';
 import '../../../core/widgets/filters/api_filter_sheet.dart';
 import '../../shared/issues/data/working_group_issue.dart';
 import '../../shared/issues/widgets/wg_issues_list.dart';
@@ -49,6 +50,10 @@ class _LineMinistryIssuesScreenViewState
     extends State<LineMinistryIssuesScreenView> {
   int _selectedTab = 0;
 
+  bool get _matrixOnly =>
+      AppSettings.of(context).moduleType == AppModuleType.lineMinistry;
+  int get _activeTab => widget.showTabs && !_matrixOnly ? _selectedTab : 1;
+
   final _apiSelections = [FilterSelection(), FilterSelection()];
 
   Set<String> _selectedYears = {};
@@ -62,7 +67,7 @@ class _LineMinistryIssuesScreenViewState
       await _openPreviewFilters(context);
       return;
     }
-    final tab = _selectedTab == 0 && widget.showTabs ? 0 : 1;
+    final tab = _activeTab;
     final catalogs = AppSettings.of(context).filters;
     final result = await Navigator.of(context).push<FilterSelection>(
       MaterialPageRoute(
@@ -108,7 +113,7 @@ class _LineMinistryIssuesScreenViewState
 
   int get _activeFilterCount {
     if (!widget.staticPreview) {
-      return _apiSelections[_selectedTab == 0 && widget.showTabs ? 0 : 1].count;
+      return _apiSelections[_activeTab].count;
     }
     return _selectedCategories.length +
         _selectedYears.length +
@@ -133,9 +138,10 @@ class _LineMinistryIssuesScreenViewState
             title: l10n.text(widget.titleKey),
             activeCount: _activeFilterCount,
             onFilter: () => _openFilterSheet(context),
-            bottom: widget.showTabs
+            bottom: widget.showTabs && !_matrixOnly
                 ? _IssueTabs(
-                    selectedIndex: _selectedTab,
+                    matrixOnly: _matrixOnly,
+                    selectedIndex: _activeTab,
                     onSelected: (index) => setState(() => _selectedTab = index),
                   )
                 : null,
@@ -180,7 +186,7 @@ class _LineMinistryIssuesScreenViewState
                 ] else ...[
                   WgIssueSummaryLoader(
                     cdcMatrix: widget.cdcMatrix,
-                    matrix: !widget.showTabs || _selectedTab == 1,
+                    matrix: _activeTab == 1,
                     builder: (summary) => Column(
                       children: [
                         _LineMinistryMetricGrid(summary: summary),
@@ -201,7 +207,7 @@ class _LineMinistryIssuesScreenViewState
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _selectedTab == 0 && widget.showTabs
+                  _activeTab == 0
                       ? WgIssuesList(
                           apiFilters: _apiSelections[0].toQuery(),
                           selection: _apiSelections[0],
@@ -770,10 +776,15 @@ class _MetaInfo extends StatelessWidget {
 }
 
 class _IssueTabs extends StatelessWidget {
-  const _IssueTabs({required this.selectedIndex, required this.onSelected});
+  const _IssueTabs({
+    required this.selectedIndex,
+    required this.onSelected,
+    this.matrixOnly = false,
+  });
 
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+  final bool matrixOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -792,55 +803,55 @@ class _IssueTabs extends StatelessWidget {
         ),
       ),
       child: Row(
-        children: List.generate(
-          tabs.length,
-          (index) => Expanded(
-            child: InkWell(
-              onTap: () => onSelected(index),
-              borderRadius: BorderRadius.circular(6),
-              child: Container(
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: selectedIndex == index
-                      ? AppColors.accent(context)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      index == 0
-                          ? Icons.calendar_month_outlined
-                          : Icons.add_box_outlined,
-                      color: selectedIndex == index
-                          ? Colors.white
-                          : AppColors.mutedText,
-                      size: 15,
-                    ),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        tabs[index],
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: selectedIndex == index
-                              ? Colors.white
-                              : AppColors.mutedText,
-                          fontSize: 12,
-                          fontWeight: selectedIndex == index
-                              ? FontWeight.w700
-                              : FontWeight.w600,
+        children: [
+          for (final index in [if (!matrixOnly) 0, 1])
+            Expanded(
+              child: InkWell(
+                onTap: () => onSelected(index),
+                borderRadius: BorderRadius.circular(6),
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: selectedIndex == index
+                        ? AppColors.accent(context)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        index == 0
+                            ? Icons.calendar_month_outlined
+                            : Icons.add_box_outlined,
+                        color: selectedIndex == index
+                            ? Colors.white
+                            : AppColors.mutedText,
+                        size: 15,
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          tabs[index],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: selectedIndex == index
+                                ? Colors.white
+                                : AppColors.mutedText,
+                            fontSize: 12,
+                            fontWeight: selectedIndex == index
+                                ? FontWeight.w700
+                                : FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
+        ],
       ),
     );
   }

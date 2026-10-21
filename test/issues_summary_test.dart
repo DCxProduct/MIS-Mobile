@@ -18,6 +18,7 @@ void main() {
   final fixture = File(
     'test/fixtures/wg_issue_summary.json',
   ).readAsStringSync();
+
   test(
     'my WG summary uses supplied values even when status counts do not sum to total',
     () async {
@@ -64,11 +65,13 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       var requests = 0;
+      final paths = <String>[];
       final settings =
           AppSettingsController(
               authRepository: AuthRepository(
                 ApiClient(
                   client: MockClient((request) async {
+                    paths.add(request.url.path);
                     if (request.url.path == '/api/v1/working-group-issues/my') {
                       return http.Response(
                         File('test/fixtures/wg_issues.json').readAsStringSync(),
@@ -106,10 +109,26 @@ void main() {
       settings.setThemeMode(ThemeMode.dark);
       await tester.pumpAndSettle();
       expect(requests, 1);
-      await tester.tap(find.text('Issues Matrix').last);
-      await tester.pumpAndSettle();
-      expect(find.byType(WgIssueSummaryLoader), findsOneWidget);
-      expect(requests, 2);
+      if (role == AppModuleType.lineMinistry) {
+        expect(find.text('WG Issues'), findsNothing);
+        expect(paths, contains('/api/v1/working-group-issues/issue-matrix'));
+        expect(
+          paths,
+          contains('/api/v1/working-group-issues/issue-matrix/summary'),
+        );
+        expect(paths, isNot(contains('/api/v1/working-group-issues/my')));
+        expect(
+          paths,
+          isNot(contains('/api/v1/working-group-issues/summary/my')),
+        );
+        expect(find.text('Issues Matrix'), findsOneWidget);
+        expect(requests, 1);
+      } else {
+        await tester.tap(find.text('Issues Matrix').last);
+        await tester.pumpAndSettle();
+        expect(find.byType(WgIssueSummaryLoader), findsOneWidget);
+        expect(requests, 2);
+      }
     });
   }
 
