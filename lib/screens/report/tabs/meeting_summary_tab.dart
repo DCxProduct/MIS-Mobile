@@ -76,7 +76,10 @@ class _MeetingSummaryCard extends StatelessWidget {
     return InkWell(
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) => MeetingSummaryDetailScreen(id: summary.id),
+          builder: (_) => MeetingSummaryDetailScreen(
+            id: summary.id,
+            summaryTitle: summary.title,
+          ),
         ),
       ),
       borderRadius: BorderRadius.circular(12),

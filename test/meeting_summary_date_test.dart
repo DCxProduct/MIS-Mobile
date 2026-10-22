@@ -30,7 +30,7 @@ void main() {
                   ? {
                       'id': 26,
                       'meeting': {
-                        'title': 'Summary title',
+                        'title': 'Different meeting title from detail API',
                         'meetingDate': '2026-10-19T00:00:00Z',
                       },
                     }
@@ -89,6 +89,11 @@ void main() {
       }
       await tester.tap(find.text('Summary title'));
       await tester.pumpAndSettle();
+      expect(find.text('Summary title'), findsOneWidget);
+      expect(
+        find.text('Different meeting title from detail API'),
+        findsNothing,
+      );
       expect(find.textContaining('2026'), findsOneWidget);
       settings.setLanguage(AppLanguage.khmer);
       await tester.pumpAndSettle();

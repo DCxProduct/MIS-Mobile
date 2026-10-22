@@ -9,10 +9,17 @@ import '../../shared/meetings/data/meeting_summary.dart';
 import '../../../../translations/app_localizations.dart';
 
 class MeetingSummaryDetailScreen extends StatefulWidget {
-  const MeetingSummaryDetailScreen({super.key, this.id, this.summary});
+  const MeetingSummaryDetailScreen({
+    super.key,
+    this.id,
+    this.summary,
+    this.summaryTitle = '',
+  });
 
   final int? id;
   final MeetingSummary? summary;
+  // The detail endpoint may omit summaryTitle and return only meeting.title.
+  final String summaryTitle;
 
   @override
   State<MeetingSummaryDetailScreen> createState() =>
@@ -93,6 +100,9 @@ class _MeetingSummaryDetailScreenState
   }
 
   Widget _buildContent(BuildContext context, MeetingSummary summary) {
+    final title = [summary.title, widget.summaryTitle, summary.detailTitle]
+        .map((value) => value.trim())
+        .firstWhere((value) => value.isNotEmpty, orElse: () => '—');
     return Scaffold(
       backgroundColor: AppColors.pageBackground(context),
       appBar: AppBar(
@@ -144,7 +154,7 @@ class _MeetingSummaryDetailScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    summary.detailTitle.isEmpty ? '—' : summary.detailTitle,
+                    title,
                     style: TextStyle(
                       color: AppColors.primaryText(context),
                       fontSize: 15,

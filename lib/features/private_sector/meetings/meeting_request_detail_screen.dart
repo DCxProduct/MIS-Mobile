@@ -1,3 +1,4 @@
+import '../../shared/issues/widgets/issue_agency_logo.dart';
 import '../../../core/widgets/editor_content.dart';
 import '../../shared/meetings/data/meeting_request.dart';
 import '../../shared/issues/data/working_group_issue.dart';
@@ -185,20 +186,10 @@ class _PrivateSectorInfoGrid extends StatelessWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Container(
-                        width: 14,
-                        height: 14,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [Color(0xFF1E73BE), Color(0xFF1EA45B)],
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.account_balance,
-                          color: Colors.white,
-                          size: 9,
-                        ),
+                      IssueAgencyLogo(
+                        path: request?.agencyLogo ?? '',
+                        size: 14,
+                        iconSize: 9,
                       ),
                       const SizedBox(width: 6),
                       Flexible(

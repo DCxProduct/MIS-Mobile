@@ -10,6 +10,8 @@ import 'package:gpsf_app/features/shared/issues/widgets/issue_agency_logo.dart';
 import 'package:gpsf_app/features/shared/meetings/data/calendar_meeting.dart';
 import 'package:gpsf_app/features/shared/meetings/data/meeting_request.dart';
 import 'package:gpsf_app/features/shared/meetings/data/meeting_summary.dart';
+import 'package:gpsf_app/features/private_sector/meetings/tabs/meeting_request_tab.dart'
+    as private_sector;
 import 'package:gpsf_app/screens/meeting/meeting_screen.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 import 'package:http/http.dart' as http;
@@ -86,6 +88,60 @@ void main() {
       }).agencyLogo,
       '/detail-logo.png',
     );
+  });
+
+  testWidgets('Private Sector request card and details use API agency logo', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final api = ApiClient(
+      client: MockClient((call) async {
+        expect(call.url.path, '/api/v1/meeting-requests');
+        return http.Response(
+          jsonEncode({
+            'success': true,
+            'data': [request],
+          }),
+          200,
+        );
+      }),
+    );
+    addTearDown(api.close);
+    final settings = AppSettingsController(authRepository: AuthRepository(api))
+      ..setLanguage(AppLanguage.english)
+      ..setModuleType(AppModuleType.privateSector);
+    addTearDown(settings.dispose);
+    await tester.pumpWidget(
+      AppSettings(
+        controller: settings,
+        child: const MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: private_sector.MeetingRequestTab(),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    var logo = tester.widget<IssueAgencyLogo>(find.byType(IssueAgencyLogo));
+    expect(logo.path, '/uploads/request-logo.png');
+    expect(logo.size, 32);
+    expect(logo.iconSize, 17);
+    final image = tester.widget<Image>(find.byType(Image));
+    expect(
+      (image.image as NetworkImage).url,
+      'https://admin-mis-stage.datacolabx.com/uploads/request-logo.png',
+    );
+    await tester.tap(find.text('Request'));
+    await tester.pumpAndSettle();
+    logo = tester.widget<IssueAgencyLogo>(find.byType(IssueAgencyLogo));
+    expect(logo.path, '/uploads/request-logo.png');
+    expect(logo.size, 14);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(

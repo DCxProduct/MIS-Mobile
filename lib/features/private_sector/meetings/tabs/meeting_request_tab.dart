@@ -1,6 +1,7 @@
 import '../../../shared/meetings/data/meeting_request.dart';
 import '../../../shared/meetings/widgets/meeting_requests_list.dart';
 import '../../../shared/issues/widgets/issue_display.dart';
+import '../../../shared/issues/widgets/issue_agency_logo.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_colors.dart';
@@ -64,20 +65,10 @@ class _MeetingRequestCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF1E73BE), Color(0xFF1EA45B)],
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.account_balance,
-                    color: Colors.white,
-                    size: 17,
-                  ),
+                IssueAgencyLogo(
+                  path: request.agencyLogo,
+                  size: 32,
+                  iconSize: 17,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
