@@ -5,6 +5,7 @@ import 'core/app_colors.dart';
 import 'core/app_settings.dart';
 import 'screens/splash/splash_screen.dart';
 import 'translations/app_localizations.dart';
+import 'translations/translation_sync.dart';
 import 'features/shared/notifications/data/mobile_notifications_transport.dart';
 import 'screens/notification/notification_screen.dart';
 
@@ -48,27 +49,30 @@ class _GpsfAppState extends State<GpsfApp> {
   Widget build(BuildContext context) {
     return AppSettings(
       controller: _settings,
-      child: AnimatedBuilder(
-        animation: _settings,
-        builder: (context, _) {
-          final localizations = AppLocalizations(_settings.language);
-          return MaterialApp(
-            navigatorKey: _navigator,
-            title: localizations.text('appTitle'),
-            debugShowCheckedModeBanner: false,
-            locale: _settings.locale,
-            supportedLocales: const [Locale('en'), Locale('km')],
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-            ],
-            themeMode: _settings.themeMode,
-            theme: _buildTheme(Brightness.light),
-            darkTheme: _buildTheme(Brightness.dark),
-            home: const SplashScreen(),
-          );
-        },
+      child: TranslationSync(
+        controller: _settings,
+        child: AnimatedBuilder(
+          animation: _settings,
+          builder: (context, _) {
+            final localizations = AppLocalizations(_settings.language);
+            return MaterialApp(
+              navigatorKey: _navigator,
+              title: localizations.text('appTitle'),
+              debugShowCheckedModeBanner: false,
+              locale: _settings.locale,
+              supportedLocales: const [Locale('en'), Locale('km')],
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+              ],
+              themeMode: _settings.themeMode,
+              theme: _buildTheme(Brightness.light),
+              darkTheme: _buildTheme(Brightness.dark),
+              home: const SplashScreen(),
+            );
+          },
+        ),
       ),
     );
   }

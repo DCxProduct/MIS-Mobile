@@ -1,4 +1,5 @@
 import '../network/api_client.dart';
+import '../../translations/translation_repository.dart';
 import '../../features/shared/notifications/data/notifications_repository.dart';
 import '../network/filter_catalog_repository.dart';
 import '../../features/shared/dashboard/data/dashboard_repository.dart';
@@ -27,7 +28,8 @@ class ModuleRepositories {
     PlenariesRepository? plenaries,
     RgcDecisionsRepository? rgcDecisions,
     NotificationsRepository? notifications,
-  }) : filters = FilterCatalogRepository(apiClient),
+  }) : translations = TranslationRepository(apiClient),
+       filters = FilterCatalogRepository(apiClient),
        dashboard = dashboard ?? DashboardRepository(apiClient),
        issues = issues ?? IssuesRepository(apiClient),
        cdcIssueMatrix = cdcIssueMatrix ?? CdcIssueMatrixRepository(apiClient),
@@ -43,6 +45,7 @@ class ModuleRepositories {
        notifications = notifications ?? NotificationsRepository(apiClient);
 
   final DashboardRepository dashboard;
+  final TranslationRepository translations;
   final FilterCatalogRepository filters;
   final IssuesRepository issues;
   final CdcIssueMatrixRepository cdcIssueMatrix;

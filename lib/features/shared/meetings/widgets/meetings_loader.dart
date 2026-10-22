@@ -29,7 +29,7 @@ class _MeetingsLoaderState extends State<MeetingsLoader> {
   Widget build(BuildContext context) => FutureBuilder<List<CalendarMeeting>>(
     future: _future,
     builder: (context, snapshot) {
-      final l10n = AppLocalizations.of(context);
+      final l10n = AppLocalizations.of(context, page: 'meeting_calendar');
       if (snapshot.connectionState != ConnectionState.done)
         return const Center(child: CircularProgressIndicator());
       if (snapshot.hasError)

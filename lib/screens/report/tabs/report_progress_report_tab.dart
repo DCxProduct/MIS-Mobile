@@ -27,7 +27,12 @@ class ReportProgressReportTab extends StatelessWidget {
         if (filtered.isEmpty) {
           return Padding(
             padding: const EdgeInsets.all(20),
-            child: Text(AppLocalizations.of(context).text('noProgressReports')),
+            child: Text(
+              AppLocalizations.of(
+                context,
+                page: 'progress_report',
+              ).text('noProgressReports'),
+            ),
           );
         }
         return Column(
@@ -84,7 +89,7 @@ class _ProgressReportCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   report.title.isEmpty
-                      ? '${AppLocalizations.of(context).text('semester')} ${report.semester}'
+                      ? '${AppLocalizations.of(context, page: 'progress_report').text('semester')} ${report.semester}'
                       : report.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -101,22 +106,34 @@ class _ProgressReportCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           _ReportDateRow(
-            label: AppLocalizations.of(context).text('deadline'),
+            label: AppLocalizations.of(
+              context,
+              page: 'progress_report',
+            ).text('deadline'),
             value: _date(context, report.deadline),
           ),
           const SizedBox(height: 9),
           _ReportDateRow(
-            label: AppLocalizations.of(context).text('firstMeeting'),
+            label: AppLocalizations.of(
+              context,
+              page: 'progress_report',
+            ).text('firstMeeting'),
             value: _date(context, report.firstMeeting),
           ),
           const SizedBox(height: 9),
           _ReportDateRow(
-            label: AppLocalizations.of(context).text('secondDeadline'),
+            label: AppLocalizations.of(
+              context,
+              page: 'progress_report',
+            ).text('secondDeadline'),
             value: _date(context, report.secondDeadline),
           ),
           const SizedBox(height: 9),
           _ReportDateRow(
-            label: AppLocalizations.of(context).text('secondMeeting'),
+            label: AppLocalizations.of(
+              context,
+              page: 'progress_report',
+            ).text('secondMeeting'),
             value: _date(context, report.secondMeeting),
           ),
           const SizedBox(height: 12),
@@ -143,7 +160,12 @@ class _ProgressReportCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(AppLocalizations.of(context).text('viewDetails')),
+                  Text(
+                    AppLocalizations.of(
+                      context,
+                      page: 'progress_report',
+                    ).text('viewDetails'),
+                  ),
                   const SizedBox(width: 8),
                   const Icon(Icons.chevron_right, size: 18),
                 ],

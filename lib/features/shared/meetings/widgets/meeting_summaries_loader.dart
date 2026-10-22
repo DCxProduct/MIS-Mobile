@@ -35,7 +35,7 @@ class _MeetingSummariesLoaderState extends State<MeetingSummariesLoader> {
   Widget build(BuildContext context) => FutureBuilder<List<MeetingSummary>>(
     future: _future,
     builder: (context, snapshot) {
-      final l10n = AppLocalizations.of(context);
+      final l10n = AppLocalizations.of(context, page: 'meeting_summary');
       if (snapshot.connectionState != ConnectionState.done) {
         return const Padding(
           padding: EdgeInsets.all(24),

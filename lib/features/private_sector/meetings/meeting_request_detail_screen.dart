@@ -13,9 +13,11 @@ class MeetingRequestDetailScreen extends StatefulWidget {
     super.key,
     required this.title,
     this.request,
+    this.translationPage = 'meeting_requests',
   });
 
   final MeetingRequest? request;
+  final String translationPage;
   final String title;
 
   @override
@@ -28,7 +30,12 @@ class _MeetingRequestDetailScreenState
   int _selectedTab = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: widget.translationPage,
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
@@ -624,361 +631,370 @@ void _showIssueDetailsSheet(
   required String status,
   WorkingGroupIssue? issue,
 }) {
+  final page = TranslationPageScope.maybeOf(context) ?? 'meeting_requests';
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
-    builder: (context) {
-      final isDark = Theme.of(context).brightness == Brightness.dark;
-      final background = isDark ? AppColors.darkCard : Colors.white;
+    builder: (_) => TranslationPageScope(
+      page: page,
+      child: Builder(
+        builder: (context) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final background = isDark ? AppColors.darkCard : Colors.white;
 
-      return Container(
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 38,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? AppColors.darkBorder
-                        : const Color(0xFFE2E8F0),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
+          return Container(
+            decoration: BoxDecoration(
+              color: background,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
-              const SizedBox(height: 14),
-              Center(
-                child: Text(
-                  AppLocalizations.of(context).text('issuesDetails'),
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                title,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 15,
-                  height: 1.35,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context).text('submittedBy'),
-                          style: TextStyle(
-                            color: AppColors.mutedText,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          issue?.submittedBy ?? 'Agriculture and Agro-In...',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+                  Center(
+                    child: Container(
+                      width: 38,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.darkBorder
+                            : const Color(0xFFE2E8F0),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context).text('status'),
-                          style: TextStyle(
-                            color: AppColors.mutedText,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '• ${AppLocalizations.of(context).status(status)}',
-                          style: TextStyle(
-                            color:
-                                (issue == null
-                                    ? status == 'Solved'
-                                    : issue.statusCode.toUpperCase() ==
-                                          'SOLVED')
-                                ? const Color(0xFF16A34A)
-                                : const Color(0xFFFF4842),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
+                  const SizedBox(height: 14),
+                  Center(
+                    child: Text(
+                      AppLocalizations.of(context).text('issuesDetails'),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context).text('categories'),
-                          style: TextStyle(
-                            color: AppColors.mutedText,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          category,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+                  const SizedBox(height: 18),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 15,
+                      height: 1.35,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(
-                            context,
-                          ).text('meetingRequestDocument'),
-                          style: TextStyle(
-                            color: AppColors.mutedText,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        PdfAttachmentPreview(
-                          path: issue?.attachmentPath ?? '',
-                          name: pdfAttachmentName(
-                            issue?.attachmentPath ?? '',
-                            name: issue?.attachmentName,
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.picture_as_pdf,
-                                color: Color(0xFFE53935),
-                                size: 16,
+                  const SizedBox(height: 16),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context).text('submittedBy'),
+                              style: TextStyle(
+                                color: AppColors.mutedText,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
                               ),
-                              SizedBox(width: 6),
-                              Flexible(
-                                child: Text(
-                                  pdfAttachmentName(
-                                    issue?.attachmentPath ?? '',
-                                    name: issue?.attachmentName,
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              issue?.submittedBy ??
+                                  'Agriculture and Agro-In...',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context).text('status'),
+                              style: TextStyle(
+                                color: AppColors.mutedText,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '• ${AppLocalizations.of(context).status(status)}',
+                              style: TextStyle(
+                                color:
+                                    (issue == null
+                                        ? status == 'Solved'
+                                        : issue.statusCode.toUpperCase() ==
+                                              'SOLVED')
+                                    ? const Color(0xFF16A34A)
+                                    : const Color(0xFFFF4842),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context).text('categories'),
+                              style: TextStyle(
+                                color: AppColors.mutedText,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              category,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              ).text('issueDocument'),
+                              style: TextStyle(
+                                color: AppColors.mutedText,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            PdfAttachmentPreview(
+                              path: issue?.attachmentPath ?? '',
+                              name: pdfAttachmentName(
+                                issue?.attachmentPath ?? '',
+                                name: issue?.attachmentName,
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.picture_as_pdf,
+                                    color: Color(0xFFE53935),
+                                    size: 16,
                                   ),
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
+                                  SizedBox(width: 6),
+                                  Flexible(
+                                    child: Text(
+                                      pdfAttachmentName(
+                                        issue?.attachmentPath ?? '',
+                                        name: issue?.attachmentName,
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
                                   ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.darkBackground
+                                : const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: isDark
+                                  ? AppColors.darkBorder
+                                  : const Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text:
+                                      '${AppLocalizations.of(context).text('submittedBy')} : ',
+                                  style: TextStyle(color: AppColors.mutedText),
                                 ),
-                              ),
-                            ],
+                                TextSpan(
+                                  text: issue?.submittedBy ?? 'Sabada',
+                                  style: TextStyle(fontWeight: FontWeight.w700),
+                                ),
+                              ],
+                            ),
+                            style: TextStyle(fontSize: 11),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.darkBackground
+                                : const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: isDark
+                                  ? AppColors.darkBorder
+                                  : const Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text:
+                                      '${AppLocalizations.of(context).text('submittedDate')} : ',
+                                  style: TextStyle(color: AppColors.mutedText),
+                                ),
+                                TextSpan(
+                                  text: issue == null
+                                      ? 'Jun 24 2025'
+                                      : issueDate(context, issue.createdAt),
+                                  style: TextStyle(fontWeight: FontWeight.w700),
+                                ),
+                              ],
+                            ),
+                            style: TextStyle(fontSize: 11),
                           ),
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(height: 20),
+                  Text(
+                    AppLocalizations.of(context).text('issuesDescriptions'),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 8),
+                  if (issue != null)
+                    EditorContent(
+                      issue.descriptionHtml ?? issue.description,
+                      style: TextStyle(
+                        color: AppColors.secondaryText(context),
+                        fontSize: 12,
+                        height: 1.5,
+                      ),
+                    )
+                  else
+                    RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          color: AppColors.secondaryText(context),
+                          fontSize: 12,
+                          height: 1.5,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        children: [
+                          TextSpan(
+                            text:
+                                issue?.description ??
+                                'សូមស្នើឡើងរៀបចំប្រជុំពិសេសមួយដើម្បីដោះស្រាយនិងឆ្លើយតបចំពោះបញ្ហាប្រឈមមធ្យមចំនួន ៥ ដែលកំពុងមានឥទ្ធិពលលើការងាររបស់យើង។ គោលបំណងនៃប្រជុំនេះគឺដើម្បីប្រមូលផ្តុំអ្នកពាក់ព័ន្ធទាំងអស់... ',
+                          ),
+                          TextSpan(
+                            text: issue == null
+                                ? AppLocalizations.of(context).text('readMore')
+                                : '',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: 18),
+                  Text(
+                    AppLocalizations.of(context).text('recommendations'),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 8),
+                  if (issue != null)
+                    EditorContent(
+                      issue.recommendationHtml ?? issue.recommendation,
+                      style: TextStyle(
+                        color: AppColors.secondaryText(context),
+                        fontSize: 12,
+                        height: 1.5,
+                      ),
+                    )
+                  else
+                    RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          color: AppColors.secondaryText(context),
+                          fontSize: 12,
+                          height: 1.5,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        children: [
+                          TextSpan(
+                            text:
+                                issue?.recommendation ??
+                                'ផ្អែកលើការស្នើសុំបណ្តោះអាសន្ន៖ ភ្នាក់ងារតាមដានរដ្ឋបាលនឹងសម្របសម្រួលជាមួយ... ',
+                          ),
+                          TextSpan(
+                            text: issue == null
+                                ? AppLocalizations.of(context).text('readMore')
+                                : '',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
-              const SizedBox(height: 16),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.darkBackground
-                            : const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: isDark
-                              ? AppColors.darkBorder
-                              : const Color(0xFFE2E8F0),
-                        ),
-                      ),
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text:
-                                  '${AppLocalizations.of(context).text('submittedBy')} : ',
-                              style: TextStyle(color: AppColors.mutedText),
-                            ),
-                            TextSpan(
-                              text: issue?.submittedBy ?? 'Sabada',
-                              style: TextStyle(fontWeight: FontWeight.w700),
-                            ),
-                          ],
-                        ),
-                        style: TextStyle(fontSize: 11),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.darkBackground
-                            : const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: isDark
-                              ? AppColors.darkBorder
-                              : const Color(0xFFE2E8F0),
-                        ),
-                      ),
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text:
-                                  '${AppLocalizations.of(context).text('submittedDate')} : ',
-                              style: TextStyle(color: AppColors.mutedText),
-                            ),
-                            TextSpan(
-                              text: issue == null
-                                  ? 'Jun 24 2025'
-                                  : issueDate(context, issue.createdAt),
-                              style: TextStyle(fontWeight: FontWeight.w700),
-                            ),
-                          ],
-                        ),
-                        style: TextStyle(fontSize: 11),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                AppLocalizations.of(context).text('issuesDescriptions'),
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 8),
-              if (issue != null)
-                EditorContent(
-                  issue.descriptionHtml ?? issue.description,
-                  style: TextStyle(
-                    color: AppColors.secondaryText(context),
-                    fontSize: 12,
-                    height: 1.5,
-                  ),
-                )
-              else
-                RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      color: AppColors.secondaryText(context),
-                      fontSize: 12,
-                      height: 1.5,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    children: [
-                      TextSpan(
-                        text:
-                            issue?.description ??
-                            'សូមស្នើឡើងរៀបចំប្រជុំពិសេសមួយដើម្បីដោះស្រាយនិងឆ្លើយតបចំពោះបញ្ហាប្រឈមមធ្យមចំនួន ៥ ដែលកំពុងមានឥទ្ធិពលលើការងាររបស់យើង។ គោលបំណងនៃប្រជុំនេះគឺដើម្បីប្រមូលផ្តុំអ្នកពាក់ព័ន្ធទាំងអស់... ',
-                      ),
-                      TextSpan(
-                        text: issue == null
-                            ? AppLocalizations.of(context).text('readMore')
-                            : '',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 18),
-              Text(
-                AppLocalizations.of(context).text('recommendations'),
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 8),
-              if (issue != null)
-                EditorContent(
-                  issue.recommendationHtml ?? issue.recommendation,
-                  style: TextStyle(
-                    color: AppColors.secondaryText(context),
-                    fontSize: 12,
-                    height: 1.5,
-                  ),
-                )
-              else
-                RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      color: AppColors.secondaryText(context),
-                      fontSize: 12,
-                      height: 1.5,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    children: [
-                      TextSpan(
-                        text:
-                            issue?.recommendation ??
-                            'ផ្អែកលើការស្នើសុំបណ្តោះអាសន្ន៖ ភ្នាក់ងារតាមដានរដ្ឋបាលនឹងសម្របសម្រួលជាមួយ... ',
-                      ),
-                      TextSpan(
-                        text: issue == null
-                            ? AppLocalizations.of(context).text('readMore')
-                            : '',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
-      );
-    },
+            ),
+          );
+        },
+      ),
+    ),
   );
 }

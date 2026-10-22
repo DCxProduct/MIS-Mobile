@@ -1,0 +1,164 @@
+{
+    "success": true,
+    "statusCode": 200,
+    "message": "OK",
+    "data": {
+        "id": 1,
+        "numberIssue": "WG01_0001",
+        "title": "កង្វះទីផ្សារស្ថិរភាពសម្រាប់លក់ផលិតផលកសិកម្មក្នុងស្រុក",
+        "description": "កសិករ និងអាជីវកម្មកសិកម្មមួយចំនួនប្រឈមនឹងការលំបាកក្នុងការស្វែងរកទីផ្សារដែលមានស្ថិរភាពសម្រាប់លក់ផលិតផលកសិកម្ម ជាពិសេសនៅរដូវប្រមូលផលដែលមានបរិមាណផលិតផលច្រើន។ កង្វះការតភ្ជាប់រវាងកសិករ អ្នកប្រមូលទិញ សហគ្រាសកែច្នៃ និងទីផ្សារ បានធ្វើឱ្យតម្លៃផលិតផលមានការប្រែប្រួលខ្លាំង និងកសិករមានអំណាចចរចាតម្លៃទាប។ បញ្ហានេះប៉ះពាល់ដល់ប្រាក់ចំណូលរបស់កសិករ និងនិរន្តរភាពនៃផលិតកម្មកសិកម្មក្នុងស្រុក។",
+        "recommendation": "ស្នើឱ្យក្រសួង និងស្ថាប័នពាក់ព័ន្ធពង្រឹងការតភ្ជាប់ទីផ្សាររវាងកសិករ សហគមន៍កសិកម្ម អ្នកប្រមូលទិញ សហគ្រាសកែច្នៃ និងអ្នកចែកចាយ ដោយជំរុញការអនុវត្តកសិកម្មតាមកិច្ចសន្យា បង្កើតប្រព័ន្ធព័ត៌មានទីផ្សារ និងតម្លៃឱ្យបានទូលំទូលាយ និងគាំទ្រការស្វែងរកទីផ្សារថ្មីៗ ដើម្បីធានាទីផ្សារមានស្ថិរភាព កាត់បន្ថយការប្រែប្រួលតម្លៃ និងបង្កើនប្រាក់ចំណូលរបស់កសិករ។",
+        "attachment": {
+            "path": "/uploads/issues/1788369860614-Issue_reference.pdf",
+            "name": "Issue_reference.pdf",
+            "size": 1947246,
+            "mimeType": "application/pdf"
+        },
+        "escalation": true,
+        "issueStatusId": 4,
+        "categoryId": 7,
+        "meetingRequestId": 1,
+        "userId": 5,
+        "stakeholderId": 14,
+        "createdAt": "2026-09-02T17:24:20.656Z",
+        "updatedAt": "2026-10-01T14:20:45.419Z",
+        "deletedAt": null,
+        "issueStatus": {
+            "id": 4,
+            "code": "IN_PROGRESS",
+            "name": "In Progress"
+        },
+        "category": {
+            "id": 7,
+            "name": "Market Access"
+        },
+        "meetingRequest": {
+            "id": 1,
+            "title": "សំណើសុំរៀបចំកិច្ចប្រជុំពិភាក្សាអំពីការពង្រឹងទីផ្សារ និងស្ថិរភាពតម្លៃផលិតផលកសិកម្មក្នុងស្រុក",
+            "meetings": [
+                {
+                    "id": 1,
+                    "meetingDate": "2026-09-03T00:00:00.000Z",
+                    "startTime": "1970-01-01T12:00:00.000Z",
+                    "documentReference": "/uploads/meetings/1788370026046-meeting_document_reference.pdf"
+                }
+            ],
+            "linkedMeetings": [
+                {
+                    "meeting": {
+                        "id": 1,
+                        "meetingDate": "2026-09-03T00:00:00.000Z",
+                        "startTime": "1970-01-01T12:00:00.000Z",
+                        "documentReference": "/uploads/meetings/1788370026046-meeting_document_reference.pdf"
+                    }
+                }
+            ]
+        },
+        "stakeholder": {
+            "id": 14,
+            "name": "Agriculture & Agro-Industry",
+            "logo": "/uploads/stakeholders/1790505693513-MAFF.jpg",
+            "stakeholderType": {
+                "id": 2,
+                "name": "Private Sector"
+            }
+        },
+        "user": {
+            "id": 5,
+            "email": "privatesector1@gmail.com",
+            "name": "PSWG Secretariat A",
+            "position": "WG A: Agriculture & Agro-Industry",
+            "avatar": "https://api.dicebear.com/10.x/glass/svg"
+        },
+        "governmentAgencies": [
+            {
+                "agencyOrder": 1,
+                "stakeholder": {
+                    "id": 1,
+                    "name": "MAFF",
+                    "description": "Ministry of Agriculture, Forestry and Fisheries",
+                    "logo": "/uploads/stakeholders/1788369688560-MAFF.jpg",
+                    "stakeholderType": {
+                        "id": 1,
+                        "name": "Ministry"
+                    }
+                }
+            },
+            {
+                "agencyOrder": 2,
+                "stakeholder": {
+                    "id": 4,
+                    "name": "MEF",
+                    "description": "Ministry of Economy and Finance",
+                    "logo": "/uploads/stakeholders/1788369650792-MEF.png",
+                    "stakeholderType": {
+                        "id": 1,
+                        "name": "Ministry"
+                    }
+                }
+            },
+            {
+                "agencyOrder": 3,
+                "stakeholder": {
+                    "id": 3,
+                    "name": "MISTI",
+                    "description": "Minister of Industry, Science, Technology & Innovation",
+                    "logo": "/uploads/stakeholders/1788369667932-misti-logo.png",
+                    "stakeholderType": {
+                        "id": 1,
+                        "name": "Ministry"
+                    }
+                }
+            },
+            {
+                "agencyOrder": 4,
+                "stakeholder": {
+                    "id": 12,
+                    "name": "MLMUPC",
+                    "description": "Ministry of Land Management, Urban Planning and Construction",
+                    "logo": "/uploads/stakeholders/1788369560175-MLMUPC.jpg",
+                    "stakeholderType": {
+                        "id": 1,
+                        "name": "Ministry"
+                    }
+                }
+            },
+            {
+                "agencyOrder": 5,
+                "stakeholder": {
+                    "id": 9,
+                    "name": "MME",
+                    "description": "Ministry of Mines and Energy",
+                    "logo": "/uploads/stakeholders/1788369594942-MME.png",
+                    "stakeholderType": {
+                        "id": 1,
+                        "name": "Ministry"
+                    }
+                }
+            }
+        ],
+        "progressReports": [
+            {
+                "progressReportId": 2,
+                "year": 2026,
+                "semester": "S2",
+                "dateOfIssueSolution": "2026-09-03T00:00:00.000Z",
+                "sourceOfVerification": "ប្រមូលទិញ និងសហគ្រាសកែច្នៃ ព្រមទាំងជំរុញការអនុវត្តកសិកម្មតាមកិច្ចសន្យា និងការផ្តល់ព័ត៌មានទីផ្សារឱ្យបានទូលំទូលាយ។",
+                "linkToVerificationSource": "https://mis-stage.datacolabx.com/ministry/progress-reports/2",
+                "progressSolution": "ប្រមូលទិញ និងសហគ្រាសកែច្នៃ ព្រមទាំងជំរុញការអនុវត្តកសិកម្មតាមកិច្ចសន្យា និងការផ្តល់ព័ត៌មានទីផ្សារឱ្យបានទូលំទូលាយ។",
+                "indicators": "ប្រមូលទិញ និងសហគ្រាសកែច្នៃ ព្រមទាំងជំរុញការអនុវត្តកសិកម្មតាមកិច្ចសន្យា និងការផ្តល់ព័ត៌មានទីផ្សារឱ្យបានទូលំទូលាយ។",
+                "implementationChallenges": "ប្រមូលទិញ និងសហគ្រាសកែច្នៃ ព្រមទាំងជំរុញការអនុវត្តកសិកម្មតាមកិច្ចសន្យា និងការផ្តល់ព័ត៌មានទីផ្សារឱ្យបានទូលំទូលាយ។",
+                "requests": "ប្រមូលទិញ និងសហគ្រាសកែច្នៃ ព្រមទាំងជំរុញការអនុវត្តកសិកម្មតាមកិច្ចសន្យា និងការផ្តល់ព័ត៌មានទីផ្សារឱ្យបានទូលំទូលាយ។",
+                "rgcDecision": "ឯកភាពឱ្យក្រសួងកសិកម្ម រុក្ខាប្រមាញ់ និងនេសាទ សហការជាមួយក្រសួង ស្ថាប័នពាក់ព័ន្ធ និងវិស័យឯកជន ពង្រឹងការតភ្ជាប់ទីផ្សាររវាងកសិករ សហគមន៍កសិកម្ម អ្នកប្រមូលទិញ និងសហគ្រាសកែច្នៃ ព្រមទាំងជំរុញការអនុវត្តកសិកម្មតាមកិច្ចសន្យា និងការផ្តល់ព័ត៌មានទីផ្សារឱ្យបានទូលំទូលាយ។",
+                "attachment": {
+                    "path": "/uploads/progress-report-updates/1788407190662-Issue_reference.pdf",
+                    "name": "Issue_reference.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                }
+            }
+        ]
+    },
+    "timestamp": "2026-10-22T02:16:31.494Z",
+    "path": "/api/v1/working-group-issues/1"
+}

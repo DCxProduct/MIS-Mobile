@@ -94,7 +94,12 @@ class _PswgDataLoaderState extends State<PswgDataLoader> {
         return const Center(child: CircularProgressIndicator());
       }
       if (snapshot.hasError) {
-        final l10n = AppLocalizations.of(context);
+        final l10n = AppLocalizations.of(
+          context,
+          page: widget.scope == DashboardScope.plenary
+              ? 'dashboard_plenary'
+              : 'dashboard_working_group',
+        );
         return Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -112,7 +117,12 @@ class _PswgDataLoaderState extends State<PswgDataLoader> {
       }
       return PswgDataScope(
         data: snapshot.data!.filtered(_selection),
-        child: Builder(builder: widget.builder),
+        child: TranslationPageScope(
+          page: widget.scope == DashboardScope.plenary
+              ? 'dashboard_plenary'
+              : 'dashboard_working_group',
+          child: Builder(builder: widget.builder),
+        ),
       );
     },
   );

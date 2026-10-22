@@ -3,6 +3,7 @@ import '../../../core/widgets/filters/api_filter_sheet.dart';
 import '../../shared/issues/data/working_group_issue.dart';
 import '../../shared/issues/widgets/wg_issues_list.dart';
 import '../../shared/issues/widgets/issue_display.dart';
+import '../../shared/issues/widgets/issue_agency_logo.dart';
 import '../../shared/issues/data/wg_issue_summary.dart';
 import '../../shared/issues/widgets/wg_issue_summary_loader.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ class _IssuesScreenState extends State<IssuesScreen> {
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
+          translationPage: tab == 0 ? 'wg_issues' : 'issue_matrix',
           initial: _filters[tab],
           load: () => catalogs.pswgIssues(matrix: tab == 1),
         ),
@@ -44,7 +46,12 @@ class _IssuesScreenState extends State<IssuesScreen> {
   int get _activeFilterCount => _filters[_selectedTab].count;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: _selectedTab == 0 ? 'wg_issues' : 'issue_matrix',
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final contentBackground = isDark
@@ -542,6 +549,8 @@ class _IssueCard extends StatelessWidget {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (_) => IssueDetailScreen(
+              translationPage:
+                  TranslationPageScope.maybeOf(context) ?? 'wg_issues',
               title: title,
               category: category,
               issue: issue,
@@ -566,20 +575,10 @@ class _IssueCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF1E73BE), Color(0xFF1EA45B)],
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.account_balance,
-                    color: Colors.white,
-                    size: 17,
-                  ),
+                IssueAgencyLogo(
+                  path: issue?.agencyLogo ?? '',
+                  size: 32,
+                  iconSize: 17,
                 ),
                 const SizedBox(width: 10),
                 Expanded(

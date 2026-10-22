@@ -30,7 +30,11 @@ class OverallTab extends StatelessWidget {
             width: 320,
             height: 195,
             child: CustomPaint(
-              painter: _DonutChartPainter(isDark: isDark, cards: cards),
+              painter: _DonutChartPainter(
+                isDark: isDark,
+                cards: cards,
+                totalLabel: l10n.text('totalIssues'),
+              ),
             ),
           ),
           const SizedBox(height: 2),
@@ -61,11 +65,16 @@ class OverallTab extends StatelessWidget {
 }
 
 class _DonutChartPainter extends CustomPainter {
-  const _DonutChartPainter({required this.isDark, this.cards});
+  const _DonutChartPainter({
+    required this.isDark,
+    this.cards,
+    required this.totalLabel,
+  });
 
   final Map<String, int?>? cards;
 
   final bool isDark;
+  final String totalLabel;
 
   static const double _cornerRadius = 6;
 
@@ -268,6 +277,7 @@ class _DonutChartPainter extends CustomPainter {
         style: const TextStyle(
           color: AppColors.text,
           fontSize: 11,
+          fontFamily: 'KhBattambang',
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -309,10 +319,11 @@ class _DonutChartPainter extends CustomPainter {
       text: TextSpan(
         children: [
           TextSpan(
-            text: 'Total Issues\n',
+            text: '$totalLabel\n',
             style: TextStyle(
               color: isDark ? const Color(0xFFB8C0CC) : const Color(0xFF6C7480),
               fontSize: 11,
+              fontFamily: 'KhBattambang',
               height: 1.25,
               fontWeight: FontWeight.w500,
             ),
@@ -339,7 +350,9 @@ class _DonutChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DonutChartPainter oldDelegate) =>
-      oldDelegate.isDark != isDark || oldDelegate.cards != cards;
+      oldDelegate.isDark != isDark ||
+      oldDelegate.cards != cards ||
+      oldDelegate.totalLabel != totalLabel;
 }
 
 class _ChartLegendRow extends StatelessWidget {

@@ -65,11 +65,14 @@ class _ProgressReportDetailLoaderState
           report: snapshot.data!,
         );
       }
-      final l10n = AppLocalizations.of(context);
+      final l10n = AppLocalizations.of(context, page: 'progress_report');
       return Scaffold(
         appBar: AppBar(
           title: Text(
-            AppLocalizations.of(context).text('progressReportDetails'),
+            AppLocalizations.of(
+              context,
+              page: 'progress_report',
+            ).text('progressReportDetails'),
           ),
         ),
         body: snapshot.hasError

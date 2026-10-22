@@ -47,6 +47,7 @@ String _meetingTime(BuildContext context, ProgressReport? report) {
 
 String _reportStatus(BuildContext context, String? raw) => AppLocalizations.of(
   context,
+  page: 'progress_report',
 ).status(_value(raw).replaceFirst(RegExp(r'^CDC_'), ''));
 
 class ReportDetailScreen extends StatefulWidget {
@@ -63,7 +64,12 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
   int _selectedTab = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: 'progress_report',
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.pageBackground(context),
       appBar: AppBar(
@@ -80,7 +86,10 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          AppLocalizations.of(context).text('progressReportDetails'),
+          AppLocalizations.of(
+            context,
+            page: 'progress_report',
+          ).text('progressReportDetails'),
           style: TextStyle(
             color: AppColors.primaryText(context),
             fontSize: 15,
@@ -149,20 +158,19 @@ class _MaffInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context, page: 'progress_report');
+    final ministry = report?.ministry.isNotEmpty == true
+        ? report!.ministry
+        : l10n.text('governmentAgency');
+    final information = l10n.remoteText('information');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SectionHeader(
-          title: AppLocalizations.of(context)
-              .text('ministryInfo')
-              .replaceAll(
-                '{ministry}',
-                report?.ministry.isNotEmpty == true
-                    ? report!.ministry
-                    : l10n.text('governmentAgency'),
-              ),
+          title: information == null
+              ? l10n.text('ministryInfo').replaceAll('{ministry}', ministry)
+              : '$ministry $information',
         ),
         const SizedBox(height: 11),
         Row(
@@ -177,7 +185,10 @@ class _MaffInfoSection extends StatelessWidget {
             const SizedBox(width: 18),
             Expanded(
               child: _PersonInfoBlock(
-                label: AppLocalizations.of(context).text('prepareBy'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'progress_report',
+                ).text('prepareBy'),
                 name: _value(report?.preparedBy),
                 date: report?.submittedAt == null
                     ? ''
@@ -188,7 +199,10 @@ class _MaffInfoSection extends StatelessWidget {
         ),
         const SizedBox(height: 13),
         _DocumentInfoBlock(
-          label: AppLocalizations.of(context).text('approvalReport'),
+          label: AppLocalizations.of(
+            context,
+            page: 'progress_report',
+          ).text('approvalReport'),
           path: report?.approvalDocument,
           name: report?.documentNames[report?.approvalDocument],
         ),
@@ -204,12 +218,17 @@ class _CdcInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context, page: 'progress_report');
+    final information = l10n.remoteText('information');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionHeader(title: AppLocalizations.of(context).text('cdcInfo')),
+        _SectionHeader(
+          title: information == null
+              ? l10n.text('cdcInfo')
+              : 'CDC $information',
+        ),
         const SizedBox(height: 11),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,7 +251,10 @@ class _CdcInfoSection extends StatelessWidget {
             const SizedBox(width: 18),
             Expanded(
               child: _PersonInfoBlock(
-                label: AppLocalizations.of(context).text('reviewBy'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'progress_report',
+                ).text('reviewBy'),
                 name: _value(report?.reviewedBy),
                 date: report?.reviewedAt == null
                     ? ''
@@ -247,7 +269,10 @@ class _CdcInfoSection extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoBlock(
-                label: AppLocalizations.of(context).text('lastUpdate'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'progress_report',
+                ).text('lastUpdate'),
                 value: _formatDate(context, report?.updatedAt),
               ),
             ),
@@ -256,6 +281,7 @@ class _CdcInfoSection extends StatelessWidget {
               child: _DocumentInfoBlock(
                 label: AppLocalizations.of(
                   context,
+                  page: 'progress_report',
                 ).text('meetingRequestDocument'),
                 path: report?.requestDocument,
                 name: report?.documentNames[report?.requestDocument],
@@ -269,14 +295,20 @@ class _CdcInfoSection extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoBlock(
-                label: AppLocalizations.of(context).text('meetingDateTime'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'progress_report',
+                ).text('meetingDateTime'),
                 value: _meetingTime(context, report),
               ),
             ),
             SizedBox(width: 18),
             Expanded(
               child: _PersonInfoBlock(
-                label: AppLocalizations.of(context).text('reviewBy'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'progress_report',
+                ).text('reviewBy'),
                 name: _value(report?.reviewedBy),
                 date: report?.reviewedAt == null
                     ? ''
@@ -469,11 +501,14 @@ class _ReportDetailTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context, page: 'progress_report');
     final labels = [
       l10n.text('descriptions'),
       l10n.text('allIssues'),
-      l10n.text('rgcDecision'),
+      l10n.api(
+        'progress_report.shared.decisions.title',
+        fallback: l10n.text('rgcDecision'),
+      ),
       l10n.text('attachment'),
     ];
 
@@ -561,7 +596,14 @@ class _IssueListTab extends StatelessWidget {
       padding: const EdgeInsets.only(top: 14),
       child: Column(
         children: items.isEmpty
-            ? [Text(AppLocalizations.of(context).text('noIssuesFound'))]
+            ? [
+                Text(
+                  AppLocalizations.of(
+                    context,
+                    page: 'progress_report',
+                  ).text('noIssuesFound'),
+                ),
+              ]
             : [
                 for (final item in items)
                   Padding(
@@ -637,7 +679,10 @@ class _ReportIssueCard extends StatelessWidget {
                   ),
                 ),
                 _SmallStatusBadge(
-                  label: AppLocalizations.of(context).status(_value(status)),
+                  label: AppLocalizations.of(
+                    context,
+                    page: 'progress_report',
+                  ).status(_value(status)),
                   color: solved
                       ? (isDark
                             ? const Color(0xFF86EFAC)
@@ -747,7 +792,14 @@ class _AttachmentTab extends StatelessWidget {
                     path: path,
                   ),
               ]
-            : [Text(AppLocalizations.of(context).text('noData'))],
+            : [
+                Text(
+                  AppLocalizations.of(
+                    context,
+                    page: 'progress_report',
+                  ).text('noData'),
+                ),
+              ],
       ),
     );
   }

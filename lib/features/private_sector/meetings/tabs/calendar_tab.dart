@@ -38,7 +38,12 @@ class _CalendarTabState extends State<CalendarTab> {
     if (datedMeetings.isEmpty) {
       return Padding(
         padding: const EdgeInsets.only(top: 12),
-        child: Text(AppLocalizations.of(context).text('noMeetings')),
+        child: Text(
+          AppLocalizations.of(
+            context,
+            page: 'meeting_calendar',
+          ).text('noMeetings'),
+        ),
       );
     }
 
@@ -72,7 +77,7 @@ class _CalendarTabState extends State<CalendarTab> {
       children: [
         const SizedBox(height: 12),
         Text(
-          '${_monthName(selected.month)} ${selected.year}',
+          '${_monthName(context, selected.month)} ${selected.year}',
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18,
@@ -94,7 +99,10 @@ class _CalendarTabState extends State<CalendarTab> {
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              AppLocalizations.of(context).text('noMeetings'),
+              AppLocalizations.of(
+                context,
+                page: 'meeting_calendar',
+              ).text('noMeetings'),
               style: const TextStyle(color: AppColors.mutedText, fontSize: 13),
             ),
           )
@@ -107,6 +115,7 @@ class _CalendarTabState extends State<CalendarTab> {
                   builder: (_) =>
                       widget.detailBuilder?.call(meeting) ??
                       MeetingRequestDetailScreen(
+                        translationPage: 'meeting_calendar',
                         title: meeting.details.title,
                         request: meeting.details,
                       ),
@@ -123,20 +132,28 @@ class _CalendarTabState extends State<CalendarTab> {
   static bool _sameMonth(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month;
 
-  static String _monthName(int month) => const [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ][month - 1];
+  static String _monthName(BuildContext context, int month) {
+    const codes = [
+      'jan',
+      'feb',
+      'mar',
+      'apr',
+      'may',
+      'jun',
+      'jul',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
+    ];
+    final code = codes[month - 1];
+    final l10n = AppLocalizations.of(context, page: 'meeting_calendar');
+    return l10n.api(
+      'meeting_requests.calendar_ui.months.$code',
+      fallback: l10n.text('month${code[0].toUpperCase()}${code.substring(1)}'),
+    );
+  }
 }
 
 class _CalendarDays extends StatelessWidget {
@@ -179,7 +196,7 @@ class _CalendarDays extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      _weekday(date.weekday),
+                      _weekday(context, date.weekday),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -220,8 +237,17 @@ class _CalendarDays extends StatelessWidget {
     );
   }
 
-  static String _weekday(int weekday) =>
-      const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][weekday - 1];
+  static String _weekday(BuildContext context, int weekday) {
+    const codes = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+    final code = codes[weekday - 1];
+    final l10n = AppLocalizations.of(context, page: 'meeting_calendar');
+    return l10n.api(
+      'meeting_requests.calendar_ui.weekdays.$code',
+      fallback: l10n.text(
+        'weekday${code[0].toUpperCase()}${code.substring(1)}',
+      ),
+    );
+  }
 
   static bool _sameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;

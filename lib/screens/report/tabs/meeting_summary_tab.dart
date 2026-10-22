@@ -30,7 +30,10 @@ class MeetingSummaryTab extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.all(20),
             child: Text(
-              AppLocalizations.of(context).text('noMeetingSummaries'),
+              AppLocalizations.of(
+                context,
+                page: 'meeting_summary',
+              ).text('noMeetingSummaries'),
             ),
           );
         }
@@ -133,7 +136,10 @@ class _MeetingSummaryCard extends StatelessWidget {
                 Expanded(
                   child: _MeetingSummaryMeta(
                     icon: Icons.calendar_month_outlined,
-                    label: AppLocalizations.of(context).text('meetingDate'),
+                    label: AppLocalizations.of(
+                      context,
+                      page: 'meeting_summary',
+                    ).text('meetingDate'),
                     value: _date(context, summary.date),
                   ),
                 ),
@@ -141,7 +147,10 @@ class _MeetingSummaryCard extends StatelessWidget {
                 Expanded(
                   child: _MeetingSummaryMeta(
                     icon: Icons.file_copy_outlined,
-                    label: AppLocalizations.of(context).text('totalIssues'),
+                    label: AppLocalizations.of(
+                      context,
+                      page: 'meeting_summary',
+                    ).text('totalIssues'),
                     value: '${summary.issueCount}',
                     iconColor: const Color(0xFFB642FF),
                     iconBackground: const Color(0xFFF2DDFF),
@@ -212,7 +221,7 @@ class _MeetingSummaryCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          '${summary.attachmentCount} ${AppLocalizations.of(context).text('attachmentsLabel')}',
+                          '${summary.attachmentCount} ${AppLocalizations.of(context, page: 'meeting_summary').text('attachmentsLabel')}',
                           style: const TextStyle(
                             color: Color(0xFF4C5563),
                             fontSize: 12,
@@ -317,7 +326,7 @@ class _StatusBadge extends StatelessWidget {
         ),
       ),
       child: Text(
-        AppLocalizations.of(context).status(status),
+        AppLocalizations.of(context, page: 'meeting_summary').status(status),
         style: TextStyle(
           color: shared ? const Color(0xFF1475A8) : AppColors.mutedText,
           fontSize: 10,

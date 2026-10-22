@@ -132,10 +132,12 @@ class _CdcDetailTextPanelState extends State<CdcDetailTextPanel> {
                   widget.body.isNotEmpty)
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    final style = TextStyle(
-                      fontSize: 13,
-                      height: 1.25,
-                      color: AppColors.primaryText(context),
+                    final style = DefaultTextStyle.of(context).style.merge(
+                      TextStyle(
+                        fontSize: 13,
+                        height: 1.25,
+                        color: AppColors.primaryText(context),
+                      ),
                     );
                     final fullBody = htmlToPlainText(widget.body);
                     final fullPainter = TextPainter(

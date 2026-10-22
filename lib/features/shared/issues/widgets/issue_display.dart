@@ -1,6 +1,21 @@
 import 'package:flutter/material.dart';
 import '../../../../translations/app_localizations.dart';
 import '../data/working_group_issue.dart';
+import '../data/issue_progress_report.dart';
+
+String issueProgressReportTitle(
+  BuildContext context,
+  IssueProgressReport report,
+) {
+  final l10n = AppLocalizations.of(context, page: 'issue_report');
+  if (report.title.isEmpty) return l10n.text('progressReport');
+  if (!report.hasGeneratedTitle) return report.title;
+  return l10n
+      .api('issue_matrix.report_tab', fallback: report.title)
+      .replaceAll('{semester}', report.semester)
+      .replaceAll('{year}', report.year?.toString() ?? '')
+      .trim();
+}
 
 String issueDate(BuildContext context, DateTime? date) =>
     issueDateWithYear(context, date);

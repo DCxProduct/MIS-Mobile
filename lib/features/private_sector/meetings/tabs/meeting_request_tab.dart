@@ -37,7 +37,7 @@ class _MeetingRequestCard extends StatelessWidget {
     final totalIssues = '${request.issuesCount}';
     final status = request.status;
     final attachmentCount =
-        '${request.attachmentCount} ${AppLocalizations.of(context).text('attachmentsLabel')}';
+        '${request.attachmentCount} ${AppLocalizations.of(context, page: 'meeting_requests').text('attachmentsLabel')}';
     return InkWell(
       onTap: () {
         Navigator.of(context).push(
@@ -115,7 +115,10 @@ class _MeetingRequestCard extends StatelessWidget {
                   child: _MeetingInfo(
                     icon: Icons.calendar_month_outlined,
                     fitValue: true,
-                    label: AppLocalizations.of(context).text('meetingDate'),
+                    label: AppLocalizations.of(
+                      context,
+                      page: 'meeting_requests',
+                    ).text('meetingDate'),
                     value: date,
                   ),
                 ),
@@ -123,7 +126,10 @@ class _MeetingRequestCard extends StatelessWidget {
                 Expanded(
                   child: _MeetingInfo(
                     icon: Icons.file_copy_outlined,
-                    label: AppLocalizations.of(context).text('totalIssues'),
+                    label: AppLocalizations.of(
+                      context,
+                      page: 'meeting_requests',
+                    ).text('totalIssues'),
                     value: totalIssues,
                     iconColor: const Color(0xFFB642FF),
                     iconBackground: const Color(0xFFF2DDFF),
@@ -251,33 +257,51 @@ class _StatusBadge extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final config = switch (status) {
       'DRAFT' || 'DRAFTED' => (
-        label: AppLocalizations.of(context).text('drafted'),
+        label: AppLocalizations.of(
+          context,
+          page: 'meeting_requests',
+        ).text('drafted'),
         color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF6B7280),
         background: isDark ? const Color(0xFF222835) : const Color(0xFFF3F4F6),
         border: isDark ? const Color(0xFF4B5563) : const Color(0xFFD1D5DB),
       ),
       'SUBMITTED' => (
-        label: AppLocalizations.of(context).text('submitted'),
+        label: AppLocalizations.of(
+          context,
+          page: 'meeting_requests',
+        ).text('submitted'),
         color: isDark ? const Color(0xFF5EEAD4) : const Color(0xFF0E9384),
         background: isDark ? const Color(0xFF123B3A) : const Color(0xFFE6FFFB),
         border: isDark ? const Color(0xFF0F766E) : const Color(0xFF79D7CD),
       ),
       'COMPLETED' => (
-        label: AppLocalizations.of(context).text('completed'),
+        label: AppLocalizations.of(
+          context,
+          page: 'meeting_requests',
+        ).text('completed'),
         color: isDark ? const Color(0xFF86EFAC) : const Color(0xFF16A34A),
         background: isDark ? const Color(0xFF123B2A) : const Color(0xFFEAFBF0),
         border: isDark ? const Color(0xFF166534) : const Color(0xFF9BE2B4),
       ),
       'UNDER_REVIEW' => (
-        label: AppLocalizations.of(context).text('underReview'),
+        label: AppLocalizations.of(
+          context,
+          page: 'meeting_requests',
+        ).text('underReview'),
         color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFFF8A00),
         background: isDark ? const Color(0xFF423415) : const Color(0xFFFFF6E8),
         border: isDark ? const Color(0xFF92400E) : const Color(0xFFFFC166),
       ),
       _ => (
         label: status == 'SCHEDULED'
-            ? AppLocalizations.of(context).text('scheduled')
-            : AppLocalizations.of(context).status(status),
+            ? AppLocalizations.of(
+                context,
+                page: 'meeting_requests',
+              ).text('scheduled')
+            : AppLocalizations.of(
+                context,
+                page: 'meeting_requests',
+              ).status(status),
         color: isDark ? const Color(0xFF75BFFF) : const Color(0xFF1675C6),
         background: isDark ? const Color(0xFF142E45) : const Color(0xFFF0F8FF),
         border: isDark ? const Color(0xFF356992) : const Color(0xFFB8DCFA),

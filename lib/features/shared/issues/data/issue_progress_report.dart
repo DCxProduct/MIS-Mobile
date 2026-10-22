@@ -6,6 +6,8 @@ class IssueProgressReport {
   const IssueProgressReport({
     required this.progressReportId,
     this.semester = '',
+    this.year,
+    this.hasGeneratedTitle = false,
     required this.title,
     required this.implementationDate,
     required this.referenceName,
@@ -26,6 +28,8 @@ class IssueProgressReport {
 
   final int? progressReportId;
   final String semester;
+  final int? year;
+  final bool hasGeneratedTitle;
   final String title;
   final DateTime? implementationDate;
   final String referenceName;
@@ -183,6 +187,9 @@ class IssueProgressReport {
             : value(report['referenceName']),
       }),
       semester: semester,
+      year: year is int ? year : null,
+      hasGeneratedTitle:
+          value(json['title']).isEmpty && value(report['title']).isEmpty,
       progressReportId: json['progressReportId'] is int
           ? json['progressReportId'] as int
           : report['id'] is int

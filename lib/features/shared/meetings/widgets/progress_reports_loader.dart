@@ -34,7 +34,7 @@ class _ProgressReportsLoaderState extends State<ProgressReportsLoader> {
   Widget build(BuildContext context) => FutureBuilder<List<ProgressReport>>(
     future: _future,
     builder: (context, snapshot) {
-      final l10n = AppLocalizations.of(context);
+      final l10n = AppLocalizations.of(context, page: 'progress_report');
       if (snapshot.connectionState != ConnectionState.done) {
         return const Padding(
           padding: EdgeInsets.all(24),

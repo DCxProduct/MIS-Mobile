@@ -74,7 +74,12 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: 'progress_report_issue',
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return DraggableScrollableSheet(
       initialChildSize: .78,

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'config/module_repositories.dart';
 import '../features/shared/notifications/data/notifications_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show mapEquals;
 import '../features/shared/meetings/data/meetings_repository.dart';
 
 import '../translations/app_language.dart';
@@ -50,10 +53,75 @@ class AppSettingsController extends ChangeNotifier {
   NotificationsRepository get notifications => _repositories.notifications;
   AuthUser? currentUser;
 
+  final _translationCache = <AppLanguage, Map<String, String>>{};
+  Future<void>? _translationRequest;
+  int _translationGeneration = 0;
+  bool _disposed = false;
+  Object? translationError;
+
+  Map<String, String> get translations =>
+      moduleType == AppModuleType.privateSector
+      ? _translationCache[language] ?? const {}
+      : const {};
+
+  void _invalidateTranslationRequest({bool clearCache = false}) {
+    _translationGeneration++;
+    _translationRequest = null;
+    translationError = null;
+    if (clearCache) _translationCache.clear();
+  }
+
+  /// Failed/missing translations retain the bundled labels. Call with refresh
+  /// to retry a failed request or pick up edits made on the web application.
+  Future<void> loadTranslations({bool refresh = false}) {
+    if (_disposed || moduleType != AppModuleType.privateSector) {
+      return Future.value();
+    }
+    // Polling, resume and language changes must not stack identical requests.
+    if (_translationRequest != null) return _translationRequest!;
+    if (!refresh && _translationCache.containsKey(language)) {
+      return Future.value();
+    }
+    final generation = ++_translationGeneration;
+    final requestedLanguage = language;
+    return _translationRequest = _fetchTranslations(
+      generation,
+      requestedLanguage,
+    );
+  }
+
+  Future<void> _fetchTranslations(
+    int generation,
+    AppLanguage requestedLanguage,
+  ) async {
+    var changed = false;
+    try {
+      final dictionary = await _repositories.translations.dictionary(
+        requestedLanguage,
+      );
+      if (_disposed || generation != _translationGeneration) return;
+      changed =
+          !mapEquals(_translationCache[requestedLanguage], dictionary) ||
+          translationError != null;
+      _translationCache[requestedLanguage] = dictionary;
+      translationError = null;
+    } on Exception catch (error) {
+      if (_disposed || generation != _translationGeneration) return;
+      changed = translationError == null;
+      translationError = error;
+    } finally {
+      if (!_disposed && generation == _translationGeneration) {
+        _translationRequest = null;
+        if (changed) notifyListeners();
+      }
+    }
+  }
+
   void setCurrentUser(AuthUser user) {
     final module = moduleForRoles(user.roles);
     if (module == null) throw const UnsupportedRoleException();
     if (currentUser?.id != user.id) {
+      _invalidateTranslationRequest(clearCache: true);
       _defaultRepositories.notifications.resetSession();
       for (final repositories in _moduleRepositories.values) {
         repositories.notifications.resetSession();
@@ -62,10 +130,13 @@ class AppSettingsController extends ChangeNotifier {
     currentUser = user;
     _userEmail = user.email;
     _moduleType = module;
+    _invalidateTranslationRequest();
     notifyListeners();
+    unawaited(loadTranslations(refresh: true));
   }
 
   void clearSession() {
+    _invalidateTranslationRequest(clearCache: true);
     _defaultRepositories.notifications.resetSession();
     for (final repositories in _moduleRepositories.values) {
       repositories.notifications.resetSession();
@@ -79,6 +150,8 @@ class AppSettingsController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
+    _invalidateTranslationRequest(clearCache: true);
     _defaultRepositories.notifications.dispose();
     auth.dispose();
     super.dispose();
@@ -110,13 +183,17 @@ class AppSettingsController extends ChangeNotifier {
   void setLanguage(AppLanguage value) {
     if (_language == value) return;
     _language = value;
+    _invalidateTranslationRequest();
     notifyListeners();
+    if (currentUser != null) unawaited(loadTranslations(refresh: true));
   }
 
   void setModuleType(AppModuleType value) {
     if (_moduleType == value) return;
     _moduleType = value;
+    _invalidateTranslationRequest();
     notifyListeners();
+    if (currentUser != null) unawaited(loadTranslations(refresh: true));
   }
 
   void setUserEmail(String email) {

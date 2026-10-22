@@ -36,7 +36,7 @@ class _MeetingRequestsListState extends State<MeetingRequestsList> {
   Widget build(BuildContext context) => FutureBuilder<List<MeetingRequest>>(
     future: _request,
     builder: (context, snapshot) {
-      final l10n = AppLocalizations.of(context);
+      final l10n = AppLocalizations.of(context, page: 'meeting_requests');
       if (snapshot.connectionState != ConnectionState.done) {
         return const Padding(
           padding: EdgeInsets.all(24),

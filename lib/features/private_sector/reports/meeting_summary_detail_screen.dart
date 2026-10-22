@@ -40,7 +40,10 @@ class _MeetingSummaryDetailScreenState
           return Scaffold(
             appBar: AppBar(
               title: Text(
-                AppLocalizations.of(context).text('meetingSummaryDetails'),
+                AppLocalizations.of(
+                  context,
+                  page: 'meeting_summary',
+                ).text('meetingSummaryDetails'),
               ),
             ),
             body: const Center(child: CircularProgressIndicator()),
@@ -50,7 +53,10 @@ class _MeetingSummaryDetailScreenState
           return Scaffold(
             appBar: AppBar(
               title: Text(
-                AppLocalizations.of(context).text('meetingSummaryDetails'),
+                AppLocalizations.of(
+                  context,
+                  page: 'meeting_summary',
+                ).text('meetingSummaryDetails'),
               ),
             ),
             body: Center(
@@ -60,6 +66,7 @@ class _MeetingSummaryDetailScreenState
                   Text(
                     AppLocalizations.of(
                       context,
+                      page: 'meeting_summary',
                     ).text('meetingSummariesLoadError'),
                   ),
                   TextButton(
@@ -68,7 +75,12 @@ class _MeetingSummaryDetailScreenState
                         context,
                       ).meetingSummaries.getSummary(widget.id!);
                     }),
-                    child: Text(AppLocalizations.of(context).text('retry')),
+                    child: Text(
+                      AppLocalizations.of(
+                        context,
+                        page: 'meeting_summary',
+                      ).text('retry'),
+                    ),
                   ),
                 ],
               ),
@@ -97,7 +109,10 @@ class _MeetingSummaryDetailScreenState
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          AppLocalizations.of(context).text('meetingSummaryDetails'),
+          AppLocalizations.of(
+            context,
+            page: 'meeting_summary',
+          ).text('meetingSummaryDetails'),
           style: TextStyle(
             color: AppColors.primaryText(context),
             fontSize: 15,
@@ -148,7 +163,10 @@ class _MeetingSummaryDetailScreenState
               child: summary.issues.isEmpty
                   ? Center(
                       child: Text(
-                        AppLocalizations.of(context).text('noIssuesFound'),
+                        AppLocalizations.of(
+                          context,
+                          page: 'meeting_summary',
+                        ).text('noIssuesFound'),
                       ),
                     )
                   : ListView.separated(
@@ -210,14 +228,20 @@ class _SummaryInfoGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoBlock(
-                label: AppLocalizations.of(context).text('meetingTime'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'meeting_summary',
+                ).text('meetingTime'),
                 value: _meetingTime(context),
               ),
             ),
             SizedBox(width: 24),
             Expanded(
               child: _InfoBlock(
-                label: AppLocalizations.of(context).text('scheduleMeeting'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'meeting_summary',
+                ).text('scheduleMeeting'),
                 value: issueDateWithYear(
                   context,
                   summary.detailDate?.toLocal(),
@@ -232,7 +256,10 @@ class _SummaryInfoGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoBlock(
-                label: AppLocalizations.of(context).text('location'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'meeting_summary',
+                ).text('location'),
                 value: summary.location.isEmpty ? '—' : summary.location,
               ),
             ),
@@ -241,6 +268,7 @@ class _SummaryInfoGrid extends StatelessWidget {
               child: _DocumentBlock(
                 label: AppLocalizations.of(
                   context,
+                  page: 'meeting_summary',
                 ).text('meetingRequestDocument'),
                 path:
                     summary.requestDocumentPath ?? summary.meetingDocumentPath,
@@ -365,7 +393,10 @@ class _AllIssuesTabHeader extends StatelessWidget {
         children: [
           Center(
             child: Text(
-              AppLocalizations.of(context).text('allIssues'),
+              AppLocalizations.of(
+                context,
+                page: 'meeting_summary',
+              ).text('allIssues'),
               style: TextStyle(
                 color: AppColors.primary,
                 fontSize: 12,
@@ -424,7 +455,10 @@ class _ClimateIssueCard extends StatelessWidget {
                     border: Border.all(color: AppColors.border(context)),
                   ),
                   child: Text(
-                    AppLocalizations.of(context).status(issue?.status ?? ''),
+                    AppLocalizations.of(
+                      context,
+                      page: 'meeting_summary_issue',
+                    ).status(issue?.status ?? ''),
                     style: TextStyle(
                       color: AppColors.secondaryText(context),
                       fontSize: 12,
@@ -501,7 +535,10 @@ class _IssueDetailsSheet extends StatelessWidget {
                   const SizedBox(height: 14),
                   Center(
                     child: Text(
-                      AppLocalizations.of(context).text('issuesDetails'),
+                      AppLocalizations.of(
+                        context,
+                        page: 'meeting_summary_issue',
+                      ).text('issuesDetails'),
                       style: TextStyle(
                         color: AppColors.primaryText(context),
                         fontSize: 15,
@@ -529,6 +566,7 @@ class _IssueDetailsSheet extends StatelessWidget {
                         _DatePill(
                           label: AppLocalizations.of(
                             context,
+                            page: 'meeting_summary_issue',
                           ).text('submittedBy'),
                           name: issue?.submittedBy.isNotEmpty == true
                               ? issue!.submittedBy
@@ -538,6 +576,7 @@ class _IssueDetailsSheet extends StatelessWidget {
                         _DatePill(
                           label: AppLocalizations.of(
                             context,
+                            page: 'meeting_summary_issue',
                           ).text('submittedDate'),
                           name: issueDateWithYear(
                             context,
@@ -547,15 +586,17 @@ class _IssueDetailsSheet extends StatelessWidget {
                         for (final order in [1, 2, 3, 4, 5]) ...[
                           const SizedBox(width: 10),
                           _DatePill(
-                            label: AppLocalizations.of(context).text(
-                              switch (order) {
-                                1 => 'governmentAgency',
-                                2 => 'governmentSecondAgency',
-                                3 => 'governmentThirdAgency',
-                                4 => 'governmentFourthAgency',
-                                _ => 'governmentFifthAgency',
-                              },
-                            ),
+                            label:
+                                AppLocalizations.of(
+                                  context,
+                                  page: 'meeting_summary_issue',
+                                ).text(switch (order) {
+                                  1 => 'governmentAgency',
+                                  2 => 'governmentSecondAgency',
+                                  3 => 'governmentThirdAgency',
+                                  4 => 'governmentFourthAgency',
+                                  _ => 'governmentFifthAgency',
+                                }),
                             name: issue?.governmentAgencies[order] ?? '—',
                           ),
                         ],
@@ -566,12 +607,16 @@ class _IssueDetailsSheet extends StatelessWidget {
                   _ReadMorePanel(
                     title: AppLocalizations.of(
                       context,
+                      page: 'meeting_summary_issue',
                     ).text('issuesDescriptions'),
                     body: issue?.descriptionHtml ?? issue?.description,
                   ),
                   const SizedBox(height: 18),
                   _ReadMorePanel(
-                    title: AppLocalizations.of(context).text('recommendations'),
+                    title: AppLocalizations.of(
+                      context,
+                      page: 'meeting_summary_issue',
+                    ).text('recommendations'),
                     body: issue?.recommendationHtml ?? issue?.recommendation,
                   ),
                 ],
@@ -598,7 +643,10 @@ class _IssueSheetInfoGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoBlock(
-                label: AppLocalizations.of(context).text('submittedBy'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'meeting_summary_issue',
+                ).text('submittedBy'),
                 value: issue?.submittedBy.isNotEmpty == true
                     ? issue!.submittedBy
                     : '—',
@@ -607,9 +655,12 @@ class _IssueSheetInfoGrid extends StatelessWidget {
             SizedBox(width: 18),
             Expanded(
               child: _InfoBlock(
-                label: AppLocalizations.of(context).text('status'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'meeting_summary_issue',
+                ).text('status'),
                 value:
-                    '• ${AppLocalizations.of(context).status(issue?.status ?? '')}',
+                    '• ${AppLocalizations.of(context, page: 'meeting_summary_issue').status(issue?.status ?? '')}',
               ),
             ),
           ],
@@ -620,7 +671,10 @@ class _IssueSheetInfoGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoBlock(
-                label: AppLocalizations.of(context).text('categories'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'meeting_summary_issue',
+                ).text('categories'),
                 value: issue?.category.isNotEmpty == true
                     ? issue!.category
                     : '—',
@@ -631,7 +685,8 @@ class _IssueSheetInfoGrid extends StatelessWidget {
               child: _DocumentBlock(
                 label: AppLocalizations.of(
                   context,
-                ).text('meetingRequestDocument'),
+                  page: 'meeting_summary_issue',
+                ).text('issueDocument'),
                 path: issue?.attachmentPath ?? issue?.referencePath,
                 name: issue?.attachmentPath != null
                     ? issue?.attachmentName

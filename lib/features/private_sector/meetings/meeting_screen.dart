@@ -29,6 +29,7 @@ class _MeetingScreenState extends State<MeetingScreen> {
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
+          translationPage: tab == 0 ? 'meeting_requests' : 'meeting_summary',
           initial: _filters[tab],
           load: tab == 0
               ? () => catalogs.meetingRequests()
@@ -44,7 +45,12 @@ class _MeetingScreenState extends State<MeetingScreen> {
   int get _activeFilterCount => _filters[_selectedTab].count;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: _selectedTab == 2 ? 'meeting_summary' : 'meeting_requests',
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final contentBackground = isDark

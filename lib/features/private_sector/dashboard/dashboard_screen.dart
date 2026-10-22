@@ -174,6 +174,9 @@ class DashboardPageState extends State<DashboardPage> {
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
+          translationPage: tab == 0
+              ? 'dashboard_plenary'
+              : 'dashboard_working_group',
           initial: _dashboardFilters[tab],
           load: () => catalogs.dashboard(
             tab == 0 ? 'plenary' : 'pswg',
@@ -560,7 +563,13 @@ class _ScopeTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
-    final labels = [l10n.text('plenary'), l10n.text('workingGroup')];
+    final labels = [
+      l10n.text('plenary'),
+      l10n.api(
+        'dashboard_working_group.title',
+        fallback: l10n.text('workingGroup'),
+      ),
+    ];
 
     return Text(
       labels[selectedIndex],
@@ -583,7 +592,13 @@ class _ScopeSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final labels = [l10n.text('plenary'), l10n.text('workingGroup')];
+    final labels = [
+      l10n.text('plenary'),
+      l10n.api(
+        'dashboard_working_group.title',
+        fallback: l10n.text('workingGroup'),
+      ),
+    ];
 
     return Container(
       height: 30,

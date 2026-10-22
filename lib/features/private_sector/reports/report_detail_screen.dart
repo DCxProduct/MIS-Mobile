@@ -33,7 +33,10 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          AppLocalizations.of(context).text('progressReportDetails'),
+          AppLocalizations.of(
+            context,
+            page: 'progress_report',
+          ).text('progressReportDetails'),
           style: TextStyle(
             color: AppColors.primaryText(context),
             fontSize: 15,
@@ -98,12 +101,17 @@ class _MaffInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context, page: 'progress_report');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionHeader(title: AppLocalizations.of(context).text('maffInfo')),
+        _SectionHeader(
+          title: AppLocalizations.of(
+            context,
+            page: 'progress_report',
+          ).text('maffInfo'),
+        ),
         const SizedBox(height: 11),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +125,10 @@ class _MaffInfoSection extends StatelessWidget {
             const SizedBox(width: 18),
             Expanded(
               child: _PersonInfoBlock(
-                label: AppLocalizations.of(context).text('prepareBy'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'progress_report',
+                ).text('prepareBy'),
                 name: 'Ouk Sabda',
                 date: 'June 01, 2025',
               ),
@@ -126,7 +137,10 @@ class _MaffInfoSection extends StatelessWidget {
         ),
         const SizedBox(height: 13),
         _DocumentInfoBlock(
-          label: AppLocalizations.of(context).text('approvalReport'),
+          label: AppLocalizations.of(
+            context,
+            page: 'progress_report',
+          ).text('approvalReport'),
         ),
       ],
     );
@@ -138,12 +152,17 @@ class _CdcInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context, page: 'progress_report');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionHeader(title: AppLocalizations.of(context).text('cdcInfo')),
+        _SectionHeader(
+          title: AppLocalizations.of(
+            context,
+            page: 'progress_report',
+          ).text('cdcInfo'),
+        ),
         const SizedBox(height: 11),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,7 +177,10 @@ class _CdcInfoSection extends StatelessWidget {
             const SizedBox(width: 18),
             Expanded(
               child: _PersonInfoBlock(
-                label: AppLocalizations.of(context).text('reviewBy'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'progress_report',
+                ).text('reviewBy'),
                 name: 'Seng Phanat',
                 date: 'June 01, 2025',
               ),
@@ -171,7 +193,10 @@ class _CdcInfoSection extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoBlock(
-                label: AppLocalizations.of(context).text('lastUpdate'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'progress_report',
+                ).text('lastUpdate'),
                 value: '2025',
               ),
             ),
@@ -180,6 +205,7 @@ class _CdcInfoSection extends StatelessWidget {
               child: _DocumentInfoBlock(
                 label: AppLocalizations.of(
                   context,
+                  page: 'progress_report',
                 ).text('meetingRequestDocument'),
               ),
             ),
@@ -191,14 +217,20 @@ class _CdcInfoSection extends StatelessWidget {
           children: [
             Expanded(
               child: _InfoBlock(
-                label: AppLocalizations.of(context).text('meetingDateTime'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'progress_report',
+                ).text('meetingDateTime'),
                 value: 'September 22, 2025,\n2:00PM-5:00PM',
               ),
             ),
             SizedBox(width: 18),
             Expanded(
               child: _PersonInfoBlock(
-                label: AppLocalizations.of(context).text('reviewBy'),
+                label: AppLocalizations.of(
+                  context,
+                  page: 'progress_report',
+                ).text('reviewBy'),
                 name: 'Seng Phanat',
                 date: 'June 01, 2025',
               ),
@@ -380,11 +412,14 @@ class _ReportDetailTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context, page: 'progress_report');
     final labels = [
       l10n.text('descriptions'),
       l10n.text('allIssues'),
-      l10n.text('rgcDecision'),
+      l10n.api(
+        'progress_report.shared.decisions.title',
+        fallback: l10n.text('rgcDecision'),
+      ),
       l10n.text('attachment'),
     ];
 
@@ -485,7 +520,7 @@ class _ReportIssueCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context, page: 'progress_report');
     final solved = status == _ReportIssueStatus.solved;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -603,6 +638,8 @@ class _AttachmentTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(top: 12),
-    child: Text(AppLocalizations.of(context).text('noData')),
+    child: Text(
+      AppLocalizations.of(context, page: 'progress_report').text('noData'),
+    ),
   );
 }

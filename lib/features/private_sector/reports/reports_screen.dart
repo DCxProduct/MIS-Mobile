@@ -28,6 +28,7 @@ class _ReportScreenState extends State<ReportScreen> {
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
+          translationPage: 'progress_report',
           initial: _progressFilters,
           load: catalogs.progressReports,
         ),
@@ -43,6 +44,7 @@ class _ReportScreenState extends State<ReportScreen> {
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
+          translationPage: 'meeting_summary',
           initial: _summaryFilters,
           load: catalogs.meetingSummaries,
         ),
@@ -55,7 +57,12 @@ class _ReportScreenState extends State<ReportScreen> {
       _selectedTab == 0 ? _progressFilters.count : _summaryFilters.count;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: _selectedTab == 0 ? 'progress_report' : 'meeting_summary',
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final contentBackground = isDark

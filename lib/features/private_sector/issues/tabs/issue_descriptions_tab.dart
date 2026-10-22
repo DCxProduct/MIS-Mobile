@@ -14,22 +14,17 @@ class IssueDescriptionsTab extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
       children: [
         _TextPanel(
           title: l10n.text('issuesDescription'),
-          body:
-              issue?.descriptionHtml ??
-              issue?.description ??
-              'The private sector stated that cultivation is largely dependent on the weather (rain), and the private sector also observed that the Ministry of Water Resources and Meteorology often issues announcements regarding weather forecasting nationwide, which results in farmers in each region not receiving clear information.',
+          body: issue?.descriptionHtml ?? issue?.description ?? '—',
         ),
         const SizedBox(height: 14),
         _TextPanel(
           title: l10n.text('recommendation'),
-          body:
-              issue?.recommendationHtml ??
-              issue?.recommendation ??
-              'The private sector, through the Ministry of Agriculture, Forestry and Fisheries, has requested the Ministry of Water Resources and Meteorology to consider establishing meteorological stations in every province and city to provide farmers with accurate weather information.',
+          body: issue?.recommendationHtml ?? issue?.recommendation ?? '—',
         ),
       ],
     );
@@ -49,8 +44,8 @@ class _TextPanel extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            color: AppColors.mutedText,
+          style: TextStyle(
+            color: AppColors.primaryText(context),
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),

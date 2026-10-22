@@ -1,351 +1,370 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
-import '../../../../core/app_colors.dart';
-import '../../../../translations/app_localizations.dart';
+import '../../../core/app_colors.dart';
+import '../../../core/widgets/editor_content.dart';
+import '../../../core/widgets/pdf_attachment_preview.dart';
+import '../../../translations/app_localizations.dart';
+import '../../cdc_section/issues/detail_widgets.dart';
+import '../../shared/issues/data/issue_progress_report.dart';
+import '../../shared/issues/widgets/issue_display.dart';
 
 class IssueProgressReportDetailScreen extends StatelessWidget {
-  const IssueProgressReportDetailScreen({super.key, required this.title});
+  const IssueProgressReportDetailScreen({
+    super.key,
+    required this.title,
+    required this.report,
+    this.issueStatus = '',
+    this.meetingDocumentPath = '',
+    this.meetingDocumentName = '',
+  });
 
   final String title;
+  final IssueProgressReport report;
+  final String issueStatus;
+  final String meetingDocumentPath;
+  final String meetingDocumentName;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.pageBackground(context),
-      appBar: AppBar(
-        backgroundColor: AppColors.pageBackground(context),
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: AppColors.primaryText(context),
-            size: 22,
-          ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          AppLocalizations.of(context).text('progressReportDetails'),
-          style: TextStyle(
-            color: AppColors.primaryText(context),
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Divider(height: 1, color: AppColors.border(context)),
-        ),
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: 'issue_report',
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final hasMeetingDocument = meetingDocumentPath.isNotEmpty;
+    final documentPath = hasMeetingDocument
+        ? meetingDocumentPath
+        : report.attachmentPaths.firstOrNull ?? '';
+    final documentName = hasMeetingDocument
+        ? meetingDocumentName
+        : report.attachmentNames[documentPath];
+    final statusColor = switch (issueStatus.toUpperCase()) {
+      'SOLVED' || 'COMPLETE' || 'COMPLETED' => const Color(0xFF16A34A),
+      'IN_PROGRESS' => const Color(0xFFFF8A00),
+      _ => AppColors.mutedText,
+    };
+    Widget section(String key, String value, {String? labelKey}) => Padding(
+      padding: const EdgeInsets.only(top: 18),
+      child: CdcDetailTextPanel(
+        key: ValueKey('report-$key'),
+        label: l10n.text(labelKey ?? key),
+        body: report.richText[key] ?? value,
+        collapsedLines: 3,
+        inlineLink: true,
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(10, 14, 10, 28),
+    );
+    Widget document(
+      String path,
+      String? name, {
+      bool showSize = false,
+    }) => PdfAttachmentPreview(
+      path: path,
+      name: pdfAttachmentName(path, name: name),
+      child: Row(
         children: [
-          Text(
-            'Climate Issue',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
+          const Icon(Icons.picture_as_pdf, color: Color(0xFFFF4842), size: 19),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  pdfAttachmentName(path, name: name),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11),
+                ),
+                if (showSize && report.attachmentSize != null)
+                  Text(
+                    report.attachmentSize! >= 1024 * 1024
+                        ? '${(report.attachmentSize! / (1024 * 1024)).toStringAsFixed(1)} MB'
+                        : '${(report.attachmentSize! / 1024).round()} KB',
+                    style: const TextStyle(
+                      fontSize: 9,
+                      color: AppColors.mutedText,
+                    ),
+                  ),
+              ],
             ),
-          ),
-          const SizedBox(height: 17),
-          const _ReportInfoGrid(),
-          const SizedBox(height: 14),
-          const _KhmerDescription(),
-          const SizedBox(height: 8),
-          _ViewDetailsButton(
-            label: AppLocalizations.of(context).text('viewDetails'),
-          ),
-          const SizedBox(height: 18),
-          _SectionTitle(
-            title: AppLocalizations.of(context).text('solutionIndicators'),
-          ),
-          const SizedBox(height: 8),
-          const _ReadMoreCard(
-            body:
-                'ត្រូវការសម្របសម្រួលរវាងក្រុមការងារនិងស្ថាប័នពាក់ព័ន្ធដើម្បីអនុវត្តសេចក្តីសម្រេចនេះឱ្យមានប្រសិទ្ធភាព។',
-          ),
-          const SizedBox(height: 16),
-          _SectionTitle(
-            title: AppLocalizations.of(context).text('solutionIndicators'),
-          ),
-          const SizedBox(height: 8),
-          const _ReadMoreCard(
-            body:
-                'ត្រូវការសម្របសម្រួលរវាងក្រុមការងារនិងស្ថាប័នពាក់ព័ន្ធដើម្បីអនុវត្តសេចក្តីសម្រេចនេះឱ្យមានប្រសិទ្ធភាព។',
-          ),
-          const SizedBox(height: 16),
-          _SectionTitle(title: AppLocalizations.of(context).text('challenges')),
-          const SizedBox(height: 8),
-          const _ReadMoreCard(
-            body:
-                'ត្រូវការសម្របសម្រួលរវាងក្រុមការងារនិងស្ថាប័នពាក់ព័ន្ធដើម្បីអនុវត្តសេចក្តីសម្រេចនេះឱ្យមានប្រសិទ្ធភាព។',
-          ),
-          const SizedBox(height: 16),
-          _SectionTitle(title: AppLocalizations.of(context).text('requests')),
-          const SizedBox(height: 8),
-          const _ReadMoreCard(
-            body:
-                'ត្រូវការសម្របសម្រួលរវាងក្រុមការងារនិងស្ថាប័នពាក់ព័ន្ធដើម្បីអនុវត្តសេចក្តីសម្រេចនេះឱ្យមានប្រសិទ្ធភាព។',
-          ),
-          const SizedBox(height: 16),
-          _SectionTitle(
-            title: AppLocalizations.of(context).text('rgcDecision'),
-          ),
-          const SizedBox(height: 8),
-          const _ReadMoreCard(
-            body:
-                'ត្រូវការសម្របសម្រួលរវាងក្រុមការងារនិងស្ថាប័នពាក់ព័ន្ធដើម្បីអនុវត្តសេចក្តីសម្រេចនេះឱ្យមានប្រសិទ្ធភាព។',
           ),
         ],
       ),
     );
+    final link = Uri.tryParse(report.verificationLink);
+    final canOpenLink =
+        link != null &&
+        (link.scheme == 'https' || link.scheme == 'http') &&
+        link.host.isNotEmpty;
+    return Scaffold(
+      backgroundColor: AppColors.pageBackground(context),
+      appBar: AppBar(
+        backgroundColor: AppColors.pageBackground(context),
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+          icon: const Icon(Icons.arrow_back, size: 22),
+        ),
+        title: Text(
+          report.title.isEmpty
+              ? l10n.text('progressReportDetails')
+              : issueProgressReportTitle(context, report),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            color: AppColors.border(context).withValues(alpha: 0.5),
+          ),
+        ),
+      ),
+      body: SafeArea(
+        top: false,
+        child: ListView(
+          key: const ValueKey('private-issue-report-scroll'),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: _InfoBlock(
+                    label: l10n.text('implementationDate'),
+                    child: Text(
+                      issueDate(context, report.implementationDate),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 2,
+                  child: _InfoBlock(
+                    label: '${l10n.text('status')} :',
+                    child: Text(
+                      issueStatus.isEmpty ? '—' : l10n.status(issueStatus),
+                      style: TextStyle(fontSize: 12, color: statusColor),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 15),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: _InfoBlock(
+                    label:
+                        '${l10n.text(hasMeetingDocument ? 'meetingReferenceDocument' : 'attachmentsLabel')} :',
+                    child: documentPath.isEmpty
+                        ? const Text('—')
+                        : document(
+                            documentPath,
+                            documentName,
+                            showSize: !hasMeetingDocument,
+                          ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 2,
+                  child: _InfoBlock(
+                    label: l10n.text('referenceName'),
+                    child: ExpandableEditorContent(
+                      report.richText['referenceName'] ??
+                          (report.referenceName.isEmpty
+                              ? '—'
+                              : report.referenceName),
+                      collapsedLines: 2,
+                      style: const TextStyle(fontSize: 12, height: 1.4),
+                      buttonStyle: _readMoreStyle(context),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (report.description.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              _ReportDescription(
+                text: report.richText['description'] ?? report.description,
+              ),
+            ],
+            if (report.indicators.isNotEmpty)
+              section(
+                'indicators',
+                report.indicators,
+                labelKey: 'solutionIndicators',
+              ),
+            if (report.implementationChallenges.isNotEmpty)
+              section(
+                'implementationChallenges',
+                report.implementationChallenges,
+                labelKey: 'challenges',
+              ),
+            if (report.requests.isNotEmpty)
+              section('requests', report.requests),
+            if (report.nextStep.isNotEmpty)
+              section('nextStep', report.nextStep),
+            if (report.rgcDecision.isNotEmpty)
+              section('rgcDecision', report.rgcDecision),
+            if (report.sourceOfVerification.isNotEmpty)
+              section('sourceOfVerification', report.sourceOfVerification),
+            if (report.verificationLink.isNotEmpty) ...[
+              const SizedBox(height: 18),
+              _InfoBlock(
+                label: l10n.text('linkToVerificationSource'),
+                child: EditorContent(
+                  canOpenLink
+                      ? '<a href="${htmlEscape.convert(report.verificationLink)}">${htmlEscape.convert(report.verificationLink)}</a>'
+                      : report.verificationLink,
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
+            ],
+            for (final path in report.attachmentPaths)
+              if (path != documentPath)
+                Padding(
+                  padding: const EdgeInsets.only(top: 18),
+                  child: document(
+                    path,
+                    report.attachmentNames[path],
+                    showSize: report.attachmentPaths.length == 1,
+                  ),
+                ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
-class _ReportInfoGrid extends StatelessWidget {
-  const _ReportInfoGrid();
+ButtonStyle _readMoreStyle(BuildContext context) => TextButton.styleFrom(
+  foregroundColor: AppColors.accent(context),
+  padding: EdgeInsets.zero,
+  minimumSize: const Size(0, 22),
+  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  textStyle: const TextStyle(
+    fontSize: 12,
+    decoration: TextDecoration.underline,
+  ),
+);
+
+class _InfoBlock extends StatelessWidget {
+  const _InfoBlock({required this.label, required this.child});
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: const TextStyle(fontSize: 12, color: AppColors.mutedText),
+      ),
+      const SizedBox(height: 7),
+      child,
+    ],
+  );
+}
+
+class _ReportDescription extends StatefulWidget {
+  const _ReportDescription({required this.text});
+  final String text;
+
+  @override
+  State<_ReportDescription> createState() => _ReportDescriptionState();
+}
+
+class _ReportDescriptionState extends State<_ReportDescription> {
+  bool _expanded = false;
+  bool _canExpand = false;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        Stack(
           children: [
-            Expanded(
-              child: _InfoBlock(
-                label: AppLocalizations.of(context).text('implementationDate'),
-                value: 'Oct 23, 2025 | 2:00-3:00 PM',
+            EditorContent(
+              widget.text,
+              key: const ValueKey('report-description'),
+              maxLines: _expanded ? null : 12,
+              onOverflowChanged: (value) {
+                if (mounted && value != _canExpand) {
+                  setState(() => _canExpand = value);
+                }
+              },
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.5,
+                color: AppColors.primaryText(context),
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _InfoBlock(
-                label: '${l10n.text('status')} :',
-                value: l10n.text('solved'),
-                valueColor: const Color(0xFF16A34A),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 13),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _DocumentInfoBlock(
-                label: AppLocalizations.of(
-                  context,
-                ).text('meetingReferenceDocument'),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _InfoBlock(
-                label: l10n.text('referenceName'),
-                value: 'ឯកសាររដ្ឋ',
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _InfoBlock extends StatelessWidget {
-  const _InfoBlock({required this.label, required this.value, this.valueColor});
-
-  final String label;
-  final String value;
-  final Color? valueColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: AppColors.mutedText,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 7),
-        Text(
-          value,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: valueColor ?? Theme.of(context).colorScheme.onSurface,
-            fontSize: 12,
-            height: 1.3,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DocumentInfoBlock extends StatelessWidget {
-  const _DocumentInfoBlock({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: AppColors.mutedText,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 7),
-        Row(
-          children: [
-            Icon(Icons.picture_as_pdf, color: Color(0xFFE53935), size: 18),
-            const SizedBox(width: 7),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '—',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: AppColors.primaryText(context),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
+            if (_canExpand && !_expanded)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: 80,
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          AppColors.pageBackground(
+                            context,
+                          ).withValues(alpha: 0),
+                          AppColors.pageBackground(context),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 1),
-                ],
+                ),
               ),
-            ),
           ],
         ),
-      ],
-    );
-  }
-}
-
-class _KhmerDescription extends StatelessWidget {
-  const _KhmerDescription();
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      'សូមជម្រាបជូនដល់ក្រុមការងារសូមពិនិត្យលើបញ្ហាអាកាសធាតុ។ '
-      'ឯកសារនេះបង្ហាញអំពីការអនុវត្ត ស្ថានភាពដំណោះស្រាយ និងការតាមដានបន្តរបស់ស្ថាប័នពាក់ព័ន្ធ។ '
-      'សូមក្រុមការងារបន្តពិនិត្យ និងផ្តល់យោបល់សម្រាប់ជំហានបន្ទាប់។\n'
-      'ប្រជុំខាងមុខត្រូវបានរៀបចំដើម្បីពិនិត្យលទ្ធផល និងពិភាក្សាពីការសម្រេចរបស់រាជរដ្ឋាភិបាល។ '
-      'សេចក្តីសម្រេចនឹងត្រូវបានកត់ត្រាទុកជាឯកសារយោង។',
-      maxLines: 9,
-      overflow: TextOverflow.fade,
-      style: TextStyle(
-        color: AppColors.secondaryText(context),
-        fontSize: 13,
-        height: 1.58,
-        fontWeight: FontWeight.w500,
-      ),
-    );
-  }
-}
-
-class _ViewDetailsButton extends StatelessWidget {
-  const _ViewDetailsButton({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: TextButton.icon(
-        onPressed: () {},
-        style: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          minimumSize: const Size(0, 30),
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-        ),
-        label: Text(
-          label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-        ),
-        iconAlignment: IconAlignment.end,
-        icon: const Icon(Icons.keyboard_arrow_down, size: 17),
-      ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: TextStyle(
-        color: Theme.of(context).colorScheme.onSurface,
-        fontSize: 14,
-        fontWeight: FontWeight.w700,
-      ),
-    );
-  }
-}
-
-class _ReadMoreCard extends StatelessWidget {
-  const _ReadMoreCard({required this.body});
-
-  final String body;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 9),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground(context),
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: AppColors.border(context)),
-      ),
-      child: RichText(
-        text: TextSpan(
-          style: TextStyle(
-            color: AppColors.primaryText(context),
-            fontSize: 12,
-            height: 1.45,
-            fontWeight: FontWeight.w500,
+        if (_canExpand)
+          Center(
+            child: TextButton.icon(
+              key: const ValueKey('report-description-toggle'),
+              onPressed: () => setState(() => _expanded = !_expanded),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.accent(context),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: const Size(0, 28),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                textStyle: const TextStyle(fontSize: 12),
+              ),
+              label: Text(l10n.text(_expanded ? 'showLess' : 'viewDetails')),
+              icon: Icon(
+                _expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                size: 18,
+              ),
+              iconAlignment: IconAlignment.end,
+            ),
           ),
-          children: [
-            TextSpan(text: body),
-            const TextSpan(text: '  '),
-            TextSpan(
-              text: AppLocalizations.of(context).text('readMore'),
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-      ),
+      ],
     );
   }
 }
