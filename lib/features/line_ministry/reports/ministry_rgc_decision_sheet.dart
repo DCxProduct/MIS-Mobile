@@ -49,7 +49,12 @@ class _MinistryRgcDecisionSheetState extends State<MinistryRgcDecisionSheet> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: 'plenary_rgc_decisions',
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return DraggableScrollableSheet(
       initialChildSize: .72,
@@ -261,7 +266,9 @@ class _DecisionPanel extends StatelessWidget {
             Expanded(
               child: field(
                 'status',
-                decision.status.isEmpty ? '' : '• ${decision.status}',
+                decision.status.isEmpty
+                    ? ''
+                    : '• ${l10n.status(decision.status)}',
                 color: statusColor,
               ),
             ),

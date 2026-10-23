@@ -43,7 +43,12 @@ class _PlenaryDetailScreenState extends State<PlenaryDetailScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: 'plenary_plenaries',
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     if (widget.plenaryId == null) return _content(context, null, const []);
     _future ??= _load();
     return FutureBuilder<(Plenary, List<RgcDecision>)>(
@@ -318,7 +323,10 @@ class _PlenaryIssueItemCard extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return _RgcDecisionBottomSheet(decision: decision);
+        return TranslationPageScope(
+          page: 'plenary_plenaries',
+          child: _RgcDecisionBottomSheet(decision: decision),
+        );
       },
     );
   }

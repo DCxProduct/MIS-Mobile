@@ -28,7 +28,12 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
   int _selectedTab = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: 'issue_matrix_detail',
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.pageBackground(context),
       appBar: AppBar(

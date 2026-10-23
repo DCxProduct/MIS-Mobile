@@ -29,7 +29,7 @@ class _LineMinistryMeetingDetailScreenState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context, page: 'meeting_calendar');
     return FutureBuilder<CalendarMeeting>(
       future: _future ??= _load(),
       builder: (context, snapshot) {
@@ -37,6 +37,7 @@ class _LineMinistryMeetingDetailScreenState
             snapshot.hasData) {
           return LineMinistryMeetingRequestDetailScreen(
             request: snapshot.data!.details,
+            translationPage: 'meeting_calendar',
           );
         }
         return Scaffold(

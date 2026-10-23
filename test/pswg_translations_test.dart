@@ -466,7 +466,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(requests, before + 1, reason: 'Resume must refresh immediately');
 
-      settings.setModuleType(AppModuleType.lineMinistry);
+      settings.setModuleType(AppModuleType.cdcSection);
       before = requests;
       await tester.pump(const Duration(seconds: 20));
       expect(requests, before);
@@ -682,7 +682,7 @@ void main() {
       settings.setLanguage(AppLanguage.khmer);
       await settings.loadTranslations();
       expect(requested, ['km', 'en', 'km']);
-      settings.setModuleType(AppModuleType.lineMinistry);
+      settings.setModuleType(AppModuleType.cdcSection);
       expect(settings.translations, isEmpty);
       settings.setModuleType(AppModuleType.privateSector);
       await settings.loadTranslations();

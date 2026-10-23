@@ -33,6 +33,12 @@ class LineMinistryReportsScreenView extends StatefulWidget {
 class _LineMinistryReportsScreenViewState
     extends State<LineMinistryReportsScreenView> {
   int _selectedTab = 0;
+  static const _translationPages = [
+    'progress_report',
+    'dashboard_plenary',
+    'plenary_plenaries',
+    'plenary_rgc_decisions',
+  ];
 
   final _filters = List.generate(4, (_) => FilterSelection());
   static const _resources = [
@@ -48,6 +54,7 @@ class _LineMinistryReportsScreenViewState
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
+          translationPage: _translationPages[tab],
           initial: _filters[tab],
           load: switch (tab) {
             0 => catalogs.progressReports,
@@ -65,7 +72,12 @@ class _LineMinistryReportsScreenViewState
   int get _activeFilterCount => _filters[_selectedTab].count;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: _translationPages[_selectedTab],
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final contentBackground = isDark
         ? AppColors.darkBackground
@@ -199,7 +211,6 @@ class _RgcDecisionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context);
-    final isKhmer = l10n.language == AppLanguage.khmer;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -253,10 +264,7 @@ class _RgcDecisionCard extends StatelessWidget {
           const SizedBox(height: 8),
           _ReportRow(label: l10n.text('categories'), value: category),
           const SizedBox(height: 8),
-          _ReportRow(
-            label: isKhmer ? 'មន្ត្រីសម្របសម្រួល' : 'Focal Person (H.E)',
-            value: focalPerson,
-          ),
+          _ReportRow(label: l10n.text('focalPersonHE'), value: focalPerson),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -273,9 +281,7 @@ class _RgcDecisionCard extends StatelessWidget {
                 const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
                 const SizedBox(width: 6),
                 Text(
-                  linkCount == '2 Link'
-                      ? (isKhmer ? '2 តំណភ្ជាប់' : '2 Link')
-                      : linkCount,
+                  linkCount == '2 Link' ? l10n.text('twoLinks') : linkCount,
                   style: const TextStyle(
                     color: Color(0xFF4C5563),
                     fontSize: 11,
@@ -448,7 +454,7 @@ class _PlenaryCard extends StatelessWidget {
           _ReportRow(label: l10n.text('meetingDate'), value: meetingDate),
           const SizedBox(height: 8),
           _ReportRow(
-            label: l10n.text('rgcDecision'),
+            label: l10n.text('numberOfRgcDecision'),
             value: numberOfRgcDecision,
           ),
           const SizedBox(height: 8),
@@ -1824,9 +1830,27 @@ class _ReportTabs extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final tabs = [
       (icon: Icons.calendar_month_outlined, label: l10n.text('progressReport')),
-      (icon: Icons.add_box_outlined, label: l10n.text('dashboard')),
-      (icon: Icons.calendar_month_outlined, label: l10n.text('plenary')),
-      (icon: Icons.assignment_outlined, label: l10n.text('rgcDecision')),
+      (
+        icon: Icons.add_box_outlined,
+        label: l10n.api(
+          'plenary_dashboard.title',
+          fallback: l10n.text('dashboard'),
+        ),
+      ),
+      (
+        icon: Icons.calendar_month_outlined,
+        label: l10n.api(
+          'plenary_plenaries.title',
+          fallback: l10n.text('plenary'),
+        ),
+      ),
+      (
+        icon: Icons.assignment_outlined,
+        label: l10n.api(
+          'plenary_rgc_decisions.title',
+          fallback: l10n.text('rgcDecision'),
+        ),
+      ),
     ];
 
     return Container(
@@ -1898,6 +1922,7 @@ class LineMinistryDashboardFilterSheet extends StatelessWidget {
   const LineMinistryDashboardFilterSheet({super.key});
   @override
   Widget build(BuildContext context) => ApiFilterSheet(
+    translationPage: 'dashboard_plenary',
     initial: FilterSelection(),
     load: () => AppSettings.of(context).filters.dashboard('plenary'),
   );

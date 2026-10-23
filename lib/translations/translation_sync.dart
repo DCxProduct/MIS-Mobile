@@ -3,10 +3,9 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../core/app_settings.dart';
-import '../core/config/module_config.dart';
 
 /// Uses the available dictionary endpoint to refresh labels while an
-/// authenticated PSWG user is viewing the app, including on resume.
+/// authenticated user of a supported module is viewing the app, including on resume.
 class TranslationSync extends StatefulWidget {
   const TranslationSync({
     super.key,
@@ -30,7 +29,7 @@ class _TranslationSyncState extends State<TranslationSync>
   bool get _shouldSync =>
       _foreground &&
       widget.controller.currentUser != null &&
-      widget.controller.moduleType == AppModuleType.privateSector;
+      widget.controller.translationModule != null;
 
   @override
   void initState() {

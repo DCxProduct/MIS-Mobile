@@ -53,16 +53,20 @@ class AppSettingsController extends ChangeNotifier {
   NotificationsRepository get notifications => _repositories.notifications;
   AuthUser? currentUser;
 
-  final _translationCache = <AppLanguage, Map<String, String>>{};
+  final _translationCache = <(String, AppLanguage), Map<String, String>>{};
   Future<void>? _translationRequest;
   int _translationGeneration = 0;
   bool _disposed = false;
   Object? translationError;
 
+  String? get translationModule => switch (moduleType) {
+    AppModuleType.privateSector => 'pswg',
+    AppModuleType.lineMinistry => 'ministry',
+    _ => null,
+  };
+
   Map<String, String> get translations =>
-      moduleType == AppModuleType.privateSector
-      ? _translationCache[language] ?? const {}
-      : const {};
+      _translationCache[(translationModule, language)] ?? const {};
 
   void _invalidateTranslationRequest({bool clearCache = false}) {
     _translationGeneration++;
@@ -74,12 +78,13 @@ class AppSettingsController extends ChangeNotifier {
   /// Failed/missing translations retain the bundled labels. Call with refresh
   /// to retry a failed request or pick up edits made on the web application.
   Future<void> loadTranslations({bool refresh = false}) {
-    if (_disposed || moduleType != AppModuleType.privateSector) {
+    final module = translationModule;
+    if (_disposed || module == null) {
       return Future.value();
     }
     // Polling, resume and language changes must not stack identical requests.
     if (_translationRequest != null) return _translationRequest!;
-    if (!refresh && _translationCache.containsKey(language)) {
+    if (!refresh && _translationCache.containsKey((module, language))) {
       return Future.value();
     }
     final generation = ++_translationGeneration;
@@ -87,23 +92,29 @@ class AppSettingsController extends ChangeNotifier {
     return _translationRequest = _fetchTranslations(
       generation,
       requestedLanguage,
+      module,
     );
   }
 
   Future<void> _fetchTranslations(
     int generation,
     AppLanguage requestedLanguage,
+    String requestedModule,
   ) async {
     var changed = false;
     try {
       final dictionary = await _repositories.translations.dictionary(
         requestedLanguage,
+        module: requestedModule,
       );
       if (_disposed || generation != _translationGeneration) return;
       changed =
-          !mapEquals(_translationCache[requestedLanguage], dictionary) ||
+          !mapEquals(
+            _translationCache[(requestedModule, requestedLanguage)],
+            dictionary,
+          ) ||
           translationError != null;
-      _translationCache[requestedLanguage] = dictionary;
+      _translationCache[(requestedModule, requestedLanguage)] = dictionary;
       translationError = null;
     } on Exception catch (error) {
       if (_disposed || generation != _translationGeneration) return;

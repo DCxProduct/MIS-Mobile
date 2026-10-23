@@ -13,6 +13,7 @@ import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/line_ministry/reports/ministry_rgc_decision_sheet.dart';
 import 'package:gpsf_app/features/shared/meetings/data/rgc_decision.dart';
 import 'package:gpsf_app/translations/app_language.dart';
+import 'package:gpsf_app/translations/app_localizations.dart';
 
 void main() {
   final fixture =
@@ -107,7 +108,10 @@ void main() {
         expect(find.text('MAFF'), findsOneWidget);
         expect(find.text('Communication'), findsOneWidget);
         expect(find.text('Oct 3, 2026'), findsOneWidget);
-        expect(find.text('• Not Addressed'), findsOneWidget);
+        expect(
+          find.text('• ${AppLocalizations(language).status('Not Addressed')}'),
+          findsOneWidget,
+        );
         expect(find.text('H.E. Mr. DITH TINA'), findsOneWidget);
         expect(find.text('Milestone 2'), findsWidgets);
         expect(find.text('General'), findsNothing);

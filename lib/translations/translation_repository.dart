@@ -6,11 +6,14 @@ class TranslationRepository {
   TranslationRepository(this._api);
   final ApiClient _api;
 
-  Future<Map<String, String>> dictionary(AppLanguage language) async {
+  Future<Map<String, String>> dictionary(
+    AppLanguage language, {
+    String module = 'pswg',
+  }) async {
     final code = language == AppLanguage.khmer ? 'km' : 'en';
     final response = await _api.get(
       'translations/dictionary',
-      query: {'language': code, 'module': 'pswg'},
+      query: {'language': code, 'module': module},
       headers: const {
         'Cache-Control': 'no-cache, no-store',
         'Pragma': 'no-cache',
@@ -22,9 +25,9 @@ class TranslationRepository {
     if (response['success'] != true ||
         data is! Map<String, dynamic> ||
         data['language'] != code ||
-        data['module'] != 'pswg' ||
+        data['module'] != module ||
         data['translations'] is! Map<String, dynamic>) {
-      throw const FormatException('Invalid PSWG translation dictionary');
+      throw const FormatException('Invalid translation dictionary');
     }
     final translations = data['translations'] as Map<String, dynamic>;
     if (translations.values.any((value) => value is! String)) {

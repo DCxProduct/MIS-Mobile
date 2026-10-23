@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_settings.dart';
+import '../core/config/module_config.dart';
 import 'app_language.dart';
 import 'en.dart';
 import 'km.dart';
 import 'pswg_translation_keys.dart';
+import 'ministry_translation_keys.dart';
 
 /// Carries the web page's translation namespace through shared widgets.
 class TranslationPageScope extends InheritedWidget {
@@ -29,11 +31,14 @@ class AppLocalizations {
     this.language, {
     this.dictionary = const {},
     this.page,
+    this.module = AppModuleType.privateSector,
   });
 
   final AppLanguage language;
   final Map<String, String> dictionary;
   final String? page;
+  final AppModuleType module;
+  bool get _isMinistry => module == AppModuleType.lineMinistry;
 
   static AppLocalizations of(BuildContext context, {String? page}) {
     final settings = AppSettings.of(context);
@@ -41,20 +46,37 @@ class AppLocalizations {
       settings.language,
       dictionary: settings.translations,
       page: page ?? TranslationPageScope.maybeOf(context),
+      module: settings.moduleType,
     );
   }
 
   String api(String key, {required String fallback}) {
-    final value = dictionary[key];
+    final value = dictionary[_isMinistry ? ministryApiKey(key, page) : key];
     return value == null || value.trim().isEmpty ? fallback : value;
   }
 
-  String filterLabel(String key) =>
-      api(pswgFilterKeys[page]?[key] ?? '', fallback: text(key));
+  String filterLabel(String key) => api(
+    (_isMinistry ? ministryFilterKeys : pswgFilterKeys)[page]?[key] ?? '',
+    fallback: text(key),
+  );
 
   String? _apiStatus(String code) {
     final normalized = code.toLowerCase();
     final token = normalized == 'drafted' ? 'draft' : normalized;
+    if (_isMinistry) {
+      final keys = switch (page) {
+        'plenary_plenaries' ||
+        'plenary_rgc_decisions' => ['$page.rgc.$token', '$page.core.$token'],
+        'meeting_summary' => ['meeting_summary.status_labels.$token'],
+        'meeting_calendar' => ['meeting_calendar.status_labels.$token'],
+        'wg_issues' => ['issue_matrix.value_labels.$token'],
+        _ => <String>[],
+      };
+      for (final key in keys) {
+        final value = dictionary[key];
+        if (value != null && value.trim().isNotEmpty) return value;
+      }
+    }
     final candidates = switch (page) {
       'meeting_calendar' => ['meeting_requests.calendar_statuses.$token'],
       'meeting_requests' => [
@@ -70,12 +92,14 @@ class AppLocalizations {
         'progress_report.values.${token == 're_reviewing' ? 're-reviewing' : token.replaceAll('_', ' ')}',
       ],
       'wg_issues' => ['wg_issues.status.$token'],
-      'issue_matrix' || 'issue_report' => ['issue_matrix.value_labels.$token'],
+      'issue_matrix' ||
+      'issue_matrix_detail' ||
+      'issue_report' => ['issue_matrix.value_labels.$token'],
       'dashboard_plenary' || 'dashboard_working_group' => ['$page.$token'],
       _ => <String>[],
     };
     for (final key in candidates) {
-      final value = dictionary[key];
+      final value = dictionary[_isMinistry ? ministryApiKey(key, page) : key];
       if (value != null && value.trim().isNotEmpty) return value;
     }
     return null;
@@ -158,10 +182,16 @@ class AppLocalizations {
   }
 
   String? remoteText(String key) {
+    final pages = _isMinistry ? ministryPageKeys : pswgPageKeys;
+    final common = _isMinistry ? ministryCommonKeys : pswgCommonKeys;
+    final parent = (_isMinistry ? ministryPageParents : pswgPageParents)[page];
+    final inheritedKey = pages[parent]?[key];
     final apiKey =
-        pswgPageKeys[page]?[key] ??
-        pswgPageKeys[pswgPageParents[page]]?[key] ??
-        pswgCommonKeys[key];
+        pages[page]?[key] ??
+        (_isMinistry && inheritedKey != null
+            ? ministryApiKey(inheritedKey, page)
+            : inheritedKey) ??
+        common[key];
     final remote = dictionary[apiKey ?? key];
     return remote != null && remote.trim().isNotEmpty ? remote : null;
   }

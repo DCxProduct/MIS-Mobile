@@ -138,6 +138,16 @@ class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (AppSettings.of(context).moduleType != AppModuleType.lineMinistry) {
+      return _buildContent(context);
+    }
+    return TranslationPageScope(
+      page: 'plenary_rgc_decisions',
+      child: Builder(builder: _buildContent),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: cdcReportBackground(context),

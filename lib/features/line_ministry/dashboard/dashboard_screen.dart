@@ -33,6 +33,7 @@ class _LineMinistryDashboardScreenState
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
+          translationPage: 'dashboard_working_group',
           initial: _filters,
           load: () => catalogs.dashboard(
             'pswg',
@@ -84,7 +85,7 @@ class _LineMinistryDashboardScreenState
                     Row(
                       children: [
                         Text(
-                          l10n.text('plenary'),
+                          l10n.text('dashboard'),
                           style: TextStyle(
                             color: colors.onSurface,
                             fontSize: 18,
@@ -430,7 +431,7 @@ class _DashboardTabs extends StatelessWidget {
     ];
 
     return Container(
-      height: 38,
+      constraints: const BoxConstraints(minHeight: 44),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : Colors.white,
@@ -439,31 +440,52 @@ class _DashboardTabs extends StatelessWidget {
           color: isDark ? AppColors.darkBorder : const Color(0xFFE8EBF0),
         ),
       ),
-      child: Row(
-        children: List.generate(
-          tabs.length,
-          (index) => Expanded(
-            child: InkWell(
-              onTap: () => onSelected(index),
-              borderRadius: BorderRadius.circular(6),
-              child: Container(
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: selectedIndex == index
-                      ? AppColors.accent(context)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  tabs[index],
-                  style: TextStyle(
-                    color: selectedIndex == index
-                        ? Colors.white
-                        : AppColors.mutedText,
-                    fontSize: 12,
-                    fontWeight: selectedIndex == index
-                        ? FontWeight.w700
-                        : FontWeight.w500,
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: constraints.maxWidth),
+            child: IntrinsicHeight(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: List.generate(
+                  tabs.length,
+                  (index) => InkWell(
+                    onTap: () => onSelected(index),
+                    borderRadius: BorderRadius.circular(6),
+                    child: Container(
+                      constraints: const BoxConstraints(
+                        minWidth: 64,
+                        minHeight: 36,
+                      ),
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: selectedIndex == index
+                            ? AppColors.accent(context)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        tabs[index],
+                        maxLines: 1,
+                        softWrap: false,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: selectedIndex == index
+                              ? Colors.white
+                              : AppColors.mutedText,
+                          fontSize: 12,
+                          fontWeight: selectedIndex == index
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),

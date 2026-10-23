@@ -73,6 +73,7 @@ class _LineMinistryIssuesScreenViewState
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
+          translationPage: 'issue_matrix',
           initial: _apiSelections[tab],
           load: () => widget.cdcMatrix
               ? catalogs.cdcIssues()
@@ -123,7 +124,12 @@ class _LineMinistryIssuesScreenViewState
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: 'issue_matrix',
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final contentBackground = isDark

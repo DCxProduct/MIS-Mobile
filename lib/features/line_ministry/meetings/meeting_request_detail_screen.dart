@@ -8,10 +8,15 @@ class LineMinistryMeetingRequestDetailScreen extends StatelessWidget {
   const LineMinistryMeetingRequestDetailScreen({
     super.key,
     required this.request,
+    this.translationPage = 'meeting_requests',
   });
   final MeetingRequest request;
+  final String translationPage;
 
   @override
-  Widget build(BuildContext context) =>
-      MeetingRequestDetailScreen(title: request.title, request: request);
+  Widget build(BuildContext context) => MeetingRequestDetailScreen(
+    title: request.title,
+    request: request,
+    translationPage: translationPage,
+  );
 }

@@ -28,6 +28,11 @@ class LineMinistryMeetingScreenView extends StatefulWidget {
 class _LineMinistryMeetingScreenViewState
     extends State<LineMinistryMeetingScreenView> {
   int _selectedTab = 0;
+  static const _translationPages = [
+    'meeting_requests',
+    'meeting_calendar',
+    'meeting_summary',
+  ];
   bool _isCalendarListView = true;
   final _filters = [FilterSelection(), FilterSelection(), FilterSelection()];
   Future<void> _openMeetingFilterSheet(BuildContext context) async {
@@ -37,6 +42,7 @@ class _LineMinistryMeetingScreenViewState
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
+          translationPage: _translationPages[tab],
           initial: _filters[tab],
           load: switch (tab) {
             0 => () => catalogs.meetingRequests(ministry: true),
@@ -54,7 +60,12 @@ class _LineMinistryMeetingScreenViewState
   int get _activeFilterCount => _filters[_selectedTab].count;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: _translationPages[_selectedTab],
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final contentBackground = isDark
