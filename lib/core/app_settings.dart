@@ -62,6 +62,7 @@ class AppSettingsController extends ChangeNotifier {
   String? get translationModule => switch (moduleType) {
     AppModuleType.privateSector => 'pswg',
     AppModuleType.lineMinistry => 'ministry',
+    AppModuleType.cdcSecretariat => 'cdcgpsf',
     _ => null,
   };
 

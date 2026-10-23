@@ -1,6 +1,8 @@
 import '../../core/widgets/editor_content.dart';
 import '../../features/shared/issues/widgets/issue_agency_logo.dart';
 import '../../core/app_settings.dart';
+import '../../core/config/module_config.dart';
+import 'rgc_decision_detail_screen.dart';
 import '../../features/shared/meetings/data/plenary.dart';
 import '../../features/shared/meetings/data/rgc_decision.dart';
 import '../../features/shared/issues/widgets/issue_display.dart';
@@ -318,6 +320,14 @@ class _PlenaryIssueItemCard extends StatelessWidget {
   final String status;
 
   void _openRgcDecisionBottomSheet(BuildContext context) {
+    if (AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat) {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => RgcDecisionDetailScreen(decisionId: decision.id),
+        ),
+      );
+      return;
+    }
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,

@@ -5,13 +5,14 @@ import '../../shared/issues/data/working_group_issue.dart';
 import '../../shared/issues/widgets/wg_issues_list.dart';
 import '../../shared/issues/widgets/issue_display.dart';
 import '../../shared/issues/data/wg_issue_summary.dart';
-import '../../shared/issues/widgets/wg_issue_summary_loader.dart';
 import '../../shared/meetings/data/rgc_decision.dart';
+import '../../shared/issues/widgets/wg_issue_summary_loader.dart';
+
 import '../../shared/meetings/widgets/rgc_decisions_loader.dart';
 import 'package:flutter/material.dart';
 import '../../../core/app_colors.dart';
 import '../../../translations/app_localizations.dart';
-import '../../../screens/report/rgc_decision_detail_screen.dart';
+import '../reports/rgc_decision_card.dart';
 import '../../private_sector/issues/issue_detail_screen.dart';
 
 class CdcSecretariatIssuesScreenView extends StatefulWidget {
@@ -31,6 +32,7 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
+          translationPage: tab == 0 ? 'cdc_rgc' : 'issue_matrix',
           initial: _filters[tab],
           load: tab == 0
               ? () => catalogs.rgc(cdcGpsf: true)
@@ -43,7 +45,12 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: _tab == 0 ? 'cdc_rgc' : 'issue_matrix',
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return ApiFilterScope(
       selections: {'rgc-decisions': _filters[0]},
@@ -127,10 +134,11 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
                   const SizedBox(height: 16),
                   if (_tab == 0) ...[
                     RgcDecisionsLoader(
+                      includePlenaryDetails: false,
                       builder: (decisions) => Column(
                         children: [
                           for (final decision in decisions)
-                            _DecisionCard(decision: decision),
+                            CdcGpsfRgcDecisionCard(decision: decision),
                         ],
                       ),
                     ),
@@ -152,154 +160,6 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
   }
 }
 
-class _DecisionCard extends StatelessWidget {
-  const _DecisionCard({required this.decision});
-
-  final RgcDecision decision;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    void openDetails() => Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
-        builder: (_) =>
-            RgcDecisionDetailScreen(agencyName: decision.agencyName),
-      ),
-    );
-    final status = switch (decision.statusCode.toUpperCase()) {
-      'SOLVED' => _IssueCardStatus.solved,
-      'IN_PROGRESS' => _IssueCardStatus.inProgress,
-      _ => _IssueCardStatus.notAddressed,
-    };
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground(context),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border(context)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 22,
-                height: 22,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.primary),
-                ),
-                child: const Icon(
-                  Icons.account_balance_outlined,
-                  size: 15,
-                  color: AppColors.primary,
-                ),
-              ),
-              const SizedBox(width: 7),
-              Expanded(
-                child: Text(
-                  decision.agencyName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 13),
-                ),
-              ),
-              _IssueStatusBadge(status: status),
-            ],
-          ),
-          const SizedBox(height: 12),
-          _row(
-            context,
-            l10n.text('meetingDate'),
-            _formatDate(decision.meetingDate),
-          ),
-          _row(context, l10n.text('categories'), decision.category),
-          _row(context, l10n.text('focalPersonHE'), decision.focalPerson),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.border(context)),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.link, size: 14),
-                  const SizedBox(width: 5),
-                  Text(
-                    '${decision.linkCount} ${l10n.text('linksLabel')}',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            height: 44,
-            child: TextButton(
-              onPressed: openDetails,
-              style: TextButton.styleFrom(
-                backgroundColor: AppColors.isDark(context)
-                    ? AppColors.darkPrimaryContainer
-                    : const Color(0xFFECF8FE),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(7),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    l10n.text('viewDetails'),
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.chevron_right, size: 19),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _row(BuildContext context, String label, String value) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Row(
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(
-              color: AppColors.secondaryText(context),
-              fontSize: 13,
-            ),
-          ),
-        ),
-        Flexible(
-          child: Text(
-            value,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 13),
-          ),
-        ),
-      ],
-    ),
-  );
-
-  String _formatDate(DateTime? date) {
-    if (date == null) return '—';
-    return '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}/${date.year}';
-  }
-}
-
 class _IssueTabs extends StatelessWidget {
   const _IssueTabs({required this.selectedIndex, required this.onSelected});
 
@@ -310,7 +170,13 @@ class _IssueTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final tabs = [l10n.text('rgcDecision'), l10n.text('issuesMatrix')];
+    final tabs = [
+      l10n.api(
+        'issue_matrix_rgc_decision.rgc.page.title',
+        fallback: l10n.text('rgcDecision'),
+      ),
+      l10n.api('issue_matrix.title', fallback: l10n.text('issuesMatrix')),
+    ];
 
     return Container(
       height: 38,
@@ -541,6 +407,7 @@ class _IssueCard extends StatelessWidget {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (_) => IssueDetailScreen(
+              translationPage: 'issue_matrix',
               title: issue.title,
               category: issue.category,
               issue: issue,
@@ -758,19 +625,19 @@ class _IssueStatusBadge extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final config = switch (status) {
       _IssueCardStatus.solved => (
-        label: l10n.text('solved'),
+        label: l10n.status('SOLVED'),
         color: isDark ? const Color(0xFF86EFAC) : const Color(0xFF16A34A),
         background: isDark ? const Color(0xFF123B2A) : const Color(0xFFEAFBF0),
         border: isDark ? const Color(0xFF166534) : const Color(0xFF6EE7A0),
       ),
       _IssueCardStatus.inProgress => (
-        label: l10n.text('inProgress'),
+        label: l10n.status('IN_PROGRESS'),
         color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFFF8A00),
         background: isDark ? const Color(0xFF423415) : const Color(0xFFFFF6E8),
         border: isDark ? const Color(0xFF92400E) : const Color(0xFFFFC166),
       ),
       _IssueCardStatus.notAddressed => (
-        label: l10n.text('notAddressed'),
+        label: l10n.status('NOT_ADDRESSED'),
         color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF6B7280),
         background: isDark ? const Color(0xFF222835) : const Color(0xFFF3F4F6),
         border: isDark ? const Color(0xFF4B5563) : const Color(0xFFD1D5DB),

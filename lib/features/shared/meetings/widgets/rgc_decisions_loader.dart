@@ -57,9 +57,14 @@ class _RgcDecisionScorecardLoaderState
 }
 
 class RgcDecisionsLoader extends StatefulWidget {
-  const RgcDecisionsLoader({super.key, required this.builder});
+  const RgcDecisionsLoader({
+    super.key,
+    required this.builder,
+    this.includePlenaryDetails = true,
+  });
 
   final Widget Function(List<RgcDecision>) builder;
+  final bool includePlenaryDetails;
 
   @override
   State<RgcDecisionsLoader> createState() => _RgcDecisionsLoaderState();
@@ -81,7 +86,7 @@ class _RgcDecisionsLoaderState extends State<RgcDecisionsLoader> {
       );
     }
     return settings.rgcDecisions.getDecisions(
-      includePlenaryDetails: true,
+      includePlenaryDetails: widget.includePlenaryDetails,
       filters: _query ?? const {},
       cdcGpsf: settings.moduleType == AppModuleType.cdcSecretariat,
     );

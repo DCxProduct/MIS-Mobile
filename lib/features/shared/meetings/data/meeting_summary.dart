@@ -11,12 +11,20 @@ class MeetingSummary {
           : DateTime.parse(json['meetingDate'] as String),
       issueCount = json['issueCount'] as int? ?? 0,
       meetingRequestCount = json['meetingRequestCount'] as int? ?? 0,
-      governmentAgency = json['governmentAgency'] as String? ?? '',
+      governmentAgency =
+          _string(json['governmentAgency']) ??
+          _string(_object(json['meetingRequest'])['governmentAgency']) ??
+          '',
       agencyLogo =
           _string(json['governmentAgencyLogo']) ??
           _string(_object(json['meetingRequest'])['governmentAgencyLogo']) ??
           '',
-      pswg = json['pswg'] as String? ?? '',
+      pswg =
+          _string(json['pswg']) ??
+          _string(_object(json['meetingRequest'])['pswg']) ??
+          '',
+      requestedDate = _date(_object(json['meetingRequest'])['requestedDate']),
+      sentBy = _string(_object(_object(json['meeting'])['user'])['name']) ?? '',
       status = json['status'] as String? ?? '',
       meetingPswg = json['meetingPswg'] as String? ?? '',
       attachmentPaths = _attachmentPaths(json),
@@ -39,6 +47,10 @@ class MeetingSummary {
       meetingDocumentPath = _path(
         _object(json['meeting'])['documentReference'],
       ),
+      summaryDocumentPath = _path(json['documentReference']),
+      summaryDocumentName = documentOriginalName(json['documentReference']),
+      summaryDocumentSize = (_object(json['documentReference'])['size'] as num?)
+          ?.toInt(),
       requestDocumentPath = _path(
         _object(json['meetingRequest'])['meetingRequestLetter'],
       ),
@@ -64,8 +76,13 @@ class MeetingSummary {
   final int issueCount, meetingRequestCount, attachmentCount;
   final List<String> attachmentPaths;
   final String detailTitle, location, startTime;
+  final DateTime? requestedDate;
+  final String sentBy;
   final DateTime? detailDate;
   final String? meetingDocumentPath, requestDocumentPath;
+  final String? summaryDocumentPath;
+  final String summaryDocumentName;
+  final int? summaryDocumentSize;
   final String? meetingDocumentName, requestDocumentName;
   final Map<String, String> attachmentNames;
   final List<MeetingSummaryIssue> issues;
@@ -85,6 +102,7 @@ class MeetingSummary {
   static Map<String, String> _attachmentNames(Map<String, dynamic> json) {
     final names = <String, String>{};
     for (final document in [
+      json['documentReference'],
       json['meetingRequest'],
       json['meetingSummary'],
       _object(json['meeting'])['documentReference'],
@@ -181,6 +199,15 @@ class MeetingSummaryIssue {
           ]) ??
           summaryMeetingDate,
       governmentAgencies: agencies,
+      agencyLogos: _agencyLogos(
+        source['agencies'] is List && (source['agencies'] as List).isNotEmpty
+            ? source['agencies']
+            : source['governmentAgencies'],
+      ),
+      escalation: _firstText([source['escalation']]),
+      rgcDecisionHtml: _firstText([source['rgcDecision']]),
+      nextStepHtml: _firstText([source['nextStep']]),
+      remarkHtml: _firstText([source['remark']]),
       attachmentPath: _path(attachment),
       referencePath: _path(reference),
       attachmentName: documentOriginalName(attachment),
@@ -197,6 +224,11 @@ class MeetingSummaryIssue {
     required this.submittedBy,
     required this.submittedDate,
     required this.governmentAgencies,
+    required this.agencyLogos,
+    required this.escalation,
+    required this.rgcDecisionHtml,
+    required this.nextStepHtml,
+    required this.remarkHtml,
     required this.attachmentPath,
     required this.referencePath,
     required this.attachmentName,
@@ -209,6 +241,8 @@ class MeetingSummaryIssue {
   String get recommendation => htmlToPlainText(recommendationHtml);
   final DateTime? submittedDate;
   final Map<int, String> governmentAgencies;
+  final Map<int, String> agencyLogos;
+  final String escalation, rgcDecisionHtml, nextStepHtml, remarkHtml;
   String get agency => governmentAgencies[1] ?? '';
   final String? attachmentPath, referencePath;
   final String? attachmentName, referenceName;
@@ -258,5 +292,22 @@ class MeetingSummaryIssue {
       }
     }
     return Map.unmodifiable(agencies);
+  }
+
+  static Map<int, String> _agencyLogos(Object? value) {
+    if (value is! List) return const {};
+    final logos = <int, String>{};
+    for (var index = 0; index < value.length; index++) {
+      final entry = _object(value[index]);
+      final order = entry['order'] ?? entry['agencyOrder'];
+      final logo = _firstText([
+        entry['logo'],
+        _object(entry['stakeholder'])['logo'],
+      ]);
+      if (logo.isNotEmpty) {
+        logos[order is int && order > 0 ? order : index + 1] = logo;
+      }
+    }
+    return Map.unmodifiable(logos);
   }
 }

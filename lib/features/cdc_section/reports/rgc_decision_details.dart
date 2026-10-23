@@ -138,11 +138,15 @@ class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (AppSettings.of(context).moduleType != AppModuleType.lineMinistry) {
+    final module = AppSettings.of(context).moduleType;
+    if (module != AppModuleType.lineMinistry &&
+        module != AppModuleType.cdcSecretariat) {
       return _buildContent(context);
     }
     return TranslationPageScope(
-      page: 'plenary_rgc_decisions',
+      page: module == AppModuleType.cdcSecretariat
+          ? 'cdc_rgc_detail'
+          : 'plenary_rgc_decisions',
       child: Builder(builder: _buildContent),
     );
   }
@@ -428,7 +432,17 @@ class CdcRgcDecisionIssueScreen extends StatelessWidget {
   final RgcDecisionIssue issue;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    if (AppSettings.of(context).moduleType != AppModuleType.cdcSecretariat) {
+      return _buildContent(context);
+    }
+    return TranslationPageScope(
+      page: 'cdc_rgc_detail',
+      child: Builder(builder: _buildContent),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) => Scaffold(
     backgroundColor: cdcReportBackground(context),
     appBar: _appBar(context),
     body: CdcRgcDecisionIssueDetails(detail: detail, issue: issue),

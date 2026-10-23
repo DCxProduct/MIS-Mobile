@@ -7,6 +7,7 @@ import 'en.dart';
 import 'km.dart';
 import 'pswg_translation_keys.dart';
 import 'ministry_translation_keys.dart';
+import 'cdcgpsf_translation_keys.dart';
 
 /// Carries the web page's translation namespace through shared widgets.
 class TranslationPageScope extends InheritedWidget {
@@ -39,6 +40,23 @@ class AppLocalizations {
   final String? page;
   final AppModuleType module;
   bool get _isMinistry => module == AppModuleType.lineMinistry;
+  bool get _isCdcGpsf => module == AppModuleType.cdcSecretariat;
+  bool get _usesSharedWebKeys => _isMinistry || _isCdcGpsf;
+  Map<String, Map<String, String>> get _pageKeys => _isCdcGpsf
+      ? cdcGpsfPageKeys
+      : _isMinistry
+      ? ministryPageKeys
+      : pswgPageKeys;
+  Map<String, String> get _commonKeys => _isCdcGpsf
+      ? cdcGpsfCommonKeys
+      : _isMinistry
+      ? ministryCommonKeys
+      : pswgCommonKeys;
+  Map<String, String> get _pageParents => _isCdcGpsf
+      ? cdcGpsfPageParents
+      : _isMinistry
+      ? ministryPageParents
+      : pswgPageParents;
 
   static AppLocalizations of(BuildContext context, {String? page}) {
     final settings = AppSettings.of(context);
@@ -51,19 +69,36 @@ class AppLocalizations {
   }
 
   String api(String key, {required String fallback}) {
-    final value = dictionary[_isMinistry ? ministryApiKey(key, page) : key];
+    final value =
+        dictionary[_usesSharedWebKeys ? ministryApiKey(key, page) : key];
     return value == null || value.trim().isEmpty ? fallback : value;
   }
 
   String filterLabel(String key) => api(
-    (_isMinistry ? ministryFilterKeys : pswgFilterKeys)[page]?[key] ?? '',
+    (_isCdcGpsf
+            ? cdcGpsfFilterKeys
+            : _isMinistry
+            ? ministryFilterKeys
+            : pswgFilterKeys)[page]?[key] ??
+        '',
     fallback: text(key),
   );
 
   String? _apiStatus(String code) {
     final normalized = code.toLowerCase();
     final token = normalized == 'drafted' ? 'draft' : normalized;
-    if (_isMinistry) {
+    if (_isCdcGpsf) {
+      final statusKey = switch (page) {
+        'cdc_rgc' || 'cdc_rgc_detail' || 'plenary_rgc_decisions' =>
+          'issue_matrix_rgc_decision.rgc.status.$token',
+        'cdc_progress_ministries' =>
+          'progress_reports.values.${token.replaceAll('_', ' ')}',
+        _ => null,
+      };
+      final value = dictionary[statusKey];
+      if (value != null && value.trim().isNotEmpty) return value;
+    }
+    if (_usesSharedWebKeys) {
       final keys = switch (page) {
         'plenary_plenaries' ||
         'plenary_rgc_decisions' => ['$page.rgc.$token', '$page.core.$token'],
@@ -99,7 +134,8 @@ class AppLocalizations {
       _ => <String>[],
     };
     for (final key in candidates) {
-      final value = dictionary[_isMinistry ? ministryApiKey(key, page) : key];
+      final value =
+          dictionary[_usesSharedWebKeys ? ministryApiKey(key, page) : key];
       if (value != null && value.trim().isNotEmpty) return value;
     }
     return null;
@@ -182,13 +218,13 @@ class AppLocalizations {
   }
 
   String? remoteText(String key) {
-    final pages = _isMinistry ? ministryPageKeys : pswgPageKeys;
-    final common = _isMinistry ? ministryCommonKeys : pswgCommonKeys;
-    final parent = (_isMinistry ? ministryPageParents : pswgPageParents)[page];
+    final pages = _pageKeys;
+    final common = _commonKeys;
+    final parent = _pageParents[page];
     final inheritedKey = pages[parent]?[key];
     final apiKey =
         pages[page]?[key] ??
-        (_isMinistry && inheritedKey != null
+        (_usesSharedWebKeys && inheritedKey != null
             ? ministryApiKey(inheritedKey, page)
             : inheritedKey) ??
         common[key];

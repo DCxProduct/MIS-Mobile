@@ -54,13 +54,14 @@ class RgcDecisionsRepository {
   Future<RgcDecisionDetail> getDecision(
     int id, {
     bool includePlenaryDetails = false,
+    bool includeDeadline = true,
   }) async {
     if (id <= 0) throw ArgumentError.value(id, 'id', 'Must be positive');
     final data = await _api.get('rgc-decisions/$id');
     try {
       final detail = RgcDecisionDetail.fromJson(data);
       if (detail.decision.id != id) throw const FormatException();
-      if (detail.deadline != null &&
+      if ((detail.deadline != null || !includeDeadline) &&
           (!includePlenaryDetails ||
               (detail.decision.plenaryStatus.isNotEmpty &&
                   detail.decision.plenaryMeetingDate != null))) {
@@ -93,6 +94,7 @@ class RgcDecisionsRepository {
   }) async {
     final items = await _api.getAllPages(
       cdcGpsf ? 'rgc-decisions/cdc-gpsf' : 'rgc-decisions',
+      limit: cdcGpsf ? 10 : 100,
       query: filters,
       objectItems: true,
       headers: headers,

@@ -86,7 +86,12 @@ class _MinistriesState extends State<CdcProgressReportMinistriesScreen>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: 'cdc_progress_ministries',
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     _future ??= _load();
     return Scaffold(

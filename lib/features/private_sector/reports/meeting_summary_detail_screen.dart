@@ -1,9 +1,12 @@
 import '../../shared/issues/widgets/issue_display.dart';
+import '../../shared/issues/widgets/issue_agency_logo.dart';
 import '../../../core/widgets/editor_content.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_colors.dart';
 import '../../../../core/app_settings.dart';
+import '../../../../core/config/module_config.dart';
+import '../../cdc_secretariat/meetings/summary_issue_details.dart';
 import '../../../../core/widgets/pdf_attachment_preview.dart';
 import '../../shared/meetings/data/meeting_summary.dart';
 import '../../../../translations/app_localizations.dart';
@@ -146,52 +149,148 @@ class _MeetingSummaryDetailScreenState
       ),
       body: SafeArea(
         top: false,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 16, 14, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child:
+            AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat
+            ? ListView(
+                padding: const EdgeInsets.fromLTRB(14, 16, 14, 28),
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      color: AppColors.primaryText(context),
+                    style: const TextStyle(
                       fontSize: 15,
                       height: 1.45,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 14),
-                  _SummaryInfoGrid(summary: summary),
-                  const SizedBox(height: 16),
-                  const _AllIssuesTabHeader(),
-                ],
-              ),
-            ),
-            Expanded(
-              child: summary.issues.isEmpty
-                  ? Center(
-                      child: Text(
-                        AppLocalizations.of(
-                          context,
-                          page: 'meeting_summary',
-                        ).text('noIssuesFound'),
-                      ),
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(14, 14, 14, 28),
-                      itemCount: summary.issues.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 14),
-                      itemBuilder: (context, index) => _ClimateIssueCard(
-                        issue: summary.issues[index],
-                        onTap: () =>
-                            _showIssueDetails(context, summary.issues[index]),
+                  const SizedBox(height: 20),
+                  _CdcSummaryInfo(summary: summary),
+                  const SizedBox(height: 20),
+                  if (summary.summaryDocumentPath != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      AppLocalizations.of(
+                        context,
+                      ).text('summaryReferenceDocument'),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-            ),
-          ],
-        ),
+                    const SizedBox(height: 12),
+                    PdfAttachmentPreview(
+                      path: summary.summaryDocumentPath!,
+                      name: summary.summaryDocumentName,
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: AppColors.border(
+                              context,
+                            ).withValues(alpha: 0.45),
+                            width: 0.7,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.picture_as_pdf,
+                              color: Colors.red,
+                              size: 32,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    pdfAttachmentName(
+                                      summary.summaryDocumentPath!,
+                                      name: summary.summaryDocumentName,
+                                    ),
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  if (summary.summaryDocumentSize != null) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${(summary.summaryDocumentSize! / (1024 * 1024)).toStringAsFixed(1)} MB',
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        color: AppColors.mutedText,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  const _AllIssuesTabHeader(),
+                  const SizedBox(height: 14),
+                  if (summary.issues.isEmpty)
+                    Text(AppLocalizations.of(context).text('noIssuesFound')),
+                  for (final issue in summary.issues) ...[
+                    _ClimateIssueCard(
+                      issue: issue,
+                      onTap: () => _showIssueDetails(context, issue),
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+                ],
+              )
+            : Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 16, 14, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            color: AppColors.primaryText(context),
+                            fontSize: 15,
+                            height: 1.45,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        _SummaryInfoGrid(summary: summary),
+                        const SizedBox(height: 16),
+                        const _AllIssuesTabHeader(),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: summary.issues.isEmpty
+                        ? Center(
+                            child: Text(
+                              AppLocalizations.of(
+                                context,
+                                page: 'meeting_summary',
+                              ).text('noIssuesFound'),
+                            ),
+                          )
+                        : ListView.separated(
+                            padding: const EdgeInsets.fromLTRB(14, 14, 14, 28),
+                            itemCount: summary.issues.length,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: 14),
+                            itemBuilder: (context, index) => _ClimateIssueCard(
+                              issue: summary.issues[index],
+                              onTap: () => _showIssueDetails(
+                                context,
+                                summary.issues[index],
+                              ),
+                            ),
+                          ),
+                  ),
+                ],
+              ),
       ),
     );
   }
@@ -204,7 +303,119 @@ class _MeetingSummaryDetailScreenState
       enableDrag: true,
       barrierColor: Colors.black54,
       backgroundColor: Colors.transparent,
-      builder: (context) => _IssueDetailsSheet(issue: issue),
+      builder: (context) =>
+          issue != null &&
+              AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat
+          ? CdcSummaryIssueDetails(issue: issue)
+          : _IssueDetailsSheet(issue: issue),
+    );
+  }
+}
+
+class _CdcSummaryInfo extends StatelessWidget {
+  const _CdcSummaryInfo({required this.summary});
+  final MeetingSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context, page: 'meeting_summary');
+    Widget field(String key, String value) =>
+        _InfoBlock(label: l10n.text(key), value: value.isEmpty ? '—' : value);
+    Widget grid(List<Widget> fields) => LayoutBuilder(
+      builder: (context, constraints) => Wrap(
+        spacing: 18,
+        runSpacing: 18,
+        children: [
+          for (final item in fields)
+            SizedBox(width: (constraints.maxWidth - 18) / 2, child: item),
+        ],
+      ),
+    );
+    Widget heading(String key) => Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Text(
+        l10n.text(key),
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        heading('meetingRequest'),
+        grid([
+          field('workingGroup', summary.pswg),
+          _DocumentBlock(
+            label: l10n.text('meetingRequestDocument'),
+            path: summary.requestDocumentPath,
+            name: summary.requestDocumentName,
+          ),
+          field(
+            'submittedDate',
+            issueDateWithYear(context, summary.requestedDate?.toLocal()),
+          ),
+        ]),
+        const SizedBox(height: 20),
+        Divider(
+          color: AppColors.border(context).withValues(alpha: 0.4),
+          thickness: 0.6,
+        ),
+        const SizedBox(height: 12),
+        heading('meetingInformation'),
+        grid([
+          field(
+            'workingGroup',
+            summary.meetingPswg.isEmpty ? summary.pswg : summary.meetingPswg,
+          ),
+          _DocumentBlock(
+            label: l10n.text('meetingDocument'),
+            path: summary.meetingDocumentPath,
+            name: summary.meetingDocumentName,
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.text('governmentAgency'),
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.mutedText,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  if (summary.governmentAgency.isNotEmpty) ...[
+                    IssueAgencyLogo(
+                      path: summary.agencyLogo,
+                      size: 22,
+                      iconSize: 14,
+                    ),
+                    const SizedBox(width: 6),
+                  ],
+                  Expanded(
+                    child: Text(
+                      summary.governmentAgency.isEmpty
+                          ? '—'
+                          : summary.governmentAgency,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          field('sentBy', summary.sentBy),
+          field(
+            'meetingTime',
+            _SummaryInfoGrid(summary: summary)._meetingTime(context),
+          ),
+          field(
+            'scheduleMeeting',
+            issueDateWithYear(context, summary.detailDate?.toLocal()),
+          ),
+          field('location', summary.location),
+        ]),
+      ],
     );
   }
 }

@@ -1,7 +1,7 @@
 import '../../../screens/report/tabs/report_progress_report_tab.dart';
-import '../../shared/issues/widgets/issue_agency_logo.dart';
+import 'rgc_decision_card.dart';
 import 'progress_report_ministries_screen.dart';
-import '../../shared/meetings/data/rgc_decision.dart';
+
 import '../../../core/app_settings.dart';
 import '../../../core/widgets/filters/api_filter_sheet.dart';
 import '../../../core/widgets/filters/api_filter_scope.dart';
@@ -9,7 +9,6 @@ import '../../shared/meetings/widgets/rgc_decisions_loader.dart';
 import '../../shared/meetings/widgets/plenaries_loader.dart';
 import '../../cdc_section/reports/rgc_decision_details.dart';
 import 'package:flutter/material.dart';
-import '../../../translations/app_language.dart';
 import '../../../core/app_colors.dart';
 import '../../../core/widgets/pdf_attachment_preview.dart';
 import '../../../features/shared/dashboard/data/dashboard_repository.dart';
@@ -29,6 +28,12 @@ class CdcSecretariatReportsScreenView extends StatefulWidget {
 
 class _CdcReportsState extends State<CdcSecretariatReportsScreenView> {
   int _tab = 0;
+  static const _translationPages = [
+    'progress_report',
+    'dashboard_plenary',
+    'plenary_plenaries',
+    'cdc_rgc',
+  ];
   final _filters = List.generate(4, (_) => FilterSelection());
   Future<void> _openFilters() async {
     final tab = _tab;
@@ -37,6 +42,7 @@ class _CdcReportsState extends State<CdcSecretariatReportsScreenView> {
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
+          translationPage: _translationPages[tab],
           initial: _filters[tab],
           load: switch (tab) {
             0 => catalogs.progressReports,
@@ -52,7 +58,12 @@ class _CdcReportsState extends State<CdcSecretariatReportsScreenView> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: _translationPages[_tab],
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return ApiFilterScope(
       selections: {
@@ -159,177 +170,11 @@ class _RgcDecisionTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RgcDecisionsLoader(
+      includePlenaryDetails: false,
       builder: (decisions) => Column(
         children: [
-          for (final decision in RgcDecisionGroup.fromDecisions(decisions))
-            _RgcDecisionCard(
-              decisionIds: decision.decisionIds,
-              plenaryName: decision.plenaryName,
-              agencyName: decision.agencyName,
-              agencyLogo: decision.agencyLogo,
-              status: decision.status,
-              meetingDate: plenaryDate(decision.meetingDate),
-              category: decision.category,
-              focalPerson: decision.focalPerson,
-              linkCount:
-                  '${decision.linkCount} ${AppLocalizations.of(context).text('link')}',
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RgcDecisionCard extends StatelessWidget {
-  const _RgcDecisionCard({
-    required this.decisionIds,
-    required this.plenaryName,
-    required this.agencyName,
-    required this.agencyLogo,
-    required this.status,
-    required this.meetingDate,
-    required this.category,
-    required this.focalPerson,
-    required this.linkCount,
-  });
-
-  final List<int> decisionIds;
-  final String plenaryName;
-  final String agencyName;
-  final String agencyLogo;
-  final String status;
-  final String meetingDate;
-  final String category;
-  final String focalPerson;
-  final String linkCount;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final l10n = AppLocalizations.of(context);
-    final isKhmer = l10n.language == AppLanguage.khmer;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : const Color(0xFFF0F2F5),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  IssueAgencyLogo(
-                    path: agencyLogo,
-                    size: 24,
-                    iconSize: 14,
-                    fallbackColors: const [
-                      Color(0xFF1E73BE),
-                      Color(0xFF1E73BE),
-                    ],
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    agencyName,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-              CdcRgcStatus(status: status),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (plenaryName.isNotEmpty)
-            _ReportRow(label: l10n.text('plenary'), value: plenaryName),
-          _ReportRow(
-            label: l10n.text('numberOfRgcDecision'),
-            value: '${decisionIds.length}',
-          ),
-          _ReportRow(label: l10n.text('meetingDate'), value: meetingDate),
-          const SizedBox(height: 8),
-          _ReportRow(label: l10n.text('categories'), value: category),
-          const SizedBox(height: 8),
-          _ReportRow(
-            label: isKhmer ? 'មន្ត្រីសម្របសម្រួល' : 'Focal Person (H.E)',
-            value: focalPerson,
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkCard : const Color(0xFFFAFAFA),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
-                const SizedBox(width: 6),
-                Text(
-                  linkCount == '2 Link'
-                      ? (isKhmer ? '2 តំណភ្ជាប់' : '2 Link')
-                      : linkCount,
-                  style: const TextStyle(
-                    color: Color(0xFF4C5563),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            height: 36,
-            child: FilledButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => CdcRgcDecisionOverviewScreen(
-                      decisionId: decisionIds.first,
-                      additionalDecisionIds: decisionIds.skip(1).toList(),
-                    ),
-                  ),
-                );
-              },
-              style: FilledButton.styleFrom(
-                backgroundColor: isDark
-                    ? AppColors.accent(context).withValues(alpha: 0.18)
-                    : const Color(0xFFF0F7FF),
-                foregroundColor: AppColors.accent(context),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    l10n.text('viewDetails'),
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                  ),
-                  SizedBox(width: 4),
-                  Icon(Icons.chevron_right, size: 16),
-                ],
-              ),
-            ),
-          ),
+          for (final decision in decisions)
+            CdcGpsfRgcDecisionCard(decision: decision),
         ],
       ),
     );
@@ -1116,13 +961,21 @@ class _ReportTabs extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        l10n.text(
-                          [
-                            'progressReport',
-                            'dashboard',
-                            'plenaries',
-                            'rgcDecision',
+                        l10n.api(
+                          const [
+                            'progress_reports.title',
+                            'plenary_dashboard.title',
+                            'plenary_plenaries.title',
+                            'issue_matrix_rgc_decision.rgc.page.title',
                           ][index],
+                          fallback: l10n.text(
+                            const [
+                              'progressReport',
+                              'dashboard',
+                              'plenaries',
+                              'rgcDecision',
+                            ][index],
+                          ),
                         ),
                         style: TextStyle(
                           fontSize: 14,

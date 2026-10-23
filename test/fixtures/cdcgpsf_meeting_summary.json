@@ -1,0 +1,85 @@
+{
+  "meeting": {
+    "title": "កិច្ចប្រជុំពិភាក្សាអំពីការលើកកម្ពស់ជើងហោះហើរត្រង់មកកម្ពុជា",
+    "meetingDate": "2026-10-19T00:00:00Z",
+    "user": {
+      "id": 20,
+      "name": "MoT"
+    },
+    "startTime": "1970-01-01T13:00:00Z",
+    "documentReference": {
+      "path": "/uploads/meetings/1792378431994-meeting_document_reference.pdf",
+      "name": "meeting_document_reference.pdf",
+      "size": 1947246,
+      "mimeType": "application/pdf"
+    },
+    "location": "សាលប្រជុំក្រសួងទេសចរណ៍ រាជធានីភ្នំពេញ"
+  },
+  "issues": [
+    {
+      "id": 17,
+      "issue": "Problems on direct flights to Cambodia",
+      "numberIssue": "WG02_0001",
+      "category": "Taxation",
+      "issueDescription": "<p style=\"text-align: justify;\">ជើងហោះហើរមកកម្ពុជានៅតែខ្វះខាត ហើយជាពិសេសថ្លៃខ្លាំងបើធៀបនឹងប្រទេសជិតខាង។<br>សង្ឃឹមថាព្រលានយន្តហោះថ្មីនឹងជួយក្នុងរឿងនេះ។<br>តម្លៃ​ជា​កត្តា​សំខាន់​ក្នុង​ការ​កំណត់​ភ្ញៀវ​ទេសចរ​មក​ទស្សនា​កម្ពុជា។ តម្លៃ​សំបុត្រ​យន្តហោះតាមប្រទេស​កម្ពុជាគឺថ្លៃខ្លាំង។<br>ក្រោយពេលព្រលានយន្តហោះក្រុងសៀមរាបចាប់ដំណើរការ មានមតិរិះគន់ជាច្រើនពីសំណាក់ ភ្ញៀវទេសចរណ៍ និងក្រុមហ៊ុនឯកជនដែលមានអាជីវកម្មទាក់ទងនឹងវិស័យទេសចរណ៍ខេត្តសៀមរាប ដែលបញ្ហាទាំងនេះពាក់ព័ន្ធនឹងព្រលានយន្តហោះខេត្តសៀមរាប។</p>",
+      "recommendation": "<p style=\"text-align: justify;\">ផ្នែកឯកជនស្នើសុំរាជរដ្ឋាភិបាល លើកទឹកចិត្តទៅដល់ក្រុមហ៊ុនអាកាសចរណ៍ដែលមានជើងហោះហើរចូលមកកម្ពុជា។<br>ផ្នែកឯកជនស្នើសូមពិនិត្យនូវតម្លៃពន្ធសំបុត្រគ្រប់ព្រលានយន្តហោះ រួមទាំងខេត្តព្រះសីហនុ និងសៀមរាបផងដែរ។<br>ផ្នែកឯកជនស្នើសុំរាជរដ្ឋាភិបាល ប្រមូលនិងដោះស្រាយបញ្ហាទាំងឡាយដែលមានទាក់ទងនឹងព្រលានយន្តហោះសៀមរាបដើម្បីសម្រួលអាជីវកម្មទាក់ទងនឹងវិស័យទេសចរណ៍ខេត្តសៀមរាប និងដើម្បីទាក់ទាញភ្ញៀវទេសចរ។</p>",
+      "issueReference": {
+        "path": "/uploads/issues/1792377414926-Issue_reference.pdf",
+        "name": "Issue_reference.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "resolveId": 5,
+      "status": "IN_PROGRESS",
+      "escalation": "CDC",
+      "rgcDecision": "<p>ស្នើសុំការគាំទ្រពីរាជរដ្ឋាភិបាលក្នុងការពិនិត្យ និងអនុម័តវិធានការលើកទឹកចិត្តសម្រាប់ក្រុមហ៊ុនអាកាសចរណ៍ ដែលបើក ឬពង្រីកជើងហោះហើរត្រង់មកកម្ពុជា។ វិធានការនេះរួមមានការសម្របសម្រួលលើថ្លៃសេវាពាក់ព័ន្ធ នីតិវិធីអាកាសចរណ៍ និងការផ្សព្វផ្សាយគោលដៅទេសចរណ៍កម្ពុជា។</p>",
+      "nextStep": "<p>ក្រសួងទេសចរណ៍នឹងបន្តសម្របសម្រួលជាមួយរដ្ឋលេខាធិការដ្ឋានអាកាសចរណ៍ស៊ីវិល ក្រសួងសេដ្ឋកិច្ច និងហិរញ្ញវត្ថុ និងវិស័យឯកជន ដើម្បីរៀបចំផែនការអនុវត្តលម្អិត។ សូមកំណត់កាលវិភាគប្រជុំបន្ទាប់ក្នុងខែវិច្ឆិកា ឆ្នាំ២០២៦ ដើម្បីតាមដានវឌ្ឍនភាព។</p>",
+      "remark": "<p>រៀបចំកិច្ចប្រជុំជាមួយភាគីពាក់ព័ន្ធនៅខែវិច្ឆិកា ឆ្នាំ២០២៦ និងបញ្ចប់សេចក្តីព្រាងផែនការលើកទឹកចិត្តសម្រាប់ជើងហោះហើរត្រង់។ ក្រសួងនឹងរាយការណ៍ពីលទ្ធផល និងសំណើវិធានការជូនកិច្ចប្រជុំបន្ទាប់។</p>",
+      "referenceDocument": {
+        "path": "/uploads/meeting-summaries/1792379126406-Issue_solution_reference.pdf",
+        "name": "Issue_solution_reference.pdf",
+        "size": 1947246,
+        "mimeType": "application/pdf"
+      },
+      "agencies": [
+        {
+          "order": 1,
+          "id": 2,
+          "name": "MoT",
+          "logo": "/uploads/stakeholders/1788369678073-MoT.png"
+        },
+        {
+          "order": 2,
+          "id": 4,
+          "name": "MEF",
+          "logo": "/uploads/stakeholders/1788369650792-MEF.png"
+        }
+      ],
+      "pswgComment": null,
+      "wgName": "Tourism"
+    }
+  ],
+  "meetingRequest": {
+    "id": 12,
+    "title": "សំណើសុំរៀបចំកិច្ចប្រជុំស្តីពីបញ្ហាជើងហោះហើរត្រង់មកកម្ពុជា",
+    "status": "COMPLETED",
+    "meetingRequestLetter": {
+      "path": "/uploads/meeting-requests/1792377727121-meeting_request_latter.pdf",
+      "name": "meeting_request_latter.pdf",
+      "size": 1947246,
+      "mimeType": "application/pdf"
+    },
+    "submittedBy": "PSWG Secretariat B",
+    "requestedDate": "2026-10-19T02:45:51.251Z",
+    "governmentAgency": "MoT",
+    "governmentAgencyLogo": "/uploads/stakeholders/1788369678073-MoT.png",
+    "pswg": "Tourism"
+  },
+  "id": 4,
+  "documentReference": {
+    "path": "/uploads/meeting-summaries/1792379878522-Meeting_summary_ reference.pdf",
+    "name": "Meeting_summary_ reference.pdf",
+    "size": 1947246,
+    "mimeType": "application/pdf"
+  }
+}

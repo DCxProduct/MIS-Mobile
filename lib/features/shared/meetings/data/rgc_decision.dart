@@ -1,4 +1,5 @@
 import '../../../../core/text/document_metadata.dart';
+import '../../issues/data/issue_progress_report.dart';
 import '../../../../core/text/html_text.dart';
 import '../../../../core/widgets/filters/filter_models.dart';
 
@@ -225,7 +226,21 @@ class RgcDecisionDetail {
        ),
        verificationSource = _string(json['verificationSource']),
        verificationLink = _string(json['verificationLink']),
-       issues = List.unmodifiable(_issueList(json));
+       issues = List.unmodifiable(_issueList(json)),
+       ministryName =
+           _string(
+             _object(json['stakeholder'])['description'],
+           ).trim().isNotEmpty
+           ? _string(_object(json['stakeholder'])['description'])
+           : _string(_object(json['stakeholder'])['name']),
+       workflowStatus = _workflowStatus(json),
+       progressReports = List.unmodifiable(
+         (json['progressReports'] is List
+                 ? json['progressReports'] as List
+                 : const [])
+             .whereType<Map<String, dynamic>>()
+             .map(RgcDecisionProgressReport.fromJson),
+       );
 
   final RgcDecision decision;
   final DateTime? deadline;
@@ -235,6 +250,19 @@ class RgcDecisionDetail {
       verificationSource,
       verificationLink;
   final List<RgcDecisionIssue> issues;
+  final String ministryName, workflowStatus;
+  final List<RgcDecisionProgressReport> progressReports;
+
+  static Map<String, dynamic> _object(Object? value) =>
+      value is Map<String, dynamic> ? value : const {};
+
+  static String _workflowStatus(Map<String, dynamic> json) {
+    final explicit = _string(json['rgcStatus']).trim();
+    if (explicit.isNotEmpty) return explicit;
+    if (json['isDraft'] == true || json['saveAsDraft'] == true) return 'Draft';
+    if (_string(json['submittedToCdcAt']).trim().isNotEmpty) return 'Submitted';
+    return '';
+  }
 
   static DateTime? _date(Object? value) =>
       value is String ? DateTime.tryParse(value) : null;
@@ -257,6 +285,19 @@ class RgcDecisionDetail {
       yield RgcDecisionIssue.fromJson(json);
     }
   }
+}
+
+class RgcDecisionProgressReport {
+  RgcDecisionProgressReport.fromJson(Map<String, dynamic> json)
+    : report = IssueProgressReport.fromJson(json),
+      status = json['status'] is String
+          ? json['status'] as String
+          : json['issueStatus'] is Map
+          ? (json['issueStatus'] as Map)['name'] as String? ?? ''
+          : '';
+
+  final IssueProgressReport report;
+  final String status;
 }
 
 class RgcDecisionIssue {

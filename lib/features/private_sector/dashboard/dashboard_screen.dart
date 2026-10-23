@@ -986,8 +986,35 @@ class _DashboardTabs extends StatelessWidget {
       l10n.text('categories'),
     ];
 
+    Widget tab(int index) => InkWell(
+      onTap: () => onSelected(index),
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.symmetric(horizontal: isCdcGpsf ? 16 : 0),
+        decoration: BoxDecoration(
+          color: selectedIndex == index
+              ? AppColors.accent(context)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          tabs[index],
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: selectedIndex == index ? Colors.white : AppColors.mutedText,
+            fontSize: 12,
+            fontWeight: selectedIndex == index
+                ? FontWeight.w700
+                : FontWeight.w500,
+          ),
+        ),
+      ),
+    );
     return Container(
-      height: isCdcGpsf ? 38 : 38,
+      height: isCdcGpsf ? 44 : 38,
       padding: EdgeInsets.all(isCdcGpsf ? 3 : 4),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : Colors.white,
@@ -996,38 +1023,17 @@ class _DashboardTabs extends StatelessWidget {
           color: isDark ? AppColors.darkBorder : const Color(0xFFE8EBF0),
         ),
       ),
-      child: Row(
-        children: List.generate(
-          tabs.length,
-          (index) => Expanded(
-            child: InkWell(
-              onTap: () => onSelected(index),
-              borderRadius: BorderRadius.circular(6),
-              child: Container(
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: selectedIndex == index
-                      ? AppColors.accent(context)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  tabs[index],
-                  style: TextStyle(
-                    color: selectedIndex == index
-                        ? Colors.white
-                        : AppColors.mutedText,
-                    fontSize: isCdcGpsf ? 10 : 12,
-                    fontWeight: selectedIndex == index
-                        ? FontWeight.w700
-                        : FontWeight.w500,
-                  ),
-                ),
-              ),
+      child: isCdcGpsf
+          ? SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(children: List.generate(tabs.length, tab)),
+            )
+          : Row(
+              children: [
+                for (var index = 0; index < tabs.length; index++)
+                  Expanded(child: tab(index)),
+              ],
             ),
-          ),
-        ),
-      ),
     );
   }
 }

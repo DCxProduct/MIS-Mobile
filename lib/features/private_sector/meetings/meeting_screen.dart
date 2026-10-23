@@ -46,7 +46,11 @@ class _MeetingScreenState extends State<MeetingScreen> {
 
   @override
   Widget build(BuildContext context) => TranslationPageScope(
-    page: _selectedTab == 2 ? 'meeting_summary' : 'meeting_requests',
+    page: const [
+      'meeting_requests',
+      'meeting_calendar',
+      'meeting_summary',
+    ][_selectedTab],
     child: Builder(builder: _buildContent),
   );
 

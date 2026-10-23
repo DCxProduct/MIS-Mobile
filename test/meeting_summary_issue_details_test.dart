@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gpsf_app/core/app_settings.dart';
+import 'package:gpsf_app/core/config/module_config.dart';
+import 'package:gpsf_app/features/cdc_secretariat/meetings/summary_issue_details.dart';
 import 'package:gpsf_app/core/network/api_client.dart';
 import 'package:gpsf_app/core/widgets/pdf_attachment_preview.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
@@ -15,6 +17,76 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 void main() {
+  testWidgets('CDC GPSF summary issue shows the complete web fields', (
+    tester,
+  ) async {
+    final json =
+        jsonDecode(
+              File(
+                'test/fixtures/cdcgpsf_meeting_summary.json',
+              ).readAsStringSync().replaceFirst('\uFEFF', ''),
+            )
+            as Map<String, dynamic>;
+    final summary = MeetingSummary(json);
+    final issue = summary.issues.single;
+    expect(summary.pswg, 'Tourism');
+    expect(summary.governmentAgency, 'MoT');
+    expect(summary.sentBy, 'MoT');
+    expect(summary.summaryDocumentName, 'Meeting_summary_ reference.pdf');
+    expect(summary.summaryDocumentSize, 1947246);
+    expect(summary.summaryDocumentPath, contains('/meeting-summaries/'));
+    expect(summary.requestedDate, DateTime.parse('2026-10-19T02:45:51.251Z'));
+    expect(issue.escalation, 'CDC');
+    expect(issue.agencyLogos[2], contains('MEF.png'));
+    expect(issue.rgcDecisionHtml, contains('<p>'));
+    expect(issue.nextStepHtml, isNotEmpty);
+    expect(issue.remarkHtml, isNotEmpty);
+    final settings = AppSettingsController()
+      ..setLanguage(AppLanguage.english)
+      ..setModuleType(AppModuleType.cdcSecretariat);
+    addTearDown(settings.dispose);
+    await tester.pumpWidget(
+      AppSettings(
+        controller: settings,
+        child: MaterialApp(home: MeetingSummaryDetailScreen(summary: summary)),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Meeting Information'), findsOneWidget);
+    expect(find.text('meeting_request_latter.pdf'), findsOneWidget);
+    expect(find.text('meeting_document_reference.pdf'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Meeting_summary_ reference.pdf'),
+      250,
+    );
+    final summaryAttachment = tester.widget<PdfAttachmentPreview>(
+      find.ancestor(
+        of: find.text('Meeting_summary_ reference.pdf'),
+        matching: find.byType(PdfAttachmentPreview),
+      ),
+    );
+    expect(summaryAttachment.path, summary.summaryDocumentPath);
+    expect(find.text('1.9 MB'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text(issue.title), 250);
+    await tester.tap(find.text(issue.title));
+    await tester.pumpAndSettle();
+    expect(find.byType(CdcSummaryIssueDetails), findsOneWidget);
+    expect(find.text('MEF'), findsOneWidget);
+    expect(find.text('CDC'), findsOneWidget);
+    expect(find.text('Issue_solution_reference.pdf'), findsOneWidget);
+    final sheetScroll = find.descendant(
+      of: find.byType(CdcSummaryIssueDetails),
+      matching: find.byType(Scrollable),
+    );
+    await tester.scrollUntilVisible(
+      find.text('Remark'),
+      300,
+      scrollable: sheetScroll,
+    );
+    expect(find.text('Remark'), findsOneWidget);
+    expect(find.text('Next Step'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
   // Contract from the backend summary serializer and the web issue dialog.
   final webSummary =
       jsonDecode(
@@ -348,3 +420,4 @@ void main() {
     },
   );
 }
+
