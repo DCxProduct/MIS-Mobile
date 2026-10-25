@@ -10,6 +10,8 @@ import 'ministry_translation_keys.dart';
 import 'cdcgpsf_translation_keys.dart';
 import 'cdc_translation_keys.dart';
 import 'cefp_translation_keys.dart';
+import 'account_translation_keys.dart';
+import 'account_translation_scope.dart';
 
 /// Carries the web page's translation namespace through shared widgets.
 class TranslationPageScope extends InheritedWidget {
@@ -76,10 +78,15 @@ class AppLocalizations {
 
   static AppLocalizations of(BuildContext context, {String? page}) {
     final settings = AppSettings.of(context);
+    final account = AccountTranslationData.maybeOf(context);
+    final accountPage =
+        account != null && (page == null || page == 'account_setting');
     return AppLocalizations(
       settings.language,
-      dictionary: settings.translations,
-      page: page ?? TranslationPageScope.maybeOf(context),
+      dictionary: accountPage ? account.dictionary : settings.translations,
+      page: accountPage
+          ? 'account_setting'
+          : page ?? TranslationPageScope.maybeOf(context),
       module: settings.moduleType,
     );
   }
@@ -258,6 +265,10 @@ class AppLocalizations {
   }
 
   String? remoteText(String key) {
+    if (page == 'account_setting') {
+      final value = dictionary[accountTranslationKeys[key] ?? key];
+      return value != null && value.trim().isNotEmpty ? value : null;
+    }
     final pages = _pageKeys;
     final common = _commonKeys;
     final parent = _pageParents[page];

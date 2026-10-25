@@ -181,7 +181,8 @@ const Map<String, String> enTranslations = {
   'emailSupport': 'Email Support',
   'emailSupportDescription':
       "Send us an email and we'll respond within 24 hours",
-  'supportEmail': 'support@example.com',
+  'supportLoadFailed': 'Unable to load support contacts.',
+  'supportOpenFailed': 'Unable to open this link.',
   'telegramSupport': 'Telegram Support',
   'telegramSupportDescription': 'Chat with our support team in real-time',
   'startChat': 'Start Chat',

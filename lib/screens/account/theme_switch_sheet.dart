@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_settings.dart';
 import '../../translations/app_localizations.dart';
+import '../../translations/account_translation_scope.dart';
 
 void showThemeSwitchSheet(BuildContext context) {
   final settings = AppSettings.of(context);
-  final l10n = AppLocalizations.of(context);
 
   showDialog<void>(
     context: context,
     barrierColor: Colors.black.withValues(alpha: 0.55),
     builder: (dialogContext) {
-      return AnimatedBuilder(
-        animation: settings,
-        builder: (context, _) {
+      return AccountTranslationScope(
+        builder: (context) {
+          final l10n = AppLocalizations.of(context);
           return Dialog(
             insetPadding: const EdgeInsets.symmetric(horizontal: 24),
             backgroundColor: Theme.of(context).colorScheme.surface,

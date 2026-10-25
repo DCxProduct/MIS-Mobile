@@ -1,0 +1,21 @@
+/// Labels from shared/account_setting are local to the account screens.
+const accountTranslationKeys = <String, String>{
+  'setting': 'page_title',
+  'profile': 'profile',
+  'personalInformation': 'personal_info',
+  'gender': 'gender',
+  'dateOfBirth': 'date_of_birth',
+  'address': 'address',
+  'phone': 'phone_number',
+  'email': 'email_address',
+  'fullName': 'full_name',
+  'position': 'position',
+  'darkMode': 'dark_mode',
+  'on': 'dark_mode',
+  'off': 'light_mode',
+  'language': 'language',
+  'khmer': 'khmer',
+  'english': 'english',
+  'male': 'male',
+  'female': 'female',
+};

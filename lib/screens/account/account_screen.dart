@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../translations/app_localizations.dart';
+import '../../translations/account_translation_scope.dart';
 import 'language_switch_sheet.dart';
 import 'logout_sheet.dart';
 import 'profile_detail_screen.dart';
@@ -14,7 +15,10 @@ class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      AccountTranslationScope(builder: _buildContent);
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
     final topPadding = MediaQuery.of(context).viewPadding.top;

@@ -1,4 +1,5 @@
 import '../../translations/app_localizations.dart';
+import '../../translations/account_translation_scope.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
@@ -9,7 +10,10 @@ class ProfileDetailScreen extends StatelessWidget {
   const ProfileDetailScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      AccountTranslationScope(builder: _buildContent);
+
+  Widget _buildContent(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.pageBackground(context),
       appBar: AppBar(
@@ -51,7 +55,7 @@ class ProfileDetailScreen extends StatelessWidget {
                   _InfoItem(
                     icon: Icons.person_outline_rounded,
                     label: AppLocalizations.of(context).text('gender'),
-                    value: user.gender ?? '—',
+                    value: _genderLabel(context, user.gender),
                   ),
                   _InfoItem(
                     icon: Icons.calendar_month_outlined,
@@ -91,6 +95,14 @@ class ProfileDetailScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _genderLabel(BuildContext context, String? gender) {
+    final key = gender?.trim().toLowerCase();
+    if (key == 'male' || key == 'female') {
+      return AppLocalizations.of(context).remoteText(key!) ?? gender!;
+    }
+    return gender ?? '—';
   }
 }
 

@@ -1,10 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/app_colors.dart';
+import '../../core/app_settings.dart';
 import '../../translations/app_localizations.dart';
+import 'support_repository.dart';
 
-class SupportCenterScreen extends StatelessWidget {
+class SupportCenterScreen extends StatefulWidget {
   const SupportCenterScreen({super.key});
+
+  @override
+  State<SupportCenterScreen> createState() => _SupportCenterScreenState();
+}
+
+class _SupportCenterScreenState extends State<SupportCenterScreen> {
+  Future<SupportContact>? _request;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _request ??= _fetch();
+  }
+
+  Future<SupportContact> _fetch() =>
+      SupportRepository(AppSettings.of(context).auth.apiClient).fetch();
+
+  Future<void> _refresh() async {
+    final request = _fetch();
+    setState(() {
+      _request = request;
+    });
+    try {
+      await request;
+    } catch (_) {
+      // FutureBuilder displays the localized retry state.
+    }
+  }
+
+  Future<void> _open(Uri uri) async {
+    try {
+      if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
+    } catch (_) {
+      // A mail or browser application may not be available on the device.
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context).text('supportOpenFailed')),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,51 +79,85 @@ class SupportCenterScreen extends StatelessWidget {
       ),
       body: SafeArea(
         top: false,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(18, 18, 18, 32),
-          children: [
-            _SupportCard(
-              icon: Icons.email_outlined,
-              title: l10n.text('emailSupport'),
-              description: l10n.text('emailSupportDescription'),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  l10n.text('supportEmail'),
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            _SupportCard(
-              icon: Icons.chat_bubble_outline,
-              title: l10n.text('telegramSupport'),
-              description: l10n.text('telegramSupportDescription'),
-              child: SizedBox(
-                width: double.infinity,
-                height: 32,
-                child: FilledButton(
-                  onPressed: () {},
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(7),
+        child: FutureBuilder<SupportContact>(
+          future: _request,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError || !snapshot.hasData) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(l10n.text('supportLoadFailed')),
+                    TextButton.icon(
+                      onPressed: _refresh,
+                      icon: const Icon(Icons.refresh),
+                      label: Text(l10n.text('retry')),
                     ),
-                    textStyle: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
+                  ],
+                ),
+              );
+            }
+            final contact = snapshot.data!;
+            return RefreshIndicator(
+              onRefresh: _refresh,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 32),
+                children: [
+                  _SupportCard(
+                    icon: Icons.email_outlined,
+                    title: l10n.text('emailSupport'),
+                    description: l10n.text('emailSupportDescription'),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: InkWell(
+                        onTap: () => _open(contact.emailUri),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            contact.email,
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                  child: Text(l10n.text('startChat')),
-                ),
+                  const SizedBox(height: 12),
+                  _SupportCard(
+                    icon: Icons.chat_bubble_outline,
+                    title: l10n.text('telegramSupport'),
+                    description: l10n.text('telegramSupportDescription'),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 32,
+                      child: FilledButton(
+                        onPressed: () => _open(contact.telegramUri),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(7),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        child: Text(l10n.text('startChat')),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );

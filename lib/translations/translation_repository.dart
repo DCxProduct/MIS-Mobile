@@ -9,11 +9,16 @@ class TranslationRepository {
   Future<Map<String, String>> dictionary(
     AppLanguage language, {
     String module = 'pswg',
+    String? page,
   }) async {
     final code = language == AppLanguage.khmer ? 'km' : 'en';
     final response = await _api.get(
       'translations/dictionary',
-      query: {'language': code, 'module': module},
+      query: {
+        'language': code,
+        'module': module,
+        'page': ?page,
+      },
       headers: const {
         'Cache-Control': 'no-cache, no-store',
         'Pragma': 'no-cache',
@@ -26,6 +31,7 @@ class TranslationRepository {
         data is! Map<String, dynamic> ||
         data['language'] != code ||
         data['module'] != module ||
+        (page != null && data['page'] != page) ||
         data['translations'] is! Map<String, dynamic>) {
       throw const FormatException('Invalid translation dictionary');
     }
