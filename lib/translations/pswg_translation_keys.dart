@@ -239,6 +239,9 @@ const pswgPageKeys = <String, Map<String, String>>{
     'governmentAgency': 'meeting_summary.issue_dialog.government_agency',
   },
   'meeting_summary': {
+    'summaryReferenceDocument': 'meeting_summary.details.summary_reference',
+    'meetingDocument': 'meeting_summary.details.meeting_document',
+    'sentBy': 'meeting_summary.details.sent_by',
     'issueDocument': 'meeting_summary.issue_dialog.issue_document',
     'noMeetingSummaries': 'meeting_summary.empty_summaries',
     'noIssuesFound': 'meeting_summary.issue_table.no_issues',

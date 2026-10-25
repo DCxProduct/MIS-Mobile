@@ -63,7 +63,8 @@ class AppSettingsController extends ChangeNotifier {
     AppModuleType.privateSector => 'pswg',
     AppModuleType.lineMinistry => 'ministry',
     AppModuleType.cdcSecretariat => 'cdcgpsf',
-    _ => null,
+    AppModuleType.cdcSection => 'cdc',
+    AppModuleType.cefp => 'cefp',
   };
 
   Map<String, String> get translations =>

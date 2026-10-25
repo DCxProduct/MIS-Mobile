@@ -23,6 +23,8 @@ class WorkingGroupIssue {
     this.attachmentName = '',
     this.attachmentSize,
     this.agencyLogo = '',
+    this.agencyNamesByOrder = const {},
+    this.agencyLogosByOrder = const {},
     this.meetingRequestDocumentName = '',
     this.progressReports = const [],
     this.reportsIncluded = false,
@@ -42,6 +44,7 @@ class WorkingGroupIssue {
   final String submittedBy, agency;
   final String? descriptionHtml, recommendationHtml;
   final String agencyLogo;
+  final Map<int, String> agencyNamesByOrder, agencyLogosByOrder;
   final DateTime? createdAt, meetingDate;
   final int attachmentCount, linkCount;
   final String attachmentPath;
@@ -190,6 +193,18 @@ class WorkingGroupIssue {
       agencyLogo: agencies.isEmpty
           ? ''
           : string(object(agencies.first['stakeholder'])['logo']),
+      agencyNamesByOrder: {
+        for (var i = 0; i < agencies.length; i++)
+          (order(agencies[i]) == 999999 ? i + 1 : order(agencies[i])): string(
+            object(agencies[i]['stakeholder'])['name'],
+          ),
+      },
+      agencyLogosByOrder: {
+        for (var i = 0; i < agencies.length; i++)
+          (order(agencies[i]) == 999999 ? i + 1 : order(agencies[i])): string(
+            object(agencies[i]['stakeholder'])['logo'],
+          ),
+      },
       createdAt: date(json['createdAt']),
       meetingDate: meetings.isEmpty
           ? null

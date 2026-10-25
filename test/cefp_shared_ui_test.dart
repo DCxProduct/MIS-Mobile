@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gpsf_app/core/app_settings.dart';
@@ -26,8 +27,18 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       final auth = AuthRepository(
         ApiClient(
-          client: MockClient((_) async {
-            throw StateError('Sample navigation must not request API data');
+          client: MockClient((request) async {
+            if (request.url.path.contains('/dashboards/')) {
+              return http.Response(
+                File(
+                  request.url.path.contains('/plenary/')
+                      ? 'test/fixtures/plenary.json'
+                      : 'test/fixtures/working_groups.json',
+                ).readAsStringSync(),
+                200,
+              );
+            }
+            return http.Response('{"success":true,"data":{}}', 200);
           }),
         ),
         enableDemoLogin: true,
@@ -46,26 +57,12 @@ void main() {
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
       expect(find.byType(CdcSectionDashboardScreenView), findsOneWidget);
-      for (final scope in [0, 1]) {
-        final viewport = find.byKey(const ValueKey('cdc-dashboard-scroll'));
-        final scroll = tester.state<ScrollableState>(
-          find
-              .descendant(of: viewport, matching: find.byType(Scrollable))
-              .first,
-        );
-        scroll.position.jumpTo(0);
-        await tester.pumpAndSettle();
-        await tester.tap(find.byKey(ValueKey('cdc-dashboard-main-$scope')));
-        await tester.pumpAndSettle();
-        await tester.ensureVisible(find.text('Agencies'));
-        await tester.tap(find.text('Agencies'));
-        await tester.pumpAndSettle();
-        scroll.position.jumpTo(scroll.position.maxScrollExtent);
-        await tester.pumpAndSettle();
-        final navTop = tester.getRect(find.byType(AppBottomNavBar)).top;
-        expect(tester.getRect(viewport).bottom, lessThanOrEqualTo(navTop));
-        expect(tester.getRect(find.text('MPTC')).bottom, lessThan(navTop));
-      }
+      expect(find.byType(DashboardPage), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
+      expect(
+        tester.getRect(find.byType(DashboardPage)).bottom,
+        lessThanOrEqualTo(tester.getRect(find.byType(AppBottomNavBar)).top),
+      );
       await tester.tap(find.text('CEFP Issues'));
       await tester.pumpAndSettle();
       expect(find.byType(CdcSectionIssuesMatrixScreen), findsOneWidget);

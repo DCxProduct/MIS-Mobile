@@ -11,6 +11,7 @@ import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/auth/data/auth_user.dart';
 import 'package:gpsf_app/features/line_ministry/reports/ministry_rgc_decision_sheet.dart';
 import 'package:gpsf_app/features/shared/meetings/data/rgc_decision.dart';
+import 'package:gpsf_app/screens/report/rgc_decision_detail_screen.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 import 'package:gpsf_app/translations/app_localizations.dart';
 import 'package:gpsf_app/translations/ministry_translation_keys.dart';
@@ -57,6 +58,82 @@ void main() {
   for (final language in AppLanguage.values) {
     final code = language == AppLanguage.khmer ? 'km' : 'en';
     final labels = Map<String, String>.from(fixtures[code] as Map);
+    testWidgets(
+      '$code ministry RGC report uses and refreshes ministry labels',
+      (tester) async {
+        var revision = 'initial';
+        final reportLabels = {
+          'plenary_rgc_decisions.rgc.date_of_issue_solution': 'solution date',
+          'plenary_rgc_decisions.rgc.indicators': 'indicators',
+          'plenary_rgc_decisions.rgc.implementation_challenges': 'challenges',
+          'plenary_rgc_decisions.rgc.request': 'requests',
+          'plenary_rgc_decisions.rgc.progress_solution': 'progress',
+          'plenary_rgc_decisions.rgc.rgc_decision': 'decision',
+        };
+        final settings = controller((request) async {
+          expect(request.url.queryParameters['module'], 'ministry');
+          return response('ministry', code, {
+            ...labels,
+            for (final entry in reportLabels.entries)
+              entry.key: '$revision $code ${entry.value}',
+            'issue_matrix_rgc_decision.rgc.report.progressSolution':
+                'Wrong CDC',
+          });
+        })..setLanguage(language);
+        addTearDown(settings.dispose);
+        await settings.loadTranslations();
+        final data =
+            jsonDecode(
+                  File(
+                    'test/fixtures/ministry_rgc_decision.json',
+                  ).readAsStringSync(),
+                )['data']
+                as Map<String, dynamic>;
+        final detail = RgcDecisionDetail.fromJson({
+          ...data,
+          'progressReports': [
+            {
+              'semester': 'S1',
+              'year': 2028,
+              'dateOfIssueSolution': '2026-10-19',
+              'referenceName': 'Reference content',
+              'progressSolution': 'Progress content',
+            },
+          ],
+        });
+        await tester.pumpWidget(
+          AppSettings(
+            controller: settings,
+            child: MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: RgcDecisionProgressReports(detail: detail),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        for (final label in reportLabels.values) {
+          expect(
+            find.textContaining('$revision $code $label', findRichText: true),
+            findsOneWidget,
+          );
+        }
+        expect(find.text('Wrong CDC'), findsNothing);
+        revision = 'updated';
+        await settings.loadTranslations(refresh: true);
+        await tester.pumpAndSettle();
+        for (final label in reportLabels.values) {
+          expect(
+            find.textContaining('$revision $code $label', findRichText: true),
+            findsOneWidget,
+          );
+        }
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
     test(
       '$code ministry aliases exist in the captured live API dictionary',
       () {
@@ -101,6 +178,16 @@ void main() {
           page('meeting_summary').status('SUBMITTED'),
           labels['meeting_summary.status_labels.submitted'],
         );
+        for (final entry in {
+          'summaryReferenceDocument': 'summary_reference',
+          'meetingDocument': 'meeting_document',
+          'sentBy': 'sent_by',
+        }.entries) {
+          expect(
+            page('meeting_summary').text(entry.key),
+            labels['meeting_summary.details.${entry.value}'],
+          );
+        }
       },
     );
     test(

@@ -413,7 +413,12 @@
     "meeting_summary.issue_dialog.escalation": "Issue Escalation",
     "meeting_summary.issue_dialog.solution_reference": "Solution Reference",
     "issue_matrix_rgc_decision.rgc.report.referenceLink": "Reference Link",
-    "issue_matrix_rgc_decision.rgc.report.referenceName": "Reference Name"
+    "issue_matrix_rgc_decision.rgc.report.referenceName": "Reference Name",
+    "meeting_summary.details.meeting_document": "Meeting Document",
+    "meeting_summary.details.sent_by": "Sent by",
+    "meeting_summary.details.summary_reference": "Summary Meeting Reference",
+    "issue_matrix_rgc_decision.rgc.report.not_available": "Not available",
+    "issue_matrix_rgc_decision.rgc.detail.rgc_fallback": "RGC Decision"
   },
   "km": {
     "dashboard.title": "ផ្ទាំងគ្រប់គ្រង",
@@ -829,6 +834,11 @@
     "meeting_summary.issue_dialog.escalation": "ការបញ្ជូនបញ្ហាទៅថ្នាក់លើ",
     "meeting_summary.issue_dialog.solution_reference": "ឯកសារយោងដំណោះស្រាយ",
     "issue_matrix_rgc_decision.rgc.report.referenceLink": "តំណភ្ជាប់ឯកសារយោង",
-    "issue_matrix_rgc_decision.rgc.report.referenceName": "ឈ្មោះឯកសារយោង"
+    "issue_matrix_rgc_decision.rgc.report.referenceName": "ឈ្មោះឯកសារយោង",
+    "meeting_summary.details.meeting_document": "ឯកសារកិច្ចប្រជុំ",
+    "meeting_summary.details.sent_by": "ផ្ញើដោយ",
+    "meeting_summary.details.summary_reference": "ឯកសារយោងសង្ខេបកិច្ចប្រជុំ",
+    "issue_matrix_rgc_decision.rgc.report.not_available": "មិនមាន",
+    "issue_matrix_rgc_decision.rgc.detail.rgc_fallback": "សេចក្តីសម្រេច"
   }
 }

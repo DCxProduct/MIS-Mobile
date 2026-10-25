@@ -14,6 +14,9 @@ import 'package:gpsf_app/features/private_sector/dashboard/dashboard_screen.dart
 import 'package:gpsf_app/features/private_sector/issues/issue_detail_screen.dart';
 import 'package:gpsf_app/features/private_sector/issues/issue_progress_report_detail_screen.dart';
 import 'package:gpsf_app/features/private_sector/meetings/tabs/calendar_tab.dart';
+import 'package:gpsf_app/features/private_sector/reports/meeting_summary_detail_screen.dart';
+import 'package:gpsf_app/features/shared/meetings/data/meeting_summary.dart';
+import 'package:gpsf_app/screens/report/tabs/report_progress_report_tab.dart';
 import 'package:gpsf_app/features/shared/issues/data/working_group_issue.dart';
 import 'package:gpsf_app/features/shared/issues/data/issue_progress_report.dart';
 import 'package:gpsf_app/features/shared/meetings/data/progress_report.dart';
@@ -53,6 +56,117 @@ AppSettingsController settingsWith(
 );
 
 void main() {
+  for (final language in AppLanguage.values) {
+    final code = language == AppLanguage.khmer ? 'km' : 'en';
+    testWidgets('$code PSWG schedule uses API templates and refreshes labels', (
+      tester,
+    ) async {
+      var template = 'Web meeting {number}';
+      final settings =
+          settingsWith((request) async {
+              if (request.url.path.endsWith('translations/dictionary')) {
+                return dictionaryResponse(code, {
+                  'progress_report.table.schedule_names.meeting': template,
+                  'progress_report.table.schedule_names.revision_deadline':
+                      'Web deadline {number}',
+                });
+              }
+              return http.Response(
+                jsonEncode({
+                  'success': true,
+                  'data': [
+                    {'id': 5, 'year': 2026, 'semester': 'S2'},
+                  ],
+                }),
+                200,
+              );
+            })
+            ..setModuleType(AppModuleType.privateSector)
+            ..setLanguage(language);
+      addTearDown(settings.dispose);
+      await settings.loadTranslations();
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: const MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(child: ReportProgressReportTab()),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final first = language == AppLanguage.khmer ? '១' : '1st';
+      final second = language == AppLanguage.khmer ? '២' : '2nd';
+      expect(find.text('Web meeting $first'), findsOneWidget);
+      expect(find.text('Web deadline $second'), findsOneWidget);
+      template = 'Edited meeting {number}';
+      await settings.loadTranslations(refresh: true);
+      await tester.pumpAndSettle();
+      expect(find.text('Edited meeting $first'), findsOneWidget);
+      expect(find.text('Web meeting $first'), findsNothing);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+    testWidgets('$code PSWG summary labels match the actual document type', (
+      tester,
+    ) async {
+      final settings =
+          settingsWith(
+              (_) async => dictionaryResponse(code, {
+                'meeting_summary.details.meeting_document':
+                    'API meeting document',
+                'meeting_summary.details.meeting_request_document':
+                    'API request letter',
+              }),
+            )
+            ..setModuleType(AppModuleType.privateSector)
+            ..setLanguage(language);
+      addTearDown(settings.dispose);
+      await settings.loadTranslations();
+      for (final hasRequest in [false, true]) {
+        final summary = MeetingSummary({
+          'id': 1,
+          'summaryTitle': 'Summary',
+          'meeting': {
+            'documentReference': {
+              'path': '/meeting.pdf',
+              'name': 'Meeting.pdf',
+            },
+          },
+          if (hasRequest)
+            'meetingRequest': {
+              'meetingRequestLetter': {
+                'path': '/request.pdf',
+                'name': 'Request.pdf',
+              },
+            },
+        });
+        await tester.pumpWidget(
+          AppSettings(
+            controller: settings,
+            child: MaterialApp(
+              home: MeetingSummaryDetailScreen(
+                key: ValueKey(hasRequest),
+                summary: summary,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.text(hasRequest ? 'API request letter' : 'API meeting document'),
+          findsOneWidget,
+        );
+        expect(
+          find.text(hasRequest ? 'API meeting document' : 'API request letter'),
+          findsNothing,
+        );
+        expect(tester.takeException(), isNull);
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
   testWidgets(
     'report and issue sheet use separate descriptions and shared API fields',
     (tester) async {
@@ -443,7 +557,7 @@ void main() {
   );
 
   testWidgets(
-    'refresh pauses in background and stops on logout, module change or dispose',
+    'refresh pauses in background and stops on logout or dispose',
     (tester) async {
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       var requests = 0;
@@ -465,14 +579,6 @@ void main() {
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
       expect(requests, before + 1, reason: 'Resume must refresh immediately');
-
-      settings.setModuleType(AppModuleType.cdcSection);
-      before = requests;
-      await tester.pump(const Duration(seconds: 20));
-      expect(requests, before);
-      settings.setModuleType(AppModuleType.privateSector);
-      await tester.pumpAndSettle();
-      expect(requests, before + 1);
 
       settings.clearSession();
       before = requests;

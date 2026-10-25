@@ -228,7 +228,7 @@
     "progress_report.pswg.year": "ឆ្នាំ",
     "progress_report.shared.decisions.columns.focal_person": "មន្ត្រីទទួលបន្ទុក (ឯកឧត្តម)",
     "progress_report.shared.decisions.columns.meeting_date": "កាលបរិច្ឆេទប្រជុំ",
-    "progress_report.shared.decisions.columns.rgc_decision": "សេចក្តីសម្រេចរាជរដ្ឋាភិបាល test B",
+    "progress_report.shared.decisions.columns.rgc_decision": "សេចក្តីសម្រេចរាជរដ្ឋាភិបាល",
     "progress_report.shared.decisions.empty": "រកមិនឃើញសេចក្តីសម្រេចរាជរដ្ឋាភិបាល។",
     "progress_report.shared.decisions.title": "បញ្ជីសេចក្តីសម្រេចរាជរដ្ឋាភិបាល",
     "progress_report.shared.description": "ការពិពណ៌នា",
@@ -305,7 +305,12 @@
     "wg_issues.stats.solved": "បានដោះស្រាយ",
     "wg_issues.stats.total_issues": "បញ្ហាសរុប",
     "wg_issues.title": "បញ្ហាក្រុមការងារ",
-    "wg_issues.view_detail": "មើលលម្អិត"
+    "wg_issues.view_detail": "មើលលម្អិត",
+    "meeting_summary.details.summary_reference": "ឯកសារយោងសង្ខេបកិច្ចប្រជុំ",
+    "meeting_summary.details.meeting_document": "ឯកសារកិច្ចប្រជុំ",
+    "meeting_summary.details.sent_by": "ផ្ញើដោយ",
+    "progress_report.table.schedule_names.meeting": "កិច្ចប្រជុំទី{number}",
+    "progress_report.table.schedule_names.revision_deadline": "ផុតកំណត់កែសម្រួលទី{number}"
   },
   "en": {
     "dashboard.title": "Dashboard",
@@ -613,6 +618,11 @@
     "wg_issues.stats.solved": "Solved",
     "wg_issues.stats.total_issues": "Total Issues",
     "wg_issues.title": "Working Group Issues",
-    "wg_issues.view_detail": "View Detail"
+    "wg_issues.view_detail": "View Detail",
+    "meeting_summary.details.summary_reference": "Summary Meeting Reference",
+    "meeting_summary.details.meeting_document": "Meeting Document",
+    "meeting_summary.details.sent_by": "Sent by",
+    "progress_report.table.schedule_names.meeting": "{number} Meeting",
+    "progress_report.table.schedule_names.revision_deadline": "{number} Deadline"
   }
 }

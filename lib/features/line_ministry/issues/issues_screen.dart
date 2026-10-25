@@ -27,9 +27,11 @@ class LineMinistryIssuesScreenView extends StatefulWidget {
     this.cdcMatrix = false,
     this.issueDetailBuilder,
     this.previewStatus = 'In Progress',
+    this.translationPage = 'issue_matrix',
   });
 
   final String titleKey;
+  final String translationPage;
   final bool showTabs;
   final bool staticPreview;
   final bool cdcMatrix;
@@ -73,7 +75,7 @@ class _LineMinistryIssuesScreenViewState
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
-          translationPage: 'issue_matrix',
+          translationPage: widget.translationPage,
           initial: _apiSelections[tab],
           load: () => widget.cdcMatrix
               ? catalogs.cdcIssues()
@@ -125,7 +127,7 @@ class _LineMinistryIssuesScreenViewState
 
   @override
   Widget build(BuildContext context) => TranslationPageScope(
-    page: 'issue_matrix',
+    page: widget.translationPage,
     child: Builder(builder: _buildContent),
   );
 

@@ -1,4 +1,5 @@
 import '../../../shared/dashboard/widgets/pswg_live_dashboard.dart';
+import '../../../cdc_section/dashboard/overall_status_card.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -7,59 +8,69 @@ import '../../../../core/app_colors.dart';
 import '../../../../translations/app_localizations.dart';
 
 class OverallTab extends StatelessWidget {
-  const OverallTab({super.key});
+  const OverallTab({super.key, this.plenary = false});
+
+  final bool plenary;
 
   @override
   Widget build(BuildContext context) {
     final cards = PswgDataScope.maybeOf(context)?.cards;
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(18, 5, 18, 16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkBackground : Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : const Color(0xFFE9EDF2),
-        ),
-      ),
-      child: Column(
-        children: [
-          SizedBox(
-            width: 320,
-            height: 195,
-            child: CustomPaint(
-              painter: _DonutChartPainter(
-                isDark: isDark,
-                cards: cards,
-                totalLabel: l10n.text('totalIssues'),
-              ),
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(18, 5, 18, 16),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkBackground : Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isDark ? AppColors.darkBorder : const Color(0xFFE9EDF2),
             ),
           ),
-          const SizedBox(height: 2),
-          _ChartLegendRow(
-            color: isDark ? AppColors.darkPrimary : const Color(0xFF2D7DBF),
-            label: l10n.text('totalIssues'),
-            value: '(${cards?['totalIssues'] ?? 20})',
+          child: Column(
+            children: [
+              SizedBox(
+                width: 320,
+                height: 195,
+                child: CustomPaint(
+                  painter: _DonutChartPainter(
+                    isDark: isDark,
+                    cards: cards,
+                    totalLabel: l10n.text('totalIssues'),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 2),
+              _ChartLegendRow(
+                color: isDark ? AppColors.darkPrimary : const Color(0xFF2D7DBF),
+                label: l10n.text('totalIssues'),
+                value: '(${cards?['totalIssues'] ?? 20})',
+              ),
+              _ChartLegendRow(
+                color: const Color(0xFF009F5C),
+                label: l10n.text('solved'),
+                value: '(${cards?['solved'] ?? 15})',
+              ),
+              _ChartLegendRow(
+                color: const Color(0xFFE8A61A),
+                label: l10n.text('inProgress'),
+                value: '(${cards?['inProgress'] ?? 4})',
+              ),
+              _ChartLegendRow(
+                color: const Color(0xFFFF3B30),
+                label: l10n.text('notAddressed'),
+                value: '(${cards?['notAddressed'] ?? 1})',
+              ),
+            ],
           ),
-          _ChartLegendRow(
-            color: const Color(0xFF009F5C),
-            label: l10n.text('solved'),
-            value: '(${cards?['solved'] ?? 15})',
-          ),
-          _ChartLegendRow(
-            color: const Color(0xFFE8A61A),
-            label: l10n.text('inProgress'),
-            value: '(${cards?['inProgress'] ?? 4})',
-          ),
-          _ChartLegendRow(
-            color: const Color(0xFFFF3B30),
-            label: l10n.text('notAddressed'),
-            value: '(${cards?['notAddressed'] ?? 1})',
-          ),
+        ),
+        if (plenary) ...[
+          const SizedBox(height: 16),
+          PlenaryProgressStatusCard(cards: cards ?? const {}),
         ],
-      ),
+      ],
     );
   }
 }

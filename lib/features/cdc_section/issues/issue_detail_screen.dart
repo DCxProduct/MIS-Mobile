@@ -39,7 +39,12 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
       : '$bytes B';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: generalIssue ? 'issue_matrix_detail' : 'cdc_issue_detail',
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final reports = issue?.reportsIncluded == true
         ? issue!.progressReports

@@ -150,10 +150,16 @@ void main() {
       await tester.scrollUntilVisible(
         inSheet(find.text('Read more')),
         120,
-        scrollable: inSheet(find.byType(Scrollable)),
+        scrollable: inSheet(find.byType(Scrollable)).first,
       );
       expect(tester.widget<Text>(inSheet(find.text(description))).maxLines, 5);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(inSheet(find.text('Read more')));
+      await tester.pumpAndSettle();
       await tester.tap(inSheet(find.text('Read more')));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(inSheet(find.text(description)), -120,
+        scrollable: inSheet(find.byType(Scrollable)));
       await tester.pumpAndSettle();
       expect(
         tester.widget<Text>(inSheet(find.text(description))).maxLines,
@@ -163,7 +169,7 @@ void main() {
       await tester.scrollUntilVisible(
         inSheet(find.text('Show less')).hitTestable(),
         120,
-        scrollable: inSheet(find.byType(Scrollable)),
+        scrollable: inSheet(find.byType(Scrollable)).first,
       );
       await tester.tap(inSheet(find.text('Show less')));
       await tester.pumpAndSettle();
@@ -171,7 +177,7 @@ void main() {
       await tester.scrollUntilVisible(
         inSheet(find.text('Actual issue recommendation')),
         120,
-        scrollable: inSheet(find.byType(Scrollable)),
+        scrollable: inSheet(find.byType(Scrollable)).first,
       );
       await tester.tap(find.byIcon(Icons.close));
       await tester.pumpAndSettle();

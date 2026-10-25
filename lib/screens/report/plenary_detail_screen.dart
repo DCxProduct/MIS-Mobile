@@ -3,6 +3,7 @@ import '../../features/shared/issues/widgets/issue_agency_logo.dart';
 import '../../core/app_settings.dart';
 import '../../core/config/module_config.dart';
 import 'rgc_decision_detail_screen.dart';
+import '../../features/line_ministry/reports/ministry_rgc_decision_sheet.dart';
 import '../../features/shared/meetings/data/plenary.dart';
 import '../../features/shared/meetings/data/rgc_decision.dart';
 import '../../features/shared/issues/widgets/issue_display.dart';
@@ -320,6 +321,10 @@ class _PlenaryIssueItemCard extends StatelessWidget {
   final String status;
 
   void _openRgcDecisionBottomSheet(BuildContext context) {
+    if (AppSettings.of(context).moduleType == AppModuleType.lineMinistry) {
+      showMinistryRgcDecisionSheet(context, decisionId: decision.id);
+      return;
+    }
     if (AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat) {
       Navigator.of(context).push(
         MaterialPageRoute<void>(

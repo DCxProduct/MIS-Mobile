@@ -399,7 +399,11 @@
     "issue_matrix.submitted_detail.status": "ស្ថានភាព",
     "issue_matrix.submitted_detail.government_primary_agency": "ស្ថាប័នរដ្ឋាភិបាលទទួលបន្ទុក",
     "progress_reports.shared.decisions.title": "បញ្ជីសេចក្តីសម្រេចរាជរដ្ឋាភិបាល",
-    "plenary_rgc_decisions.rgc.plenary": "វេទិការ"
+    "plenary_rgc_decisions.rgc.plenary": "វេទិការ",
+    "meeting_summary.details.meeting_document": "ឯកសារកិច្ចប្រជុំ",
+    "meeting_summary.details.sent_by": "ផ្ញើដោយ",
+    "meeting_summary.details.summary_reference": "ឯកសារយោងសង្ខេបកិច្ចប្រជុំ",
+    "plenary_rgc_decisions.rgc.date_of_issue_solution": "កាលបរិច្ឆេទដោះស្រាយបញ្ហា"
   },
   "en": {
     "dashboard.apply_filters": "Apply Filters",
@@ -801,6 +805,10 @@
     "issue_matrix.submitted_detail.status": "Status",
     "issue_matrix.submitted_detail.government_primary_agency": "Government Primary Agency",
     "progress_reports.shared.decisions.title": "List of RGC Decision",
-    "plenary_rgc_decisions.rgc.plenary": "Plenary"
+    "plenary_rgc_decisions.rgc.plenary": "Plenary",
+    "meeting_summary.details.meeting_document": "Meeting Document",
+    "meeting_summary.details.sent_by": "Sent by",
+    "meeting_summary.details.summary_reference": "Summary Meeting Reference",
+    "plenary_rgc_decisions.rgc.date_of_issue_solution": "Date of Issue Solution"
   }
 }

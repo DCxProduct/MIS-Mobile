@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:gpsf_app/features/shared/meetings/data/meeting_request.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -15,6 +16,41 @@ import 'package:gpsf_app/translations/app_language.dart';
 import 'package:gpsf_app/translations/app_localizations.dart';
 
 void main() {
+  test('request issues retain working group and ordered ministry logos', () {
+    final request = MeetingRequest({
+      'id': 11,
+      'user': {
+        'name': 'PSWG Secretariat A',
+        'stakeholders': [
+          {
+            'stakeholder': {'name': 'Agriculture & Agro-Industry'},
+          },
+        ],
+      },
+      'issues': [
+        {
+          'id': 1,
+          'title': 'Issue',
+          'governmentAgencies': [
+            {
+              'agencyOrder': 3,
+              'stakeholder': {'name': 'MEF', 'logo': '/mef.png'},
+            },
+            {
+              'agencyOrder': 1,
+              'stakeholder': {'name': 'MAFF', 'logo': '/maff.png'},
+            },
+          ],
+        },
+      ],
+    });
+    expect(request.submittedBy, 'PSWG Secretariat A');
+    final issue = request.issues.single;
+    expect(issue.submittedBy, 'Agriculture & Agro-Industry');
+    expect(issue.agencyNamesByOrder, {1: 'MAFF', 3: 'MEF'});
+    expect(issue.agencyLogosByOrder[1], '/maff.png');
+    expect(issue.agencyNamesByOrder.containsKey(2), isFalse);
+  });
   final fixture = File(
     'test/fixtures/meeting_requests.json',
   ).readAsStringSync();

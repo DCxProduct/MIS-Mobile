@@ -267,6 +267,29 @@ class CdcPlenaryStatusCards extends StatelessWidget {
   }
 }
 
+/// Progress classifications are separate from the overall in-progress count.
+class PlenaryProgressStatusCard extends StatelessWidget {
+  const PlenaryProgressStatusCard({super.key, required this.cards});
+
+  final Map<String, int?> cards;
+
+  @override
+  Widget build(BuildContext context) {
+    final mid = cards['midProgress'] ?? 0;
+    final early = cards['earlyProgress'] ?? 0;
+    final total = mid + early;
+    return _PlenaryRingCard(
+      centerKey: 'inProgress',
+      value: total,
+      labels: const ['midProgress', 'earlyProgress'],
+      counts: [mid, early],
+      shares: [total == 0 ? 0 : mid / total, total == 0 ? 0 : early / total],
+      colors: const [Color(0xFFF9A15D), Color(0xFFF5DBA9)],
+      progressStyle: true,
+    );
+  }
+}
+
 class _PlenaryRingCard extends StatelessWidget {
   const _PlenaryRingCard({
     required this.centerKey,
@@ -275,6 +298,7 @@ class _PlenaryRingCard extends StatelessWidget {
     required this.counts,
     required this.shares,
     required this.colors,
+    this.progressStyle = false,
   });
   final String centerKey;
   final int value;
@@ -282,6 +306,7 @@ class _PlenaryRingCard extends StatelessWidget {
   final List<int?> counts;
   final List<double> shares;
   final List<Color> colors;
+  final bool progressStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -290,7 +315,10 @@ class _PlenaryRingCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.text('overallStatus'), style: const TextStyle(fontSize: 13)),
+        Text(
+          l10n.text(progressStyle ? 'inProgress' : 'overallStatus'),
+          style: const TextStyle(fontSize: 13),
+        ),
         const SizedBox(height: 12),
         Container(
           width: double.infinity,
@@ -311,22 +339,32 @@ class _PlenaryRingCard extends StatelessWidget {
                   alignment: Alignment.center,
                   clipBehavior: Clip.none,
                   children: [
-                    CustomPaint(
-                      size: const Size(170, 170),
-                      painter: _StatusRing(
-                        shares.any((share) => share > 0)
-                            ? [shares[0], shares[1], 0]
-                            : [1, 0, 0],
-                        shares.any((share) => share > 0)
-                            ? [colors[0], colors[1], Colors.transparent]
-                            : [
-                                const Color(0xFFE5E8ED),
-                                Colors.transparent,
-                                Colors.transparent,
-                              ],
-                        startAngle: 1.0,
+                    if (!progressStyle || value > 0)
+                      CustomPaint(
+                        size: const Size(170, 170),
+                        painter: _StatusRing(
+                          shares.any((share) => share > 0)
+                              ? [shares[0], shares[1], 0]
+                              : [1, 0, 0],
+                          shares.any((share) => share > 0)
+                              ? [colors[0], colors[1], Colors.transparent]
+                              : [
+                                  const Color(0xFFE5E8ED),
+                                  Colors.transparent,
+                                  Colors.transparent,
+                                ],
+                          startAngle: 1.0,
+                        ),
                       ),
-                    ),
+                    if (progressStyle)
+                      Container(
+                        width: 110,
+                        height: 110,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFBAD9F2),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [

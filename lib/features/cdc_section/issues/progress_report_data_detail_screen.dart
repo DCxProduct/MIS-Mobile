@@ -31,7 +31,12 @@ class CdcIssueProgressReportDataDetailScreen extends StatelessWidget {
       : '${(bytes / 1024).round()} KB';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: 'issue_report',
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final hasMeetingDocument = meetingDocumentPath.isNotEmpty;
     final documentPath = hasMeetingDocument

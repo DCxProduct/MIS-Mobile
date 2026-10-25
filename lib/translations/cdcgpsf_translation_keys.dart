@@ -88,6 +88,15 @@ final cdcGpsfPageKeys = <String, Map<String, String>>{
   'cdc_rgc': _rgcKeys,
   'cdc_rgc_detail': _rgcDetailKeys,
   'cdc_rgc_report': {
+    'rgcReportNoReference': 'issue_matrix_rgc_decision.rgc.report.not_available',
+    'rgcReportReferenceName':
+        'issue_matrix_rgc_decision.rgc.report.referenceName',
+    'rgcReportReferenceAttachment':
+        'issue_matrix_rgc_decision.rgc.report.issue_attachment',
+    'rgcReportSolutionIndicators':
+        'issue_matrix_rgc_decision.rgc.report.solutionIndicators',
+    'rgcReportChallenges': 'issue_matrix_rgc_decision.rgc.report.challenges',
+    'requests': 'issue_matrix_rgc_decision.rgc.report.requests',
     'noProgressReports': 'issue_matrix_rgc_decision.rgc.report.no_progress',
     'implementationDate':
         'issue_matrix_rgc_decision.rgc.report.implementationDate',

@@ -2,19 +2,14 @@ import '../../translations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
-import '../../core/app_settings.dart';
-import '../../core/config/module_config.dart';
+import '../../features/auth/data/auth_user.dart';
+import 'widgets/profile_loader.dart';
 
 class ProfileDetailScreen extends StatelessWidget {
   const ProfileDetailScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final settings = AppSettings.of(context);
-    final email = settings.userEmail.isNotEmpty
-        ? settings.userEmail
-        : 'ministry@gmail.com';
-
     return Scaffold(
       backgroundColor: AppColors.pageBackground(context),
       appBar: AppBar(
@@ -39,56 +34,60 @@ class ProfileDetailScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: SafeArea(
-        top: false,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-          children: [
-            const _ProfileCard(),
-            const SizedBox(height: 20),
-            _SectionTitle(
-              title: AppLocalizations.of(context).text('personalInformation'),
-            ),
-            const SizedBox(height: 10),
-            _InfoCard(
-              children: [
-                _InfoItem(
-                  icon: Icons.person_outline_rounded,
-                  label: AppLocalizations.of(context).text('gender'),
-                  value: 'Male',
-                ),
-                _InfoItem(
-                  icon: Icons.calendar_month_outlined,
-                  label: AppLocalizations.of(context).text('dateOfBirth'),
-                  value: '09 March 2000',
-                ),
-                _InfoItem(
-                  icon: Icons.location_on_outlined,
-                  label: AppLocalizations.of(context).text('address'),
-                  value: 'Phumi Ti 1, Sangkat Ti 1, Khan Toul Kouk',
-                  showDivider: false,
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            _SectionTitle(title: AppLocalizations.of(context).text('contact')),
-            const SizedBox(height: 10),
-            _InfoCard(
-              children: [
-                _InfoItem(
-                  icon: Icons.phone_outlined,
-                  label: AppLocalizations.of(context).text('phone'),
-                  value: '016 446 646',
-                ),
-                _InfoItem(
-                  icon: Icons.email_outlined,
-                  label: AppLocalizations.of(context).text('email'),
-                  value: email,
-                  showDivider: false,
-                ),
-              ],
-            ),
-          ],
+      body: ProfileLoader(
+        builder: (context, user) => SafeArea(
+          top: false,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+            children: [
+              _ProfileCard(user: user),
+              const SizedBox(height: 20),
+              _SectionTitle(
+                title: AppLocalizations.of(context).text('personalInformation'),
+              ),
+              const SizedBox(height: 10),
+              _InfoCard(
+                children: [
+                  _InfoItem(
+                    icon: Icons.person_outline_rounded,
+                    label: AppLocalizations.of(context).text('gender'),
+                    value: user.gender ?? '—',
+                  ),
+                  _InfoItem(
+                    icon: Icons.calendar_month_outlined,
+                    label: AppLocalizations.of(context).text('dateOfBirth'),
+                    value: user.dateOfBirth?.split('T').first ?? '—',
+                  ),
+                  _InfoItem(
+                    icon: Icons.location_on_outlined,
+                    label: AppLocalizations.of(context).text('address'),
+                    value: user.address ?? '—',
+                    showDivider: false,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              _SectionTitle(
+                title: AppLocalizations.of(context).text('contact'),
+              ),
+              const SizedBox(height: 10),
+              _InfoCard(
+                children: [
+                  _InfoItem(
+                    icon: Icons.phone_outlined,
+                    label: AppLocalizations.of(context).text('phone'),
+                    value: user.phoneNumber ?? '—',
+                  ),
+                  _InfoItem(
+                    icon: Icons.email_outlined,
+                    label: AppLocalizations.of(context).text('email'),
+                    value: user.email,
+                    showDivider: false,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -96,20 +95,12 @@ class ProfileDetailScreen extends StatelessWidget {
 }
 
 class _ProfileCard extends StatelessWidget {
-  const _ProfileCard();
+  const _ProfileCard({required this.user});
+  final AuthUser user;
 
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
-    final settings = AppSettings.of(context);
-    final moduleName = switch (settings.moduleType) {
-      AppModuleType.lineMinistry => 'Line Ministry',
-      AppModuleType.privateSector => 'Private Sector',
-      AppModuleType.cdcSection => 'CDC Section',
-      AppModuleType.cefp => 'CEFP',
-      AppModuleType.cdcSecretariat => 'CDC Secretariat',
-    };
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -119,30 +110,14 @@ class _ProfileCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 58,
-            height: 58,
-            decoration: BoxDecoration(
-              color: isDark
-                  ? AppColors.darkPrimaryContainer
-                  : AppColors.subtleBackground(context),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.person_rounded,
-              color: isDark
-                  ? AppColors.darkPrimary
-                  : AppColors.secondaryText(context),
-              size: 34,
-            ),
-          ),
+          ProfileAvatar(path: user.avatar, size: 58),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'KHON VAKHIM',
+                  user.name,
                   style: TextStyle(
                     color: AppColors.primaryText(context),
                     fontSize: 15,
@@ -151,7 +126,7 @@ class _ProfileCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  moduleName,
+                  user.position ?? '—',
                   style: TextStyle(
                     color: AppColors.secondaryText(context),
                     fontSize: 12,
@@ -159,23 +134,6 @@ class _ProfileCard extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          ),
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: isDark
-                  ? AppColors.darkElevated
-                  : AppColors.subtleBackground(context),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              Icons.edit_outlined,
-              color: isDark
-                  ? AppColors.darkPrimary
-                  : AppColors.secondaryText(context),
-              size: 18,
             ),
           ),
         ],

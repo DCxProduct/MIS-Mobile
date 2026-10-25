@@ -1,3 +1,5 @@
+import '../../private_sector/dashboard/dashboard_screen.dart'
+    show SharedDashboardCharts;
 import '../../../screens/report/tabs/report_progress_report_tab.dart';
 import 'rgc_decision_card.dart';
 import 'progress_report_ministries_screen.dart';
@@ -13,10 +15,7 @@ import '../../../core/app_colors.dart';
 import '../../../core/widgets/pdf_attachment_preview.dart';
 import '../../../features/shared/dashboard/data/dashboard_repository.dart';
 import '../../../features/shared/dashboard/widgets/pswg_live_dashboard.dart';
-import '../dashboard/agencies_tab.dart';
-import '../dashboard/categories_tab.dart';
-import '../dashboard/overall_tab.dart';
-import '../dashboard/working_group_tab.dart';
+
 import '../../../screens/report/plenary_detail_screen.dart';
 import '../../../translations/app_localizations.dart';
 
@@ -426,113 +425,18 @@ class _ReportRow extends StatelessWidget {
   }
 }
 
-class _ReportDashboardTab extends StatefulWidget {
+class _ReportDashboardTab extends StatelessWidget {
   const _ReportDashboardTab();
-
-  @override
-  State<_ReportDashboardTab> createState() => _ReportDashboardTabState();
-}
-
-class _ReportDashboardTabState extends State<_ReportDashboardTab> {
-  int _selectedFilter = 0;
-
   @override
   Widget build(BuildContext context) {
+    final selection = ApiFilterScope.selection(context, 'dashboard');
     return PswgDataLoader(
       scope: DashboardScope.plenary,
-      builder: _buildContent,
-    );
-  }
-
-  Widget _buildContent(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final cards = PswgDataScope.maybeOf(context)?.cards;
-    final totalIssues = cards?['totalIssues'] ?? 0;
-    final solved = cards?['solved'] ?? 0;
-    final inProgress = cards?['inProgress'] ?? 0;
-    final notAddressed = cards?['notAddressed'] ?? 0;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          padding: EdgeInsets.zero,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          childAspectRatio: 2.26,
-          children: [
-            _MetricCard(
-              label: l10n.text('totalIssues'),
-              value: '$totalIssues',
-              background: const Color(0xFFDDEEFF),
-              icon: Icons.library_books_outlined,
-            ),
-            _MetricCard(
-              label: l10n.text('solved'),
-              value: '$solved/$totalIssues',
-              background: const Color(0xFFE5FAEF),
-              icon: Icons.fact_check_outlined,
-            ),
-            _MetricCard(
-              label: l10n.text('inProgress'),
-              value: '$inProgress/$totalIssues',
-              background: const Color(0xFFFFF8DC),
-              icon: Icons.add_box_outlined,
-            ),
-            _MetricCard(
-              label: l10n.text('notAddressed'),
-              value: '$notAddressed/$totalIssues',
-              background: const Color(0xFFFFEEEE),
-              icon: Icons.assignment_late_outlined,
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        _TotalPrimaryAgenciesCard(
-          value: '${cards?['totalPrimaryAgencies'] ?? 0}',
-        ),
-        const SizedBox(height: 16),
-        Container(
-          height: 34,
-          padding: const EdgeInsets.all(3),
-          decoration: BoxDecoration(
-            color: AppColors.cardBackground(context),
-            borderRadius: BorderRadius.circular(9),
-            border: Border.all(color: AppColors.border(context)),
-          ),
-          child: Row(
-            children: [
-              for (var index = 0; index < 4; index++)
-                Expanded(
-                  child: _SubFilterChip(
-                    label: l10n.text(
-                      [
-                        'overall',
-                        'agencies',
-                        'workingGroup',
-                        'categories',
-                      ][index],
-                    ),
-                    selected: _selectedFilter == index,
-                    onTap: () => setState(() => _selectedFilter = index),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        if (_selectedFilter == 1)
-          const CdcSecretariatAgenciesTab()
-        else if (_selectedFilter == 2)
-          const CdcSecretariatWorkingGroupTab()
-        else if (_selectedFilter == 3)
-          const CdcSecretariatCategoriesTab()
-        else
-          const CdcSecretariatOverallTab(),
-      ],
+      selection: selection,
+      progressReportId: int.tryParse(
+        selection.toQuery()['progressReportId'] ?? '',
+      ),
+      builder: (_) => const SharedDashboardCharts(plenary: true),
     );
   }
 }
@@ -713,200 +617,6 @@ class _PercentageBadge extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurface,
               fontSize: 11,
               fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SubFilterChip extends StatelessWidget {
-  const _SubFilterChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.accent(context)
-              : (isDark ? AppColors.darkCard : Colors.white),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            label,
-            style: TextStyle(
-              color: selected
-                  ? Colors.white
-                  : (isDark
-                        ? AppColors.secondaryText(context)
-                        : const Color(0xFF4C5563)),
-              fontSize: 10,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MetricCard extends StatelessWidget {
-  const _MetricCard({
-    required this.label,
-    required this.value,
-    required this.background,
-    required this.icon,
-  });
-
-  final String label;
-  final String value;
-  final Color background;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(11, 10, 10, 9),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : background,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : Colors.transparent,
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: isDark
-                        ? AppColors.secondaryText(context)
-                        : AppColors.mutedText,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 7),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      color: isDark ? Colors.white : const Color(0xFF27364A),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: isDark
-                  ? AppColors.darkBorder
-                  : Colors.white.withValues(alpha: 0.86),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              icon,
-              color: isDark ? const Color(0xFFE3E8EF) : const Color(0xFF4C5563),
-              size: 21,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TotalPrimaryAgenciesCard extends StatelessWidget {
-  const _TotalPrimaryAgenciesCard({required this.value});
-
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(context).text('totalPrimaryAgencies'),
-                style: const TextStyle(
-                  color: AppColors.mutedText,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                value,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkBorder : const Color(0xFFFAFAFA),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: isDark ? AppColors.darkBorder : const Color(0xFFE5E8ED),
-              ),
-            ),
-            child: const Icon(
-              Icons.calendar_month_outlined,
-              color: Color(0xFF4C5563),
-              size: 20,
             ),
           ),
         ],

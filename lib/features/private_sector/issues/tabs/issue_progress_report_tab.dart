@@ -8,14 +8,24 @@ import '../../../shared/issues/widgets/issue_display.dart';
 import '../issue_progress_report_detail_screen.dart';
 
 class IssueProgressReportTab extends StatelessWidget {
-  const IssueProgressReportTab({super.key, this.issue, this.onRefresh});
+  const IssueProgressReportTab({
+    super.key,
+    this.issue,
+    this.onRefresh,
+    this.fallbackIssue,
+  });
 
   final WorkingGroupIssue? issue;
+  final WorkingGroupIssue? fallbackIssue;
   final Future<void> Function()? onRefresh;
 
   @override
   Widget build(BuildContext context) {
-    final reports = issue?.progressReports ?? const <IssueProgressReport>[];
+    final reports = issue?.reportsIncluded == true
+        ? issue!.progressReports
+        : fallbackIssue?.progressReports ??
+              issue?.progressReports ??
+              const <IssueProgressReport>[];
     if (reports.isEmpty) {
       return LayoutBuilder(
         builder: (context, constraints) => ListView(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/app_settings.dart';
+import '../../core/config/module_config.dart';
 import '../../core/widgets/editor_content.dart';
 import '../../core/widgets/pdf_attachment_preview.dart';
 import '../../features/shared/issues/widgets/issue_agency_logo.dart';
@@ -105,7 +106,10 @@ class CdcGpsfRgcDecisionDetail extends StatelessWidget {
       children: [
         Text(
           decision.plenaryName.isEmpty
-              ? l10n.text('rgcDecision')
+              ? l10n.api(
+                  'issue_matrix_rgc_decision.rgc.detail.rgc_fallback',
+                  fallback: l10n.text('rgcDecision'),
+                )
               : decision.plenaryName,
           style: const TextStyle(
             fontSize: 17,
@@ -155,7 +159,9 @@ class CdcGpsfRgcDecisionDetail extends StatelessWidget {
                       _ => const Color(0xFFEF4444),
                     },
                   ),
-                  if (detail.workflowStatus.isNotEmpty)
+                  if (detail.workflowStatus.isNotEmpty &&
+                      AppSettings.of(context).moduleType !=
+                          AppModuleType.lineMinistry)
                     _DetailMetadataField(
                       label: '${l10n.text('status')} RGC',
                       value: l10n.status(detail.workflowStatus),
@@ -232,25 +238,28 @@ class CdcGpsfRgcDecisionDetail extends StatelessWidget {
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 12),
-        _DecisionProgressReports(detail: detail),
+        RgcDecisionProgressReports(detail: detail),
       ],
     );
   }
 }
 
-class _DecisionProgressReports extends StatefulWidget {
-  const _DecisionProgressReports({required this.detail});
+class RgcDecisionProgressReports extends StatefulWidget {
+  const RgcDecisionProgressReports({super.key, required this.detail});
   final RgcDecisionDetail detail;
   @override
-  State<_DecisionProgressReports> createState() =>
-      _DecisionProgressReportsState();
+  State<RgcDecisionProgressReports> createState() =>
+      RgcDecisionProgressReportsState();
 }
 
-class _DecisionProgressReportsState extends State<_DecisionProgressReports> {
+class RgcDecisionProgressReportsState
+    extends State<RgcDecisionProgressReports> {
   int _selected = 0;
   @override
   Widget build(BuildContext context) => TranslationPageScope(
-    page: 'cdc_rgc_report',
+    page: AppSettings.of(context).moduleType == AppModuleType.lineMinistry
+        ? 'plenary_rgc_decisions'
+        : 'cdc_rgc_report',
     child: Builder(builder: _buildContent),
   );
 
@@ -262,7 +271,13 @@ class _DecisionProgressReportsState extends State<_DecisionProgressReports> {
     final report = update.report;
     String title(int index) {
       final item = reports[index].report;
-      if (item.hasGeneratedTitle && item.title.isNotEmpty) {
+      if (const {
+            AppModuleType.cdcSecretariat,
+            AppModuleType.cdcSection,
+            AppModuleType.cefp,
+          }.contains(AppSettings.of(context).moduleType) &&
+          item.hasGeneratedTitle &&
+          item.title.isNotEmpty) {
         return l10n
             .api(
               'issue_matrix_rgc_decision.rgc.report.tab',
@@ -302,13 +317,17 @@ class _DecisionProgressReportsState extends State<_DecisionProgressReports> {
         ),
         _section(
           context,
-          'referenceName',
-          _content(report.richText['referenceName'] ?? report.referenceName),
+          'rgcReportReferenceName',
+          _content(
+            report.referenceName.trim().isEmpty
+                ? l10n.text('rgcReportNoReference')
+                : report.richText['referenceName'] ?? report.referenceName,
+          ),
         ),
         if (report.attachmentPaths.isNotEmpty) ...[
           const SizedBox(height: 16),
           Text(
-            l10n.text('attachmentsLabel'),
+            l10n.text('rgcReportReferenceAttachment'),
             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
           ),
           for (final path in report.attachmentPaths)
@@ -321,7 +340,17 @@ class _DecisionProgressReportsState extends State<_DecisionProgressReports> {
                   name: report.attachmentNames[path],
                 ),
                 child: ListTile(
-                  contentPadding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(
+                      color: AppColors.border(context).withValues(alpha: 0.6),
+                      width: 0.8,
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   leading: const Icon(
                     Icons.picture_as_pdf,
                     color: Color(0xFFEF4444),
@@ -349,12 +378,12 @@ class _DecisionProgressReportsState extends State<_DecisionProgressReports> {
         ),
         _section(
           context,
-          'indicators',
+          'rgcReportSolutionIndicators',
           _content(report.richText['indicators'] ?? report.indicators),
         ),
         _section(
           context,
-          'implementationChallenges',
+          'rgcReportChallenges',
           _content(
             report.richText['implementationChallenges'] ??
                 report.implementationChallenges,
@@ -362,7 +391,7 @@ class _DecisionProgressReportsState extends State<_DecisionProgressReports> {
         ),
         _section(
           context,
-          'request',
+          'requests',
           _content(report.richText['requests'] ?? report.requests),
         ),
         _section(
@@ -490,6 +519,10 @@ Widget _section(BuildContext context, String labelKey, Widget child) => Padding(
         decoration: BoxDecoration(
           color: AppColors.subtleBackground(context),
           borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: AppColors.border(context).withValues(alpha: 0.6),
+            width: 0.8,
+          ),
         ),
         child: child,
       ),

@@ -62,6 +62,16 @@ class AuthRepository {
     }
   }
 
+  Future<AuthUser> getProfile() async {
+    if (_staticUser != null) return _staticUser!;
+    final data = await _api.get('users/me');
+    try {
+      return AuthUser.fromJson(data);
+    } on FormatException {
+      throw const ApiException('The server returned an invalid profile.');
+    }
+  }
+
   Future<void> forgotPassword(String email) => _api.postAction(
     'auth/forgot-password',
     body: {'email': email.trim().toLowerCase()},

@@ -25,7 +25,7 @@ class CdcIssueProgressReportCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context, page: 'issue_report');
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -41,7 +41,7 @@ class CdcIssueProgressReportCard extends StatelessWidget {
                 ? 'Report S1 2025'
                 : report!.title.isEmpty
                 ? l10n.text('progressReport')
-                : report!.title,
+                : issueProgressReportTitle(context, report!),
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 12),

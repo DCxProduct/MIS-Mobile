@@ -82,7 +82,7 @@ class _RgcDecisionsLoaderState extends State<RgcDecisionsLoader> {
       return settings.rgcDecisions.getMinistryDecisions(
         userId: settings.currentUser?.id,
         filters: _query ?? const {},
-        includePlenaryDetails: true,
+        includePlenaryDetails: widget.includePlenaryDetails,
       );
     }
     return settings.rgcDecisions.getDecisions(

@@ -8,6 +8,8 @@ import 'km.dart';
 import 'pswg_translation_keys.dart';
 import 'ministry_translation_keys.dart';
 import 'cdcgpsf_translation_keys.dart';
+import 'cdc_translation_keys.dart';
+import 'cefp_translation_keys.dart';
 
 /// Carries the web page's translation namespace through shared widgets.
 class TranslationPageScope extends InheritedWidget {
@@ -41,18 +43,32 @@ class AppLocalizations {
   final AppModuleType module;
   bool get _isMinistry => module == AppModuleType.lineMinistry;
   bool get _isCdcGpsf => module == AppModuleType.cdcSecretariat;
+  bool get _isCdc => module == AppModuleType.cdcSection;
+  bool get _isCefp => module == AppModuleType.cefp;
   bool get _usesSharedWebKeys => _isMinistry || _isCdcGpsf;
-  Map<String, Map<String, String>> get _pageKeys => _isCdcGpsf
+  Map<String, Map<String, String>> get _pageKeys => _isCefp
+      ? cefpPageKeys
+      : _isCdc
+      ? cdcPageKeys
+      : _isCdcGpsf
       ? cdcGpsfPageKeys
       : _isMinistry
       ? ministryPageKeys
       : pswgPageKeys;
-  Map<String, String> get _commonKeys => _isCdcGpsf
+  Map<String, String> get _commonKeys => _isCefp
+      ? cefpCommonKeys
+      : _isCdc
+      ? cdcCommonKeys
+      : _isCdcGpsf
       ? cdcGpsfCommonKeys
       : _isMinistry
       ? ministryCommonKeys
       : pswgCommonKeys;
-  Map<String, String> get _pageParents => _isCdcGpsf
+  Map<String, String> get _pageParents => _isCefp
+      ? cefpPageParents
+      : _isCdc
+      ? cdcPageParents
+      : _isCdcGpsf
       ? cdcGpsfPageParents
       : _isMinistry
       ? ministryPageParents
@@ -70,12 +86,22 @@ class AppLocalizations {
 
   String api(String key, {required String fallback}) {
     final value =
-        dictionary[_usesSharedWebKeys ? ministryApiKey(key, page) : key];
+        dictionary[_isCefp
+            ? cefpApiKey(key)
+            : _isCdc
+            ? cdcApiKey(key)
+            : _usesSharedWebKeys
+            ? ministryApiKey(key, page)
+            : key];
     return value == null || value.trim().isEmpty ? fallback : value;
   }
 
   String filterLabel(String key) => api(
-    (_isCdcGpsf
+    (_isCefp
+            ? cefpFilterKeys
+            : _isCdc
+            ? cdcFilterKeys
+            : _isCdcGpsf
             ? cdcGpsfFilterKeys
             : _isMinistry
             ? ministryFilterKeys
@@ -87,6 +113,18 @@ class AppLocalizations {
   String? _apiStatus(String code) {
     final normalized = code.toLowerCase();
     final token = normalized == 'drafted' ? 'draft' : normalized;
+    if (_isCdc || _isCefp) {
+      final prefix = switch (page) {
+        'cdc_rgc' ||
+        'cdc_rgc_detail' ||
+        'cdc_rgc_report' => 'rgc_decision.status',
+        'cdc_issue_matrix' || 'cdc_issue_detail' => 'cdc_issue_matrix.status',
+        _ => null,
+      };
+      final key = '$prefix.$token';
+      final value = dictionary[_isCefp ? cefpApiKey(key) : key];
+      if (value != null && value.trim().isNotEmpty) return value;
+    }
     if (_isCdcGpsf) {
       final statusKey = switch (page) {
         'cdc_rgc' || 'cdc_rgc_detail' || 'plenary_rgc_decisions' =>
@@ -154,7 +192,8 @@ class AppLocalizations {
     if (translated != null) return translated;
     var key = switch (normalized) {
       'DRAFT' => 'draft',
-      'DRAFTED' || 'SAVED' => 'drafted',
+      'DRAFTED' => 'drafted',
+      'SAVED' => 'saved',
       'NEW_SUBMISSION' => 'newSubmission',
       'LIVE' => 'live',
       'REVIEWED' => 'reviewed',
@@ -188,6 +227,7 @@ class AppLocalizations {
         'pswgReviewed',
         'draft',
         'drafted',
+        'saved',
         'submitted',
         'completed',
         'complete',
@@ -238,6 +278,7 @@ class AppLocalizations {
     const statusCodes = {
       'draft': 'DRAFT',
       'drafted': 'DRAFTED',
+      'saved': 'SAVED',
       'newSubmission': 'NEW_SUBMISSION',
       'submitted': 'SUBMITTED',
       'completed': 'COMPLETED',

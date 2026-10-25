@@ -222,6 +222,9 @@ const ministryPageKeys = <String, Map<String, String>>{
     'governmentAgency': 'meeting_summary.issue_dialog.government_agency',
   },
   'meeting_summary': {
+    'summaryReferenceDocument': 'meeting_summary.details.summary_reference',
+    'meetingDocument': 'meeting_summary.details.meeting_document',
+    'sentBy': 'meeting_summary.details.sent_by',
     'issueDocument': 'meeting_summary.issue_dialog.issue_document',
     'noMeetingSummaries': 'meeting_summary.empty_summaries',
     'noIssuesFound': 'meeting_summary.issue_table.no_issues',
@@ -479,6 +482,11 @@ const ministryPageKeys = <String, Map<String, String>>{
     'report': 'plenary_plenaries.title',
   },
   'plenary_rgc_decisions': {
+    'implementationDate': 'plenary_rgc_decisions.rgc.date_of_issue_solution',
+    'rgcReportReferenceAttachment': 'plenary_rgc_decisions.rgc.attachment',
+    'rgcReportSolutionIndicators': 'plenary_rgc_decisions.rgc.indicators',
+    'rgcReportChallenges': 'plenary_rgc_decisions.rgc.implementation_challenges',
+    'requests': 'plenary_rgc_decisions.rgc.request',
     'plenary': 'plenary_rgc_decisions.rgc.plenary',
     'meetingRequestDetails': 'plenary_rgc_decisions.core.plenary_detail',
     'deadline': 'plenary_rgc_decisions.core.deadline',

@@ -212,6 +212,8 @@ class MeetingSummaryIssue {
       referencePath: _path(reference),
       attachmentName: documentOriginalName(attachment),
       referenceName: documentOriginalName(reference),
+      attachmentSize: (_object(attachment)['size'] as num?)?.toInt(),
+      referenceSize: (_object(reference)['size'] as num?)?.toInt(),
     );
   }
 
@@ -233,6 +235,8 @@ class MeetingSummaryIssue {
     required this.referencePath,
     required this.attachmentName,
     required this.referenceName,
+    required this.attachmentSize,
+    required this.referenceSize,
   });
 
   final String title, category, status, submittedBy;
@@ -246,6 +250,7 @@ class MeetingSummaryIssue {
   String get agency => governmentAgencies[1] ?? '';
   final String? attachmentPath, referencePath;
   final String? attachmentName, referenceName;
+  final int? attachmentSize, referenceSize;
 
   static Map<String, dynamic> _object(Object? value) =>
       value is Map<String, dynamic> ? value : const {};

@@ -5,6 +5,7 @@ import '../../../core/app_colors.dart';
 import '../../../features/shared/meetings/data/progress_report.dart';
 import '../../../features/shared/meetings/widgets/progress_reports_loader.dart';
 import '../../../translations/app_localizations.dart';
+import '../../../translations/app_language.dart';
 import '../progress_report_detail_loader.dart';
 
 class ReportProgressReportTab extends StatelessWidget {
@@ -68,6 +69,19 @@ class _ProgressReportCard extends StatelessWidget {
   final Widget Function(ProgressReport)? detailBuilder;
   final ProgressReport report;
 
+  String _scheduleLabel(BuildContext context, {required bool meeting}) {
+    final l10n = AppLocalizations.of(context, page: 'progress_report');
+    final number = l10n.language == AppLanguage.khmer
+        ? (meeting ? '១' : '២')
+        : (meeting ? '1st' : '2nd');
+    return l10n
+        .api(
+          'progress_report.table.schedule_names.${meeting ? 'meeting' : 'revision_deadline'}',
+          fallback: l10n.text(meeting ? 'firstMeeting' : 'secondDeadline'),
+        )
+        .replaceAll('{number}', number);
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -114,18 +128,12 @@ class _ProgressReportCard extends StatelessWidget {
           ),
           const SizedBox(height: 9),
           _ReportDateRow(
-            label: AppLocalizations.of(
-              context,
-              page: 'progress_report',
-            ).text('firstMeeting'),
+            label: _scheduleLabel(context, meeting: true),
             value: _date(context, report.firstMeeting),
           ),
           const SizedBox(height: 9),
           _ReportDateRow(
-            label: AppLocalizations.of(
-              context,
-              page: 'progress_report',
-            ).text('secondDeadline'),
+            label: _scheduleLabel(context, meeting: false),
             value: _date(context, report.secondDeadline),
           ),
           const SizedBox(height: 9),

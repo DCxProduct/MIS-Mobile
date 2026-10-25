@@ -17,7 +17,10 @@ class CdcSectionIssuesScreenView extends StatelessWidget {
       previewStatus: 'Solved',
       issueDetailBuilder: (title, category, issue) =>
           issue != null &&
-              AppSettings.of(context).moduleType == AppModuleType.cdcSection
+              const {
+                AppModuleType.cdcSection,
+                AppModuleType.cefp,
+              }.contains(AppSettings.of(context).moduleType)
           ? CdcIssueDetailLoader(
               issueId: issue.id,
               generalIssue: true,

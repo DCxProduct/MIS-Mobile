@@ -3,6 +3,8 @@ import '../../shared/widgets/list_screen_header.dart';
 
 import '../../../core/app_colors.dart';
 import '../../../core/app_settings.dart';
+import '../../../core/config/module_config.dart';
+import '../../cdc_secretariat/reports/rgc_decision_card.dart';
 import '../../../translations/app_localizations.dart';
 import '../../shared/meetings/data/rgc_decision.dart';
 import '../../shared/meetings/data/rgc_decisions_repository.dart';
@@ -41,10 +43,11 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
       _error = null;
     });
     try {
-      // Complete pagination before grouping so each ministry/plenary card
-      // contains all its decisions, including those on later API pages.
       final decisions = await _repository!.getDecisions(
-        includePlenaryDetails: true,
+        includePlenaryDetails: !const {
+          AppModuleType.cdcSection,
+          AppModuleType.cefp,
+        }.contains(AppSettings.of(context).moduleType),
         filters: _filters.toQuery(),
       );
       if (!mounted || version != _loadVersion) return;
@@ -67,7 +70,11 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
     final result = await Navigator.of(context).push<FilterSelection>(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (_) => ApiFilterSheet(initial: _filters, load: catalogs.rgc),
+        builder: (_) => ApiFilterSheet(
+          translationPage: 'cdc_rgc',
+          initial: _filters,
+          load: catalogs.rgc,
+        ),
       ),
     );
     if (!mounted || result == null) return;
@@ -76,13 +83,21 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => TranslationPageScope(
+    page: 'cdc_rgc',
+    child: Builder(builder: _buildContent),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final reports = RgcDecisionGroup.fromDecisions(
-      _decisions
-          .where((decision) => _filters.matchesLocal(decision.filterValues))
-          .toList(),
-    );
+    final individualDecisions = const {
+      AppModuleType.cdcSection,
+      AppModuleType.cefp,
+    }.contains(AppSettings.of(context).moduleType);
+    final filtered = _decisions
+        .where((decision) => _filters.matchesLocal(decision.filterValues))
+        .toList();
+    final reports = RgcDecisionGroup.fromDecisions(filtered);
     return ColoredBox(
       color: AppColors.isDark(context)
           ? AppColors.darkBackground
@@ -107,9 +122,21 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
                 : ListView.separated(
                     key: const ValueKey('cdc-rgc-reports'),
                     padding: const EdgeInsets.fromLTRB(14, 12, 14, 96),
-                    itemCount: reports.length + 1,
-                    separatorBuilder: (_, _) => const SizedBox(height: 16),
+                    itemCount:
+                        (individualDecisions
+                            ? filtered.length
+                            : reports.length) +
+                        1,
+                    separatorBuilder: (_, _) =>
+                        SizedBox(height: individualDecisions ? 0 : 16),
                     itemBuilder: (context, index) {
+                      if (individualDecisions) {
+                        return index < filtered.length
+                            ? CdcGpsfRgcDecisionCard(decision: filtered[index])
+                            : filtered.isEmpty
+                            ? Center(child: Text(l10n.text('noRgcDecisions')))
+                            : const SizedBox.shrink();
+                      }
                       if (index < reports.length) {
                         return _ReportCard(decision: reports[index]);
                       }

@@ -305,7 +305,10 @@ class _MeetingSummaryDetailScreenState
       backgroundColor: Colors.transparent,
       builder: (context) =>
           issue != null &&
-              AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat
+              const {
+                AppModuleType.cdcSecretariat,
+                AppModuleType.lineMinistry,
+              }.contains(AppSettings.of(context).moduleType)
           ? CdcSummaryIssueDetails(issue: issue)
           : _IssueDetailsSheet(issue: issue),
     );
@@ -487,10 +490,12 @@ class _SummaryInfoGrid extends StatelessWidget {
             SizedBox(width: 24),
             Expanded(
               child: _DocumentBlock(
-                label: AppLocalizations.of(
-                  context,
-                  page: 'meeting_summary',
-                ).text('meetingRequestDocument'),
+                label: AppLocalizations.of(context, page: 'meeting_summary')
+                    .text(
+                      summary.requestDocumentPath != null
+                          ? 'meetingRequestDocument'
+                          : 'meetingDocument',
+                    ),
                 path:
                     summary.requestDocumentPath ?? summary.meetingDocumentPath,
                 name: summary.requestDocumentPath != null

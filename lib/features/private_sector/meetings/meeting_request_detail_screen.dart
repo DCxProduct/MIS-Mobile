@@ -690,7 +690,9 @@ void _showIssueDetailsSheet(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              AppLocalizations.of(context).text('submittedBy'),
+                              AppLocalizations.of(
+                                context,
+                              ).text('governmentAgency'),
                               style: TextStyle(
                                 color: AppColors.mutedText,
                                 fontSize: 11,
@@ -698,13 +700,29 @@ void _showIssueDetailsSheet(
                               ),
                             ),
                             SizedBox(height: 4),
-                            Text(
-                              issue?.submittedBy ??
-                                  'Agriculture and Agro-In...',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
+                            Row(
+                              children: [
+                                if ((issue?.agencyNamesByOrder[1] ?? '')
+                                    .isNotEmpty) ...[
+                                  IssueAgencyLogo(
+                                    path: issue?.agencyLogosByOrder[1] ?? '',
+                                    size: 22,
+                                    iconSize: 14,
+                                  ),
+                                  const SizedBox(width: 6),
+                                ],
+                                Expanded(
+                                  child: Text(
+                                    (issue?.agencyNamesByOrder[1] ?? '').isEmpty
+                                        ? '—'
+                                        : issue!.agencyNamesByOrder[1]!,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -893,6 +911,59 @@ void _showIssueDetailsSheet(
                             style: TextStyle(fontSize: 11),
                           ),
                         ),
+                        if (issue != null) ...[
+                          for (final order in [2, 3, 4, 5])
+                            Container(
+                              margin: const EdgeInsets.only(left: 10),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.fieldBackground(context),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: AppColors.border(
+                                    context,
+                                  ).withValues(alpha: 0.5),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '${AppLocalizations.of(context).text(switch (order) {
+                                      2 => 'governmentSecondAgency',
+                                      3 => 'governmentThirdAgency',
+                                      4 => 'governmentFourthAgency',
+                                      _ => 'governmentFifthAgency',
+                                    })} : ',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.mutedText,
+                                    ),
+                                  ),
+                                  if ((issue.agencyNamesByOrder[order] ?? '')
+                                      .isNotEmpty) ...[
+                                    IssueAgencyLogo(
+                                      path:
+                                          issue.agencyLogosByOrder[order] ?? '',
+                                      size: 18,
+                                      iconSize: 12,
+                                    ),
+                                    const SizedBox(width: 6),
+                                  ],
+                                  Text(
+                                    (issue.agencyNamesByOrder[order] ?? '')
+                                            .isEmpty
+                                        ? '—'
+                                        : issue.agencyNamesByOrder[order]!,
+                                    style: const TextStyle(fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
                       ],
                     ),
                   ),

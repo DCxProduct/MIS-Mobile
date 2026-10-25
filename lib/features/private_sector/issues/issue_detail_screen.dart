@@ -169,7 +169,11 @@ class _IssueDetailScreenState extends State<IssueDetailScreen>
         Expanded(
           child: RefreshIndicator(
             onRefresh: _refresh,
-            child: IssueProgressReportTab(issue: _detail, onRefresh: _refresh),
+            child: IssueProgressReportTab(
+              issue: _detail,
+              fallbackIssue: widget.issue,
+              onRefresh: _refresh,
+            ),
           ),
         ),
       ],

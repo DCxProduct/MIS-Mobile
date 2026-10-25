@@ -17,6 +17,89 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 void main() {
+  test('summary 3 preserves both supplied issue records independently', () {
+    final data =
+        jsonDecode(
+              File(
+                'test/fixtures/ministry_summary_3.json',
+              ).readAsStringSync().replaceFirst('\uFEFF', ''),
+            )
+            as Map<String, dynamic>;
+    final summary = MeetingSummary(data);
+    expect(summary.issues, hasLength(2));
+    for (var index = 0; index < summary.issues.length; index++) {
+      final issue = summary.issues[index];
+      final source = data['issues'][index];
+      expect(issue.title, source['issue']);
+      expect(issue.descriptionHtml, source['issueDescription']);
+      expect(issue.rgcDecisionHtml, source['rgcDecision']);
+      expect(issue.nextStepHtml, source['nextStep']);
+      expect(issue.referencePath, source['referenceDocument']['path']);
+      expect(issue.attachmentSize, 1947246);
+      expect(issue.referenceSize, 1947246);
+      expect(issue.submittedBy, 'MAFF');
+    }
+    expect(summary.issues.first.category, 'General');
+    expect(summary.issues.last.category, 'Regulation');
+    expect(summary.issues.first.remarkHtml, isEmpty);
+    expect(summary.issues.last.remarkHtml, isNotEmpty);
+  });
+  testWidgets('ministry summary opens complete selected issue data', (
+    tester,
+  ) async {
+    final settings = AppSettingsController()
+      ..setLanguage(AppLanguage.english)
+      ..setModuleType(AppModuleType.lineMinistry);
+    addTearDown(settings.dispose);
+    final summary = MeetingSummary({
+      'id': 3,
+      'issues': [
+        {
+          'id': 17,
+          'issue': 'Selected ministry issue',
+          'category': 'General',
+          'status': 'IN_PROGRESS',
+          'issueDescription': '<p>Full description</p>',
+          'recommendation': '<p>Full recommendation</p>',
+          'rgcDecision': '<p>Selected RGC decision</p>',
+          'nextStep': '<p>Selected next step</p>',
+          'remark': '<p>Selected remark</p>',
+          'escalation': 'CDC',
+          'agencies': [
+            {'order': 1, 'name': 'MAFF', 'logo': '/maff.png'},
+          ],
+          'referenceDocument': {
+            'path': '/solution.pdf',
+            'name': 'Solution.pdf',
+          },
+        },
+      ],
+    });
+    await tester.pumpWidget(
+      AppSettings(
+        controller: settings,
+        child: MaterialApp(home: MeetingSummaryDetailScreen(summary: summary)),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Selected ministry issue'));
+    await tester.pumpAndSettle();
+    expect(find.byType(CdcSummaryIssueDetails), findsOneWidget);
+    expect(find.text('MAFF'), findsOneWidget);
+    expect(find.text('Solution.pdf'), findsOneWidget);
+    final scroll = find.descendant(
+      of: find.byType(CdcSummaryIssueDetails),
+      matching: find.byType(Scrollable),
+    );
+    await tester.scrollUntilVisible(
+      find.text('Selected next step'),
+      200,
+      scrollable: scroll.first,
+    );
+    expect(find.text('Selected RGC decision'), findsOneWidget);
+    expect(find.text('Selected next step'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
   testWidgets('CDC GPSF summary issue shows the complete web fields', (
     tester,
   ) async {
@@ -81,7 +164,7 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('Remark'),
       300,
-      scrollable: sheetScroll,
+      scrollable: sheetScroll.first,
     );
     expect(find.text('Remark'), findsOneWidget);
     expect(find.text('Next Step'), findsOneWidget);
@@ -109,21 +192,26 @@ void main() {
     'summary detail API fills sender and date without changing the UI',
     (tester) async {
       var calls = 0;
-      final settings = AppSettingsController(
-        authRepository: AuthRepository(
-          ApiClient(
-            client: MockClient((request) async {
-              calls++;
-              expect(request.url.path, '/api/v1/meeting-summaries/4');
-              return http.Response(
-                jsonEncode({'success': true, 'data': webSummary}),
-                200,
-                headers: {'content-type': 'application/json; charset=utf-8'},
-              );
-            }),
-          ),
-        ),
-      )..setLanguage(AppLanguage.english);
+      final settings =
+          AppSettingsController(
+              authRepository: AuthRepository(
+                ApiClient(
+                  client: MockClient((request) async {
+                    calls++;
+                    expect(request.url.path, '/api/v1/meeting-summaries/4');
+                    return http.Response(
+                      jsonEncode({'success': true, 'data': webSummary}),
+                      200,
+                      headers: {
+                        'content-type': 'application/json; charset=utf-8',
+                      },
+                    );
+                  }),
+                ),
+              ),
+            )
+            ..setLanguage(AppLanguage.english)
+            ..setModuleType(AppModuleType.privateSector);
       addTearDown(settings.dispose);
       await tester.pumpWidget(
         AppSettings(
@@ -254,40 +342,45 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       var calls = 0;
-      final settings = AppSettingsController(
-        authRepository: AuthRepository(
-          ApiClient(
-            client: MockClient((request) async {
-              calls++;
-              expect(request.url.path, '/api/v1/meeting-summaries/26');
-              return http.Response(
-                jsonEncode({
-                  'success': true,
-                  'data': {
-                    'id': 26,
-                    'meeting': {
-                      'title': 'Actual meeting',
-                      'meetingDate': '2026-10-19T00:00:00Z',
-                      'startTime': '13:30',
-                      'location': 'Actual room',
-                    },
-                    'issues': [
-                      issueJson,
-                      {
-                        'issue': 'Another issue',
-                        'submittedBy': 'Another submitter',
-                        'submittedDate': '2024-01-01T00:00:00Z',
+      final settings =
+          AppSettingsController(
+              authRepository: AuthRepository(
+                ApiClient(
+                  client: MockClient((request) async {
+                    calls++;
+                    expect(request.url.path, '/api/v1/meeting-summaries/26');
+                    return http.Response(
+                      jsonEncode({
+                        'success': true,
+                        'data': {
+                          'id': 26,
+                          'meeting': {
+                            'title': 'Actual meeting',
+                            'meetingDate': '2026-10-19T00:00:00Z',
+                            'startTime': '13:30',
+                            'location': 'Actual room',
+                          },
+                          'issues': [
+                            issueJson,
+                            {
+                              'issue': 'Another issue',
+                              'submittedBy': 'Another submitter',
+                              'submittedDate': '2024-01-01T00:00:00Z',
+                            },
+                          ],
+                        },
+                      }),
+                      200,
+                      headers: {
+                        'content-type': 'application/json; charset=utf-8',
                       },
-                    ],
-                  },
-                }),
-                200,
-                headers: {'content-type': 'application/json; charset=utf-8'},
-              );
-            }),
-          ),
-        ),
-      )..setLanguage(AppLanguage.english);
+                    );
+                  }),
+                ),
+              ),
+            )
+            ..setLanguage(AppLanguage.english)
+            ..setModuleType(AppModuleType.privateSector);
       addTearDown(settings.dispose);
       await tester.pumpWidget(
         AppSettings(
@@ -387,7 +480,8 @@ void main() {
     'missing API metadata stays empty without fabricated date, time or agencies',
     (tester) async {
       final settings = AppSettingsController()
-        ..setLanguage(AppLanguage.english);
+        ..setLanguage(AppLanguage.english)
+        ..setModuleType(AppModuleType.privateSector);
       addTearDown(settings.dispose);
       await tester.pumpWidget(
         AppSettings(
@@ -420,4 +514,3 @@ void main() {
     },
   );
 }
-

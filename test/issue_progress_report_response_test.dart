@@ -131,89 +131,95 @@ void main() {
     );
   });
 
-  testWidgets('CDC Issues opens the selected working-group issue report', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    final requestedDetails = <String>[];
-    final api = ApiClient(
-      client: MockClient((request) async {
-        final path = request.url.path;
-        Object data;
-        if (path == '/api/v1/working-group-issues/issue-matrix/summary') {
-          data = {
-            'totalIssues': 2,
-            'solved': 0,
-            'inProgress': 2,
-            'notAddressed': 0,
-            'totalPrimaryAgencies': 1,
-          };
-        } else if (path == '/api/v1/working-group-issues/issue-matrix') {
-          data = {
-            'items': [
-              {
-                'id': 2,
-                'title': 'General issue',
-                'category': {'name': 'General'},
-                'issueStatus': {'code': 'IN_PROGRESS'},
-              },
-              {
+  for (final module in [AppModuleType.cdcSection, AppModuleType.cefp]) {
+    testWidgets(
+      '${module.name} Issues opens the selected working-group issue report',
+      (tester) async {
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final requestedDetails = <String>[];
+        final api = ApiClient(
+          client: MockClient((request) async {
+            final path = request.url.path;
+            Object data;
+            if (path == '/api/v1/working-group-issues/issue-matrix/summary') {
+              data = {
+                'totalIssues': 2,
+                'solved': 0,
+                'inProgress': 2,
+                'notAddressed': 0,
+                'totalPrimaryAgencies': 1,
+              };
+            } else if (path == '/api/v1/working-group-issues/issue-matrix') {
+              data = {
+                'items': [
+                  {
+                    'id': 2,
+                    'title': 'General issue',
+                    'category': {'name': 'General'},
+                    'issueStatus': {'code': 'IN_PROGRESS'},
+                  },
+                  {
+                    'id': 1,
+                    'title': 'Market issue',
+                    'category': {'name': 'Market Access'},
+                    'issueStatus': {'code': 'IN_PROGRESS'},
+                  },
+                ],
+                'meta': {'totalPages': 1},
+              };
+            } else {
+              requestedDetails.add(path);
+              expect(path, '/api/v1/working-group-issues/1');
+              data = {
                 'id': 1,
                 'title': 'Market issue',
                 'category': {'name': 'Market Access'},
-                'issueStatus': {'code': 'IN_PROGRESS'},
-              },
-            ],
-            'meta': {'totalPages': 1},
-          };
-        } else {
-          requestedDetails.add(path);
-          expect(path, '/api/v1/working-group-issues/1');
-          data = {
-            'id': 1,
-            'title': 'Market issue',
-            'category': {'name': 'Market Access'},
-            'progressReports': [
-              {
-                'progressReportId': 2,
-                'year': 2026,
-                'semester': 'S2',
-                'sourceOfVerification': 'System reference name',
-              },
-            ],
-          };
-        }
-        return http.Response.bytes(
-          utf8.encode(jsonEncode({'success': true, 'data': data})),
-          200,
+                'progressReports': [
+                  {
+                    'progressReportId': 2,
+                    'year': 2026,
+                    'semester': 'S2',
+                    'sourceOfVerification': 'System reference name',
+                  },
+                ],
+              };
+            }
+            return http.Response.bytes(
+              utf8.encode(jsonEncode({'success': true, 'data': data})),
+              200,
+            );
+          }),
         );
-      }),
+        final settings =
+            AppSettingsController(authRepository: AuthRepository(api))
+              ..setLanguage(AppLanguage.english)
+              ..setModuleType(module);
+        addTearDown(settings.dispose);
+        await tester.pumpWidget(
+          AppSettings(
+            controller: settings,
+            child: const MaterialApp(
+              home: Scaffold(body: CdcSectionIssuesScreenView()),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(find.text('Market issue'));
+        await tester.tap(find.text('Market issue'));
+        await tester.pumpAndSettle();
+        expect(find.text('Descriptions'), findsOneWidget);
+        await tester.tap(find.text('Progress Report'));
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(find.text('Report S2 2026'));
+        expect(find.text('Report S2 2026'), findsOneWidget);
+        expect(find.text('System reference name'), findsOneWidget);
+        expect(requestedDetails, ['/api/v1/working-group-issues/1']);
+      },
     );
-    final settings = AppSettingsController(authRepository: AuthRepository(api))
-      ..setLanguage(AppLanguage.english)
-      ..setModuleType(AppModuleType.cdcSection);
-    addTearDown(settings.dispose);
-    await tester.pumpWidget(
-      AppSettings(
-        controller: settings,
-        child: const MaterialApp(
-          home: Scaffold(body: CdcSectionIssuesScreenView()),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Market issue'));
-    await tester.tap(find.text('Market issue'));
-    await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Report S2 2026'));
-    expect(find.text('Report S2 2026'), findsOneWidget);
-    expect(find.text('System reference name'), findsOneWidget);
-    expect(requestedDetails, ['/api/v1/working-group-issues/1']);
-  });
-
+  }
   testWidgets('report card and View Details show supplied API data', (
     tester,
   ) async {
@@ -287,6 +293,9 @@ void main() {
     });
     final api = ApiClient(
       client: MockClient((request) async {
+        if (!request.url.path.contains('/working-group-issues/')) {
+          return http.Response('{"success":true,"data":{}}', 200);
+        }
         expect(request.url.path, '/api/v1/working-group-issues/5');
         return http.Response.bytes(
           utf8.encode(
@@ -319,7 +328,9 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Progress Report'), findsNothing);
+    await tester.tap(find.text('Progress Report'));
+    await tester.pumpAndSettle();
+    expect(find.text('Progress Report'), findsOneWidget);
     expect(find.text('Reference Name'), findsNothing);
     expect(find.text('View Details'), findsNothing);
     expect(find.text('Progress from matrix list'), findsNothing);
@@ -336,6 +347,9 @@ void main() {
         final initial = sampleApiIssue();
         final api = ApiClient(
           client: MockClient((request) async {
+            if (!request.url.path.contains('/working-group-issues/')) {
+              return http.Response('{"success":true,"data":{}}', 200);
+            }
             expect(request.url.path, '/api/v1/working-group-issues/1');
             return http.Response.bytes(
               utf8.encode(
@@ -371,6 +385,8 @@ void main() {
             ),
           ),
         );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Progress Report'));
         await tester.pumpAndSettle();
         expect(
           find.text(detailHasReports ? 'Report S2 2026' : 'Report S1 2025'),

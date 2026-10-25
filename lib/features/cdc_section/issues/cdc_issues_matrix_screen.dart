@@ -23,6 +23,9 @@ class CdcSectionIssuesMatrixScreen extends StatelessWidget {
         settings.moduleType == AppModuleType.cefp;
     return LineMinistryIssuesScreenView(
       titleKey: titleKey,
+      translationPage: issueMatrix
+          ? 'cdc_issue_matrix'
+          : 'issue_matrix',
       showTabs: false,
       cdcMatrix: issueMatrix,
       staticPreview: settings.auth.isStaticSession,

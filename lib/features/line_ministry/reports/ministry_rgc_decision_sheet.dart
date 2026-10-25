@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import '../../../screens/report/rgc_decision_detail_screen.dart';
 
 import '../../../core/app_colors.dart';
 import '../../../core/app_settings.dart';
@@ -124,6 +125,11 @@ class _MinistryRgcDecisionSheetState extends State<MinistryRgcDecisionSheet> {
                       padding: const EdgeInsets.fromLTRB(16, 18, 16, 28),
                       children: [
                         _DecisionPanel(detail: detail, issues: issues),
+                        const SizedBox(height: 20),
+                        RgcDecisionProgressReports(
+                          key: ValueKey(detail.decision.id),
+                          detail: detail,
+                        ),
                       ],
                     );
                   },

@@ -63,137 +63,96 @@ void main() {
     },
   );
 
-  testWidgets('login opens the CDC Section sample dashboard without requests', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    final settings = AppSettingsController(authRepository: auth)
-      ..setLanguage(AppLanguage.english);
-    await tester.pumpWidget(
-      AppSettings(
-        controller: settings,
-        child: const MaterialApp(home: LoginScreen()),
-      ),
-    );
-    await tester.enterText(find.byType(TextFormField).first, 'cdc@gmail.com');
-    await tester.enterText(find.byType(TextFormField).last, '12345678');
-    await tester.ensureVisible(find.byType(PrimaryButton));
-    await tester.tap(find.byType(PrimaryButton));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 2));
-    await tester.pumpAndSettle();
-    await tester.pump(const Duration(seconds: 2));
-    await tester.pumpAndSettle();
-    expect(settings.moduleType, AppModuleType.cdcSection);
-    expect(find.byType(CdcSectionDashboardScreenView), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('cdc-dashboard-main-1')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Filter'));
-    await tester.pumpAndSettle();
-    expect(find.byType(BottomSheet), findsNothing);
-    expect(find.text('Progress Report'), findsOneWidget);
-    expect(find.text('S1 2025'), findsOneWidget);
-    expect(find.text('S2 2025'), findsOneWidget);
-    await tester.ensureVisible(find.byKey(const ValueKey('filter-year-2026')));
-    await tester.tap(find.byKey(const ValueKey('filter-year-2026')));
-    await tester.tap(find.text('Apply Filters'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Filter (1)'));
-    await tester.pumpAndSettle();
-    final selectedYear = tester.widget<Semantics>(
-      find
-          .ancestor(
-            of: find.byKey(const ValueKey('filter-year-2026')),
-            matching: find.byType(Semantics),
-          )
-          .first,
-    );
-    expect(selectedYear.properties.checked, isTrue);
-    await tester.tap(find.byIcon(Icons.close_rounded));
-    await tester.pumpAndSettle();
-    final dashboardScroll = find
-        .descendant(
-          of: find.byKey(const ValueKey('cdc-dashboard-scroll')),
-          matching: find.byType(Scrollable),
-        )
-        .first;
-    await tester.scrollUntilVisible(
-      find.text('Categories'),
-      150,
-      scrollable: dashboardScroll,
-    );
-    await tester.tap(find.text('Categories'));
-    await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text('Strategy'),
-      150,
-      scrollable: dashboardScroll,
-    );
-    expect(find.text('Government'), findsOneWidget);
-    expect(tester.takeException(), isNull);
-    await tester.tap(find.text('CDC Issues'));
-    await tester.pumpAndSettle();
-    expect(find.text('CDC Issues Matrix'), findsOneWidget);
-    expect(find.text('Meeting Requests'), findsNothing);
-    expect(find.text('56'), findsOneWidget);
-    expect(find.text('30/56'), findsOneWidget);
-    expect(find.text('16/56'), findsOneWidget);
-    expect(find.text('10/56'), findsOneWidget);
-    expect(find.text('14'), findsOneWidget);
-    expect(find.text('Joint Inspection'), findsOneWidget);
-    await tester.tap(find.text('Joint Inspection'));
-    await tester.pumpAndSettle();
-    expect(find.text('Issue Details'), findsOneWidget);
-    expect(find.text('Submit Detail'), findsOneWidget);
-    expect(find.text('Government Primary Agency:'), findsOneWidget);
-    expect(find.text('MAFF'), findsOneWidget);
-    expect(find.text('Request Doc'), findsOneWidget);
-    expect(find.text('Descriptions'), findsNothing);
-    await tester.tap(find.widgetWithText(TextButton, 'Read more').first);
-    await tester.pumpAndSettle();
-    expect(find.text('Show less'), findsOneWidget);
-    await tester.tap(find.widgetWithText(TextButton, 'Show less'));
-    await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Link to Verification Source'));
-    await tester.pumpAndSettle();
-    for (final key in [
-      'indicators',
-      'progressSolution',
-      'implementationChallenges',
-      'request',
-      'nextStep',
-      'sourceOfVerification',
-      'linkToVerificationSource',
-    ]) {
-      expect(find.byKey(ValueKey('cdc-detail-$key')), findsOneWidget);
-    }
-    await tester.tap(find.byTooltip('Back'));
-    await tester.pumpAndSettle();
-    expect(find.text('CDC Issues Matrix'), findsOneWidget);
-    await tester.tap(find.text('Filter'));
-    await tester.pumpAndSettle();
-    expect(find.text('All PSWGs'), findsOneWidget);
-    expect(find.text('Plenary Escalation'), findsOneWidget);
-    expect(find.byType(FilterChip), findsNothing);
-    expect(find.byType(BottomSheet), findsNothing);
-    await tester.tap(find.byKey(const ValueKey('filter-year-2024')));
-    await tester.tap(find.text('Apply Filters'));
-    await tester.pumpAndSettle();
-    expect(find.text('Joint Inspection'), findsNothing);
-    expect(find.text('No issues found.'), findsOneWidget);
-    await tester.tap(find.text('Filter'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('filter-year-2024')));
-    await tester.tap(find.text('Apply Filters'));
-    await tester.pumpAndSettle();
-    expect(find.text('Joint Inspection'), findsOneWidget);
-    expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(tester.takeException(), isNull);
-    expect(requests, 0);
-    await tester.pumpWidget(const SizedBox.shrink());
-    settings.dispose();
-  });
+  testWidgets(
+    'demo login opens the shared dashboard with a retry on API failure',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final settings = AppSettingsController(authRepository: auth)
+        ..setLanguage(AppLanguage.english);
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: const MaterialApp(home: LoginScreen()),
+        ),
+      );
+      await tester.enterText(find.byType(TextFormField).first, 'cdc@gmail.com');
+      await tester.enterText(find.byType(TextFormField).last, '12345678');
+      await tester.ensureVisible(find.byType(PrimaryButton));
+      await tester.tap(find.byType(PrimaryButton));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
+      expect(settings.moduleType, AppModuleType.cdcSection);
+      expect(find.byType(CdcSectionDashboardScreenView), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
+      expect(requests, 0);
+      final dashboardRequests = requests;
+      await tester.tap(find.text('CDC Issues'));
+      await tester.pumpAndSettle();
+      expect(find.text('CDC Issues Matrix'), findsOneWidget);
+      expect(find.text('Meeting Requests'), findsNothing);
+      expect(find.text('56'), findsOneWidget);
+      expect(find.text('30/56'), findsOneWidget);
+      expect(find.text('16/56'), findsOneWidget);
+      expect(find.text('10/56'), findsOneWidget);
+      expect(find.text('14'), findsOneWidget);
+      expect(find.text('Joint Inspection'), findsOneWidget);
+      await tester.tap(find.text('Joint Inspection'));
+      await tester.pumpAndSettle();
+      expect(find.text('Issue Details'), findsOneWidget);
+      expect(find.text('Submit Detail'), findsOneWidget);
+      expect(find.text('Government Primary Agency:'), findsOneWidget);
+      expect(find.text('MAFF'), findsOneWidget);
+      expect(find.text('Request Doc'), findsNothing);
+      expect(find.text('Descriptions'), findsNothing);
+      await tester.tap(find.widgetWithText(TextButton, 'Read more').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Show less'), findsOneWidget);
+      await tester.tap(find.widgetWithText(TextButton, 'Show less'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Link to Verification Source'));
+      await tester.pumpAndSettle();
+      for (final key in [
+        'indicators',
+        'progressSolution',
+        'implementationChallenges',
+        'request',
+        'nextStep',
+        'sourceOfVerification',
+        'linkToVerificationSource',
+      ]) {
+        expect(find.byKey(ValueKey('cdc-detail-$key')), findsOneWidget);
+      }
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      expect(find.text('CDC Issues Matrix'), findsOneWidget);
+      await tester.tap(find.text('Filter'));
+      await tester.pumpAndSettle();
+      expect(find.text('All PSWGs'), findsOneWidget);
+      expect(find.text('Plenary Escalation'), findsOneWidget);
+      expect(find.byType(FilterChip), findsNothing);
+      expect(find.byType(BottomSheet), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('filter-year-2024')));
+      await tester.tap(find.text('Apply Filters'));
+      await tester.pumpAndSettle();
+      expect(find.text('Joint Inspection'), findsNothing);
+      expect(find.text('No issues found.'), findsOneWidget);
+      await tester.tap(find.text('Filter'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('filter-year-2024')));
+      await tester.tap(find.text('Apply Filters'));
+      await tester.pumpAndSettle();
+      expect(find.text('Joint Inspection'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(tester.takeException(), isNull);
+      expect(requests, dashboardRequests);
+      await tester.pumpWidget(const SizedBox.shrink());
+      settings.dispose();
+    },
+  );
 }

@@ -30,7 +30,7 @@ class CdcSummaryIssueDetails extends StatelessWidget {
         value,
       ],
     );
-    Widget document(String? path, String? name) => path == null
+    Widget document(String? path, String? name, int? size) => path == null
         ? text('')
         : PdfAttachmentPreview(
             path: path,
@@ -40,11 +40,24 @@ class CdcSummaryIssueDetails extends StatelessWidget {
                 const Icon(Icons.picture_as_pdf, color: Colors.red, size: 18),
                 const SizedBox(width: 5),
                 Expanded(
-                  child: Text(
-                    pdfAttachmentName(path, name: name),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 11),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        pdfAttachmentName(path, name: name),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                      if (size != null)
+                        Text(
+                          '${(size / (1024 * 1024)).toStringAsFixed(1)} MB',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: AppColors.mutedText,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ],
@@ -71,7 +84,11 @@ class CdcSummaryIssueDetails extends StatelessWidget {
       ),
       field(
         'issueDocument',
-        document(issue.attachmentPath, issue.attachmentName),
+        document(
+          issue.attachmentPath,
+          issue.attachmentName,
+          issue.attachmentSize,
+        ),
       ),
       field('categories', text(issue.category)),
       field('governmentAgency', agency(1)),
@@ -89,14 +106,10 @@ class CdcSummaryIssueDetails extends StatelessWidget {
           ),
         ),
       ),
-      field('governmentSecondAgency', agency(2)),
-      field('governmentThirdAgency', agency(3)),
-      field('governmentFourthAgency', agency(4)),
-      field('governmentFifthAgency', agency(5)),
       field('issueEscalation', text(issue.escalation)),
       field(
         'solutionReferenceDocument',
-        document(issue.referencePath, issue.referenceName),
+        document(issue.referencePath, issue.referenceName, issue.referenceSize),
       ),
     ];
     final sections = <String, String>{
@@ -104,7 +117,7 @@ class CdcSummaryIssueDetails extends StatelessWidget {
       'recommendations': issue.recommendationHtml,
       'rgcDecision': issue.rgcDecisionHtml,
       'nextStep': issue.nextStepHtml,
-      'remark': issue.remarkHtml,
+      if (issue.remarkHtml.isNotEmpty) 'remark': issue.remarkHtml,
     };
     return FractionallySizedBox(
       heightFactor: 0.9,
@@ -156,6 +169,59 @@ class CdcSummaryIssueDetails extends StatelessWidget {
                           SizedBox(
                             width: (constraints.maxWidth - 16) / 2,
                             child: item,
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (final order in [2, 3, 4, 5])
+                          Container(
+                            margin: const EdgeInsets.only(right: 10),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.fieldBackground(context),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: AppColors.border(
+                                  context,
+                                ).withValues(alpha: 0.4),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${l10n.text(switch (order) {
+                                    2 => 'governmentSecondAgency',
+                                    3 => 'governmentThirdAgency',
+                                    4 => 'governmentFourthAgency',
+                                    _ => 'governmentFifthAgency',
+                                  })} : ',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.mutedText,
+                                  ),
+                                ),
+                                if (issue.governmentAgencies.containsKey(
+                                  order,
+                                )) ...[
+                                  IssueAgencyLogo(
+                                    path: issue.agencyLogos[order] ?? '',
+                                    size: 18,
+                                    iconSize: 12,
+                                  ),
+                                  const SizedBox(width: 6),
+                                ],
+                                text(issue.governmentAgencies[order] ?? ''),
+                              ],
+                            ),
                           ),
                       ],
                     ),

@@ -151,7 +151,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  const DashboardPage({super.key, this.initialScopeTab = 0});
+  final int initialScopeTab;
 
   @override
   State<DashboardPage> createState() => DashboardPageState();
@@ -159,8 +160,7 @@ class DashboardPage extends StatefulWidget {
 
 class DashboardPageState extends State<DashboardPage> {
   CdcDashboardFilters _cdcFilters = CdcDashboardFilters();
-  int _selectedScopeTab = 0;
-  int _selectedStatusTab = 0;
+  late int _selectedScopeTab = widget.initialScopeTab;
 
   final _dashboardFilters = [FilterSelection(), FilterSelection()];
   int get _filterTab =>
@@ -200,7 +200,12 @@ class DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     final module = AppSettings.of(context).moduleType;
-    if (module == AppModuleType.privateSector || module == AppModuleType.cefp) {
+    if (const {
+      AppModuleType.privateSector,
+      AppModuleType.lineMinistry,
+      AppModuleType.cdcSection,
+      AppModuleType.cefp,
+    }.contains(module)) {
       return PswgDataLoader(
         selection: _dashboardFilters[_filterTab],
         progressReportId: _reportId,
@@ -218,21 +223,11 @@ class DashboardPageState extends State<DashboardPage> {
         builder: _buildContent,
       );
     }
-    if (_selectedStatusTab == 2) {
-      return PswgDataLoader(
-        selection: _dashboardFilters[_filterTab],
-        progressReportId: _reportId,
-        builder: _buildContent,
-      );
-    }
     return _buildContent(context);
   }
 
   Widget _buildContent(BuildContext context) {
     final moduleType = AppSettings.of(context).moduleType;
-    if (moduleType == AppModuleType.lineMinistry) {
-      return const LineMinistryDashboardScreen();
-    }
 
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
@@ -252,10 +247,34 @@ class DashboardPageState extends State<DashboardPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (moduleType != AppModuleType.cdcSecretariat)
+                    if (moduleType != AppModuleType.cdcSecretariat &&
+                        moduleType != AppModuleType.lineMinistry)
                       _ScopeTitle(selectedIndex: _selectedScopeTab),
                     const SizedBox(height: 10),
-                    if (moduleType == AppModuleType.privateSector)
+                    if (moduleType == AppModuleType.lineMinistry)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              l10n.text('dashboard'),
+                              style: TextStyle(
+                                color: colors.onSurface,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          _FilterBar(
+                            onTap: () => _openFilterSheet(context),
+                            activeCount: _dashboardFilters[_filterTab].count,
+                          ),
+                        ],
+                      )
+                    else if (const {
+                      AppModuleType.privateSector,
+                      AppModuleType.cdcSection,
+                      AppModuleType.cefp,
+                    }.contains(moduleType))
                       Row(
                         children: [
                           Expanded(
@@ -312,27 +331,7 @@ class DashboardPageState extends State<DashboardPage> {
                         ],
                       ),
                     const SizedBox(height: 14),
-                    _MetricGrid(isWorkingGroup: _selectedScopeTab == 1),
-                    const SizedBox(height: 8),
-                    const _WideMetricCard(),
-                    const SizedBox(height: 20),
-                    _DashboardTabs(
-                      selectedIndex: _selectedStatusTab,
-                      onSelected: (index) {
-                        setState(() => _selectedStatusTab = index);
-                      },
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      _statusTitleKey(_selectedStatusTab, l10n),
-                      style: TextStyle(
-                        color: colors.onSurface,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _StatusTabContent(selectedIndex: _selectedStatusTab),
+                    SharedDashboardCharts(plenary: _selectedScopeTab == 0),
                   ],
                 ),
               ),
@@ -341,15 +340,6 @@ class DashboardPageState extends State<DashboardPage> {
         ),
       ],
     );
-  }
-
-  String _statusTitleKey(int selectedIndex, AppLocalizations l10n) {
-    return switch (selectedIndex) {
-      1 => l10n.text('agencies'),
-      2 => l10n.text('workingGroup'),
-      3 => l10n.text('categoriesOfIssues'),
-      _ => l10n.text('overallStatus'),
-    };
   }
 }
 
@@ -968,7 +958,12 @@ class _WideMetricCard extends StatelessWidget {
 }
 
 class _DashboardTabs extends StatelessWidget {
-  const _DashboardTabs({required this.selectedIndex, required this.onSelected});
+  const _DashboardTabs({
+    required this.selectedIndex,
+    required this.onSelected,
+    this.plenary = false,
+  });
+  final bool plenary;
 
   final int selectedIndex;
   final ValueChanged<int> onSelected;
@@ -978,6 +973,7 @@ class _DashboardTabs extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isCdcGpsf =
+        !plenary &&
         AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat;
     final tabs = [
       l10n.text('overall'),
@@ -1039,13 +1035,15 @@ class _DashboardTabs extends StatelessWidget {
 }
 
 class _StatusTabContent extends StatelessWidget {
-  const _StatusTabContent({required this.selectedIndex});
+  const _StatusTabContent({required this.selectedIndex, required this.plenary});
 
   final int selectedIndex;
+  final bool plenary;
 
   @override
   Widget build(BuildContext context) {
-    if (AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat) {
+    if (!plenary &&
+        AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat) {
       return switch (selectedIndex) {
         1 => const CdcSecretariatAgenciesTab(),
         2 => const CdcSecretariatWorkingGroupTab(),
@@ -1057,7 +1055,60 @@ class _StatusTabContent extends StatelessWidget {
       1 => const AgenciesTab(),
       2 => const WorkingGroupTab(),
       3 => const CategoriesTab(),
-      _ => const OverallTab(),
+      _ => OverallTab(plenary: plenary),
     };
+  }
+}
+
+class SharedDashboardCharts extends StatefulWidget {
+  const SharedDashboardCharts({super.key, required this.plenary});
+  final bool plenary;
+  @override
+  State<SharedDashboardCharts> createState() => _SharedDashboardChartsState();
+}
+
+class _SharedDashboardChartsState extends State<SharedDashboardCharts> {
+  int _selectedStatusTab = 0;
+  String _statusTitleKey(int index, AppLocalizations l10n) =>
+      l10n.text(switch (index) {
+        1 => 'agencies',
+        2 => 'workingGroup',
+        3 => 'categoriesOfIssues',
+        _ => 'overallStatus',
+      });
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _MetricGrid(isWorkingGroup: !widget.plenary),
+        const SizedBox(height: 8),
+        const _WideMetricCard(),
+        const SizedBox(height: 20),
+        _DashboardTabs(
+          plenary: widget.plenary,
+          selectedIndex: _selectedStatusTab,
+          onSelected: (index) {
+            setState(() => _selectedStatusTab = index);
+          },
+        ),
+        const SizedBox(height: 14),
+        Text(
+          _statusTitleKey(_selectedStatusTab, l10n),
+          style: TextStyle(
+            color: colors.onSurface,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 12),
+        _StatusTabContent(
+          selectedIndex: _selectedStatusTab,
+          plenary: widget.plenary,
+        ),
+      ],
+    );
   }
 }

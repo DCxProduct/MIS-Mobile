@@ -1,4 +1,5 @@
 import '../../features/shared/issues/widgets/issue_display.dart';
+import '../../features/shared/issues/widgets/issue_agency_logo.dart';
 import '../../core/text/document_metadata.dart';
 import '../../core/widgets/editor_content.dart';
 import 'package:flutter/material.dart';
@@ -291,6 +292,19 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
       _text(_object(data['user'])['name']),
     ].firstWhere((name) => name.trim().isNotEmpty, orElse: () => '');
     final status = _status(data['status'] ?? data['issueStatus']);
+    final agencies = <int, Map<String, dynamic>>{};
+    final rawAgencies = data['governmentAgencies'] ?? data['agencies'];
+    if (rawAgencies is List) {
+      for (var i = 0; i < rawAgencies.length; i++) {
+        final entry = _object(rawAgencies[i]);
+        final order = entry['agencyOrder'] ?? entry['order'] ?? i + 1;
+        if (order is int) {
+          agencies[order] = entry['stakeholder'] is Map
+              ? _object(entry['stakeholder'])
+              : entry;
+        }
+      }
+    }
     final children = <Widget>[
       Text(
         _value(_text(data['title'] ?? data['decision'])),
@@ -378,16 +392,63 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
         ],
       ),
       const SizedBox(height: 16),
-      Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: [
-          _Chip(text: '${l10n.text('submittedBy')}: ${_value(person)}'),
-          _Chip(
-            text:
-                '${l10n.text('submittedDate')}: ${issueDateWithYear(context, date)}',
-          ),
-        ],
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _Chip(text: '${l10n.text('submittedBy')}: ${_value(person)}'),
+            const SizedBox(width: 8),
+            _Chip(
+              text:
+                  '${l10n.text('submittedDate')}: ${issueDateWithYear(context, date)}',
+            ),
+            for (final order in [1, 2, 3, 4, 5]) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(
+                    color: AppColors.border(context).withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${l10n.text(switch (order) {
+                        1 => 'governmentAgency',
+                        2 => 'governmentSecondAgency',
+                        3 => 'governmentThirdAgency',
+                        4 => 'governmentFourthAgency',
+                        _ => 'governmentFifthAgency',
+                      })}: ',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.mutedText,
+                      ),
+                    ),
+                    if (_name(agencies[order]).isNotEmpty) ...[
+                      IssueAgencyLogo(
+                        path: _text(agencies[order]?['logo']),
+                        size: 18,
+                        iconSize: 12,
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(
+                      _value(_name(agencies[order])),
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
       const SizedBox(height: 18),
       _ExpandableText(
@@ -400,20 +461,79 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
       ),
     ];
     for (final entry in const {
+      'rgcDecision': 'rgcDecision',
       'indicators': 'indicators',
       'progressSolution': 'progressSolution',
       'implementationChallenges': 'implementationChallenges',
       'requests': 'request',
-      'nextStep': 'nextStep',
       'sourceOfVerification': 'sourceOfVerification',
+      'linkToVerificationSource': 'linkToVerificationSource',
+      'nextStep': 'nextStep',
+      'dateOfIssueSolution': 'implementationDate',
     }.entries) {
       final text = _rich(data[entry.key] ?? update[entry.key]);
-      if (text.isNotEmpty) {
-        children.add(
-          _ExpandableText(label: l10n.text(entry.value), text: text),
-        );
-      }
+      children.add(_ExpandableText(label: l10n.text(entry.value), text: text));
     }
+    final attachment =
+        update['attachment'] ??
+        update['referenceDocument'] ??
+        widget.item['referenceDocument'] ??
+        widget.item['attachment'];
+    final metadata = _object(attachment);
+    final path = attachment is String ? attachment : _text(metadata['path']);
+    final name = pdfAttachmentName(
+      path,
+      name: documentOriginalName(attachment),
+    );
+    final size = metadata['size'];
+    children.add(
+      Text(l10n.text('attachmentsLabel'), style: const TextStyle(fontSize: 12)),
+    );
+    children.add(const SizedBox(height: 8));
+    children.add(
+      Container(
+        constraints: const BoxConstraints(minHeight: 70),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.border(context)),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: path.trim().isEmpty
+            ? const SizedBox.shrink()
+            : PdfAttachmentPreview(
+                path: path,
+                name: name,
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.picture_as_pdf,
+                      color: Colors.red,
+                      size: 32,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(name, style: const TextStyle(fontSize: 12)),
+                          if (size is num) ...[
+                            const SizedBox(height: 5),
+                            Text(
+                              '${(size / (1024 * 1024)).toStringAsFixed(1)} MB',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: AppColors.mutedText,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+      ),
+    );
     return children;
   }
 }
@@ -468,6 +588,7 @@ class _ExpandableText extends StatelessWidget {
         const SizedBox(height: 8),
         Container(
           width: double.infinity,
+          constraints: const BoxConstraints(minHeight: 70),
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             border: Border.all(color: AppColors.border(context)),

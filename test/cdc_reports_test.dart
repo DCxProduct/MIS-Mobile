@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:gpsf_app/core/widgets/pdf_attachment_preview.dart';
+import 'package:gpsf_app/screens/report/rgc_decision_detail_screen.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,8 +9,7 @@ import 'package:gpsf_app/core/app_settings.dart';
 import 'package:gpsf_app/core/config/module_config.dart';
 import 'package:gpsf_app/core/network/api_client.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
-import 'package:gpsf_app/features/cdc_section/reports/rgc_decision_details.dart';
-import 'package:gpsf_app/features/cdc_section/issues/detail_widgets.dart';
+
 import 'package:gpsf_app/screens/report/report_screen.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 
@@ -18,7 +17,7 @@ void main() {
   http.Response ok(Object data) =>
       http.Response(jsonEncode({'success': true, 'data': data}), 200);
 
-  for (final module in [AppModuleType.cdcSection, AppModuleType.cefp]) {
+  for (final module in [AppModuleType.cefp]) {
     testWidgets('$module shows both MEF and MAFF from the supplied API shape', (
       tester,
     ) async {
@@ -112,38 +111,25 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('MEF'), findsOneWidget);
       expect(find.text('MAFF'), findsOneWidget);
-      expect(find.text('Oct 2, 2026'), findsNothing);
-      expect(find.text('Sep 13, 2026'), findsNWidgets(2));
-      expect(find.text('View Details'), findsNWidgets(2));
-      expect(find.text('Sent'), findsNWidgets(2));
-      expect(paths, ['/api/v1/rgc-decisions', '/api/v1/plenaries/3']);
+      expect(find.text('Sent'), findsNothing);
+      expect(find.text('Not Addressed'), findsNWidgets(2));
+      expect(paths, ['/api/v1/rgc-decisions']);
       await tester.tap(find.text('View Details').first);
       await tester.pumpAndSettle();
-      expect(find.byType(CdcRgcDecisionOverviewScreen), findsOneWidget);
-      final count = find.ancestor(
-        of: find.text('Number of RGC Decision'),
-        matching: find.byType(CdcDetailInfoValue),
-      );
+      expect(find.byType(RgcDecisionDetailScreen), findsOneWidget);
+      final detail = tester
+          .widget<CdcGpsfRgcDecisionDetail>(
+            find.byType(CdcGpsfRgcDecisionDetail),
+          )
+          .detail;
+      expect(detail.decision.id, 2);
+      expect(detail.decisionContent, '<p>MEF decision</p>');
+      expect(detail.issues.single.description, 'MEF linked issue description');
       expect(
-        find.descendant(of: count, matching: find.text('1')),
-        findsOneWidget,
+        detail.issues.single.recommendations,
+        'MEF linked issue recommendation',
       );
-      expect(
-        find.descendant(of: count, matching: find.text('2')),
-        findsNothing,
-      );
-      expect(find.text('Oct 5, 2026'), findsOneWidget);
-      expect(find.text('MEF decision'), findsOneWidget);
-      expect(paths, [
-        '/api/v1/rgc-decisions',
-        '/api/v1/plenaries/3',
-        '/api/v1/rgc-decisions/2',
-        '/api/v1/plenaries/3',
-      ]);
-      await tester.tap(find.text('MEF decision'));
-      await tester.pumpAndSettle();
-      expect(find.text('MEF linked issue description'), findsOneWidget);
-      expect(find.text('MEF linked issue recommendation'), findsOneWidget);
+      expect(paths, ['/api/v1/rgc-decisions', '/api/v1/rgc-decisions/2']);
       expect(tester.takeException(), isNull);
     });
   }
@@ -197,7 +183,7 @@ void main() {
     },
   );
 
-  testWidgets('CDC all-ministry pagination and selected detail', (
+  testWidgets('CEFP decision pagination, filters and selected detail', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(320, 720);
@@ -378,7 +364,7 @@ void main() {
     final api = ApiClient(client: client);
     addTearDown(api.close);
     final settings = AppSettingsController(authRepository: AuthRepository(api))
-      ..setModuleType(AppModuleType.cdcSection)
+      ..setModuleType(AppModuleType.cefp)
       ..setLanguage(AppLanguage.english);
     addTearDown(settings.dispose);
 
@@ -404,9 +390,12 @@ void main() {
       isTrue,
     );
 
-    // All pages are loaded before grouping; no partial ministry cards.
-    await tester.scrollUntilVisible(find.text('Jan 23, 2024').first, 150);
-    expect(find.text('Jan 23, 2024'), findsWidgets);
+    // Every decision remains available across API pages.
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('cdc-gpsf-rgc-181')),
+      150,
+    );
+    expect(find.byKey(const ValueKey('cdc-gpsf-rgc-181')), findsOneWidget);
     expect(
       requested.any(
         (uri) =>
@@ -416,78 +405,26 @@ void main() {
       isTrue,
     );
 
-    await tester.scrollUntilVisible(find.text('Nov 12, 2023'), -150);
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('cdc-gpsf-rgc-179')),
+      -150,
+    );
     await tester.tap(find.text('View Details').first);
     await tester.pumpAndSettle();
-    expect(find.byType(CdcRgcDecisionOverviewScreen), findsOneWidget);
-    final count = find.ancestor(
-      of: find.text('Number of RGC Decision'),
-      matching: find.byType(CdcDetailInfoValue),
-    );
-    expect(
-      find.descendant(of: count, matching: find.text('1')),
-      findsOneWidget,
-    );
-    expect(find.text('179'), findsNothing);
-    expect(find.text('Sep 30, 2026'), findsOneWidget);
-    expect(requested.any((uri) => uri.path.endsWith('/plenaries/3')), isTrue);
-    expect(find.byIcon(Icons.calendar_month_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.file_copy_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.person_outline), findsOneWidget);
+    expect(find.byType(RgcDecisionDetailScreen), findsOneWidget);
+    final detail = tester
+        .widget<CdcGpsfRgcDecisionDetail>(find.byType(CdcGpsfRgcDecisionDetail))
+        .detail;
+    expect(detail.decision.id, 179);
+    expect(detail.decisionContent, '<p>A real decision from the API</p>');
+    expect(detail.issues.single.description, 'A real issue from the API');
+    expect(requested.any((uri) => uri.path.contains('/plenaries/')), isFalse);
     expect(
       requested.any((uri) => uri.path.endsWith('/rgc-decisions/179')),
       isTrue,
     );
-    await tester.tap(find.text('A real decision from the API'));
-    await tester.pumpAndSettle();
-    expect(find.byType(CdcRgcDecisionIssueScreen), findsOneWidget);
-    expect(find.text('A real issue from the API'), findsOneWidget);
-    expect(find.text('Meeting Request Document'), findsOneWidget);
-    expect(find.text('Issue_reference.pdf'), findsOneWidget);
-    final preview = tester.widget<PdfAttachmentPreview>(
-      find.byType(PdfAttachmentPreview),
-    );
-    expect(preview.path, '/uploads/issues/1788402959624-Issue_reference.pdf');
-    final submitter = find.textContaining(
-      'PSWG Secretariat A',
-      findRichText: true,
-    );
-    final submittedDate = find.textContaining(
-      'Sep 3, 2026',
-      findRichText: true,
-    );
-    expect(submitter, findsOneWidget);
-    expect(submittedDate, findsOneWidget);
-    expect(
-      tester.getRect(submitter).left,
-      lessThan(tester.getRect(submittedDate).left),
-    );
-    expect(
-      tester.getRect(submittedDate).left,
-      lessThan(
-        tester.getRect(find.textContaining('MAFF', findRichText: true)).left,
-      ),
-    );
-    expect(find.textContaining('MAFF', findRichText: true), findsOneWidget);
-    final agencyRow = find.ancestor(
-      of: find.textContaining('MAFF', findRichText: true),
-      matching: find.byType(SingleChildScrollView),
-    );
-    await tester.drag(agencyRow, const Offset(-800, 0));
-    await tester.pumpAndSettle();
-    expect(
-      find.textContaining('Gov’t Fifth Agency', findRichText: true),
-      findsOneWidget,
-    );
     expect(tester.takeException(), isNull);
-    expect(
-      requested.any((uri) => uri.path.endsWith('/meeting-requests')),
-      isFalse,
-    );
-
-    await tester.tap(find.byIcon(Icons.arrow_back));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pageBack();
     await tester.pumpAndSettle();
     for (final selection in [
       ('plenaryId', '3'),

@@ -6,6 +6,10 @@ class AuthUser {
     required this.isActive,
     this.avatar,
     this.position,
+    this.phoneNumber,
+    this.gender,
+    this.address,
+    this.dateOfBirth,
     this.roles = const [],
   });
 
@@ -15,6 +19,10 @@ class AuthUser {
   final bool isActive;
   final String? avatar;
   final String? position;
+  final String? phoneNumber;
+  final String? gender;
+  final String? address;
+  final String? dateOfBirth;
   final List<String> roles;
 
   factory AuthUser.fromJson(Map<String, dynamic> json) {
@@ -42,6 +50,10 @@ class AuthUser {
       isActive: json['isActive'] as bool,
       avatar: json['avatar'] as String?,
       position: json['position'] as String?,
+      phoneNumber: json['phoneNumber'] as String?,
+      gender: json['gender'] as String?,
+      address: json['address'] as String?,
+      dateOfBirth: json['dateOfBirth'] as String?,
       roles: List.unmodifiable(
         (rawRoles as List? ?? []).map((role) => role['name'] as String),
       ),

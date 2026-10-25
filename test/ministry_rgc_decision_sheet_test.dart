@@ -23,6 +23,61 @@ void main() {
           as Map<String, dynamic>;
   final data = fixture['data'] as Map<String, dynamic>;
 
+  testWidgets('ministry decision shows each report period and its document', (
+    tester,
+  ) async {
+    final detail = RgcDecisionDetail.fromJson({
+      ...data,
+      'progressReports': [
+        for (final semester in ['S1', 'S2'])
+          {
+            'semester': semester,
+            'year': 2028,
+            'dateOfIssueSolution': '2026-10-19',
+            'referenceName': '$semester reference',
+            'progressSolution': '$semester progress',
+            'attachment': {
+              'path': '/$semester.pdf',
+              'name': '$semester.pdf',
+              'size': 1947246,
+            },
+          },
+      ],
+    });
+    final settings = AppSettingsController()
+      ..setLanguage(AppLanguage.english)
+      ..setModuleType(AppModuleType.lineMinistry);
+    addTearDown(settings.dispose);
+    await tester.pumpWidget(
+      AppSettings(
+        controller: settings,
+        child: MaterialApp(
+          home: Scaffold(
+            body: MinistryRgcDecisionSheet(
+              decisionId: detail.decision.id,
+              detail: detail,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final scroll = find.byType(Scrollable).first;
+    await tester.scrollUntilVisible(
+      find.text('Report S1 2028'),
+      300,
+      scrollable: scroll,
+    );
+    expect(find.text('S1.pdf'), findsOneWidget);
+    final second = find.text('Report S2 2028');
+    await tester.ensureVisible(second);
+    await tester.tap(second);
+    await tester.pumpAndSettle();
+    expect(find.text('S2.pdf'), findsOneWidget);
+    expect(find.text('S1.pdf'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   test('preserves web decision fields independently from its linked issue', () {
     final detail = RgcDecisionDetail.fromJson(data);
     expect(detail.decision.agencyName, 'MAFF');
@@ -39,7 +94,7 @@ void main() {
     expect(detail.issues.single.status, 'In Progress');
     expect(
       RgcDecisionDetail.fromJson({...data, 'indicatorName': ''}).indicatorName,
-      'Milestone 2',
+      isEmpty,
     );
   });
 

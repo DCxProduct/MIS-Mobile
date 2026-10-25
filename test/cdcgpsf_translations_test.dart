@@ -94,7 +94,11 @@ void main() {
         'remark',
       ]) {
         final label = find.text(labels['meeting_summary.issue_dialog.$key']!);
-        await tester.scrollUntilVisible(label, 250);
+        await tester.scrollUntilVisible(
+          label,
+          250,
+          scrollable: find.byType(Scrollable).first,
+        );
         expect(label, findsOneWidget);
       }
       expect(tester.takeException(), isNull);
@@ -103,6 +107,7 @@ void main() {
     testWidgets(
       '$code CDC RGC report uses report labels independently of decision fields',
       (tester) async {
+        var unavailableLabel = 'API $code reference unavailable';
         final settings = settingsWith(
           (_) async => dictionary('cdcgpsf', code, {
             ...labels,
@@ -112,6 +117,10 @@ void main() {
                 'Report indicator API',
             'issue_matrix_rgc_decision.rgc.report.tab':
                 'API {semester} / {year}',
+            'issue_matrix_rgc_decision.rgc.report.not_available':
+                unavailableLabel,
+            'issue_matrix_rgc_decision.rgc.detail.rgc_fallback':
+                'API $code decision heading',
           }),
         )..setLanguage(language);
         addTearDown(settings.dispose);
@@ -126,7 +135,7 @@ void main() {
               'year': 2028,
               'semester': 'S1',
               'indicators': 'Report metric',
-              'referenceName': 'Reference',
+              'referenceName': '',
               'dateOfIssueSolution': '2028-05-16',
             },
           ],
@@ -145,6 +154,7 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        expect(find.text('API $code decision heading'), findsOneWidget);
         final scrollable = find
             .descendant(
               of: find.byKey(const ValueKey('cdc-gpsf-rgc-detail')),
@@ -155,6 +165,7 @@ void main() {
           'Decision indicator API',
           'API S1 / 2028',
           labels['issue_matrix_rgc_decision.rgc.report.implementationDate']!,
+          unavailableLabel,
           'Report indicator API',
         ]) {
           await tester.scrollUntilVisible(
@@ -167,6 +178,15 @@ void main() {
             findsOneWidget,
           );
         }
+        unavailableLabel = 'Updated API $code reference unavailable';
+        await settings.loadTranslations(refresh: true);
+        await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(
+          find.text(unavailableLabel, findRichText: true),
+          -250,
+          scrollable: scrollable,
+        );
+        expect(find.text(unavailableLabel, findRichText: true), findsOneWidget);
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox.shrink());
       },

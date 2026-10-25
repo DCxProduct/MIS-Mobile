@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:gpsf_app/core/app_settings.dart';
+import 'package:gpsf_app/screens/issues/issue_detail_screen.dart' as ministry;
 import 'package:gpsf_app/core/network/api_client.dart';
 import 'package:gpsf_app/core/widgets/pdf_attachment_preview.dart';
 import 'package:gpsf_app/core/widgets/editor_content.dart';
@@ -26,6 +27,7 @@ void main() {
     WidgetTester tester,
     ApiClient api, {
     bool selectProgress = true,
+    bool ministryScreen = false,
   }) async {
     tester.view.physicalSize = const Size(320, 700);
     tester.view.devicePixelRatio = 1;
@@ -41,11 +43,17 @@ void main() {
       AppSettings(
         controller: settings,
         child: MaterialApp(
-          home: IssueDetailScreen(
-            title: issue.title,
-            category: issue.category,
-            issue: issue,
-          ),
+          home: ministryScreen
+              ? ministry.IssueDetailScreen(
+                  title: issue.title,
+                  category: issue.category,
+                  issue: issue,
+                )
+              : IssueDetailScreen(
+                  title: issue.title,
+                  category: issue.category,
+                  issue: issue,
+                ),
         ),
       ),
     );
@@ -61,6 +69,9 @@ void main() {
         tester,
         ApiClient(
           client: MockClient((request) async {
+            if (!request.url.path.contains('/working-group-issues/')) {
+              return http.Response('{"success":true,"data":{}}', 200);
+            }
             calls++;
             expect(request.url.path, '/api/v1/working-group-issues/1');
             return http.Response.bytes(utf8.encode(fixture), 200);
@@ -120,65 +131,71 @@ void main() {
     },
   );
 
-  testWidgets('fetches issue detail, shows report and opens all API fields', (
-    tester,
-  ) async {
-    var calls = 0;
-    final api = ApiClient(
-      client: MockClient((request) async {
-        calls++;
-        expect(request.method, 'GET');
-        expect(request.url.path, '/api/v1/working-group-issues/1');
-        return http.Response.bytes(utf8.encode(fixture), 200);
-      }),
-    );
-    await openIssue(tester, api);
-    expect(calls, 1);
-    expect(find.text('Report S2 2026'), findsOneWidget);
-    expect(find.text('1 Attachments'), findsOneWidget);
-    expect(find.textContaining('2026'), findsWidgets);
-    expect(
-      find.text('No progress report data is available for this issue.'),
-      findsNothing,
-    );
-    expect(tester.takeException(), isNull);
+  for (final ministryScreen in [false, true]) {
+    testWidgets(
+      'ministry=$ministryScreen fetches detail, shows report and opens all API fields',
+      (tester) async {
+        var calls = 0;
+        final api = ApiClient(
+          client: MockClient((request) async {
+            if (!request.url.path.contains('/working-group-issues/')) {
+              return http.Response('{"success":true,"data":{}}', 200);
+            }
+            calls++;
+            expect(request.method, 'GET');
+            expect(request.url.path, '/api/v1/working-group-issues/1');
+            return http.Response.bytes(utf8.encode(fixture), 200);
+          }),
+        );
+        await openIssue(tester, api, ministryScreen: ministryScreen);
+        expect(calls, 1);
+        expect(find.text('Report S2 2026'), findsOneWidget);
+        expect(find.text('1 Attachments'), findsOneWidget);
+        expect(find.textContaining('2026'), findsWidgets);
+        expect(
+          find.text('No progress report data is available for this issue.'),
+          findsNothing,
+        );
+        expect(tester.takeException(), isNull);
 
-    await tester.tap(find.text('Descriptions'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Progress Report'));
-    await tester.pumpAndSettle();
-    expect(calls, 2);
-    await tester.ensureVisible(find.text('View Details'));
-    await tester.tap(find.text('View Details'));
-    await tester.pumpAndSettle();
-    final detail = tester.widget<IssueProgressReportDetailScreen>(
-      find.byType(IssueProgressReportDetailScreen),
+        await tester.tap(find.text('Descriptions'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Progress Report'));
+        await tester.pumpAndSettle();
+        expect(calls, 2);
+        await tester.ensureVisible(find.text('View Details'));
+        await tester.tap(find.text('View Details'));
+        await tester.pumpAndSettle();
+        final detail = tester.widget<IssueProgressReportDetailScreen>(
+          find.byType(IssueProgressReportDetailScreen),
+        );
+        final raw = jsonDecode(fixture)['data']['progressReports'][0];
+        expect(detail.report.progressReportId, 2);
+        expect(detail.report.description, raw['progressSolution']);
+        expect(detail.report.indicators, raw['indicators']);
+        expect(
+          detail.report.implementationChallenges,
+          raw['implementationChallenges'],
+        );
+        expect(detail.report.requests, raw['requests']);
+        expect(detail.report.rgcDecision, raw['rgcDecision']);
+        expect(detail.report.verificationLink, raw['linkToVerificationSource']);
+        expect(find.text('Climate Issue'), findsNothing);
+        await tester.scrollUntilVisible(
+          find.text('Issue_reference.pdf'),
+          400,
+          scrollable: find.byType(Scrollable).last,
+        );
+        final preview = tester.widget<PdfAttachmentPreview>(
+          find.byType(PdfAttachmentPreview),
+        );
+        expect(preview.path, raw['attachment']['path']);
+        expect(preview.name, 'Issue_reference.pdf');
+        expect(find.text('1.9 MB'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
     );
-    final raw = jsonDecode(fixture)['data']['progressReports'][0];
-    expect(detail.report.progressReportId, 2);
-    expect(detail.report.description, raw['progressSolution']);
-    expect(detail.report.indicators, raw['indicators']);
-    expect(
-      detail.report.implementationChallenges,
-      raw['implementationChallenges'],
-    );
-    expect(detail.report.requests, raw['requests']);
-    expect(detail.report.rgcDecision, raw['rgcDecision']);
-    expect(detail.report.verificationLink, raw['linkToVerificationSource']);
-    expect(find.text('Climate Issue'), findsNothing);
-    await tester.scrollUntilVisible(
-      find.text('Issue_reference.pdf'),
-      400,
-      scrollable: find.byType(Scrollable).last,
-    );
-    final preview = tester.widget<PdfAttachmentPreview>(
-      find.byType(PdfAttachmentPreview),
-    );
-    expect(preview.path, raw['attachment']['path']);
-    expect(preview.name, 'Issue_reference.pdf');
-    expect(find.text('1.9 MB'), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+  }
 
   testWidgets('empty API reports display empty state without demo reports', (
     tester,
@@ -209,7 +226,10 @@ void main() {
     await openIssue(
       tester,
       ApiClient(
-        client: MockClient((_) async {
+        client: MockClient((request) async {
+          if (!request.url.path.contains('/working-group-issues/')) {
+            return http.Response('{"success":true,"data":{}}', 200);
+          }
           calls++;
           return calls == 1
               ? http.Response('{"message":"Failed"}', 500)
@@ -250,7 +270,10 @@ void main() {
     await openIssue(
       tester,
       ApiClient(
-        client: MockClient((_) async {
+        client: MockClient((request) async {
+          if (!request.url.path.contains('/working-group-issues/')) {
+            return http.Response('{"success":true,"data":{}}', 200);
+          }
           calls++;
           return http.Response.bytes(
             utf8.encode(responseWithReports(count)),
@@ -325,7 +348,10 @@ void main() {
       await openIssue(
         tester,
         ApiClient(
-          client: MockClient((_) async {
+          client: MockClient((request) async {
+            if (!request.url.path.contains('/working-group-issues/')) {
+              return http.Response('{"success":true,"data":{}}', 200);
+            }
             calls++;
             return http.Response.bytes(
               utf8.encode(responseWithReports(count)),
@@ -365,7 +391,10 @@ void main() {
       await openIssue(
         tester,
         ApiClient(
-          client: MockClient((_) async {
+          client: MockClient((request) async {
+            if (!request.url.path.contains('/working-group-issues/')) {
+              return http.Response('{"success":true,"data":{}}', 200);
+            }
             calls++;
             if (calls == 2) return http.Response('{"message":"Failed"}', 500);
             return http.Response.bytes(

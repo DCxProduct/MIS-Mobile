@@ -50,6 +50,9 @@ class MeetingRequest {
           (issue) => WorkingGroupIssue.fromJson({
             ...issue as Map<String, dynamic>,
             'user': issue['user'] ?? json['user'],
+            'stakeholder':
+                issue['stakeholder'] ??
+                _requestIssueStakeholder(issue['user'] ?? json['user']),
           }),
         ),
       );
@@ -85,6 +88,16 @@ class MeetingRequest {
 
   static Map<String, dynamic> _object(Object? value) =>
       value is Map<String, dynamic> ? value : const <String, dynamic>{};
+
+  static Map<String, dynamic>? _requestIssueStakeholder(Object? user) {
+    final relations = _object(user)['stakeholders'];
+    if (relations is! List) return null;
+    final names = relations
+        .map((entry) => _string(_object(_object(entry)['stakeholder'])['name']))
+        .where((name) => name.isNotEmpty)
+        .toList();
+    return names.isEmpty ? null : {'name': names.join(', ')};
+  }
 
   static int _int(Object? value) => value is int ? value : 0;
 
