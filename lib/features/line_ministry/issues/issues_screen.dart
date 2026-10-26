@@ -182,7 +182,8 @@ class _LineMinistryIssuesScreenViewState
                         submittedBy: 'Agriculture and Agro-industry',
                         description:
                             'The private sector said that the Economic Land Concession (ELCs), which invest in rubber, cashew, plantations, etc., are now fully developed and some are ready for production.',
-                        attachmentCount: '2 ${l10n.text('attachmentsLabel')}',
+                        attachmentCount:
+                            '${l10n.number(2)} ${l10n.text('attachmentsLabel')}',
                         matrixPreview: true,
                         detailBuilder: widget.issueDetailBuilder,
                       )

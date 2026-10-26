@@ -75,6 +75,7 @@ void main() {
                         'id': page == '1' ? 46 : 47,
                         'ministryId': page == '1' ? 3 : 9,
                         'ministry': {'name': page == '1' ? 'MAFF' : 'MEF'},
+                        'issues': 3,
                         'status': 'CDC_UNDER_REVIEW',
                       },
                     ], pages: 2);
@@ -152,13 +153,34 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Semester 2'), findsOneWidget);
         expect(find.text('Semester 1'), findsOneWidget);
-        expect(find.textContaining('2026'), findsWidgets);
+        expect(find.textContaining(l10n.number(2026)), findsWidgets);
         await tester.tap(find.text(l10n.text('viewDetails')).first);
         await tester.pumpAndSettle();
         expect(find.text('Full CDC report'), findsOneWidget);
         expect(find.text('CDC API description'), findsOneWidget);
         expect(find.text('MAFF'), findsOneWidget);
         expect(find.text('MEF'), findsOneWidget);
+        for (final selectedLanguage in [
+          AppLanguage.khmer,
+          AppLanguage.english,
+          language,
+        ]) {
+          settings.setLanguage(selectedLanguage);
+          await tester.pumpAndSettle();
+          final current = AppLocalizations.of(
+            tester.element(find.text('MAFF')),
+          );
+          expect(
+            find.text(
+              '${current.text('governmentAgency')} (${current.number(2)})',
+            ),
+            findsOneWidget,
+          );
+          expect(
+            find.text('${current.text('allIssues')}: ${current.number(3)}'),
+            findsNWidgets(2),
+          );
+        }
         await tester.tap(find.text(l10n.text('viewDetails')).first);
         await tester.pumpAndSettle();
         expect(find.byType(ReportDetailScreen), findsOneWidget);

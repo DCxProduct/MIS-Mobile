@@ -190,7 +190,7 @@ class _DetailInfoBlock extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          value,
+          AppLocalizations.of(context).number(value),
           style: TextStyle(
             color: valueColor ?? Theme.of(context).colorScheme.onSurface,
             fontSize: 12,
@@ -755,7 +755,9 @@ void _showIssueDetailsSheet(
                               style: TextStyle(color: AppColors.mutedText),
                             ),
                             TextSpan(
-                              text: 'Jun 24 2025',
+                              text: AppLocalizations.of(
+                                context,
+                              ).date(DateTime(2025, 6, 24)),
                               style: TextStyle(fontWeight: FontWeight.w700),
                             ),
                           ],

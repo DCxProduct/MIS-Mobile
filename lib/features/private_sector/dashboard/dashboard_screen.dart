@@ -705,7 +705,7 @@ class _FilterBar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(9),
                   ),
                   child: Text(
-                    '$activeCount',
+                    AppLocalizations.of(context).number(activeCount),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 10,
@@ -992,7 +992,7 @@ class _DashboardTabs extends StatelessWidget {
       borderRadius: BorderRadius.circular(6),
       child: Container(
         alignment: Alignment.center,
-        padding: EdgeInsets.symmetric(horizontal: isCdcGpsf ? 16 : 0),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: selectedIndex == index
               ? AppColors.accent(context)
@@ -1003,7 +1003,6 @@ class _DashboardTabs extends StatelessWidget {
           tabs[index],
           maxLines: 1,
           softWrap: false,
-          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: selectedIndex == index ? Colors.white : AppColors.mutedText,
             fontSize: 12,
@@ -1024,17 +1023,10 @@ class _DashboardTabs extends StatelessWidget {
           color: isDark ? AppColors.darkBorder : const Color(0xFFE8EBF0),
         ),
       ),
-      child: isCdcGpsf
-          ? SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(children: List.generate(tabs.length, tab)),
-            )
-          : Row(
-              children: [
-                for (var index = 0; index < tabs.length; index++)
-                  Expanded(child: tab(index)),
-              ],
-            ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(children: List.generate(tabs.length, tab)),
+      ),
     );
   }
 }

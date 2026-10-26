@@ -39,7 +39,7 @@ class PrivateSectorSummaryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  value,
+                  l10n.number(value),
                   style: TextStyle(
                     color: isDark ? Colors.white : const Color(0xFF27364A),
                     fontSize: 20,

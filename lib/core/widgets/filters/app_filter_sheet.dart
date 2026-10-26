@@ -285,7 +285,7 @@ class _AppFilterSheetState extends State<AppFilterSheet> {
                   SizedBox(width: widget.compact ? 8 : 10),
                   Expanded(
                     child: Text(
-                      item.label,
+                      AppLocalizations.of(context).number(item.label),
                       maxLines: section.id == 'local.pswgs' ? 1 : null,
                       overflow: section.id == 'local.pswgs'
                           ? TextOverflow.ellipsis

@@ -189,8 +189,14 @@ class _ReportCard extends StatelessWidget {
           for (final row in [
             if (decision.plenaryName.isNotEmpty)
               (l10n.text('plenary'), decision.plenaryName),
-            (l10n.text('numberOfRgcDecision'), '${decision.decisions.length}'),
-            (l10n.text('meetingDate'), plenaryDate(decision.meetingDate, context: context)),
+            (
+              l10n.text('numberOfRgcDecision'),
+              l10n.number(decision.decisions.length),
+            ),
+            (
+              l10n.text('meetingDate'),
+              plenaryDate(decision.meetingDate, context: context),
+            ),
             (l10n.text('categories'), rgcValue(decision.category)),
             (l10n.text('focalPersonHE'), rgcValue(decision.focalPerson)),
           ]) ...[
@@ -228,7 +234,7 @@ class _ReportCard extends StatelessWidget {
                 const Icon(Icons.link, size: 14),
                 const SizedBox(width: 5),
                 Text(
-                  '${decision.linkCount} Link',
+                  '${l10n.number(decision.linkCount)} ${l10n.text('linksLabel')}',
                   style: const TextStyle(fontSize: 12),
                 ),
               ],

@@ -38,7 +38,7 @@ class CdcIssueProgressReportCard extends StatelessWidget {
         children: [
           Text(
             report == null
-                ? 'Report S1 2025'
+                ? l10n.number('Report S1 2025')
                 : report!.title.isEmpty
                 ? l10n.text('progressReport')
                 : issueProgressReportTitle(context, report!),
@@ -48,7 +48,7 @@ class CdcIssueProgressReportCard extends StatelessWidget {
           _ReportRow(
             label: l10n.text('implementationDate'),
             value: report == null
-                ? 'Oct 30, 2025 | 2:00-3:00PM'
+                ? l10n.number('Oct 30, 2025 | 2:00-3:00PM')
                 : issueDateWithTime(context, report!.implementationDate),
           ),
           const SizedBox(height: 10),
@@ -75,7 +75,7 @@ class CdcIssueProgressReportCard extends StatelessWidget {
                   const Icon(Icons.link, size: 14),
                   const SizedBox(width: 6),
                   Text(
-                    '${report?.attachmentPaths.length ?? 2} ${l10n.text('attachmentsLabel')}',
+                    '${l10n.number(report?.attachmentPaths.length ?? 2)} ${l10n.text('attachmentsLabel')}',
                     style: const TextStyle(fontSize: 12),
                   ),
                 ],

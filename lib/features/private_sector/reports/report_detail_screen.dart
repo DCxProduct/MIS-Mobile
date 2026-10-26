@@ -289,7 +289,7 @@ class _InfoBlock extends StatelessWidget {
         ),
         const SizedBox(height: 7),
         Text(
-          value,
+          AppLocalizations.of(context).number(value),
           style: TextStyle(
             color: valueColor ?? AppColors.primaryText(context),
             fontSize: 12,
@@ -338,7 +338,7 @@ class _PersonInfoBlock extends StatelessWidget {
             children: [
               TextSpan(text: name),
               TextSpan(
-                text: '  ( $date )',
+                text: '  ( ${AppLocalizations.of(context).number(date)} )',
                 style: const TextStyle(
                   color: AppColors.mutedText,
                   fontSize: 9,

@@ -10,11 +10,16 @@ String issueProgressReportTitle(
   final l10n = AppLocalizations.of(context, page: 'issue_report');
   if (report.title.isEmpty) return l10n.text('progressReport');
   if (!report.hasGeneratedTitle) return report.title;
-  return l10n
-      .api('issue_matrix.report_tab', fallback: report.title)
-      .replaceAll('{semester}', report.semester)
-      .replaceAll('{year}', report.year?.toString() ?? '')
-      .trim();
+  return l10n.number(
+    l10n
+        .api('issue_matrix.report_tab', fallback: report.title)
+        .replaceAll('{semester}', l10n.number(report.semester))
+        .replaceAll(
+          '{year}',
+          report.year == null ? '' : l10n.number(report.year),
+        )
+        .trim(),
+  );
 }
 
 String issueDate(BuildContext context, DateTime? date) =>

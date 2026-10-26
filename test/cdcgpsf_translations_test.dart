@@ -163,7 +163,7 @@ void main() {
             .first;
         for (final title in [
           'Decision indicator API',
-          'API S1 / 2028',
+          AppLocalizations(language).number('API S1 / 2028'),
           labels['issue_matrix_rgc_decision.rgc.report.implementationDate']!,
           unavailableLabel,
           'Report indicator API',

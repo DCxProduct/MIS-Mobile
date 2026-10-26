@@ -519,7 +519,7 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
                           if (size is num) ...[
                             const SizedBox(height: 5),
                             Text(
-                              '${(size / (1024 * 1024)).toStringAsFixed(1)} MB',
+                              '${AppLocalizations.of(context).number(size / (1024 * 1024), decimalPlaces: 1)} MB',
                               style: const TextStyle(
                                 fontSize: 10,
                                 color: AppColors.mutedText,

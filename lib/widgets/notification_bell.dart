@@ -79,7 +79,9 @@ class _NotificationBellState extends State<NotificationBell>
               repo.preferences?.unreadBadge == true &&
               (repo.unreadCount ?? 0) > 0,
           label: Text(
-            (repo.unreadCount ?? 0) > 99 ? '99+' : '${repo.unreadCount ?? 0}',
+            AppLocalizations.of(context).number(
+              (repo.unreadCount ?? 0) > 99 ? '99+' : repo.unreadCount ?? 0,
+            ),
           ),
           child: Container(
             width: 34,

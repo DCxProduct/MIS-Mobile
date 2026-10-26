@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
+import '../../../translations/app_localizations.dart';
 import '../../../features/shared/dashboard/data/working_group_summary.dart';
 
 class CdcReportCategoriesTab extends StatelessWidget {
@@ -49,9 +50,9 @@ class CdcReportCategoriesTab extends StatelessWidget {
             bottomPadding:
                 index ==
                     (categories?.isNotEmpty == true
-                        ? categories!.length
-                        : _items.length) -
-                1
+                            ? categories!.length
+                            : _items.length) -
+                        1
                 ? 0
                 : 13,
           ),
@@ -94,7 +95,7 @@ class _CategoryIssueRow extends StatelessWidget {
                 ),
               ),
               Text(
-                '$count',
+                AppLocalizations.of(context).number(count),
                 style: TextStyle(
                   color: colors.onSurfaceVariant,
                   fontSize: 12,

@@ -165,7 +165,9 @@ class CdcIssueProgressReportDataDetailScreen extends StatelessWidget {
                                     if (!hasMeetingDocument &&
                                         report.attachmentSize != null)
                                       Text(
-                                        _fileSize(report.attachmentSize!),
+                                        l10n.number(
+                                          _fileSize(report.attachmentSize!),
+                                        ),
                                         style: const TextStyle(
                                           fontSize: 9,
                                           color: AppColors.mutedText,

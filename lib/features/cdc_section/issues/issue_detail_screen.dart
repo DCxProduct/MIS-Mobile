@@ -181,7 +181,9 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                                         issue?.attachmentSize != null &&
                                         documentPath.isNotEmpty)
                                       Text(
-                                        _fileSize(issue!.attachmentSize!),
+                                        l10n.number(
+                                          _fileSize(issue!.attachmentSize!),
+                                        ),
                                         style: const TextStyle(
                                           fontSize: 9,
                                           color: AppColors.mutedText,

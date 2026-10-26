@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
+import '../../../translations/app_localizations.dart';
 import '../../../features/shared/dashboard/data/working_group_summary.dart';
 
 class CdcReportAgenciesTab extends StatelessWidget {
@@ -24,14 +25,24 @@ class CdcReportAgenciesTab extends StatelessWidget {
         ),
       ),
       child: CustomPaint(
-        painter: _AgenciesBarChartPainter(isDark: isDark, agencies: agencies),
+        painter: _AgenciesBarChartPainter(
+          isDark: isDark,
+          agencies: agencies,
+          l10n: AppLocalizations.of(context),
+        ),
       ),
     );
   }
 }
 
 class _AgenciesBarChartPainter extends CustomPainter {
-  const _AgenciesBarChartPainter({required this.isDark, this.agencies});
+  const _AgenciesBarChartPainter({
+    required this.isDark,
+    this.agencies,
+    required this.l10n,
+  });
+
+  final AppLocalizations l10n;
 
   final bool isDark;
   final List<WorkingGroupSummary>? agencies;
@@ -163,7 +174,7 @@ class _AgenciesBarChartPainter extends CustomPainter {
 
       _paintText(
         canvas,
-        ticks[i],
+        l10n.number(ticks[i]),
         Offset(x, chartBottom + 14),
         axisStyle,
         horizontalCenter: true,
@@ -195,5 +206,7 @@ class _AgenciesBarChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _AgenciesBarChartPainter oldDelegate) =>
-      oldDelegate.isDark != isDark || oldDelegate.agencies != agencies;
+      oldDelegate.isDark != isDark ||
+      oldDelegate.agencies != agencies ||
+      oldDelegate.l10n.language != l10n.language;
 }

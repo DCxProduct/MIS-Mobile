@@ -377,7 +377,9 @@ class _LineMinistryCalendarListCard extends StatelessWidget {
                   child: _MeetingInfo(
                     icon: Icons.file_copy_outlined,
                     label: AppLocalizations.of(context).text('totalIssues'),
-                    value: '${meeting.details.issuesCount}',
+                    value: AppLocalizations.of(
+                      context,
+                    ).number(meeting.details.issuesCount),
                     iconColor: const Color(0xFFB642FF),
                     iconBackground: const Color(0xFFF2DDFF),
                   ),
@@ -454,7 +456,9 @@ class _LineMinistryMeetingCard extends StatelessWidget {
     final title = request.title;
     final group = request.group.isEmpty ? '—' : request.group;
     final date = issueDate(context, request.meetingDate);
-    final totalIssues = '${request.issuesCount}';
+    final totalIssues = AppLocalizations.of(
+      context,
+    ).number(request.issuesCount);
     final status = request.status;
     final attachmentCount =
         '${AppLocalizations.of(context).number(request.attachmentCount)} ${AppLocalizations.of(context).text('attachmentsLabel')}';
@@ -771,7 +775,7 @@ class _FilterButton extends StatelessWidget {
                   borderRadius: BorderRadius.circular(9),
                 ),
                 child: Text(
-                  '$activeCount',
+                  AppLocalizations.of(context).number(activeCount),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 10,

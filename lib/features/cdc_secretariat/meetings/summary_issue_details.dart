@@ -51,7 +51,7 @@ class CdcSummaryIssueDetails extends StatelessWidget {
                       ),
                       if (size != null)
                         Text(
-                          '${(size / (1024 * 1024)).toStringAsFixed(1)} MB',
+                          '${AppLocalizations.of(context).number(size / (1024 * 1024), decimalPlaces: 1)} MB',
                           style: const TextStyle(
                             fontSize: 10,
                             color: AppColors.mutedText,

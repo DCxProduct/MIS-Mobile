@@ -80,8 +80,8 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
                 if (showSize && report.attachmentSize != null)
                   Text(
                     report.attachmentSize! >= 1024 * 1024
-                        ? '${(report.attachmentSize! / (1024 * 1024)).toStringAsFixed(1)} MB'
-                        : '${(report.attachmentSize! / 1024).round()} KB',
+                        ? '${AppLocalizations.of(context).number(report.attachmentSize! / (1024 * 1024), decimalPlaces: 1)} MB'
+                        : '${AppLocalizations.of(context).number((report.attachmentSize! / 1024).round())} KB',
                     style: const TextStyle(
                       fontSize: 9,
                       color: AppColors.mutedText,

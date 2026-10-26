@@ -239,7 +239,7 @@ class _MinistriesState extends State<CdcProgressReportMinistriesScreen>
                 ],
                 const SizedBox(height: 16),
                 Text(
-                  '${l10n.text('governmentAgency')} (${ministries.length})',
+                  '${l10n.text('governmentAgency')} (${l10n.number(ministries.length)})',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -285,7 +285,7 @@ class _MinistriesState extends State<CdcProgressReportMinistriesScreen>
                         ProgressReportMinistryStatus(status: ministry.status),
                         const SizedBox(height: 8),
                         Text(
-                          '${l10n.text('allIssues')}: ${ministry.issues}',
+                          '${l10n.text('allIssues')}: ${l10n.number(ministry.issues)}',
                           style: const TextStyle(fontSize: 13),
                         ),
                         if (ministry.submittedToCdc &&

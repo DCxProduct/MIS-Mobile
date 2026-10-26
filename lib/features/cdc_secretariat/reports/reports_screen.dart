@@ -124,7 +124,7 @@ class _CdcReportsState extends State<CdcSecretariatReportsScreenView> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              '${l10n.text('filter')}${_filters[_tab].count == 0 ? '' : ' (${_filters[_tab].count})'}',
+                              '${l10n.text('filter')}${_filters[_tab].count == 0 ? '' : ' (${l10n.number(_filters[_tab].count)})'}',
                               style: const TextStyle(fontSize: 12),
                             ),
                             const SizedBox(width: 5),
@@ -194,7 +194,9 @@ class _PlenaryTab extends StatelessWidget {
               title: plenary.name,
               status: plenary.status,
               meetingDate: plenaryDate(plenary.meetingDate, context: context),
-              numberOfRgcDecision: '${plenary.numberOfRgcDecisions}',
+              numberOfRgcDecision: AppLocalizations.of(
+                context,
+              ).number(plenary.numberOfRgcDecisions),
               deadline: rgcDate(plenary.deadline, context: context),
               attachmentCount:
                   '${AppLocalizations.of(context).number(plenary.attachmentCount)} ${AppLocalizations.of(context).text('attachmentsLabel')}',

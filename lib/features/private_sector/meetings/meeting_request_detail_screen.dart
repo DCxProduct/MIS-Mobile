@@ -314,7 +314,7 @@ class _PdfBlock extends StatelessWidget {
                           ? '—'
                           : (request!.letterSize == null
                                 ? '—'
-                                : '${(request!.letterSize! / 1024).toStringAsFixed(0)} KB'),
+                                : '${AppLocalizations.of(context).number(request!.letterSize! / 1024, decimalPlaces: 0)} KB'),
                       style: TextStyle(
                         color: AppColors.mutedText,
                         fontSize: 7,

@@ -236,7 +236,7 @@ class _FilterButton extends StatelessWidget {
                   borderRadius: BorderRadius.circular(9),
                 ),
                 child: Text(
-                  '$activeCount',
+                  AppLocalizations.of(context).number(activeCount),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 10,

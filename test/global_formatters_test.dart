@@ -5,8 +5,89 @@ import 'package:gpsf_app/core/formatters/number_formatter.dart';
 import 'package:gpsf_app/core/app_settings.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 import 'package:gpsf_app/translations/app_localizations.dart';
+import 'package:gpsf_app/features/cdc_section/dashboard/overall_status_card.dart';
+import 'package:gpsf_app/features/private_sector/dashboard/widgets/summary_card.dart';
+import 'package:gpsf_app/features/line_ministry/dashboard/widgets/summary_card.dart';
 
 void main() {
+  testWidgets(
+    'summary cards and chart legends change digits without stale English',
+    (tester) async {
+      final settings = AppSettingsController()
+        ..setLanguage(AppLanguage.english);
+      addTearDown(settings.dispose);
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: const MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    PrivateSectorSummaryCard(value: '14'),
+                    SummaryCard(value: '12'),
+                    CdcOverallStatusCard(
+                      workingGroup: true,
+                      cards: {
+                        'totalIssues': 20,
+                        'solved': 19,
+                        'inProgress': 1,
+                        'notAddressed': 0,
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      for (final language in [
+        AppLanguage.khmer,
+        AppLanguage.english,
+        AppLanguage.khmer,
+      ]) {
+        settings.setLanguage(language);
+        await tester.pumpAndSettle();
+        final l10n = AppLocalizations(language);
+        expect(find.text(l10n.number(14)), findsOneWidget);
+        expect(find.text(l10n.number(12)), findsOneWidget);
+        expect(find.text('(${l10n.number(20)})'), findsOneWidget);
+        expect(find.text('(${l10n.number(19)})'), findsOneWidget);
+        final forbiddenDigits = language == AppLanguage.khmer
+            ? RegExp('[0-9]')
+            : RegExp('[០-៩]');
+        for (final text in tester.widgetList<Text>(find.byType(Text))) {
+          expect(
+            forbiddenDigits.hasMatch(text.data ?? ''),
+            isFalse,
+            reason: text.data,
+          );
+        }
+      }
+    },
+  );
+  test('translation labels localize digits from fallback and API text', () {
+    const khmer = AppLocalizations(AppLanguage.khmer);
+    const english = AppLocalizations(AppLanguage.english);
+    expect(khmer.text('version'), 'កំណែ ១.០');
+    expect(khmer.text('twoAttachments'), 'ឯកសារភ្ជាប់ ២');
+    expect(english.text('version'), 'Version 1.0');
+    expect(
+      const AppLocalizations(
+        AppLanguage.khmer,
+        dictionary: {'custom': 'S2 2027'},
+      ).text('custom'),
+      'S២ ២០២៧',
+    );
+    expect(
+      const AppLocalizations(
+        AppLanguage.english,
+        dictionary: {'custom': 'S២ ២០២៧'},
+      ).text('custom'),
+      'S2 2027',
+    );
+  });
   test('digits convert both directions without changing punctuation', () {
     expect(
       formatNumber('-1,234.50 / 20 (95%)', language: AppLanguage.khmer),

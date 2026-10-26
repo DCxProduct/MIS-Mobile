@@ -1,3 +1,4 @@
+import 'package:gpsf_app/translations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_colors.dart';
@@ -52,7 +53,7 @@ class DashboardCard extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    value,
+                    AppLocalizations.of(context).number(value),
                     style: TextStyle(
                       color: isDark ? Colors.white : const Color(0xFF27364A),
                       fontSize: 20,

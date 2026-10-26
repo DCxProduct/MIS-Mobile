@@ -150,7 +150,10 @@ class _MeetingSummaryDetailScreenState
       body: SafeArea(
         top: false,
         child:
-            AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat
+            const {
+              AppModuleType.cdcSecretariat,
+              AppModuleType.privateSector,
+            }.contains(AppSettings.of(context).moduleType)
             ? ListView(
                 padding: const EdgeInsets.fromLTRB(14, 16, 14, 28),
                 children: [
@@ -213,7 +216,7 @@ class _MeetingSummaryDetailScreenState
                                   if (summary.summaryDocumentSize != null) ...[
                                     const SizedBox(height: 4),
                                     Text(
-                                      '${(summary.summaryDocumentSize! / (1024 * 1024)).toStringAsFixed(1)} MB',
+                                      '${AppLocalizations.of(context).number(summary.summaryDocumentSize! / (1024 * 1024), decimalPlaces: 1)} MB',
                                       style: const TextStyle(
                                         fontSize: 10,
                                         color: AppColors.mutedText,
@@ -308,6 +311,7 @@ class _MeetingSummaryDetailScreenState
               const {
                 AppModuleType.cdcSecretariat,
                 AppModuleType.lineMinistry,
+                AppModuleType.privateSector,
               }.contains(AppSettings.of(context).moduleType)
           ? CdcSummaryIssueDetails(issue: issue)
           : _IssueDetailsSheet(issue: issue),

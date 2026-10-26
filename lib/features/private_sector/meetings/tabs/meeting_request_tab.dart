@@ -35,7 +35,9 @@ class _MeetingRequestCard extends StatelessWidget {
     final title = request.title;
     final group = request.group.isEmpty ? '—' : request.group;
     final date = issueDate(context, request.meetingDate);
-    final totalIssues = '${request.issuesCount}';
+    final totalIssues = AppLocalizations.of(
+      context,
+    ).number(request.issuesCount);
     final status = request.status;
     final attachmentCount =
         '${AppLocalizations.of(context).number(request.attachmentCount)} ${AppLocalizations.of(context, page: 'meeting_requests').text('attachmentsLabel')}';

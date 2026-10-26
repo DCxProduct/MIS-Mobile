@@ -154,13 +154,12 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        expect(find.text('API request letter'), findsOneWidget);
+        expect(find.text('API meeting document'), findsOneWidget);
+        expect(find.text('Meeting.pdf'), findsOneWidget);
         expect(
-          find.text(hasRequest ? 'API request letter' : 'API meeting document'),
-          findsOneWidget,
-        );
-        expect(
-          find.text(hasRequest ? 'API meeting document' : 'API request letter'),
-          findsNothing,
+          find.text('Request.pdf'),
+          hasRequest ? findsOneWidget : findsNothing,
         );
         expect(tester.takeException(), isNull);
       }
@@ -326,11 +325,11 @@ void main() {
       );
       await tester.pumpWidget(detail(IssueProgressReport.fromJson(data)));
       await tester.pumpAndSettle();
-      expect(find.text('របាយការណ៍ S2 2026'), findsOneWidget);
+      expect(find.text('របាយការណ៍ S២ ២០២៦'), findsOneWidget);
       template = 'Updated {year} / {semester}';
       await settings.loadTranslations(refresh: true);
       await tester.pumpAndSettle();
-      expect(find.text('Updated 2026 / S2'), findsOneWidget);
+      expect(find.text('Updated ២០២៦ / S២'), findsOneWidget);
       await tester.pumpWidget(
         detail(
           IssueProgressReport.fromJson({
@@ -341,7 +340,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Authored report title'), findsOneWidget);
-      expect(find.text('Updated 2026 / S2'), findsNothing);
+      expect(find.text('Updated ២០២៦ / S២'), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );
@@ -461,15 +460,30 @@ void main() {
           ? 'Submitted label'
           : 'Matrix submitted';
       final meeting = page == 'wg_issues' ? 'Meeting label' : 'Matrix meeting';
-      expect(find.text('$title 1'), findsOneWidget);
-      expect(find.text('$reference 1:'), findsOneWidget);
-      expect(find.text('$category 1'), findsOneWidget);
       expect(
-        find.textContaining('$submitted 1', findRichText: true),
+        find.text(AppLocalizations(settings.language).number('$title 1')),
         findsOneWidget,
       );
       expect(
-        find.textContaining('$meeting 1', findRichText: true),
+        find.text(AppLocalizations(settings.language).number('$reference 1:')),
+        findsOneWidget,
+      );
+      expect(
+        find.text(AppLocalizations(settings.language).number('$category 1')),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining(
+          AppLocalizations(settings.language).number('$submitted 1'),
+          findRichText: true,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining(
+          AppLocalizations(settings.language).number('$meeting 1'),
+          findRichText: true,
+        ),
         findsOneWidget,
       );
       expect(find.text('Wrong request title 1'), findsNothing);
@@ -480,9 +494,18 @@ void main() {
           .onRefresh();
       await tester.pumpAndSettle();
       expect(requests, 2);
-      expect(find.text('$title 2'), findsOneWidget);
-      expect(find.text('$reference 2:'), findsOneWidget);
-      expect(find.text('$title 1'), findsNothing);
+      expect(
+        find.text(AppLocalizations(settings.language).number('$title 2')),
+        findsOneWidget,
+      );
+      expect(
+        find.text(AppLocalizations(settings.language).number('$reference 2:')),
+        findsOneWidget,
+      );
+      expect(
+        find.text(AppLocalizations(settings.language).number('$title 1')),
+        findsNothing,
+      );
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
     });
@@ -556,42 +579,41 @@ void main() {
     },
   );
 
-  testWidgets(
-    'refresh pauses in background and stops on logout or dispose',
-    (tester) async {
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      var requests = 0;
-      final settings = settingsWith((_) async {
-        requests++;
-        return dictionaryResponse('km', {'dashboard.title': '$requests'});
-      });
-      addTearDown(settings.dispose);
-      settings.setCurrentUser(pswgUser);
-      await settings.loadTranslations();
-      await tester.pumpWidget(
-        TranslationSync(controller: settings, child: const SizedBox.shrink()),
-      );
-      await tester.pumpAndSettle();
-      var before = requests;
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      await tester.pump(const Duration(seconds: 20));
-      expect(requests, before);
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      await tester.pumpAndSettle();
-      expect(requests, before + 1, reason: 'Resume must refresh immediately');
+  testWidgets('refresh pauses in background and stops on logout or dispose', (
+    tester,
+  ) async {
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    var requests = 0;
+    final settings = settingsWith((_) async {
+      requests++;
+      return dictionaryResponse('km', {'dashboard.title': '$requests'});
+    });
+    addTearDown(settings.dispose);
+    settings.setCurrentUser(pswgUser);
+    await settings.loadTranslations();
+    await tester.pumpWidget(
+      TranslationSync(controller: settings, child: const SizedBox.shrink()),
+    );
+    await tester.pumpAndSettle();
+    var before = requests;
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pump(const Duration(seconds: 20));
+    expect(requests, before);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(requests, before + 1, reason: 'Resume must refresh immediately');
 
-      settings.clearSession();
-      before = requests;
-      await tester.pump(const Duration(seconds: 20));
-      expect(requests, before);
-      settings.setCurrentUser(pswgUser);
-      await tester.pumpAndSettle();
-      before = requests;
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pump(const Duration(seconds: 20));
-      expect(requests, before);
-    },
-  );
+    settings.clearSession();
+    before = requests;
+    await tester.pump(const Duration(seconds: 20));
+    expect(requests, before);
+    settings.setCurrentUser(pswgUser);
+    await tester.pumpAndSettle();
+    before = requests;
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 20));
+    expect(requests, before);
+  });
 
   test(
     'simultaneous refreshes share an in-flight dictionary request',

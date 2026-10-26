@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
+import '../../../translations/app_localizations.dart';
 
 class CategoriesTab extends StatelessWidget {
   const CategoriesTab({super.key});
@@ -70,7 +71,7 @@ class _CategoryIssueRow extends StatelessWidget {
                 ),
               ),
               Text(
-                '3',
+                AppLocalizations.of(context).number(3),
                 style: TextStyle(
                   color: colors.onSurfaceVariant,
                   fontSize: 12,

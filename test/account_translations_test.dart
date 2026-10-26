@@ -239,15 +239,24 @@ void main() {
       addTearDown(settings.dispose);
       await tester.pumpWidget(app(settings, const ProfileDetailScreen()));
       await tester.pumpAndSettle();
-      expect(find.text(label), findsOneWidget);
+      expect(
+        find.text(AppLocalizations(settings.language).number(label)),
+        findsOneWidget,
+      );
       label = 'Shared gender v2';
       await tester.pump(TranslationSync.refreshInterval);
       await tester.pumpAndSettle();
-      expect(find.text(label), findsOneWidget);
+      expect(
+        find.text(AppLocalizations(settings.language).number(label)),
+        findsOneWidget,
+      );
       fail = true;
       await tester.pump(TranslationSync.refreshInterval);
       await tester.pumpAndSettle();
-      expect(find.text(label), findsOneWidget);
+      expect(
+        find.text(AppLocalizations(settings.language).number(label)),
+        findsOneWidget,
+      );
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
       final before = calls;
       await tester.pump(const Duration(seconds: 20));
@@ -256,24 +265,36 @@ void main() {
       label = 'Resumed label';
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
-      expect(find.text(label), findsOneWidget);
+      expect(
+        find.text(AppLocalizations(settings.language).number(label)),
+        findsOneWidget,
+      );
       delayed = Completer<http.Response>();
       await tester.pump(TranslationSync.refreshInterval);
       expect(delayedRequest, isNotNull);
       label = 'English label';
       settings.setLanguage(AppLanguage.english);
       await tester.pumpAndSettle();
-      expect(find.text(label), findsOneWidget);
+      expect(
+        find.text(AppLocalizations(settings.language).number(label)),
+        findsOneWidget,
+      );
       delayed.complete(dictionary(delayedRequest!, {'gender': 'Stale Khmer'}));
       await tester.pumpAndSettle();
       expect(find.text('Stale Khmer'), findsNothing);
-      expect(find.text(label), findsOneWidget);
+      expect(
+        find.text(AppLocalizations(settings.language).number(label)),
+        findsOneWidget,
+      );
       settings.clearSession();
       await tester.pumpAndSettle();
       final loggedOutCalls = calls;
       await tester.pump(const Duration(seconds: 20));
       expect(calls, loggedOutCalls);
-      expect(find.text(label), findsNothing);
+      expect(
+        find.text(AppLocalizations(settings.language).number(label)),
+        findsNothing,
+      );
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump(const Duration(seconds: 20));
       expect(calls, loggedOutCalls);

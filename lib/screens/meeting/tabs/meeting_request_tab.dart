@@ -289,7 +289,7 @@ class _MeetingInfo extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                value,
+                AppLocalizations.of(context).number(value),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(

@@ -209,7 +209,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('CEFP S1 / 2028'), findsOneWidget);
+      expect(
+        find.text(AppLocalizations(language).number('CEFP S1 / 2028')),
+        findsOneWidget,
+      );
       expect(find.text('CEFP reference $code'), findsOneWidget);
       expect(find.text('Wrong module'), findsNothing);
       expect(tester.takeException(), isNull);

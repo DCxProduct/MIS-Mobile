@@ -209,7 +209,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('CDC S1 / 2028'), findsOneWidget);
+      expect(
+        find.text(AppLocalizations(language).number('CDC S1 / 2028')),
+        findsOneWidget,
+      );
       expect(find.text('CDC reference $code'), findsOneWidget);
       expect(find.text('Wrong module'), findsNothing);
       expect(tester.takeException(), isNull);

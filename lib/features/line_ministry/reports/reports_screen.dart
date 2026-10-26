@@ -236,7 +236,9 @@ class _PlenaryTab extends StatelessWidget {
               documentReference: plenary.documentReference,
               documentReferenceName: plenary.documentReferenceName,
               meetingDate: plenaryDate(plenary.meetingDate, context: context),
-              numberOfRgcDecision: '${plenary.numberOfRgcDecisions}',
+              numberOfRgcDecision: AppLocalizations.of(
+                context,
+              ).number(plenary.numberOfRgcDecisions),
               deadline: _formatDate(context, plenary.deadline),
               attachmentCount: _attachmentLabel(context, plenary),
             ),
@@ -479,7 +481,7 @@ class _ProgressReportCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  year,
+                  AppLocalizations.of(context).number(year),
                   style: TextStyle(
                     color: isDark
                         ? const Color(0xFFD8B4FE)
@@ -636,7 +638,7 @@ class _FilterButton extends StatelessWidget {
                   borderRadius: BorderRadius.circular(9),
                 ),
                 child: Text(
-                  '$activeCount',
+                  AppLocalizations.of(context).number(activeCount),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 10,

@@ -27,7 +27,9 @@ class OverallTab extends StatelessWidget {
           SizedBox(
             width: 320,
             height: 195,
-            child: CustomPaint(painter: _DonutChartPainter(isDark: isDark)),
+            child: CustomPaint(
+              painter: _DonutChartPainter(isDark: isDark, l10n: l10n),
+            ),
           ),
           const SizedBox(height: 2),
           _ChartLegendRow(
@@ -57,7 +59,9 @@ class OverallTab extends StatelessWidget {
 }
 
 class _DonutChartPainter extends CustomPainter {
-  const _DonutChartPainter({required this.isDark});
+  const _DonutChartPainter({required this.isDark, required this.l10n});
+
+  final AppLocalizations l10n;
 
   final bool isDark;
 
@@ -228,7 +232,7 @@ class _DonutChartPainter extends CustomPainter {
   ) {
     final painter = TextPainter(
       text: TextSpan(
-        text: text,
+        text: l10n.number(text),
         style: const TextStyle(
           color: AppColors.text,
           fontSize: 11,
@@ -273,7 +277,7 @@ class _DonutChartPainter extends CustomPainter {
       text: TextSpan(
         children: [
           TextSpan(
-            text: 'Total Issues\n',
+            text: '${l10n.text('totalIssues')}\n',
             style: TextStyle(
               color: isDark ? const Color(0xFFB8C0CC) : const Color(0xFF6C7480),
               fontSize: 11,
@@ -282,7 +286,7 @@ class _DonutChartPainter extends CustomPainter {
             ),
           ),
           TextSpan(
-            text: '20',
+            text: l10n.number(20),
             style: TextStyle(
               color: isDark ? Colors.white : AppColors.text,
               fontSize: 16,
@@ -303,7 +307,8 @@ class _DonutChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DonutChartPainter oldDelegate) =>
-      oldDelegate.isDark != isDark;
+      oldDelegate.isDark != isDark ||
+      oldDelegate.l10n.language != l10n.language;
 }
 
 class _ChartLegendRow extends StatelessWidget {
@@ -344,7 +349,7 @@ class _ChartLegendRow extends StatelessWidget {
             ),
           ),
           Text(
-            value,
+            AppLocalizations.of(context).number(value),
             style: TextStyle(
               color: colors.onSurface,
               fontSize: 12,

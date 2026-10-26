@@ -249,7 +249,7 @@ class _InfoField extends StatelessWidget {
         ),
         const SizedBox(height: 5),
         Text(
-          value,
+          AppLocalizations.of(context).number(value),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(

@@ -51,7 +51,7 @@ class LineMinistryReportCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(5),
                 ),
                 child: Text(
-                  year,
+                  AppLocalizations.of(context).number(year),
                   style: TextStyle(
                     color: isDark
                         ? const Color(0xFFD8B4FE)
@@ -74,9 +74,12 @@ class LineMinistryReportCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              const Text(
-                'July 24, 2025',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+              Text(
+                l10n.date(DateTime(2025, 7, 24)),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),

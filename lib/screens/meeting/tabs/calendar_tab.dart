@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
+import '../../../translations/app_localizations.dart';
 
 class CalendarTab extends StatelessWidget {
   const CalendarTab({super.key});
@@ -20,7 +21,7 @@ class CalendarTab extends StatelessWidget {
         children: [
           const SizedBox(height: 12),
           Text(
-            '$_month $_year',
+            AppLocalizations.of(context).number('$_month $_year'),
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
               fontSize: 18,
@@ -105,7 +106,7 @@ class _FullMonthCalendar extends StatelessWidget {
                       borderRadius: BorderRadius.circular(5),
                     ),
                     child: Text(
-                      '$day',
+                      AppLocalizations.of(context).number(day),
                       style: TextStyle(
                         color: selected
                             ? Colors.white
@@ -182,7 +183,7 @@ class _CalendarEventCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          attendees,
+                          AppLocalizations.of(context).number(attendees),
                           style: const TextStyle(
                             color: AppColors.mutedText,
                             fontSize: 12,
@@ -197,7 +198,7 @@ class _CalendarEventCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 5),
                         Text(
-                          time,
+                          AppLocalizations.of(context).number(time),
                           style: const TextStyle(
                             color: AppColors.mutedText,
                             fontSize: 12,

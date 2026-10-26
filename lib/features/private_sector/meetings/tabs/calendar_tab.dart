@@ -305,7 +305,9 @@ class _CalendarEventCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${meeting.guestCount}',
+                            AppLocalizations.of(
+                              context,
+                            ).number(meeting.guestCount),
                             style: const TextStyle(
                               color: AppColors.mutedText,
                               fontSize: 12,

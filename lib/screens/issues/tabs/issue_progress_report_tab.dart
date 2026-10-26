@@ -39,7 +39,7 @@ class _ProgressReportCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title,
+            AppLocalizations.of(context).number(title),
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
               fontSize: 13,
@@ -59,7 +59,9 @@ class _ProgressReportCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                'Oct 30, 2025 | 2:00-3:00PM',
+                AppLocalizations.of(
+                  context,
+                ).number('Oct 30, 2025 | 2:00-3:00PM'),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 11,
@@ -102,12 +104,12 @@ class _ProgressReportCard extends StatelessWidget {
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
-                SizedBox(width: 6),
+              children: [
+                const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
+                const SizedBox(width: 6),
                 Text(
-                  '2 Attachement',
-                  style: TextStyle(
+                  AppLocalizations.of(context).text('twoAttachments'),
+                  style: const TextStyle(
                     color: Color(0xFF4C5563),
                     fontSize: 11,
                     fontWeight: FontWeight.w500,

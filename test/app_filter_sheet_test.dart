@@ -45,8 +45,17 @@ void main() {
       ),
     );
 
+    settings.setLanguage(AppLanguage.khmer);
+    await tester.pump();
+    expect(find.text('២០២៦'), findsOneWidget);
+    expect(find.text('២០២៧'), findsOneWidget);
+    expect(find.text('2026'), findsNothing);
     await tester.tap(find.byKey(const ValueKey('filter-local.year-2026')));
     await tester.pump();
+    expect(find.text('S២ ២០២៦'), findsOneWidget);
+    settings.setLanguage(AppLanguage.english);
+    await tester.pump();
+    expect(find.text('S2 2026'), findsOneWidget);
     expect(
       find.byKey(const ValueKey('filter-progressReportId-27')),
       findsNothing,

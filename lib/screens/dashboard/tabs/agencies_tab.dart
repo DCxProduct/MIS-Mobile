@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
+import '../../../translations/app_localizations.dart';
 
 class AgenciesTab extends StatelessWidget {
   const AgenciesTab({super.key});
@@ -20,13 +21,17 @@ class AgenciesTab extends StatelessWidget {
           color: isDark ? AppColors.darkBorder : const Color(0xFFE9EDF2),
         ),
       ),
-      child: const CustomPaint(painter: _AgenciesBarChartPainter()),
+      child: CustomPaint(
+        painter: _AgenciesBarChartPainter(AppLocalizations.of(context)),
+      ),
     );
   }
 }
 
 class _AgenciesBarChartPainter extends CustomPainter {
-  const _AgenciesBarChartPainter();
+  const _AgenciesBarChartPainter(this.l10n);
+
+  final AppLocalizations l10n;
 
   static const _labels = [
     'CDC',
@@ -147,7 +152,7 @@ class _AgenciesBarChartPainter extends CustomPainter {
 
       _paintText(
         canvas,
-        ticks[i],
+        l10n.number(ticks[i]),
         Offset(x, chartBottom + 14),
         axisStyle,
         horizontalCenter: true,
@@ -178,5 +183,6 @@ class _AgenciesBarChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _AgenciesBarChartPainter oldDelegate) =>
+      oldDelegate.l10n.language != l10n.language;
 }

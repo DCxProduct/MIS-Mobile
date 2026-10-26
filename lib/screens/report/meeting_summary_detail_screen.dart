@@ -173,7 +173,7 @@ class _InfoBlock extends StatelessWidget {
         ),
         const SizedBox(height: 7),
         Text(
-          value,
+          AppLocalizations.of(context).number(value),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(

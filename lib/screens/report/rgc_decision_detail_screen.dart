@@ -278,17 +278,24 @@ class RgcDecisionProgressReportsState
           }.contains(AppSettings.of(context).moduleType) &&
           item.hasGeneratedTitle &&
           item.title.isNotEmpty) {
-        return l10n
-            .api(
-              'issue_matrix_rgc_decision.rgc.report.tab',
-              fallback: item.title,
-            )
-            .replaceAll('{semester}', item.semester)
-            .replaceAll('{year}', item.year?.toString() ?? '')
-            .trim();
+        return l10n.number(
+          l10n
+              .api(
+                'issue_matrix_rgc_decision.rgc.report.tab',
+                fallback: item.title,
+              )
+              .replaceAll('{semester}', l10n.number(item.semester))
+              .replaceAll(
+                '{year}',
+                item.year == null ? '' : l10n.number(item.year),
+              )
+              .trim(),
+        );
       }
-      if (item.title.isNotEmpty) return item.title;
-      return '${l10n.text('report')} ${index + 1}';
+      if (item.title.isNotEmpty) {
+        return item.hasGeneratedTitle ? l10n.number(item.title) : item.title;
+      }
+      return '${l10n.text('report')} ${l10n.number(index + 1)}';
     }
 
     return Column(
@@ -363,7 +370,7 @@ class RgcDecisionProgressReportsState
                       report.attachmentSize != null &&
                           report.attachmentPaths.length == 1
                       ? Text(
-                          '${(report.attachmentSize! / (1024 * 1024)).toStringAsFixed(1)} MB',
+                          '${l10n.number(report.attachmentSize! / (1024 * 1024), decimalPlaces: 1)} MB',
                           style: const TextStyle(fontSize: 10),
                         )
                       : null,

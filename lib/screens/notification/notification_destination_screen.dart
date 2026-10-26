@@ -260,7 +260,7 @@ class _ResourceDetailState extends State<_ResourceDetail> {
       final text = value is String
           ? htmlToPlainText(value)
           : value is num
-          ? '$value'
+          ? l10n.number(value)
           : '';
       if (text.trim().isEmpty) return;
       children.add(

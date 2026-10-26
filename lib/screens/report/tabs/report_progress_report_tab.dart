@@ -103,7 +103,7 @@ class _ProgressReportCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   report.title.isEmpty
-                      ? '${AppLocalizations.of(context, page: 'progress_report').text('semester')} ${report.semester}'
+                      ? '${AppLocalizations.of(context, page: 'progress_report').text('semester')} ${AppLocalizations.of(context).number(report.semester)}'
                       : report.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

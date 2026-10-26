@@ -165,7 +165,9 @@ class _PlenaryDetailScreenState extends State<PlenaryDetailScreen> {
                     ).text('numberOfRgcDecision'),
                     value: plenary == null
                         ? '—'
-                        : '${plenary.numberOfRgcDecisions}',
+                        : AppLocalizations.of(
+                            context,
+                          ).number(plenary.numberOfRgcDecisions),
                   ),
                 ),
                 SizedBox(width: 16),

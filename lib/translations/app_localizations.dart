@@ -298,7 +298,10 @@ class AppLocalizations {
     return remote != null && remote.trim().isNotEmpty ? remote : null;
   }
 
-  String text(String key) {
+  /// Localize digits in UI translations as well as the translated words.
+  String text(String key) => number(_text(key));
+
+  String _text(String key) {
     final remote = remoteText(key);
     if (remote != null) return remote;
     const statusCodes = {

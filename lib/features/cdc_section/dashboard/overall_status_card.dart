@@ -56,7 +56,8 @@ class CdcOverallStatusCard extends StatelessWidget {
                     clipBehavior: Clip.none,
                     children: [
                       Semantics(
-                        label: '${l10n.text('totalIssues')}: $total',
+                        label:
+                            '${l10n.text('totalIssues')}: ${l10n.number(total)}',
                         child: CustomPaint(
                           size: const Size(170, 170),
                           painter: _StatusRing(shares, colors),
@@ -129,7 +130,7 @@ class CdcOverallStatusCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '(${index == 0 ? total : counts[index - 1]})',
+                        '(${l10n.number(index == 0 ? total : counts[index - 1])})',
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -426,7 +427,9 @@ class _PlenaryRingCard extends StatelessWidget {
                       ),
                       Text(
                         AppLocalizations.of(context).number(
-                          counts[index] == null ? '—' : '(${counts[index]})',
+                          counts[index] == null
+                              ? '—'
+                              : '(${l10n.number(counts[index])})',
                         ),
                         style: const TextStyle(
                           fontSize: 11,

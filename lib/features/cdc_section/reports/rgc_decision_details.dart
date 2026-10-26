@@ -206,7 +206,9 @@ class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
                         Expanded(
                           child: CdcDetailInfoValue(
                             label: l10n.text('numberOfRgcDecision'),
-                            value: '${details.length}',
+                            value: AppLocalizations.of(
+                              context,
+                            ).number(details.length),
                           ),
                         ),
                         const SizedBox(width: 16),

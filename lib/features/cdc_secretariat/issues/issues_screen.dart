@@ -98,7 +98,7 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              '${l10n.text('filter')}${_filters[_tab].count > 0 ? ' (${_filters[_tab].count})' : ''}',
+                              '${l10n.text('filter')}${_filters[_tab].count > 0 ? ' (${l10n.number(_filters[_tab].count)})' : ''}',
                               style: const TextStyle(fontSize: 12),
                             ),
                             const SizedBox(width: 5),
@@ -523,7 +523,7 @@ class _IssueCard extends StatelessWidget {
                   const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
                   const SizedBox(width: 6),
                   Text(
-                    '${issue.linkCount} ${AppLocalizations.of(context).text('linksLabel')}',
+                    '${AppLocalizations.of(context).number(issue.linkCount)} ${AppLocalizations.of(context).text('linksLabel')}',
                     style: const TextStyle(
                       color: Color(0xFF4C5563),
                       fontSize: 12,

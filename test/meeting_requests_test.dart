@@ -115,6 +115,15 @@ void main() {
       expect(find.text('Scheduled'), findsOneWidget);
       expect(find.text('Another meeting request'), findsOneWidget);
       expect(find.text('2 Attachments'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      settings.setLanguage(AppLanguage.khmer);
+      await tester.pumpAndSettle();
+      expect(find.text('២'), findsOneWidget);
+      expect(find.text('2'), findsNothing);
+      settings.setLanguage(AppLanguage.english);
+      await tester.pumpAndSettle();
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('២'), findsNothing);
       await tester.tap(find.text('សំណើសុំរៀបចំកិច្ចប្រជុំ'));
       await tester.pumpAndSettle();
       expect(find.text('Meeting description & details'), findsOneWidget);

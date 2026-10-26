@@ -199,10 +199,7 @@ class _ScopeTitle extends StatelessWidget {
 }
 
 class _ScopeSelector extends StatelessWidget {
-  const _ScopeSelector({
-    required this.selectedIndex,
-    required this.onSelected,
-  });
+  const _ScopeSelector({required this.selectedIndex, required this.onSelected});
 
   final int selectedIndex;
   final ValueChanged<int> onSelected;
@@ -269,8 +266,8 @@ class _ScopePill extends StatelessWidget {
             color: selected
                 ? Colors.white
                 : (AppColors.isDark(context)
-                    ? const Color(0xFFB9D7ED)
-                    : AppColors.primary),
+                      ? const Color(0xFFB9D7ED)
+                      : AppColors.primary),
             fontSize: 12,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
           ),
@@ -281,10 +278,7 @@ class _ScopePill extends StatelessWidget {
 }
 
 class _FilterButton extends StatelessWidget {
-  const _FilterButton({
-    required this.activeCount,
-    required this.onTap,
-  });
+  const _FilterButton({required this.activeCount, required this.onTap});
 
   final int activeCount;
   final VoidCallback onTap;
@@ -329,7 +323,7 @@ class _FilterButton extends StatelessWidget {
                   borderRadius: BorderRadius.circular(9),
                 ),
                 child: Text(
-                  '$activeCount',
+                  AppLocalizations.of(context).number(activeCount),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 10,
@@ -451,7 +445,7 @@ class _MetricCard extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    value,
+                    AppLocalizations.of(context).number(value),
                     style: TextStyle(
                       color: isDark ? Colors.white : const Color(0xFF27364A),
                       fontSize: 20,
@@ -517,7 +511,7 @@ class _WideMetricCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '14',
+                  AppLocalizations.of(context).number(14),
                   style: TextStyle(
                     color: isDark ? Colors.white : const Color(0xFF27364A),
                     fontSize: 20,
@@ -547,10 +541,7 @@ class _WideMetricCard extends StatelessWidget {
 }
 
 class _DashboardTabs extends StatelessWidget {
-  const _DashboardTabs({
-    required this.selectedIndex,
-    required this.onSelected,
-  });
+  const _DashboardTabs({required this.selectedIndex, required this.onSelected});
 
   final int selectedIndex;
   final ValueChanged<int> onSelected;
@@ -651,7 +642,7 @@ class LineMinistryOverallTab extends StatelessWidget {
             width: 320,
             height: 195,
             child: CustomPaint(
-              painter: _LineMinistryDonutPainter(isDark: isDark),
+              painter: _LineMinistryDonutPainter(isDark: isDark, l10n: l10n),
             ),
           ),
           const SizedBox(height: 12),
@@ -682,7 +673,9 @@ class LineMinistryOverallTab extends StatelessWidget {
 }
 
 class _LineMinistryDonutPainter extends CustomPainter {
-  const _LineMinistryDonutPainter({required this.isDark});
+  const _LineMinistryDonutPainter({required this.isDark, required this.l10n});
+
+  final AppLocalizations l10n;
 
   final bool isDark;
 
@@ -765,7 +758,7 @@ class _LineMinistryDonutPainter extends CustomPainter {
             ),
           ),
           TextSpan(
-            text: '20',
+            text: l10n.number(20),
             style: TextStyle(
               color: isDark ? Colors.white : AppColors.text,
               fontSize: 16,
@@ -802,7 +795,7 @@ class _LineMinistryDonutPainter extends CustomPainter {
   ) {
     final painter = TextPainter(
       text: TextSpan(
-        text: text,
+        text: l10n.number(text),
         style: const TextStyle(
           color: AppColors.text,
           fontSize: 11,
@@ -843,7 +836,8 @@ class _LineMinistryDonutPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _LineMinistryDonutPainter oldDelegate) =>
-      oldDelegate.isDark != isDark;
+      oldDelegate.isDark != isDark ||
+      oldDelegate.l10n.language != l10n.language;
 }
 
 class _ChartLegendRow extends StatelessWidget {
@@ -884,7 +878,7 @@ class _ChartLegendRow extends StatelessWidget {
             ),
           ),
           Text(
-            value,
+            AppLocalizations.of(context).number(value),
             style: TextStyle(
               color: colors.onSurface,
               fontSize: 12,
@@ -929,8 +923,7 @@ class _LineMinistryFilterSheet extends StatefulWidget {
       _LineMinistryFilterSheetState();
 }
 
-class _LineMinistryFilterSheetState
-    extends State<_LineMinistryFilterSheet> {
+class _LineMinistryFilterSheetState extends State<_LineMinistryFilterSheet> {
   late Set<String> _workingGroups;
   late Set<String> _statuses;
   late Set<String> _agencies;
@@ -978,11 +971,7 @@ class _LineMinistryFilterSheetState
     'MOC',
   ];
 
-  static const _progressItems = [
-    'Both',
-    'S1',
-    'S2',
-  ];
+  static const _progressItems = ['Both', 'S1', 'S2'];
 
   @override
   void initState() {
@@ -1008,8 +997,7 @@ class _LineMinistryFilterSheetState
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
-    final borderColor =
-        isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
+    final borderColor = isDark ? AppColors.darkBorder : const Color(0xFFE6E9ED);
 
     final viewPadding = MediaQuery.of(context).viewPadding;
     final topInset = viewPadding.top > 48.0 ? viewPadding.top : 48.0;
@@ -1024,19 +1012,12 @@ class _LineMinistryFilterSheetState
       child: FractionallySizedBox(
         heightFactor: 1.0,
         child: Container(
-          decoration: BoxDecoration(
-            color: background,
-          ),
+          decoration: BoxDecoration(color: background),
           child: Column(
             children: [
               // ================= FILTER HEADER =================
               Container(
-                padding: EdgeInsets.fromLTRB(
-                  22,
-                  topInset + 24,
-                  22,
-                  12,
-                ),
+                padding: EdgeInsets.fromLTRB(22, topInset + 24, 22, 12),
                 child: Row(
                   children: [
                     const SizedBox(width: 28),
@@ -1059,10 +1040,7 @@ class _LineMinistryFilterSheetState
                       child: const SizedBox(
                         width: 28,
                         height: 28,
-                        child: Icon(
-                          Icons.close,
-                          size: 25,
-                        ),
+                        child: Icon(Icons.close, size: 25),
                       ),
                     ),
                   ],
@@ -1072,12 +1050,7 @@ class _LineMinistryFilterSheetState
               // ================= FILTER CONTENT =================
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    25,
-                    20,
-                    25,
-                    22,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(25, 20, 25, 22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1219,8 +1192,7 @@ class _LineMinistryFilterSheetState
                         items: _progressItems,
                         columns: 3,
                         selectedItems: _progressReports,
-                        onChanged: (value) =>
-                            _toggle(_progressReports, value),
+                        onChanged: (value) => _toggle(_progressReports, value),
                       ),
                     ],
                   ),
@@ -1237,11 +1209,7 @@ class _LineMinistryFilterSheetState
                 ),
                 decoration: BoxDecoration(
                   color: background,
-                  border: Border(
-                    top: BorderSide(
-                      color: borderColor,
-                    ),
-                  ),
+                  border: Border(top: BorderSide(color: borderColor)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.03),
@@ -1269,9 +1237,7 @@ class _LineMinistryFilterSheetState
                           workingGroups: {..._workingGroups},
                           statuses: {..._statuses},
                           agencies: {..._agencies},
-                          progressReports: {
-                            ..._progressReports,
-                          },
+                          progressReports: {..._progressReports},
                         ),
                       );
                     },
@@ -1469,11 +1435,7 @@ class _CheckTileBox extends StatelessWidget {
         ),
       ),
       child: selected
-          ? const Icon(
-              Icons.check,
-              size: 11,
-              color: Colors.white,
-            )
+          ? const Icon(Icons.check, size: 11, color: Colors.white)
           : null,
     );
   }
@@ -1495,6 +1457,6 @@ String _localizeLabel(BuildContext context, String text) {
     'Draft' => l10n.text('draft'),
     'View All' => l10n.text('viewAll'),
     'View Less' => l10n.text('viewLess'),
-    _ => text,
+    _ => l10n.number(text),
   };
 }

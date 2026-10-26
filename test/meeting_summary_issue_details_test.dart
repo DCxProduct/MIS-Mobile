@@ -100,76 +100,87 @@ void main() {
     expect(find.text('Selected next step'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
-  testWidgets('CDC GPSF summary issue shows the complete web fields', (
-    tester,
-  ) async {
-    final json =
-        jsonDecode(
-              File(
-                'test/fixtures/cdcgpsf_meeting_summary.json',
-              ).readAsStringSync().replaceFirst('\uFEFF', ''),
-            )
-            as Map<String, dynamic>;
-    final summary = MeetingSummary(json);
-    final issue = summary.issues.single;
-    expect(summary.pswg, 'Tourism');
-    expect(summary.governmentAgency, 'MoT');
-    expect(summary.sentBy, 'MoT');
-    expect(summary.summaryDocumentName, 'Meeting_summary_ reference.pdf');
-    expect(summary.summaryDocumentSize, 1947246);
-    expect(summary.summaryDocumentPath, contains('/meeting-summaries/'));
-    expect(summary.requestedDate, DateTime.parse('2026-10-19T02:45:51.251Z'));
-    expect(issue.escalation, 'CDC');
-    expect(issue.agencyLogos[2], contains('MEF.png'));
-    expect(issue.rgcDecisionHtml, contains('<p>'));
-    expect(issue.nextStepHtml, isNotEmpty);
-    expect(issue.remarkHtml, isNotEmpty);
-    final settings = AppSettingsController()
-      ..setLanguage(AppLanguage.english)
-      ..setModuleType(AppModuleType.cdcSecretariat);
-    addTearDown(settings.dispose);
-    await tester.pumpWidget(
-      AppSettings(
-        controller: settings,
-        child: MaterialApp(home: MeetingSummaryDetailScreen(summary: summary)),
-      ),
+  for (final module in [
+    AppModuleType.cdcSecretariat,
+    AppModuleType.privateSector,
+  ]) {
+    testWidgets(
+      '$module summary shows separate documents and complete web fields',
+      (tester) async {
+        final json =
+            jsonDecode(
+                  File(
+                    'test/fixtures/cdcgpsf_meeting_summary.json',
+                  ).readAsStringSync().replaceFirst('\uFEFF', ''),
+                )
+                as Map<String, dynamic>;
+        final summary = MeetingSummary(json);
+        final issue = summary.issues.single;
+        expect(summary.pswg, 'Tourism');
+        expect(summary.governmentAgency, 'MoT');
+        expect(summary.sentBy, 'MoT');
+        expect(summary.summaryDocumentName, 'Meeting_summary_ reference.pdf');
+        expect(summary.summaryDocumentSize, 1947246);
+        expect(summary.summaryDocumentPath, contains('/meeting-summaries/'));
+        expect(
+          summary.requestedDate,
+          DateTime.parse('2026-10-19T02:45:51.251Z'),
+        );
+        expect(issue.escalation, 'CDC');
+        expect(issue.agencyLogos[2], contains('MEF.png'));
+        expect(issue.rgcDecisionHtml, contains('<p>'));
+        expect(issue.nextStepHtml, isNotEmpty);
+        expect(issue.remarkHtml, isNotEmpty);
+        final settings = AppSettingsController()
+          ..setLanguage(AppLanguage.english)
+          ..setModuleType(module);
+        addTearDown(settings.dispose);
+        await tester.pumpWidget(
+          AppSettings(
+            controller: settings,
+            child: MaterialApp(
+              home: MeetingSummaryDetailScreen(summary: summary),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Meeting Information'), findsOneWidget);
+        expect(find.text('meeting_request_latter.pdf'), findsOneWidget);
+        expect(find.text('meeting_document_reference.pdf'), findsOneWidget);
+        await tester.scrollUntilVisible(
+          find.text('Meeting_summary_ reference.pdf'),
+          250,
+        );
+        final summaryAttachment = tester.widget<PdfAttachmentPreview>(
+          find.ancestor(
+            of: find.text('Meeting_summary_ reference.pdf'),
+            matching: find.byType(PdfAttachmentPreview),
+          ),
+        );
+        expect(summaryAttachment.path, summary.summaryDocumentPath);
+        expect(find.text('1.9 MB'), findsOneWidget);
+        await tester.scrollUntilVisible(find.text(issue.title), 250);
+        await tester.tap(find.text(issue.title));
+        await tester.pumpAndSettle();
+        expect(find.byType(CdcSummaryIssueDetails), findsOneWidget);
+        expect(find.text('MEF'), findsOneWidget);
+        expect(find.text('CDC'), findsOneWidget);
+        expect(find.text('Issue_solution_reference.pdf'), findsOneWidget);
+        final sheetScroll = find.descendant(
+          of: find.byType(CdcSummaryIssueDetails),
+          matching: find.byType(Scrollable),
+        );
+        await tester.scrollUntilVisible(
+          find.text('Remark'),
+          300,
+          scrollable: sheetScroll.first,
+        );
+        expect(find.text('Remark'), findsOneWidget);
+        expect(find.text('Next Step'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
     );
-    await tester.pumpAndSettle();
-    expect(find.text('Meeting Information'), findsOneWidget);
-    expect(find.text('meeting_request_latter.pdf'), findsOneWidget);
-    expect(find.text('meeting_document_reference.pdf'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Meeting_summary_ reference.pdf'),
-      250,
-    );
-    final summaryAttachment = tester.widget<PdfAttachmentPreview>(
-      find.ancestor(
-        of: find.text('Meeting_summary_ reference.pdf'),
-        matching: find.byType(PdfAttachmentPreview),
-      ),
-    );
-    expect(summaryAttachment.path, summary.summaryDocumentPath);
-    expect(find.text('1.9 MB'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text(issue.title), 250);
-    await tester.tap(find.text(issue.title));
-    await tester.pumpAndSettle();
-    expect(find.byType(CdcSummaryIssueDetails), findsOneWidget);
-    expect(find.text('MEF'), findsOneWidget);
-    expect(find.text('CDC'), findsOneWidget);
-    expect(find.text('Issue_solution_reference.pdf'), findsOneWidget);
-    final sheetScroll = find.descendant(
-      of: find.byType(CdcSummaryIssueDetails),
-      matching: find.byType(Scrollable),
-    );
-    await tester.scrollUntilVisible(
-      find.text('Remark'),
-      300,
-      scrollable: sheetScroll.first,
-    );
-    expect(find.text('Remark'), findsOneWidget);
-    expect(find.text('Next Step'), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+  }
   // Contract from the backend summary serializer and the web issue dialog.
   final webSummary =
       jsonDecode(
@@ -189,7 +200,7 @@ void main() {
   });
 
   testWidgets(
-    'summary detail API fills sender and date without changing the UI',
+    'private summary detail endpoint fills the complete Ministry issue dialog',
     (tester) async {
       var calls = 0;
       final settings =
@@ -221,11 +232,19 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('9:00 AM'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Problems on direct flights to Cambodia'),
+        250,
+      );
       await tester.tap(find.text('Problems on direct flights to Cambodia'));
       await tester.pumpAndSettle();
+      expect(find.byType(CdcSummaryIssueDetails), findsOneWidget);
       expect(
-        find.text('Submitted By : MoT', findRichText: true),
-        findsOneWidget,
+        find.descendant(
+          of: find.byType(BottomSheet),
+          matching: find.text('MoT'),
+        ),
+        findsNWidgets(2),
       );
       expect(
         find.descendant(
@@ -246,13 +265,13 @@ void main() {
       final sheet = find.byType(BottomSheet);
       expect(
         find.descendant(of: sheet, matching: find.byType(Wrap)),
-        findsNothing,
+        findsOneWidget,
       );
       settings.setLanguage(AppLanguage.khmer);
       await tester.pumpAndSettle();
       expect(
         find.text(
-          '${AppLocalizations(AppLanguage.khmer).text('submittedBy')} : MoT',
+          AppLocalizations(AppLanguage.khmer).text('submittedBy'),
           findRichText: true,
         ),
         findsOneWidget,
@@ -335,7 +354,7 @@ void main() {
   });
 
   testWidgets(
-    'API summary issue sheet uses selected record fields in the original layout',
+    'private summary issue sheet preserves selected fields and both documents',
     (tester) async {
       tester.view.physicalSize = const Size(390, 1000);
       tester.view.devicePixelRatio = 1;
@@ -390,6 +409,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('1:30 PM'), findsOneWidget);
+      await tester.scrollUntilVisible(find.text('Actual summary issue'), 250);
       await tester.tap(find.text('Actual summary issue'));
       await tester.pumpAndSettle();
       for (final language in [AppLanguage.english, AppLanguage.khmer]) {
@@ -397,49 +417,43 @@ void main() {
         await tester.pumpAndSettle();
         final l10n = AppLocalizations(language);
         expect(
-          find.text(
-            '${l10n.text('submittedBy')} : Actual submitter',
-            findRichText: true,
-          ),
+          find.text('Actual submitter', findRichText: true),
           findsOneWidget,
         );
         expect(
           find.descendant(
             of: find.byType(BottomSheet),
-            matching: find.textContaining('2026', findRichText: true),
+            matching: find.textContaining(
+              l10n.number(2026),
+              findRichText: true,
+            ),
           ),
           findsOneWidget,
         );
         expect(
-          find.text(
-            '${l10n.text('governmentAgency')} : Primary actual agency',
-            findRichText: true,
-          ),
+          find.text('Primary actual agency', findRichText: true),
           findsOneWidget,
         );
         expect(
-          find.text(
-            '${l10n.text('governmentSecondAgency')} : Second actual agency',
-            findRichText: true,
-          ),
+          find.text('Second actual agency', findRichText: true),
           findsOneWidget,
         );
         expect(
-          find.text(
-            '${l10n.text('governmentThirdAgency')} : Third actual agency',
-            findRichText: true,
-          ),
+          find.text('Third actual agency', findRichText: true),
           findsOneWidget,
         );
         expect(find.text('Original issue.pdf'), findsOneWidget);
-        expect(find.text('Original reference.pdf'), findsNothing);
+        expect(find.text('Original reference.pdf'), findsOneWidget);
         final documents = tester.widgetList<PdfAttachmentPreview>(
           find.descendant(
             of: find.byType(BottomSheet),
             matching: find.byType(PdfAttachmentPreview),
           ),
         );
-        expect(documents.map((doc) => doc.path), ['/issue.pdf']);
+        expect(documents.map((doc) => doc.path), [
+          '/issue.pdf',
+          '/reference.pdf',
+        ]);
         expect(find.textContaining('MAFF', findRichText: true), findsNothing);
         expect(
           find.textContaining('Jun 24 2025', findRichText: true),
@@ -453,17 +467,18 @@ void main() {
       }
       Navigator.of(tester.element(find.byType(BottomSheet))).pop();
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.text('Another issue'), 250);
       await tester.tap(find.text('Another issue'));
       await tester.pumpAndSettle();
       final km = AppLocalizations(AppLanguage.khmer);
       expect(
-        find.text(
-          '${km.text('submittedBy')} : Another submitter',
-          findRichText: true,
-        ),
+        find.text('Another submitter', findRichText: true),
         findsOneWidget,
       );
-      expect(find.textContaining('2024', findRichText: true), findsOneWidget);
+      expect(
+        find.textContaining(km.number(2024), findRichText: true),
+        findsOneWidget,
+      );
       expect(
         find.textContaining('Primary actual agency', findRichText: true),
         findsNothing,
@@ -501,13 +516,21 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('7:00 AM'), findsNothing);
+      await tester.scrollUntilVisible(find.text('Minimal issue'), 250);
       await tester.tap(find.text('Minimal issue'));
       await tester.pumpAndSettle();
       expect(
-        find.text('Submitted Date : —', findRichText: true),
+        find.descendant(
+          of: find.byType(BottomSheet),
+          matching: find.text('Submitted Date'),
+        ),
         findsOneWidget,
       );
-      expect(find.text('Submitted By : —', findRichText: true), findsOneWidget);
+      expect(find.text('Submitted By'), findsOneWidget);
+      expect(
+        find.descendant(of: find.byType(BottomSheet), matching: find.text('—')),
+        findsWidgets,
+      );
       expect(find.textContaining('MAFF', findRichText: true), findsNothing);
       expect(find.textContaining('Not Data', findRichText: true), findsNothing);
       expect(tester.takeException(), isNull);
