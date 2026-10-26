@@ -6,8 +6,13 @@ import '../../../../translations/app_localizations.dart';
 import '../data/calendar_meeting.dart';
 
 class MeetingsLoader extends StatefulWidget {
-  const MeetingsLoader({super.key, required this.builder});
+  const MeetingsLoader({
+    super.key,
+    required this.builder,
+    this.buildWhenEmpty = false,
+  });
   final Widget Function(List<CalendarMeeting>) builder;
+  final bool buildWhenEmpty;
   @override
   State<MeetingsLoader> createState() => _MeetingsLoaderState();
 }
@@ -30,9 +35,10 @@ class _MeetingsLoaderState extends State<MeetingsLoader> {
     future: _future,
     builder: (context, snapshot) {
       final l10n = AppLocalizations.of(context, page: 'meeting_calendar');
-      if (snapshot.connectionState != ConnectionState.done)
+      if (snapshot.connectionState != ConnectionState.done) {
         return const Center(child: CircularProgressIndicator());
-      if (snapshot.hasError)
+      }
+      if (snapshot.hasError) {
         return Column(
           children: [
             Text(l10n.text('meetingsLoadError')),
@@ -46,11 +52,14 @@ class _MeetingsLoaderState extends State<MeetingsLoader> {
             ),
           ],
         );
+      }
       final selection = ApiFilterScope.selection(context, 'meetings');
       final items = snapshot.data!
           .where((item) => selection.matchesLocal(item.details.filterValues))
           .toList();
-      if (items.isEmpty) return Text(l10n.text('noMeetings'));
+      if (items.isEmpty && !widget.buildWhenEmpty) {
+        return Text(l10n.text('noMeetings'));
+      }
       return widget.builder(items);
     },
   );

@@ -4,6 +4,7 @@ import '../../../../core/app_colors.dart';
 import '../../../../translations/app_localizations.dart';
 import '../../../shared/meetings/data/calendar_meeting.dart';
 import '../../../shared/meetings/widgets/meetings_loader.dart';
+import '../../../shared/meetings/widgets/monthly_meeting_calendar.dart';
 import '../meeting_request_detail_screen.dart';
 
 class CalendarTab extends StatefulWidget {
@@ -21,13 +22,9 @@ class _CalendarTabState extends State<CalendarTab> {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: Theme.of(context).brightness == Brightness.dark
-          ? AppColors.darkBackground
-          : Colors.white,
-      child: MeetingsLoader(
-        builder: (meetings) => _buildCalendar(context, meetings),
-      ),
+    return MeetingsLoader(
+      buildWhenEmpty: true,
+      builder: (meetings) => _buildCalendar(context, meetings),
     );
   }
 
@@ -35,19 +32,6 @@ class _CalendarTabState extends State<CalendarTab> {
     final datedMeetings =
         meetings.where((meeting) => meeting.date != null).toList()
           ..sort((a, b) => a.date!.compareTo(b.date!));
-    if (datedMeetings.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 12),
-        child: Text(
-          AppLocalizations.of(
-            context,
-            page: 'meeting_calendar',
-          ).text('noMeetings'),
-        ),
-      );
-    }
-
-    final firstDate = datedMeetings.first.date!.toLocal();
     if (_selectedDate == null && widget.initialMeetingId != null) {
       for (final meeting in datedMeetings) {
         if (meeting.details.id == widget.initialMeetingId) {
@@ -56,38 +40,21 @@ class _CalendarTabState extends State<CalendarTab> {
         }
       }
     }
-    final selected = _selectedDate == null
-        ? DateTime(firstDate.year, firstDate.month, firstDate.day)
-        : DateTime(
-            _selectedDate!.year,
-            _selectedDate!.month,
-            _selectedDate!.day,
-          );
+    // Open on the device's current day, not the oldest API meeting.
+    // An explicitly opened meeting or a user's date selection takes priority.
+    final date = _selectedDate ?? DateTime.now();
+    final selected = DateTime(date.year, date.month, date.day);
     final monthMeetings = datedMeetings
         .where((meeting) => _sameMonth(meeting.date!.toLocal(), selected))
         .toList();
     final selectedMeetings = monthMeetings
         .where((meeting) => _sameDay(meeting.date!.toLocal(), selected))
         .toList();
-    final monthStart = DateTime(selected.year, selected.month, 1);
-    final daysInMonth = DateTime(selected.year, selected.month + 1, 0).day;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 12),
-        Text(
-          '${_monthName(context, selected.month)} ${AppLocalizations.of(context).number(selected.year)}',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 12),
-        _CalendarDays(
-          monthStart: monthStart,
-          daysInMonth: daysInMonth,
+        MonthlyMeetingCalendar(
           selectedDate: selected,
           meetingDates: monthMeetings
               .map((meeting) => meeting.date!.toLocal())
@@ -131,126 +98,6 @@ class _CalendarTabState extends State<CalendarTab> {
 
   static bool _sameMonth(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month;
-
-  static String _monthName(BuildContext context, int month) {
-    const codes = [
-      'jan',
-      'feb',
-      'mar',
-      'apr',
-      'may',
-      'jun',
-      'jul',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
-    ];
-    final code = codes[month - 1];
-    final l10n = AppLocalizations.of(context, page: 'meeting_calendar');
-    return l10n.api(
-      'meeting_requests.calendar_ui.months.$code',
-      fallback: l10n.text('month${code[0].toUpperCase()}${code.substring(1)}'),
-    );
-  }
-}
-
-class _CalendarDays extends StatelessWidget {
-  const _CalendarDays({
-    required this.monthStart,
-    required this.daysInMonth,
-    required this.selectedDate,
-    required this.meetingDates,
-    required this.onSelected,
-  });
-
-  final DateTime monthStart;
-  final int daysInMonth;
-  final DateTime selectedDate;
-  final List<DateTime> meetingDates;
-  final ValueChanged<DateTime> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final scale = MediaQuery.textScalerOf(context).scale(12) / 12;
-    return Container(
-      padding: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.border(context))),
-      ),
-      child: SizedBox(
-        height: 58 * scale,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: daysInMonth,
-          separatorBuilder: (_, _) => const SizedBox(width: 12),
-          itemBuilder: (context, index) {
-            final date = DateTime(monthStart.year, monthStart.month, index + 1);
-            final selected = _sameDay(date, selectedDate);
-            return SizedBox(
-              width: 36 * scale,
-              child: InkWell(
-                onTap: () => onSelected(date),
-                borderRadius: BorderRadius.circular(6),
-                child: Column(
-                  children: [
-                    Text(
-                      _weekday(context, date.weekday),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xFF6B7280),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 9),
-                    Container(
-                      width: 26 * scale,
-                      height: 26 * scale,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? AppColors.accent(context)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Text(
-                        AppLocalizations.of(context).number(date.day),
-                        style: TextStyle(
-                          color: selected
-                              ? Colors.white
-                              : const Color(0xFF9AA3AF),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  static String _weekday(BuildContext context, int weekday) {
-    const codes = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-    final code = codes[weekday - 1];
-    final l10n = AppLocalizations.of(context, page: 'meeting_calendar');
-    return l10n.api(
-      'meeting_requests.calendar_ui.weekdays.$code',
-      fallback: l10n.text(
-        'weekday${code[0].toUpperCase()}${code.substring(1)}',
-      ),
-    );
-  }
-
-  static bool _sameDay(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
 class _CalendarEventCard extends StatelessWidget {
