@@ -245,7 +245,7 @@ class _NotificationScreenState extends State<NotificationScreen>
                       : Text(
                           l10n
                               .text('unreadNotifications')
-                              .replaceAll('{count}', '$count'),
+                              .replaceAll('{count}', l10n.number(count)),
                           style: TextStyle(
                             color: AppColors.accent(context),
                             fontSize: 13,
@@ -313,9 +313,7 @@ class _NotificationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final date = item.createdAt?.toLocal();
-    final dateText = date == null
-        ? ''
-        : '${date.day}/${date.month}/${date.year}';
+    final dateText = date == null ? '' : l10n.date(date);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -460,6 +458,6 @@ class _NotificationCard extends StatelessWidget {
         : difference.inHours > 0
         ? (difference.inHours, 'notificationHoursAgo')
         : (difference.inMinutes, 'notificationMinutesAgo');
-    return l10n.text(key).replaceAll('{count}', '$count');
+    return l10n.text(key).replaceAll('{count}', l10n.number(count));
   }
 }

@@ -60,7 +60,9 @@ class ProfileDetailScreen extends StatelessWidget {
                   _InfoItem(
                     icon: Icons.calendar_month_outlined,
                     label: AppLocalizations.of(context).text('dateOfBirth'),
-                    value: user.dateOfBirth?.split('T').first ?? '—',
+                    value: AppLocalizations.of(
+                      context,
+                    ).date(DateTime.tryParse(user.dateOfBirth ?? '')),
                   ),
                   _InfoItem(
                     icon: Icons.location_on_outlined,

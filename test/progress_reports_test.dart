@@ -387,6 +387,15 @@ void main() {
 
       expect(requests, ['/api/v1/progress-reports']);
       expect(find.text('ចំណងជើងរបាយការណ៍ **'), findsOneWidget);
+      expect(find.text('2026'), findsOneWidget);
+      settings.setLanguage(AppLanguage.khmer);
+      await tester.pumpAndSettle();
+      expect(find.text('២០២៦'), findsOneWidget);
+      expect(find.text('2026'), findsNothing);
+      settings.setLanguage(AppLanguage.english);
+      await tester.pumpAndSettle();
+      expect(find.text('2026'), findsOneWidget);
+      expect(find.text('២០២៦'), findsNothing);
     });
   }
 }

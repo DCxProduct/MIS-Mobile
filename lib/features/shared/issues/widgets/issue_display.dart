@@ -20,22 +20,13 @@ String issueProgressReportTitle(
 String issueDate(BuildContext context, DateTime? date) =>
     issueDateWithYear(context, date);
 
-String issueDateWithYear(BuildContext context, DateTime? date) {
-  if (date == null) return '—';
-  final l10n = MaterialLocalizations.of(context);
-  return '${l10n.formatMediumDate(date)} ${l10n.formatYear(date)}';
-}
+String issueDateWithYear(BuildContext context, DateTime? date) =>
+    AppLocalizations.of(context).date(date);
 
-String issueDateWithTime(BuildContext context, DateTime? date) {
-  if (date == null) return '—';
-  final localizations = MaterialLocalizations.of(context);
-  final time = localizations.formatTimeOfDay(
-    TimeOfDay.fromDateTime(date),
-    alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
-  );
-  return '${issueDateWithYear(context, date)} | $time';
-}
-
+String issueDateWithTime(BuildContext context, DateTime? date) =>
+    AppLocalizations.of(
+      context,
+    ).dateTime(date, use24Hour: MediaQuery.alwaysUse24HourFormatOf(context));
 String issueStatusLabel(BuildContext context, WorkingGroupIssue issue) {
   final l10n = AppLocalizations.of(context);
   final code = issue.statusCode.trim();

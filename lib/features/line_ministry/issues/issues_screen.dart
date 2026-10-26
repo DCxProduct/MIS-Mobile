@@ -231,7 +231,7 @@ class _LineMinistryIssuesScreenViewState
                                 : issue.submittedBy,
                             description: issue.description,
                             attachmentCount:
-                                '${issue.attachmentCount} ${l10n.text('attachmentsLabel')}',
+                                '${AppLocalizations.of(context).number(issue.attachmentCount)} ${l10n.text('attachmentsLabel')}',
                             issue: issue,
                             detailBuilder: widget.issueDetailBuilder,
                           ),
@@ -253,7 +253,7 @@ class _LineMinistryIssuesScreenViewState
                                 : issue.submittedBy,
                             description: issue.description,
                             attachmentCount:
-                                '${issue.attachmentCount} ${l10n.text('attachmentsLabel')}',
+                                '${AppLocalizations.of(context).number(issue.attachmentCount)} ${l10n.text('attachmentsLabel')}',
                             issue: issue,
                             detailBuilder: widget.issueDetailBuilder,
                           ),
@@ -370,7 +370,7 @@ class _MetricCard extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    value,
+                    AppLocalizations.of(context).number(value),
                     style: TextStyle(
                       color: isDark ? Colors.white : const Color(0xFF27364A),
                       fontSize: 18,
@@ -437,7 +437,7 @@ class _TotalPrimaryAgenciesCard extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                value,
+                AppLocalizations.of(context).number(value),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 20,

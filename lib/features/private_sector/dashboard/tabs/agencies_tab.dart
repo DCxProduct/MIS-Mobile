@@ -1,3 +1,4 @@
+import '../../../../translations/app_localizations.dart';
 import '../../../shared/dashboard/widgets/pswg_live_dashboard.dart';
 import '../../../shared/dashboard/data/working_group_summary.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ class AgenciesTab extends StatelessWidget {
       ),
       child: CustomPaint(
         painter: _AgenciesBarChartPainter(
+          l10n: AppLocalizations.of(context),
           rows: PswgDataScope.maybeOf(context)?.agencies,
         ),
       ),
@@ -32,7 +34,8 @@ class AgenciesTab extends StatelessWidget {
 }
 
 class _AgenciesBarChartPainter extends CustomPainter {
-  const _AgenciesBarChartPainter({this.rows});
+  const _AgenciesBarChartPainter({this.rows, required this.l10n});
+  final AppLocalizations l10n;
 
   final List<WorkingGroupSummary>? rows;
 
@@ -184,7 +187,7 @@ class _AgenciesBarChartPainter extends CustomPainter {
     bool verticalCenter = false,
   }) {
     final painter = TextPainter(
-      text: TextSpan(text: text, style: style),
+      text: TextSpan(text: l10n.number(text), style: style),
       textDirection: TextDirection.ltr,
     )..layout();
 
@@ -199,5 +202,7 @@ class _AgenciesBarChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) =>
-      oldDelegate is! _AgenciesBarChartPainter || oldDelegate.rows != rows;
+      oldDelegate is! _AgenciesBarChartPainter ||
+      oldDelegate.l10n.language != l10n.language ||
+      oldDelegate.rows != rows;
 }

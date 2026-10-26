@@ -104,7 +104,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(calls, 2);
     expect(find.text('Female'), findsOneWidget);
-    expect(find.text('2000-03-09'), findsOneWidget);
+    expect(find.text('Mar 9, 2000'), findsOneWidget);
     expect(find.text('Phnom Penh'), findsOneWidget);
     expect(find.text('012345678'), findsOneWidget);
   });

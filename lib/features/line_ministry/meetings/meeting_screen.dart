@@ -415,7 +415,7 @@ class _LineMinistryCalendarListCard extends StatelessWidget {
                   const Icon(Icons.link, color: Color(0xFF4C5563), size: 14),
                   const SizedBox(width: 6),
                   Text(
-                    '${meeting.details.attachmentCount} ${AppLocalizations.of(context).text('attachmentsLabel')}',
+                    '${AppLocalizations.of(context).number(meeting.details.attachmentCount)} ${AppLocalizations.of(context).text('attachmentsLabel')}',
                     style: const TextStyle(
                       color: Color(0xFF4C5563),
                       fontSize: 11,
@@ -457,7 +457,7 @@ class _LineMinistryMeetingCard extends StatelessWidget {
     final totalIssues = '${request.issuesCount}';
     final status = request.status;
     final attachmentCount =
-        '${request.attachmentCount} ${AppLocalizations.of(context).text('attachmentsLabel')}';
+        '${AppLocalizations.of(context).number(request.attachmentCount)} ${AppLocalizations.of(context).text('attachmentsLabel')}';
     return InkWell(
       onTap: () {
         Navigator.of(context).push(

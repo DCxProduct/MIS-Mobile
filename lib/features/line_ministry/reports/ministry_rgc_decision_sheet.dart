@@ -294,7 +294,10 @@ class _DecisionPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: field('meetingDate', _decisionDate(decision.meetingDate)),
+              child: field(
+                'meetingDate',
+                AppLocalizations.of(context).date(decision.meetingDate),
+              ),
             ),
             const SizedBox(width: 18),
             Expanded(child: field('indicators', detail.indicatorName)),
@@ -352,24 +355,5 @@ class _DecisionPanel extends StatelessWidget {
           ),
       ],
     );
-  }
-
-  static String _decisionDate(DateTime? date) {
-    if (date == null) return '—';
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 }

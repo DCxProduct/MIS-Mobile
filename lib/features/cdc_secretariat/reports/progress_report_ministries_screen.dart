@@ -135,7 +135,7 @@ class _MinistriesState extends State<CdcProgressReportMinistriesScreen>
               children: [
                 Text(
                   report.title.isEmpty
-                      ? '${l10n.text('semester')} ${report.semester} ${report.year}'
+                      ? '${l10n.text('semester')} ${l10n.number(report.semester)} ${l10n.number(report.year)}'
                       : report.title,
                   style: const TextStyle(
                     fontSize: 18,
@@ -152,10 +152,10 @@ class _MinistriesState extends State<CdcProgressReportMinistriesScreen>
                         runSpacing: 8,
                         children: [
                           Text(
-                            '${l10n.text('year')}: ${report.year == 0 ? '—' : report.year}',
+                            '${l10n.text('year')}: ${report.year == 0 ? '—' : l10n.number(report.year)}',
                           ),
                           Text(
-                            '${l10n.text('semester')}: ${report.semester.isEmpty ? '—' : report.semester}',
+                            '${l10n.text('semester')}: ${report.semester.isEmpty ? '—' : l10n.number(report.semester)}',
                           ),
                         ],
                       ),
@@ -347,10 +347,7 @@ String _scheduleLabel(
   final number = entry.number;
   String formatted;
   if (l10n.language == AppLanguage.khmer) {
-    formatted = '$number'
-        .split('')
-        .map((digit) => '០១២៣៤៥៦៧៨៩'[int.parse(digit)])
-        .join();
+    formatted = l10n.number(number);
   } else {
     final suffix = number % 100 >= 11 && number % 100 <= 13
         ? 'th'

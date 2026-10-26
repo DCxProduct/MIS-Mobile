@@ -35,9 +35,9 @@ String _meetingTime(BuildContext context, ProgressReport? report) {
     final minute =
         iso?.minute ?? (match == null ? null : int.tryParse(match[2]!));
     if (hour == null || minute == null || hour > 23 || minute > 59) return '';
-    return MaterialLocalizations.of(
+    return AppLocalizations.of(
       context,
-    ).formatTimeOfDay(TimeOfDay(hour: hour, minute: minute));
+    ).time(DateTime(2000, 1, 1, hour, minute));
   }
 
   final start = clock(meeting['startTime']);

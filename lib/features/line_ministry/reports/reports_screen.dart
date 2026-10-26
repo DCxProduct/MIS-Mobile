@@ -235,7 +235,7 @@ class _PlenaryTab extends StatelessWidget {
               status: plenary.status,
               documentReference: plenary.documentReference,
               documentReferenceName: plenary.documentReferenceName,
-              meetingDate: plenaryDate(plenary.meetingDate),
+              meetingDate: plenaryDate(plenary.meetingDate, context: context),
               numberOfRgcDecision: '${plenary.numberOfRgcDecisions}',
               deadline: _formatDate(context, plenary.deadline),
               attachmentCount: _attachmentLabel(context, plenary),
@@ -251,7 +251,7 @@ class _PlenaryTab extends StatelessWidget {
   }
 
   static String _attachmentLabel(BuildContext context, Plenary plenary) {
-    return '${plenary.attachmentCount} ${AppLocalizations.of(context).text('attachmentsLabel')}';
+    return '${AppLocalizations.of(context).number(plenary.attachmentCount)} ${AppLocalizations.of(context).text('attachmentsLabel')}';
   }
 }
 
@@ -817,7 +817,7 @@ class _MetricCard extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    value,
+                    AppLocalizations.of(context).number(value),
                     style: TextStyle(
                       color: isDark ? Colors.white : const Color(0xFF27364A),
                       fontSize: 18,
@@ -884,7 +884,7 @@ class _TotalPrimaryAgenciesCard extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                value,
+                AppLocalizations.of(context).number(value),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 20,

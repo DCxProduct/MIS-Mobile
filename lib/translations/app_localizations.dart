@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../core/formatters/number_formatter.dart' as numbers;
+import '../core/formatters/date_formatter.dart' as dates;
 
 import '../core/app_settings.dart';
 import '../core/config/module_config.dart';
@@ -40,6 +42,19 @@ class AppLocalizations {
   });
 
   final AppLanguage language;
+  String number(Object? value, {int? decimalPlaces}) => numbers.formatNumber(
+    value,
+    language: language,
+    decimalPlaces: decimalPlaces,
+  );
+  String date(
+    DateTime? value, {
+    dates.AppDateStyle style = dates.AppDateStyle.medium,
+  }) => dates.formatDate(value, language: language, style: style);
+  String time(DateTime? value, {bool use24Hour = false}) =>
+      dates.formatTime(value, language: language, use24Hour: use24Hour);
+  String dateTime(DateTime? value, {bool use24Hour = false}) =>
+      dates.formatDateTime(value, language: language, use24Hour: use24Hour);
   final Map<String, String> dictionary;
   final String? page;
   final AppModuleType module;

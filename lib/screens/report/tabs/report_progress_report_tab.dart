@@ -115,7 +115,10 @@ class _ProgressReportCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              _Tag(label: '${report.year}', color: const Color(0xFFB642FF)),
+              _Tag(
+                label: AppLocalizations.of(context).number(report.year),
+                color: const Color(0xFFB642FF),
+              ),
             ],
           ),
           const SizedBox(height: 12),

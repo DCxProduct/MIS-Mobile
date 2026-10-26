@@ -101,11 +101,26 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      // CDC G-PSF opens RGC decisions first; WG metrics are on the matrix tab.
+      if (role == AppModuleType.cdcSecretariat) {
+        await tester.tap(find.text('Issues Matrix').last);
+        await tester.pumpAndSettle();
+      }
       expect(find.text('12'), findsOneWidget);
       expect(find.text('1/12'), findsOneWidget);
       expect(find.text('3/12'), findsOneWidget);
       expect(find.text('0/12'), findsOneWidget);
       expect(requests, 1);
+      settings.setLanguage(AppLanguage.khmer);
+      await tester.pumpAndSettle();
+      expect(find.text('១២'), findsOneWidget);
+      expect(find.text('១/១២'), findsOneWidget);
+      expect(find.text('៣/១២'), findsOneWidget);
+      expect(find.text('០/១២'), findsOneWidget);
+      expect(find.text('1/12'), findsNothing);
+      settings.setLanguage(AppLanguage.english);
+      await tester.pumpAndSettle();
+      expect(find.text('1/12'), findsOneWidget);
       settings.setThemeMode(ThemeMode.dark);
       await tester.pumpAndSettle();
       expect(requests, 1);
@@ -123,11 +138,14 @@ void main() {
         );
         expect(find.text('Issues Matrix'), findsOneWidget);
         expect(requests, 1);
-      } else {
+      } else if (role == AppModuleType.privateSector) {
         await tester.tap(find.text('Issues Matrix').last);
         await tester.pumpAndSettle();
         expect(find.byType(WgIssueSummaryLoader), findsOneWidget);
         expect(requests, 2);
+      } else {
+        expect(find.byType(WgIssueSummaryLoader), findsOneWidget);
+        expect(requests, 1);
       }
     });
   }

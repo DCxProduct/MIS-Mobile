@@ -30,7 +30,11 @@ class CdcSecretariatOverallTab extends StatelessWidget {
             width: 320,
             height: 195,
             child: CustomPaint(
-              painter: _DonutChartPainter(isDark: isDark, cards: cards),
+              painter: _DonutChartPainter(
+                isDark: isDark,
+                cards: cards,
+                l10n: l10n,
+              ),
             ),
           ),
           const SizedBox(height: 2),
@@ -61,7 +65,12 @@ class CdcSecretariatOverallTab extends StatelessWidget {
 }
 
 class _DonutChartPainter extends CustomPainter {
-  const _DonutChartPainter({required this.isDark, this.cards});
+  const _DonutChartPainter({
+    required this.isDark,
+    this.cards,
+    required this.l10n,
+  });
+  final AppLocalizations l10n;
 
   final bool isDark;
   final Map<String, int?>? cards;
@@ -256,7 +265,7 @@ class _DonutChartPainter extends CustomPainter {
   ) {
     final painter = TextPainter(
       text: TextSpan(
-        text: text,
+        text: l10n.number(text),
         style: const TextStyle(
           color: AppColors.text,
           fontSize: 11,
@@ -301,7 +310,7 @@ class _DonutChartPainter extends CustomPainter {
       text: TextSpan(
         children: [
           TextSpan(
-            text: 'Total Issues\n',
+            text: '${l10n.text('totalIssues')}\n',
             style: TextStyle(
               color: isDark ? const Color(0xFFB8C0CC) : const Color(0xFF6C7480),
               fontSize: 11,
@@ -310,7 +319,7 @@ class _DonutChartPainter extends CustomPainter {
             ),
           ),
           TextSpan(
-            text: '$total',
+            text: l10n.number(total),
             style: TextStyle(
               color: isDark ? Colors.white : AppColors.text,
               fontSize: 16,
@@ -331,7 +340,9 @@ class _DonutChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DonutChartPainter oldDelegate) =>
-      oldDelegate.isDark != isDark || oldDelegate.cards != cards;
+      oldDelegate.l10n.language != l10n.language ||
+      oldDelegate.isDark != isDark ||
+      oldDelegate.cards != cards;
 }
 
 class _ChartLegendRow extends StatelessWidget {
@@ -372,7 +383,7 @@ class _ChartLegendRow extends StatelessWidget {
             ),
           ),
           Text(
-            value,
+            AppLocalizations.of(context).number(value),
             style: TextStyle(
               color: colors.onSurface,
               fontSize: 12,

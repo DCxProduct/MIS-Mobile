@@ -190,7 +190,7 @@ class _ReportCard extends StatelessWidget {
             if (decision.plenaryName.isNotEmpty)
               (l10n.text('plenary'), decision.plenaryName),
             (l10n.text('numberOfRgcDecision'), '${decision.decisions.length}'),
-            (l10n.text('meetingDate'), plenaryDate(decision.meetingDate)),
+            (l10n.text('meetingDate'), plenaryDate(decision.meetingDate, context: context)),
             (l10n.text('categories'), rgcValue(decision.category)),
             (l10n.text('focalPersonHE'), rgcValue(decision.focalPerson)),
           ]) ...[

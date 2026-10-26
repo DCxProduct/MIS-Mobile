@@ -294,7 +294,7 @@ class _ResourceDetailState extends State<_ResourceDetail> {
 
     void date(String key, Object? value) {
       final date = value is String ? DateTime.tryParse(value)?.toLocal() : null;
-      if (date != null) info(key, '${date.day}/${date.month}/${date.year}');
+      if (date != null) info(key, AppLocalizations.of(context).date(date));
     }
 
     void heading(String title) => children.add(

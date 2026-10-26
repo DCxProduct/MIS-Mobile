@@ -37,7 +37,7 @@ class _MeetingRequestCard extends StatelessWidget {
     final totalIssues = '${request.issuesCount}';
     final status = request.status;
     final attachmentCount =
-        '${request.attachmentCount} ${AppLocalizations.of(context).text('attachmentsLabel')}';
+        '${AppLocalizations.of(context).number(request.attachmentCount)} ${AppLocalizations.of(context).text('attachmentsLabel')}';
     return InkWell(
       onTap: () {
         Navigator.of(context).push(

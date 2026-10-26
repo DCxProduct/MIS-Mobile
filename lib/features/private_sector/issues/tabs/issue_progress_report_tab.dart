@@ -118,7 +118,7 @@ class _ProgressReportCard extends StatelessWidget {
                   const SizedBox(width: 5),
                   Flexible(
                     child: Text(
-                      '${report.attachmentPaths.length} ${l10n.text('attachmentsLabel')}',
+                      '${l10n.number(report.attachmentPaths.length)} ${l10n.text('attachmentsLabel')}',
                       style: TextStyle(
                         fontSize: 11,
                         color: AppColors.secondaryText(context),

@@ -37,6 +37,7 @@ class OverallTab extends StatelessWidget {
                 child: CustomPaint(
                   painter: _DonutChartPainter(
                     isDark: isDark,
+                    l10n: l10n,
                     cards: cards,
                     totalLabel: l10n.text('totalIssues'),
                   ),
@@ -78,6 +79,7 @@ class OverallTab extends StatelessWidget {
 class _DonutChartPainter extends CustomPainter {
   const _DonutChartPainter({
     required this.isDark,
+    required this.l10n,
     this.cards,
     required this.totalLabel,
   });
@@ -85,6 +87,7 @@ class _DonutChartPainter extends CustomPainter {
   final Map<String, int?>? cards;
 
   final bool isDark;
+  final AppLocalizations l10n;
   final String totalLabel;
 
   static const double _cornerRadius = 6;
@@ -284,7 +287,7 @@ class _DonutChartPainter extends CustomPainter {
   ) {
     final painter = TextPainter(
       text: TextSpan(
-        text: text,
+        text: l10n.number(text),
         style: const TextStyle(
           color: AppColors.text,
           fontSize: 11,
@@ -340,7 +343,7 @@ class _DonutChartPainter extends CustomPainter {
             ),
           ),
           TextSpan(
-            text: '${cards?['totalIssues'] ?? 20}',
+            text: l10n.number(cards?['totalIssues'] ?? 20),
             style: TextStyle(
               color: isDark ? Colors.white : AppColors.text,
               fontSize: 16,
@@ -361,6 +364,7 @@ class _DonutChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DonutChartPainter oldDelegate) =>
+      oldDelegate.l10n.language != l10n.language ||
       oldDelegate.isDark != isDark ||
       oldDelegate.cards != cards ||
       oldDelegate.totalLabel != totalLabel;
@@ -404,7 +408,7 @@ class _ChartLegendRow extends StatelessWidget {
             ),
           ),
           Text(
-            value,
+            AppLocalizations.of(context).number(value),
             style: TextStyle(
               color: colors.onSurface,
               fontSize: 12,

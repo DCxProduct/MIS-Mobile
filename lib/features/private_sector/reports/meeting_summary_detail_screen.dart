@@ -438,9 +438,9 @@ class _SummaryInfoGrid extends StatelessWidget {
     final int? minute =
         date?.minute ?? (clock == null ? null : int.tryParse(clock[2]!));
     if (hour == null || minute == null || hour > 23 || minute > 59) return '—';
-    return MaterialLocalizations.of(
+    return AppLocalizations.of(
       context,
-    ).formatTimeOfDay(TimeOfDay(hour: hour, minute: minute));
+    ).time(DateTime(2000, 1, 1, hour, minute));
   }
 
   @override

@@ -1,3 +1,5 @@
+import '../../../core/formatters/date_formatter.dart';
+import '../../../translations/app_language.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
@@ -21,36 +23,18 @@ BoxDecoration cdcReportCardDecoration(BuildContext context) => BoxDecoration(
   border: Border.all(color: AppColors.border(context)),
 );
 
-String rgcDate(DateTime? date) {
-  if (date == null) return '—';
-  // API timestamps are UTC; show their calendar date in Cambodia (UTC+7).
-  // Values without a timezone already represent a calendar date.
-  final displayDate = date.isUtc ? date.add(const Duration(hours: 7)) : date;
-  return _reportDate(displayDate);
+String rgcDate(DateTime? date, {BuildContext? context}) {
+  final displayDate = date?.isUtc == true
+      ? date!.add(const Duration(hours: 7))
+      : date;
+  return context == null
+      ? formatDate(displayDate, language: AppLanguage.english)
+      : AppLocalizations.of(context).date(displayDate);
 }
 
-// CDC displays a plenary's calendar date from the API without shifting its day.
-String plenaryDate(DateTime? date) => _reportDate(date);
-
-String _reportDate(DateTime? date) {
-  if (date == null) return '—';
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return '${months[date.month - 1]} ${date.day}, ${date.year}';
-}
-
+String plenaryDate(DateTime? date, {BuildContext? context}) => context == null
+    ? formatDate(date, language: AppLanguage.english)
+    : AppLocalizations.of(context).date(date);
 String rgcValue(String value) => value.trim().isEmpty ? '—' : value;
 
 Color _statusColor(String status) => switch (status.toLowerCase()) {
@@ -201,14 +185,17 @@ class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
                         Expanded(
                           child: CdcDetailInfoValue(
                             label: l10n.text('deadline'),
-                            value: rgcDate(detail.deadline),
+                            value: rgcDate(detail.deadline, context: context),
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: CdcDetailInfoValue(
                             label: l10n.text('meetingDate'),
-                            value: plenaryDate(decision.meetingDate),
+                            value: plenaryDate(
+                              decision.meetingDate,
+                              context: context,
+                            ),
                           ),
                         ),
                       ],
@@ -333,7 +320,10 @@ class _DecisionIssueCard extends StatelessWidget {
                       icon: Icons.calendar_month_outlined,
                       color: const Color(0xFF1890FF),
                       label: l10n.text('meetingDate'),
-                      value: rgcDate(detail.decision.meetingDate),
+                      value: rgcDate(
+                        detail.decision.meetingDate,
+                        context: context,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -673,7 +663,7 @@ class _IssueDetailsState extends State<_CdcRgcDecisionIssuePanel> {
               const SizedBox(width: 20),
               CdcDetailDateChip(
                 label: l10n.text('submittedDate'),
-                value: rgcDate(issue.submittedDate),
+                value: rgcDate(issue.submittedDate, context: context),
               ),
               const SizedBox(width: 20),
               for (var order = 1; order <= 5; order++) ...[

@@ -437,7 +437,7 @@ class _IssueMetricCard extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    value,
+                    AppLocalizations.of(context).number(value),
                     style: TextStyle(
                       color: isDark ? Colors.white : const Color(0xFF27364A),
                       fontSize: 18,
@@ -689,7 +689,7 @@ class _IssueCard extends StatelessWidget {
                     Text(
                       issue == null
                           ? AppLocalizations.of(context).text('twoAttachments')
-                          : '${issue!.attachmentCount} ${AppLocalizations.of(context).text('attachmentsLabel')}',
+                          : '${AppLocalizations.of(context).number(issue!.attachmentCount)} ${AppLocalizations.of(context).text('attachmentsLabel')}',
                       style: const TextStyle(
                         color: Color(0xFF4C5563),
                         fontSize: 12,

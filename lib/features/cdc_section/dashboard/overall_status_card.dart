@@ -73,7 +73,7 @@ class CdcOverallStatusCard extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '$total',
+                            AppLocalizations.of(context).number(total),
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -177,7 +177,9 @@ class _Badge extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          '${(share * 100).toStringAsFixed(2)}%',
+          AppLocalizations.of(
+            context,
+          ).number('${(share * 100).toStringAsFixed(2)}%'),
           style: const TextStyle(fontSize: 10),
         ),
       ],
@@ -376,7 +378,7 @@ class _PlenaryRingCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '$value',
+                          AppLocalizations.of(context).number(value),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -423,7 +425,9 @@ class _PlenaryRingCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        counts[index] == null ? '—' : '(${counts[index]})',
+                        AppLocalizations.of(context).number(
+                          counts[index] == null ? '—' : '(${counts[index]})',
+                        ),
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,

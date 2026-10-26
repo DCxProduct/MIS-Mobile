@@ -1,3 +1,4 @@
+import '../../../../translations/app_localizations.dart';
 import '../../../shared/dashboard/widgets/pswg_live_dashboard.dart';
 import '../../../shared/dashboard/data/working_group_summary.dart';
 import 'package:flutter/material.dart';
@@ -80,7 +81,7 @@ class _CategoryIssueRow extends StatelessWidget {
                 ),
               ),
               Text(
-                '${data?.total ?? 3}',
+                AppLocalizations.of(context).number(data?.total ?? 3),
                 style: TextStyle(
                   color: colors.onSurfaceVariant,
                   fontSize: 12,

@@ -1,3 +1,4 @@
+import '../../../translations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
@@ -82,7 +83,7 @@ class _CategoryIssueRow extends StatelessWidget {
                 ),
               ),
               Text(
-                '${data?.total ?? 3}',
+                AppLocalizations.of(context).number(data?.total ?? 3),
                 style: TextStyle(
                   color: colors.onSurfaceVariant,
                   fontSize: 12,

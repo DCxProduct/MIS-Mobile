@@ -77,7 +77,7 @@ class _CalendarTabState extends State<CalendarTab> {
       children: [
         const SizedBox(height: 12),
         Text(
-          '${_monthName(context, selected.month)} ${selected.year}',
+          '${_monthName(context, selected.month)} ${AppLocalizations.of(context).number(selected.year)}',
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18,
@@ -217,7 +217,7 @@ class _CalendarDays extends StatelessWidget {
                         borderRadius: BorderRadius.circular(5),
                       ),
                       child: Text(
-                        '${date.day}',
+                        AppLocalizations.of(context).number(date.day),
                         style: TextStyle(
                           color: selected
                               ? Colors.white
@@ -320,7 +320,9 @@ class _CalendarEventCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            _timeLabel(meeting.startTime),
+                            AppLocalizations.of(
+                              context,
+                            ).time(meeting.startTime),
                             style: const TextStyle(
                               color: AppColors.mutedText,
                               fontSize: 12,
@@ -338,12 +340,5 @@ class _CalendarEventCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  static String _timeLabel(DateTime? time) {
-    if (time == null) return '—';
-    final hour = time.hour % 12 == 0 ? 12 : time.hour % 12;
-    final minute = time.minute.toString().padLeft(2, '0');
-    return '$hour:$minute ${time.hour >= 12 ? 'PM' : 'AM'}';
   }
 }

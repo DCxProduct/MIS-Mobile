@@ -162,7 +162,12 @@ void main() {
         expect(find.text('21th'), findsOneWidget);
         expect(find.text('MAFF'), findsOneWidget);
         expect(find.text('Communication'), findsOneWidget);
-        expect(find.text('Oct 3, 2026'), findsOneWidget);
+        expect(
+          find.text(
+            language == AppLanguage.khmer ? '៣ តុលា ២០២៦' : 'Oct 3, 2026',
+          ),
+          findsOneWidget,
+        );
         expect(
           find.text('• ${AppLocalizations(language).status('Not Addressed')}'),
           findsOneWidget,

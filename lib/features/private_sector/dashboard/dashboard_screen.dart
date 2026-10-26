@@ -862,7 +862,7 @@ class _MetricCard extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    value,
+                    AppLocalizations.of(context).number(value),
                     style: TextStyle(
                       color: isDark ? Colors.white : const Color(0xFF27364A),
                       fontSize: 20,
@@ -928,7 +928,12 @@ class _WideMetricCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${PswgDataScope.maybeOf(context)?.cards['totalPrimaryAgencies'] ?? 0}',
+                  AppLocalizations.of(context).number(
+                    PswgDataScope.maybeOf(
+                          context,
+                        )?.cards['totalPrimaryAgencies'] ??
+                        0,
+                  ),
                   style: TextStyle(
                     color: isDark ? Colors.white : const Color(0xFF27364A),
                     fontSize: 20,

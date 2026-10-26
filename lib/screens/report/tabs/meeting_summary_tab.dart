@@ -154,7 +154,9 @@ class _MeetingSummaryCard extends StatelessWidget {
                       context,
                       page: 'meeting_summary',
                     ).text('totalIssues'),
-                    value: '${summary.issueCount}',
+                    value: AppLocalizations.of(
+                      context,
+                    ).number(summary.issueCount),
                     iconColor: const Color(0xFFB642FF),
                     iconBackground: const Color(0xFFF2DDFF),
                   ),
@@ -224,7 +226,7 @@ class _MeetingSummaryCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          '${summary.attachmentCount} ${AppLocalizations.of(context, page: 'meeting_summary').text('attachmentsLabel')}',
+                          '${AppLocalizations.of(context).number(summary.attachmentCount)} ${AppLocalizations.of(context, page: 'meeting_summary').text('attachmentsLabel')}',
                           style: const TextStyle(
                             color: Color(0xFF4C5563),
                             fontSize: 12,
