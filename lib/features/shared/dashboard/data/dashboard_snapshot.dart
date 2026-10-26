@@ -65,6 +65,7 @@ class DashboardSnapshot {
             ...value,
             'workingGroupId': value[idKey],
             'workingGroupName': value[nameKey],
+            'workingGroupKhName': value[nameKey.replaceFirst('Name', 'KhName')],
           });
         }),
       );

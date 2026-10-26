@@ -4,12 +4,20 @@ import '../../../shared/dashboard/data/working_group_summary.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_colors.dart';
+import '../../../shared/dashboard/widgets/agency_status_bars.dart';
 
 class AgenciesTab extends StatelessWidget {
-  const AgenciesTab({super.key});
+  const AgenciesTab({super.key, this.showStatusBreakdown = false});
+
+  final bool showStatusBreakdown;
 
   @override
   Widget build(BuildContext context) {
+    if (showStatusBreakdown) {
+      return AgencyStatusBars(
+        agencies: PswgDataScope.maybeOf(context)?.agencies ?? const [],
+      );
+    }
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(

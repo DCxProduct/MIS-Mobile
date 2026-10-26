@@ -7,6 +7,6 @@ class CdcSecretariatDashboardScreenView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const DashboardPage();
+    return const DashboardPage(initialScopeTab: 1);
   }
 }

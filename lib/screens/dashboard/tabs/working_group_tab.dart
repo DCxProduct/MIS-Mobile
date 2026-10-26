@@ -4,6 +4,7 @@ import '../../../features/shared/dashboard/data/working_group_summary.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
+import '../../../translations/app_localizations.dart';
 
 class WorkingGroupTab extends StatelessWidget {
   const WorkingGroupTab({super.key, this.groups});
@@ -18,7 +19,8 @@ class WorkingGroupTab extends StatelessWidget {
         builder: (groups) => WorkingGroupTab(groups: groups),
       );
     }
-    final items = data.map((group) => group.name).toList();
+    final language = AppLocalizations.of(context).language;
+    final items = data.map((group) => group.displayName(language)).toList();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -77,8 +79,6 @@ class _WorkingGroupRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: colors.onSurface,
                 fontSize: 12,

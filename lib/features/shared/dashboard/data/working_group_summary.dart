@@ -1,7 +1,10 @@
+import '../../../../translations/app_language.dart';
+
 class WorkingGroupSummary {
   const WorkingGroupSummary({
     required this.id,
     required this.name,
+    this.khmerName = '',
     required this.total,
     required this.solved,
     required this.inProgress,
@@ -10,6 +13,13 @@ class WorkingGroupSummary {
 
   final int id;
   final String name;
+  final String khmerName;
+
+  // Keep the English name as the filter value; localize only the display.
+  String displayName(AppLanguage language) =>
+      language == AppLanguage.khmer && khmerName.trim().isNotEmpty
+      ? khmerName.trim()
+      : name;
   final int total;
   final int solved;
   final int inProgress;
@@ -29,6 +39,7 @@ class WorkingGroupSummary {
     return WorkingGroupSummary(
       id: count('workingGroupId'),
       name: name,
+      khmerName: json['workingGroupKhName'] as String? ?? '',
       total: count('total'),
       solved: count('solved'),
       inProgress: count('inProgress'),

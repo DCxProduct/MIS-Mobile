@@ -1,10 +1,6 @@
 import '../../../core/widgets/filters/api_filter_sheet.dart';
 import '../../shared/dashboard/data/dashboard_repository.dart';
 import '../../shared/dashboard/widgets/pswg_live_dashboard.dart';
-import '../../cdc_secretariat/dashboard/filter_sheet.dart';
-import '../../cdc_secretariat/dashboard/categories_tab.dart';
-import '../../cdc_secretariat/dashboard/working_group_tab.dart';
-import '../../cdc_secretariat/dashboard/agencies_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -45,8 +41,8 @@ import '../meetings/meeting_screen.dart';
 import '../reports/reports_screen.dart';
 import 'tabs/agencies_tab.dart';
 import 'tabs/categories_tab.dart';
+import 'tabs/plenary_categories_tab.dart';
 import 'tabs/overall_tab.dart';
-import '../../cdc_secretariat/dashboard/overall_tab.dart';
 import 'tabs/working_group_tab.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -159,14 +155,10 @@ class DashboardPage extends StatefulWidget {
 }
 
 class DashboardPageState extends State<DashboardPage> {
-  CdcDashboardFilters _cdcFilters = CdcDashboardFilters();
   late int _selectedScopeTab = widget.initialScopeTab;
 
   final _dashboardFilters = [FilterSelection(), FilterSelection()];
-  int get _filterTab =>
-      AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat
-      ? 1
-      : _selectedScopeTab;
+  int get _filterTab => _selectedScopeTab;
   Future<void> _openFilterSheet(BuildContext context) async {
     final tab = _filterTab;
     final catalogs = AppSettings.of(context).filters;
@@ -189,7 +181,6 @@ class DashboardPageState extends State<DashboardPage> {
     if (!mounted || result == null) return;
     setState(() {
       _dashboardFilters[tab] = result;
-      _cdcFilters = result;
     });
   }
 
@@ -199,31 +190,14 @@ class DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final module = AppSettings.of(context).moduleType;
-    if (const {
-      AppModuleType.privateSector,
-      AppModuleType.lineMinistry,
-      AppModuleType.cdcSection,
-      AppModuleType.cefp,
-    }.contains(module)) {
-      return PswgDataLoader(
-        selection: _dashboardFilters[_filterTab],
-        progressReportId: _reportId,
-        scope: _selectedScopeTab == 0
-            ? DashboardScope.plenary
-            : DashboardScope.pswg,
-        builder: _buildContent,
-      );
-    }
-    if (module == AppModuleType.cdcSecretariat) {
-      return PswgDataLoader(
-        selection: _dashboardFilters[_filterTab],
-        scope: DashboardScope.pswg,
-        progressReportId: _reportId,
-        builder: _buildContent,
-      );
-    }
-    return _buildContent(context);
+    return PswgDataLoader(
+      selection: _dashboardFilters[_filterTab],
+      progressReportId: _reportId,
+      scope: _selectedScopeTab == 0
+          ? DashboardScope.plenary
+          : DashboardScope.pswg,
+      builder: _buildContent,
+    );
   }
 
   Widget _buildContent(BuildContext context) {
@@ -308,7 +282,7 @@ class DashboardPageState extends State<DashboardPage> {
                           const Spacer(),
                           _FilterBar(
                             onTap: () => _openFilterSheet(context),
-                            activeCount: _cdcFilters.count,
+                            activeCount: _dashboardFilters[_filterTab].count,
                           ),
                         ],
                       )
@@ -729,52 +703,17 @@ class _FilterBar extends StatelessWidget {
 }
 
 class _MetricGrid extends StatelessWidget {
-  const _MetricGrid({required this.isWorkingGroup});
-
-  final bool isWorkingGroup;
+  const _MetricGrid();
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final moduleType = AppSettings.of(context).moduleType;
-    final isLineMinistry = moduleType == AppModuleType.lineMinistry;
-
-    final isSecretariat = moduleType == AppModuleType.cdcSecretariat;
-    final demoTotalIssues = isSecretariat
-        ? '179'
-        : isWorkingGroup
-        ? '20'
-        : (isLineMinistry ? '56' : '20');
-    final demoSolved = isSecretariat
-        ? '166/179'
-        : isWorkingGroup
-        ? '15/20'
-        : (isLineMinistry ? '30/56' : '15/20');
-    final demoInProgress = isSecretariat
-        ? '13/179'
-        : isWorkingGroup
-        ? '4/20'
-        : (isLineMinistry ? '16/56' : '4/20');
-    final demoNotAddressed = isSecretariat
-        ? '0/179'
-        : isWorkingGroup
-        ? '1/20'
-        : (isLineMinistry ? '10/56' : '1/20');
-
-    final cards = PswgDataScope.maybeOf(context)?.cards;
-    final totalIssues = cards == null
-        ? demoTotalIssues
-        : '${cards['totalIssues']}';
-    final solved = cards == null
-        ? demoSolved
-        : '${cards['solved']}/$totalIssues';
-    final inProgress = cards == null
-        ? demoInProgress
-        : '${cards['inProgress']}/$totalIssues';
-    final notAddressed = cards == null
-        ? demoNotAddressed
-        : '${cards['notAddressed']}/$totalIssues';
-
+    final cards =
+        PswgDataScope.maybeOf(context)?.cards ?? const <String, int?>{};
+    final totalIssues = '${cards['totalIssues'] ?? 0}';
+    final solved = '${cards['solved'] ?? 0}/$totalIssues';
+    final inProgress = '${cards['inProgress'] ?? 0}/$totalIssues';
+    final notAddressed = '${cards['notAddressed'] ?? 0}/$totalIssues';
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -977,9 +916,6 @@ class _DashboardTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isCdcGpsf =
-        !plenary &&
-        AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat;
     final tabs = [
       l10n.text('overall'),
       l10n.text('agencies'),
@@ -1014,8 +950,8 @@ class _DashboardTabs extends StatelessWidget {
       ),
     );
     return Container(
-      height: isCdcGpsf ? 44 : 38,
-      padding: EdgeInsets.all(isCdcGpsf ? 3 : 4),
+      height: 38,
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(8),
@@ -1039,19 +975,10 @@ class _StatusTabContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!plenary &&
-        AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat) {
-      return switch (selectedIndex) {
-        1 => const CdcSecretariatAgenciesTab(),
-        2 => const CdcSecretariatWorkingGroupTab(),
-        3 => const CdcSecretariatCategoriesTab(),
-        _ => const CdcSecretariatOverallTab(),
-      };
-    }
     return switch (selectedIndex) {
-      1 => const AgenciesTab(),
+      1 => const AgenciesTab(showStatusBreakdown: true),
       2 => const WorkingGroupTab(),
-      3 => const CategoriesTab(),
+      3 => plenary ? const PlenaryCategoriesTab() : const CategoriesTab(),
       _ => OverallTab(plenary: plenary),
     };
   }
@@ -1070,7 +997,7 @@ class _SharedDashboardChartsState extends State<SharedDashboardCharts> {
       l10n.text(switch (index) {
         1 => 'agencies',
         2 => 'workingGroup',
-        3 => 'categoriesOfIssues',
+        3 => widget.plenary ? 'measureCategory' : 'categoriesOfIssues',
         _ => 'overallStatus',
       });
   @override
@@ -1080,7 +1007,7 @@ class _SharedDashboardChartsState extends State<SharedDashboardCharts> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _MetricGrid(isWorkingGroup: !widget.plenary),
+        const _MetricGrid(),
         const SizedBox(height: 8),
         const _WideMetricCard(),
         const SizedBox(height: 20),

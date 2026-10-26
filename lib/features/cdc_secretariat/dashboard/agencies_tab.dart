@@ -7,5 +7,6 @@ class CdcSecretariatAgenciesTab extends StatelessWidget {
   const CdcSecretariatAgenciesTab({super.key});
 
   @override
-  Widget build(BuildContext context) => const pswg.AgenciesTab();
+  Widget build(BuildContext context) =>
+      const pswg.AgenciesTab(showStatusBreakdown: true);
 }

@@ -1,3 +1,4 @@
+import '../../../shared/dashboard/widgets/donut_label_layout.dart';
 import '../../../shared/dashboard/widgets/pswg_live_dashboard.dart';
 import '../../../cdc_section/dashboard/overall_status_card.dart';
 import 'dart:math' as math;
@@ -55,7 +56,7 @@ class OverallTab extends StatelessWidget {
                 value: '(${cards?['solved'] ?? 15})',
               ),
               _ChartLegendRow(
-                color: const Color(0xFFE8A61A),
+                color: const Color(0xFFF7B51D),
                 label: l10n.text('inProgress'),
                 value: '(${cards?['inProgress'] ?? 4})',
               ),
@@ -106,26 +107,10 @@ class _DonutChartPainter extends CustomPainter {
         percent: 0.3154,
         color: isDark ? AppColors.darkPrimary : const Color(0xFF216AAA),
         label: '31.54%',
-        offset: const Offset(100, -20),
       ),
-      (
-        percent: 0.2813,
-        color: const Color(0xFF009F5C),
-        label: '28.13%',
-        offset: const Offset(78, 58),
-      ),
-      (
-        percent: 0.142,
-        color: const Color(0xFFFF3B30),
-        label: '14.2%',
-        offset: const Offset(-92, 34),
-      ),
-      (
-        percent: 0.26,
-        color: const Color(0xFFF7B51D),
-        label: '25%',
-        offset: const Offset(-78, -50),
-      ),
+      (percent: 0.2813, color: const Color(0xFF009F5C), label: '28.13%'),
+      (percent: 0.142, color: const Color(0xFFFF3B30), label: '14.2%'),
+      (percent: 0.26, color: const Color(0xFFF7B51D), label: '25%'),
     ];
 
     final total = cards?['totalIssues'] ?? 0;
@@ -133,21 +118,9 @@ class _DonutChartPainter extends CustomPainter {
         ? demoSegments
         : [
             for (final item in [
-              (
-                key: 'solved',
-                color: const Color(0xFF009F5C),
-                offset: const Offset(78, 58),
-              ),
-              (
-                key: 'inProgress',
-                color: const Color(0xFFF7B51D),
-                offset: const Offset(-78, -50),
-              ),
-              (
-                key: 'notAddressed',
-                color: const Color(0xFFFF3B30),
-                offset: const Offset(-92, 34),
-              ),
+              (key: 'solved', color: const Color(0xFF009F5C)),
+              (key: 'inProgress', color: const Color(0xFFF7B51D)),
+              (key: 'notAddressed', color: const Color(0xFFFF3B30)),
             ])
               if (total > 0 && (cards![item.key] ?? 0) > 0)
                 (
@@ -155,18 +128,18 @@ class _DonutChartPainter extends CustomPainter {
                   color: item.color,
                   label:
                       '${(100 * cards![item.key]! / total).toStringAsFixed(1)}%',
-                  offset: item.offset,
                 ),
           ];
     for (final segment in segments) {
       final sweep = segment.percent * math.pi * 2;
+      final segmentGap = math.min(gapAngle, sweep / 4);
 
       final path = _roundedDonutSegment(
         center: center,
         outerRadius: outerRadius,
         innerRadius: innerRadius,
-        startAngle: startAngle + gapAngle / 2,
-        sweepAngle: sweep - gapAngle,
+        startAngle: startAngle + segmentGap / 2,
+        sweepAngle: sweep - segmentGap,
         cornerRadius: _cornerRadius,
       );
 
@@ -183,13 +156,23 @@ class _DonutChartPainter extends CustomPainter {
 
     _drawCenterLabel(canvas, center);
 
-    for (final segment in segments) {
-      _drawPercentChip(
-        canvas,
-        center + segment.offset,
-        segment.label,
-        segment.color,
+    final labelPositions = donutLabelLayout(
+      fractions: [for (final segment in segments) segment.percent],
+      size: size,
+      radius: outerRadius,
+      startAngle: -math.pi / 2,
+    );
+    for (var i = 0; i < segments.length; i++) {
+      final segment = segments[i];
+      final position = labelPositions[i];
+      canvas.drawLine(
+        position.anchor,
+        position.center,
+        Paint()
+          ..color = segment.color
+          ..strokeWidth = 1,
       );
+      _drawPercentChip(canvas, position.center, segment.label, segment.color);
     }
   }
 
@@ -213,8 +196,12 @@ class _DonutChartPainter extends CustomPainter {
     final outerRect = Rect.fromCircle(center: center, radius: outerRadius);
     final innerRect = Rect.fromCircle(center: center, radius: innerRadius);
 
-    final outerCut = cornerRadius / outerRadius;
-    final innerCut = cornerRadius / innerRadius;
+    final effectiveRadius = math.min(
+      cornerRadius,
+      sweepAngle * innerRadius / 4,
+    );
+    final outerCut = effectiveRadius / outerRadius;
+    final innerCut = effectiveRadius / innerRadius;
 
     final path = Path();
 
@@ -233,13 +220,13 @@ class _DonutChartPainter extends CustomPainter {
     path.quadraticBezierTo(
       _point(center, outerRadius, endAngle).dx,
       _point(center, outerRadius, endAngle).dy,
-      _point(center, outerRadius - cornerRadius, endAngle).dx,
-      _point(center, outerRadius - cornerRadius, endAngle).dy,
+      _point(center, outerRadius - effectiveRadius, endAngle).dx,
+      _point(center, outerRadius - effectiveRadius, endAngle).dy,
     );
 
     path.lineTo(
-      _point(center, innerRadius + cornerRadius, endAngle).dx,
-      _point(center, innerRadius + cornerRadius, endAngle).dy,
+      _point(center, innerRadius + effectiveRadius, endAngle).dx,
+      _point(center, innerRadius + effectiveRadius, endAngle).dy,
     );
 
     path.quadraticBezierTo(
@@ -259,13 +246,13 @@ class _DonutChartPainter extends CustomPainter {
     path.quadraticBezierTo(
       _point(center, innerRadius, startAngle).dx,
       _point(center, innerRadius, startAngle).dy,
-      _point(center, innerRadius + cornerRadius, startAngle).dx,
-      _point(center, innerRadius + cornerRadius, startAngle).dy,
+      _point(center, innerRadius + effectiveRadius, startAngle).dx,
+      _point(center, innerRadius + effectiveRadius, startAngle).dy,
     );
 
     path.lineTo(
-      _point(center, outerRadius - cornerRadius, startAngle).dx,
-      _point(center, outerRadius - cornerRadius, startAngle).dy,
+      _point(center, outerRadius - effectiveRadius, startAngle).dx,
+      _point(center, outerRadius - effectiveRadius, startAngle).dy,
     );
 
     path.quadraticBezierTo(

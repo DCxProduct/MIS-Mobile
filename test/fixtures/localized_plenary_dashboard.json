@@ -1,0 +1,477 @@
+{
+    "success": true,
+    "statusCode": 200,
+    "message": "OK",
+    "data": {
+        "type": "PLENARY",
+        "crossFilterData": {
+            "version": 2,
+            "rows": [
+                {
+                    "workingGroupIds": [
+                        14
+                    ],
+                    "agencyId": 1,
+                    "categoryId": 5,
+                    "statusCode": "IN_PROGRESS",
+                    "cdcProgressCode": null,
+                    "count": 1
+                }
+            ]
+        },
+        "status": "LIVE",
+        "generatedAt": "2026-10-09T07:22:39.629Z",
+        "cards": {
+            "totalIssues": 1,
+            "solved": 0,
+            "inProgress": 1,
+            "notAddressed": 0,
+            "totalPrimaryAgencies": 1,
+            "totalMinistries": 13,
+            "midProgress": 0,
+            "earlyProgress": 0
+        },
+        "byWorkingGroup": [
+            {
+                "workingGroupId": 14,
+                "workingGroupName": "Agriculture & Agro-Industry",
+                "workingGroupKhName": "ក្រុមការងារ ក៖ ផ្នែកកសិកម្ម កសិ-ឧស្សាហកម្ម",
+                "total": 1,
+                "solved": 0,
+                "inProgress": 1,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 18,
+                "workingGroupName": "Banking and Financial Services",
+                "workingGroupKhName": "ក្រុមការងារ ង៖ ផ្នែកសេវាធនាគារ និងហិវញ្ញវត្ថុ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 26,
+                "workingGroupName": "Construction and Real Estate",
+                "workingGroupKhName": "ក្រុមការងារ ឌ៖ ផ្នែកសំណង់ និងអចលនទ្រព្យ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 28,
+                "workingGroupName": "Digital Economy, Society & Telecommunications",
+                "workingGroupKhName": "ក្រុមការងារ ណ៖ ផ្នែកសេដ្ឋកិច្ច សង្គមឌីជីថល និងទូរគមនាគមន៍",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 24,
+                "workingGroupName": "Education",
+                "workingGroupKhName": "ក្រុមការងារ ដ៖ ផ្នែកអប់រំ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 23,
+                "workingGroupName": "Energy and Mineral Resources",
+                "workingGroupKhName": "ក្រុមការងារ ញ៖ ផ្នែកថាមពល និងធនធានរ៉ែ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 20,
+                "workingGroupName": "Export Processing and Trade Facilitation",
+                "workingGroupKhName": "ក្រុមការងារ ឆ៖ ផ្នែកផលិតកម្មកែច្នៃសម្រាប់នាំចេញ និងកិច្ចសម្រួលពាណិជ្ជកម្ម",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 25,
+                "workingGroupName": "Health",
+                "workingGroupKhName": "ក្រុមការងារ ឋ៖ ផ្នែកសុខាភិបាល",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 21,
+                "workingGroupName": "Industrial Relations",
+                "workingGroupKhName": "ក្រុមការងារ ជ៖ ផ្នែកទំនាក់ទំនងវិជ្ជាជីវៈ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 29,
+                "workingGroupName": "Land Administration, Security & Public Order",
+                "workingGroupKhName": "ក្រុមការងារ ត៖ ផ្នែករដ្ឋបាលដែនដី សន្តិសុខ និងសណ្ដាប់ធ្នាប់សាធារណៈ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 17,
+                "workingGroupName": "Law, Tax, and Governance",
+                "workingGroupKhName": "ក្រុមការងារ ឃ៖ ផ្នែកនីតិកម្ម ពន្ធដារ និងអភិបាលកិច្ច",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 16,
+                "workingGroupName": "Manufacturing & SMEs",
+                "workingGroupKhName": "ក្រុមការងារ គ៖ ផ្នែកកម្មន្តសាល សហគ្រាសទុនតូច និងមធ្យម និងសេវា",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 27,
+                "workingGroupName": "Non-Bank Financial Services",
+                "workingGroupKhName": "ក្រុមការងារ ឍ៖ ផ្នែកសេវាហិរញ្ញវត្ថុមិនមែនធនាគារ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 22,
+                "workingGroupName": "Rice and Paddy",
+                "workingGroupKhName": "ក្រុមការងារ ឈ៖ ផ្នែកស្រូវ-អង្ករ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 15,
+                "workingGroupName": "Tourism",
+                "workingGroupKhName": "ក្រុមការងារ ខ៖ ផ្នែកទេសចរណ៍",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 19,
+                "workingGroupName": "Transport and Infrastructure",
+                "workingGroupKhName": "ក្រុមការងារ ច៖ ផ្នែកដឹកជញ្ជូន និងហេដ្ឋារចនាសម្ព័ន្ធ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            }
+        ],
+        "byPrimaryAgency": [
+            {
+                "agencyId": 1,
+                "agencyName": "MAFF",
+                "total": 1,
+                "solved": 0,
+                "inProgress": 1,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 4,
+                "agencyName": "MEF",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 3,
+                "agencyName": "MISTI",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 12,
+                "agencyName": "MLMUPC",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 9,
+                "agencyName": "MME",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 7,
+                "agencyName": "MoC",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 10,
+                "agencyName": "MoEYS",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 11,
+                "agencyName": "MoH",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 8,
+                "agencyName": "MoLVT",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 2,
+                "agencyName": "MoT",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 6,
+                "agencyName": "MPWT",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 5,
+                "agencyName": "NBC",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 13,
+                "agencyName": "NBFSA",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            }
+        ],
+        "byCategory": [
+            {
+                "categoryId": 5,
+                "categoryName": "Climate",
+                "categoryKhName": "អាកាសធាតុ",
+                "total": 1,
+                "solved": 0,
+                "inProgress": 1,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 8,
+                "categoryName": "Communication",
+                "categoryKhName": "ការទំនាក់ទំនង",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 9,
+                "categoryName": "Customs",
+                "categoryKhName": "គយ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 10,
+                "categoryName": "Digital / IT",
+                "categoryKhName": "ឌីជីថល និងបច្ចេកវិទ្យាព័ត៌មាន",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 11,
+                "categoryName": "Finance",
+                "categoryKhName": "ហិរញ្ញវត្ថុ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 12,
+                "categoryName": "Gender",
+                "categoryKhName": "យេនឌ័រ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 1,
+                "categoryName": "General",
+                "categoryKhName": "បញ្ហាទូទៅ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 13,
+                "categoryName": "Governance",
+                "categoryKhName": "អភិបាលកិច្ច",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 14,
+                "categoryName": "Human Resources",
+                "categoryKhName": "ធនធានមនុស្ស",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 15,
+                "categoryName": "Infrastructure",
+                "categoryKhName": "ហេដ្ឋារចនាសម្ព័ន្ធ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 16,
+                "categoryName": "Legislation",
+                "categoryKhName": "ច្បាប់",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 17,
+                "categoryName": "Licensing",
+                "categoryKhName": "ការផ្តល់អាជ្ញាបណ្ណ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 7,
+                "categoryName": "Market Access",
+                "categoryKhName": "ការចូលទៅកាន់ទីផ្សារ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 3,
+                "categoryName": "Policy",
+                "categoryKhName": "គោលនយោបាយ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 6,
+                "categoryName": "Procedure",
+                "categoryKhName": "នីតិវិធី",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 18,
+                "categoryName": "Regulation",
+                "categoryKhName": "បទប្បញ្ញត្តិ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 19,
+                "categoryName": "Security",
+                "categoryKhName": "សន្តិសុខ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 20,
+                "categoryName": "Strategy",
+                "categoryKhName": "យុទ្ធសាស្ត្រ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 4,
+                "categoryName": "Taxation",
+                "categoryKhName": "ពន្ធដារ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 2,
+                "categoryName": "Trade",
+                "categoryKhName": "ពាណិជ្ជកម្ម",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            }
+        ],
+        "report": {
+            "id": 2,
+            "title": "ចំណងជើងរបាយការណ៍ **",
+            "year": 2026,
+            "semester": "S2"
+        }
+    },
+    "timestamp": "2026-10-26T02:52:21.981Z",
+    "path": "/api/v1/dashboards/plenary/live"
+}
