@@ -65,7 +65,7 @@ class _MeetingRequestsListState extends State<MeetingRequestsList> {
           .where(
             (issue) =>
                 query.isEmpty ||
-                '${issue.title} ${issue.group} ${issue.description}'
+                '${issue.title} ${issue.group} ${issue.groupKhmer} ${issue.description}'
                     .toLowerCase()
                     .contains(query),
           )

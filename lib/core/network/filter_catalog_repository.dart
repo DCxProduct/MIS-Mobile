@@ -593,6 +593,7 @@ class FilterCatalogRepository {
       return FilterOption(
         value: '${row[valueKey]}',
         label: row['name'] as String,
+        khmerLabel: row['khName'] as String?,
       );
     }).toList();
     return FilterSection(

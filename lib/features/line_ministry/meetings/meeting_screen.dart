@@ -349,7 +349,11 @@ class _LineMinistryCalendarListCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        meeting.details.group,
+                        AppLocalizations.of(context).workingGroup(
+                          meeting.details.displayGroup(
+                            AppLocalizations.of(context).language,
+                          ),
+                        ),
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontSize: 12,
@@ -454,7 +458,12 @@ class _LineMinistryMeetingCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final title = request.title;
-    final group = request.group.isEmpty ? '—' : request.group;
+    final groupName = request.displayGroup(
+      AppLocalizations.of(context).language,
+    );
+    final group = groupName.isEmpty
+        ? '—'
+        : AppLocalizations.of(context).workingGroup(groupName);
     final date = issueDate(context, request.meetingDate);
     final totalIssues = AppLocalizations.of(
       context,

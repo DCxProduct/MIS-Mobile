@@ -32,7 +32,12 @@ class _MeetingRequestCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final title = request.title;
-    final group = request.group.isEmpty ? '—' : request.group;
+    final groupName = request.displayGroup(
+      AppLocalizations.of(context).language,
+    );
+    final group = groupName.isEmpty
+        ? '—'
+        : AppLocalizations.of(context).workingGroup(groupName);
     final date = issueDate(context, request.meetingDate);
     final totalIssues = AppLocalizations.of(
       context,

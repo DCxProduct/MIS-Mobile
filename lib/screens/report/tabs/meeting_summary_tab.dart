@@ -180,7 +180,7 @@ class _MeetingSummaryCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(5),
                     ),
                     child: Text(
-                      summary.pswg,
+                      AppLocalizations.of(context).workingGroup(summary.pswg),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(

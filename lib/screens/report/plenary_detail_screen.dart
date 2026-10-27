@@ -247,7 +247,9 @@ class _PlenaryDetailScreenState extends State<PlenaryDetailScreen> {
                   context,
                   decision.meetingDate?.toLocal(),
                 ),
-                category: _display(decision.category),
+                category: _display(
+                  AppLocalizations.of(context).category(decision.category),
+                ),
                 focalPerson: _display(decision.focalPerson),
                 description: _display(decision.content),
                 status: AppLocalizations.of(context).status(
@@ -529,7 +531,11 @@ class _RgcDecisionBottomSheet extends StatelessWidget {
                             label: AppLocalizations.of(
                               context,
                             ).text('categories'),
-                            value: _display(decision.category),
+                            value: _display(
+                              AppLocalizations.of(
+                                context,
+                              ).category(decision.category),
+                            ),
                           ),
                         ),
                         SizedBox(width: 12),

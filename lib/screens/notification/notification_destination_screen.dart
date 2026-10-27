@@ -358,7 +358,15 @@ class _ResourceDetailState extends State<_ResourceDetail> {
       heading(l10n.text('allIssues'));
       for (final issue in _objects(data['issues'])) {
         heading('${issue['issue'] ?? ''}');
-        info('category', issue['category']);
+        final category = issue['category'];
+        info(
+          'category',
+          l10n.category(
+            category is String
+                ? category
+                : '${_object(category)['name'] ?? ''}',
+          ),
+        );
         info('status', issue['status']);
         info('description', issue['issueDescription']);
         info('recommendation', issue['recommendation']);
@@ -430,7 +438,7 @@ class _DecisionList extends StatelessWidget {
             child: ListTile(
               title: Text(decision.agencyName),
               subtitle: Text(
-                '${decision.category}\n${AppLocalizations.of(context).status(decision.status)}',
+                '${AppLocalizations.of(context).category(decision.category)}\n${AppLocalizations.of(context).status(decision.status)}',
               ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).push<void>(

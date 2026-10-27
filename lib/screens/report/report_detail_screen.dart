@@ -707,7 +707,9 @@ class _ReportIssueCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              _value(_named(item['category'])),
+              _value(
+                AppLocalizations.of(context).category(_named(item['category'])),
+              ),
               style: TextStyle(
                 color: Color(0xFF7C3AED),
                 fontSize: 12,

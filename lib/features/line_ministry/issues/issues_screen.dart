@@ -586,7 +586,7 @@ class _LineMinistryIssueListCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        category,
+                        AppLocalizations.of(context).category(category),
                         style: TextStyle(
                           color: matrixPreview
                               ? AppColors.primary
@@ -639,7 +639,9 @@ class _LineMinistryIssueListCard extends StatelessWidget {
                   child: _MetaInfo(
                     icon: Icons.person_outline,
                     label: AppLocalizations.of(context).text('submittedBy'),
-                    value: submittedBy,
+                    value: AppLocalizations.of(
+                      context,
+                    ).workingGroup(submittedBy),
                     iconColor: const Color(0xFFB642FF),
                     iconBackground: const Color(0xFFF2DDFF),
                   ),

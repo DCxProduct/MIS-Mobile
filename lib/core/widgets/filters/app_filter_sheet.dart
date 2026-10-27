@@ -244,10 +244,12 @@ class _AppFilterSheetState extends State<AppFilterSheet> {
   }
 
   Widget _option(FilterSection section, FilterOption item) {
+    final l10n = AppLocalizations.of(context);
+    final label = l10n.category(l10n.workingGroup(item.label));
     final selected = _draft.values[section.id]?.contains(item.value) ?? false;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Semantics(
-      label: item.label,
+      label: label,
       checked: selected,
       enabled: item.enabled,
       onTap: item.enabled ? () => _toggle(section, item.value) : null,
@@ -285,7 +287,7 @@ class _AppFilterSheetState extends State<AppFilterSheet> {
                   SizedBox(width: widget.compact ? 8 : 10),
                   Expanded(
                     child: Text(
-                      AppLocalizations.of(context).number(item.label),
+                      l10n.number(label),
                       maxLines: section.id == 'local.pswgs' ? 1 : null,
                       overflow: section.id == 'local.pswgs'
                           ? TextOverflow.ellipsis

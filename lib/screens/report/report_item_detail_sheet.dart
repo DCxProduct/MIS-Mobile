@@ -321,7 +321,7 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
           Expanded(
             child: _Info(
               label: l10n.text('submittedBy'),
-              value: _value(organization),
+              value: _value(l10n.workingGroup(organization)),
             ),
           ),
           const SizedBox(width: 16),
@@ -343,7 +343,7 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
           Expanded(
             child: _Info(
               label: l10n.text('categories'),
-              value: _value(_name(data['category'])),
+              value: _value(l10n.category(_name(data['category']))),
             ),
           ),
           const SizedBox(width: 16),

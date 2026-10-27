@@ -69,7 +69,9 @@ class _CategoryTotalsChartState extends State<CategoryTotalsChart> {
                             SizedBox(
                               width: labelWidth,
                               child: Text(
-                                entry.$2.displayName(l10n.language),
+                                l10n.category(
+                                  entry.$2.displayName(l10n.language),
+                                ),
                                 style: TextStyle(
                                   color: AppColors.primaryText(context),
                                   fontSize: 12,
@@ -79,7 +81,9 @@ class _CategoryTotalsChartState extends State<CategoryTotalsChart> {
                             ),
                             const SizedBox(width: 12),
                             Semantics(
-                              label: entry.$2.displayName(l10n.language),
+                              label: l10n.category(
+                                entry.$2.displayName(l10n.language),
+                              ),
                               value: l10n.number(entry.$2.total),
                               child: SizedBox(
                                 width: barWidth,
@@ -162,7 +166,11 @@ class _CategoryTotalsChartState extends State<CategoryTotalsChart> {
                       TextButton(
                         onPressed: () => setState(() => _expanded = !_expanded),
                         child: Text(
-                          l10n.text(_expanded ? 'viewLess' : 'viewAll'),
+                          l10n.text(
+                            _expanded
+                                ? 'dashboardShowLess'
+                                : 'dashboardShowMore',
+                          ),
                         ),
                       ),
                     const SizedBox(height: 16),

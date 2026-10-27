@@ -457,7 +457,9 @@ class _IssueCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        issue.category.isEmpty ? '—' : issue.category,
+                        AppLocalizations.of(context).category(
+                          issue.category.isEmpty ? '—' : issue.category,
+                        ),
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontSize: 12,
@@ -486,7 +488,11 @@ class _IssueCard extends StatelessWidget {
                   child: _IssueMeta(
                     icon: Icons.person_outline,
                     label: AppLocalizations.of(context).text('submittedBy'),
-                    value: issue.submittedBy.isEmpty ? '—' : issue.submittedBy,
+                    value: issue.submittedBy.isEmpty
+                        ? '—'
+                        : AppLocalizations.of(
+                            context,
+                          ).workingGroup(issue.submittedBy),
                     iconColor: const Color(0xFFB642FF),
                     iconBackground: const Color(0xFFF2DDFF),
                   ),

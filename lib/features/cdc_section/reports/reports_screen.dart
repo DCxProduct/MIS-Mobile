@@ -197,7 +197,10 @@ class _ReportCard extends StatelessWidget {
               l10n.text('meetingDate'),
               plenaryDate(decision.meetingDate, context: context),
             ),
-            (l10n.text('categories'), rgcValue(decision.category)),
+            (
+              l10n.text('categories'),
+              rgcValue(l10n.category(decision.category)),
+            ),
             (l10n.text('focalPersonHE'), rgcValue(decision.focalPerson)),
           ]) ...[
             Row(

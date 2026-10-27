@@ -1,3 +1,4 @@
+import '../../../../translations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_colors.dart';
@@ -51,7 +52,7 @@ class PrivateSectorIssueCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              category,
+              AppLocalizations.of(context).category(category),
               style: const TextStyle(
                 color: AppColors.primary,
                 fontSize: 12,

@@ -483,7 +483,7 @@ class _IssueCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              category,
+              AppLocalizations.of(context).category(category),
               style: const TextStyle(
                 color: Color(0xFF7C3AED),
                 fontSize: 12,
@@ -642,7 +642,7 @@ void _showIssueDetailsSheet(
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          category,
+                          AppLocalizations.of(context).category(category),
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,

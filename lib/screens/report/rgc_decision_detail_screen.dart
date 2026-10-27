@@ -148,7 +148,7 @@ class CdcGpsfRgcDecisionDetail extends StatelessWidget {
                   ),
                   _DetailMetadataField(
                     label: l10n.text('categories'),
-                    value: decision.category,
+                    value: l10n.category(decision.category),
                   ),
                   _DetailMetadataField(
                     label: l10n.text('status'),

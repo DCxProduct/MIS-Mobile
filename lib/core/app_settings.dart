@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'text/working_group_names.dart';
+import 'text/api_localized_names.dart';
 
 import 'config/module_repositories.dart';
 import '../features/shared/notifications/data/notifications_repository.dart';
@@ -52,6 +54,75 @@ class AppSettingsController extends ChangeNotifier {
   RgcDecisionsRepository get rgcDecisions => _repositories.rgcDecisions;
   NotificationsRepository get notifications => _repositories.notifications;
   AuthUser? currentUser;
+  WorkingGroupNames workingGroupNames = WorkingGroupNames(const []);
+  Future<void>? _workingGroupNamesRequest;
+  bool _workingGroupNamesLoaded = false;
+  int _workingGroupNamesGeneration = 0;
+
+  Future<void> loadWorkingGroupNames() {
+    if (_disposed || _workingGroupNamesLoaded) return Future.value();
+    return _workingGroupNamesRequest ??= _fetchWorkingGroupNames();
+  }
+
+  Future<void> _fetchWorkingGroupNames() async {
+    final generation = _workingGroupNamesGeneration;
+    try {
+      final rows = await auth.apiClient.getList('stakeholders/working-groups');
+      if (_disposed || generation != _workingGroupNamesGeneration) return;
+      workingGroupNames = WorkingGroupNames(rows);
+      _workingGroupNamesLoaded = true;
+      notifyListeners();
+    } on Exception {
+      // Keep the API's original names if this optional lookup is unavailable.
+    } finally {
+      if (generation == _workingGroupNamesGeneration) {
+        _workingGroupNamesRequest = null;
+      }
+    }
+  }
+
+  void _resetWorkingGroupNames() {
+    _workingGroupNamesGeneration++;
+    _workingGroupNamesRequest = null;
+    _workingGroupNamesLoaded = false;
+    workingGroupNames = WorkingGroupNames(const []);
+  }
+
+  ApiLocalizedNames categoryNames = ApiLocalizedNames(const []);
+  Future<void>? _categoryNamesRequest;
+  bool _categoryNamesLoaded = false;
+  int _categoryNamesGeneration = 0;
+
+  Future<void> loadCategoryNames() {
+    if (_disposed || _categoryNamesLoaded) return Future.value();
+    return _categoryNamesRequest ??= _fetchCategoryNames();
+  }
+
+  Future<void> _fetchCategoryNames() async {
+    final generation = _categoryNamesGeneration;
+    try {
+      final rows = await auth.apiClient.getList(
+        'working-group-issues/categories',
+      );
+      if (_disposed || generation != _categoryNamesGeneration) return;
+      categoryNames = ApiLocalizedNames(rows);
+      _categoryNamesLoaded = true;
+      notifyListeners();
+    } on Exception {
+      // Keep the API's original names if this optional lookup is unavailable.
+    } finally {
+      if (generation == _categoryNamesGeneration) {
+        _categoryNamesRequest = null;
+      }
+    }
+  }
+
+  void _resetCategoryNames() {
+    _categoryNamesGeneration++;
+    _categoryNamesRequest = null;
+    _categoryNamesLoaded = false;
+    categoryNames = ApiLocalizedNames(const []);
+  }
 
   final _translationCache = <(String, AppLanguage), Map<String, String>>{};
   Future<void>? _translationRequest;
@@ -80,6 +151,10 @@ class AppSettingsController extends ChangeNotifier {
   /// Failed/missing translations retain the bundled labels. Call with refresh
   /// to retry a failed request or pick up edits made on the web application.
   Future<void> loadTranslations({bool refresh = false}) {
+    if (currentUser != null) {
+      unawaited(loadWorkingGroupNames());
+      unawaited(loadCategoryNames());
+    }
     final module = translationModule;
     if (_disposed || module == null) {
       return Future.value();
@@ -134,6 +209,8 @@ class AppSettingsController extends ChangeNotifier {
     final module = moduleForRoles(user.roles);
     if (module == null) throw const UnsupportedRoleException();
     if (currentUser?.id != user.id) {
+      _resetWorkingGroupNames();
+      _resetCategoryNames();
       _invalidateTranslationRequest(clearCache: true);
       _defaultRepositories.notifications.resetSession();
       for (final repositories in _moduleRepositories.values) {
@@ -149,6 +226,8 @@ class AppSettingsController extends ChangeNotifier {
   }
 
   void clearSession() {
+    _resetWorkingGroupNames();
+    _resetCategoryNames();
     _invalidateTranslationRequest(clearCache: true);
     _defaultRepositories.notifications.resetSession();
     for (final repositories in _moduleRepositories.values) {

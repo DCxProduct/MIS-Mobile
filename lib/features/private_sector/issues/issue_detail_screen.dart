@@ -399,7 +399,7 @@ class _IssueHeader extends StatelessWidget {
               Expanded(
                 child: field(
                   l10n.text('category'),
-                  value(issue?.category ?? category),
+                  value(l10n.category(issue?.category ?? category)),
                 ),
               ),
               const SizedBox(width: 16),

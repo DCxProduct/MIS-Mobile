@@ -335,7 +335,7 @@ class _DecisionIssueCard extends StatelessWidget {
                       icon: Icons.file_copy_outlined,
                       color: const Color(0xFFB437FF),
                       label: l10n.text('categories'),
-                      value: rgcValue(detail.decision.category),
+                      value: rgcValue(l10n.category(detail.decision.category)),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -558,7 +558,7 @@ class _IssueDetailsState extends State<_CdcRgcDecisionIssuePanel> {
             Expanded(
               child: CdcDetailInfoValue(
                 label: l10n.text('submittedBy'),
-                value: rgcValue(issue.submittedBy),
+                value: rgcValue(l10n.workingGroup(issue.submittedBy)),
               ),
             ),
             const SizedBox(width: 16),
@@ -581,9 +581,11 @@ class _IssueDetailsState extends State<_CdcRgcDecisionIssuePanel> {
               child: CdcDetailInfoValue(
                 label: l10n.text('categories'),
                 value: rgcValue(
-                  issue.category.isEmpty
-                      ? detail.decision.category
-                      : issue.category,
+                  l10n.category(
+                    issue.category.isEmpty
+                        ? detail.decision.category
+                        : issue.category,
+                  ),
                 ),
               ),
             ),

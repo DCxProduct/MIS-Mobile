@@ -73,7 +73,10 @@ class CalendarMeeting {
             ? (user?['stakeholders'] ?? [])
             : [
                 {
-                  'stakeholder': {'name': group},
+                  'stakeholder': {
+                    'name': group,
+                    'khName': json['workingGroupKhName'],
+                  },
                 },
               ]),
       },

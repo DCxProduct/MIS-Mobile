@@ -94,7 +94,7 @@ class CdcGpsfRgcDecisionCard extends StatelessWidget {
             l10n.text('meetingDate'),
             issueDate(context, decision.meetingDate),
           ),
-          row(l10n.text('categories'), decision.category),
+          row(l10n.text('categories'), l10n.category(decision.category)),
           row(l10n.text('focalPersonHE'), decision.focalPerson),
           const SizedBox(height: 14),
           SizedBox(

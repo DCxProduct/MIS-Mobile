@@ -26,10 +26,14 @@ class _WorkingGroupListState extends State<WorkingGroupList> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final sorted = sortWorkingGroupsByKhmerCode(widget.groups);
+    final maximum = sorted.fold<int>(1, (max, group) {
+      final count = group.solved + group.inProgress + group.notAddressed;
+      return count > max ? count : max;
+    });
     final visible = _expanded ? sorted : sorted.take(_previewCount).toList();
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 10, 0, 8),
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
       decoration: BoxDecoration(
         color: AppColors.cardBackground(context),
         borderRadius: BorderRadius.circular(10),
@@ -41,18 +45,25 @@ class _WorkingGroupListState extends State<WorkingGroupList> {
           for (var index = 0; index < visible.length; index++)
             _WorkingGroupRow(
               key: ValueKey('working-group-${visible[index].id}'),
-              label: visible[index].displayName(l10n.language),
+              label: l10n.workingGroup(
+                visible[index].displayName(l10n.language),
+              ),
               group: visible[index],
-              showDivider: index != visible.length - 1,
+              maximum: maximum,
             ),
           if (sorted.length > _previewCount)
             TextButton(
               onPressed: () => setState(() => _expanded = !_expanded),
-              child: Text(l10n.text(_expanded ? 'viewLess' : 'viewAll')),
+              child: Text(
+                l10n.text(
+                  _expanded ? 'dashboardShowLess' : 'dashboardShowMore',
+                ),
+              ),
             ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 12, 16, 8),
+            padding: const EdgeInsets.fromLTRB(0, 12, 0, 8),
             child: Wrap(
+              alignment: WrapAlignment.center,
               spacing: 16,
               runSpacing: 10,
               children: [
@@ -95,99 +106,103 @@ class _WorkingGroupRow extends StatelessWidget {
   const _WorkingGroupRow({
     super.key,
     required this.label,
-    required this.showDivider,
     required this.group,
+    required this.maximum,
   });
 
   final WorkingGroupSummary group;
+  final int maximum;
   final String label;
-  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(0, 10, 0, 12),
-      decoration: BoxDecoration(
-        border: showDivider
-            ? Border(
-                bottom: BorderSide(
-                  color: colors.outlineVariant.withValues(alpha: 0.9),
-                ),
-              )
-            : null,
-      ),
+    final l10n = AppLocalizations.of(context);
+    final counts = [group.solved, group.inProgress, group.notAddressed];
+    final total = counts.fold<int>(0, (sum, count) => sum + count);
+    const colors = [_solvedColor, _inProgressColor, _notAddressedColor];
+    const statuses = ['solved', 'inProgress', 'notAddressed'];
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
           Expanded(
+            flex: 5,
             child: Text(
               label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: colors.onSurface,
+                color: AppColors.primaryText(context),
                 fontSize: 12,
-                fontWeight: FontWeight.w500,
+                height: 1.5,
               ),
             ),
           ),
           const SizedBox(width: 8),
-          _MiniStatusBars(group: group),
-          const SizedBox(width: 12),
+          Container(
+            width: 2,
+            height: 20,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 5,
+            child: Semantics(
+              label: label,
+              value: List.generate(
+                3,
+                (i) => '${l10n.text(statuses[i])}: ${l10n.number(counts[i])}',
+              ).join(', '),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: Container(
+                  key: ValueKey('group-track-${group.id}'),
+                  height: 20,
+                  color: AppColors.isDark(context)
+                      ? AppColors.darkElevated
+                      : const Color(0xFFEBF2F7),
+                  child: total == 0
+                      ? null
+                      : Row(
+                          children: [
+                            for (var i = 0; i < counts.length; i++)
+                              if (counts[i] > 0)
+                                Expanded(
+                                  flex: counts[i],
+                                  child: ColoredBox(
+                                    key: ValueKey(
+                                      'group-${group.id}-${statuses[i]}',
+                                    ),
+                                    color: colors[i],
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 4,
+                                      ),
+                                      child: SizedBox.expand(
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          alignment: Alignment.centerRight,
+                                          child: Text(
+                                            l10n.number(counts[i]),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            if (maximum > total) Spacer(flex: maximum - total),
+                          ],
+                        ),
+                ),
+              ),
+            ),
+          ),
         ],
-      ),
-    );
-  }
-}
-
-class _MiniStatusBars extends StatelessWidget {
-  const _MiniStatusBars({required this.group});
-
-  final WorkingGroupSummary group;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 22,
-      height: 18,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          _MiniBar(
-            color: _inProgressColor,
-            height: group.total == 0 ? 0 : 18 * group.inProgress / group.total,
-          ),
-          const SizedBox(width: 4),
-          _MiniBar(
-            color: _notAddressedColor,
-            height: group.total == 0
-                ? 0
-                : 18 * group.notAddressed / group.total,
-          ),
-          const SizedBox(width: 4),
-          _MiniBar(
-            color: _solvedColor,
-            height: group.total == 0 ? 0 : 18 * group.solved / group.total,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MiniBar extends StatelessWidget {
-  const _MiniBar({required this.color, required this.height});
-
-  final Color color;
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 4,
-      height: height,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(3),
       ),
     );
   }

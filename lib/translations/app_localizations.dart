@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../core/text/working_group_names.dart';
+import '../core/text/api_localized_names.dart';
 import '../core/formatters/number_formatter.dart' as numbers;
 import '../core/formatters/date_formatter.dart' as dates;
 
@@ -39,9 +41,17 @@ class AppLocalizations {
     this.dictionary = const {},
     this.page,
     this.module = AppModuleType.privateSector,
+    this.workingGroupNames,
+    this.categoryNames,
   });
 
   final AppLanguage language;
+  final WorkingGroupNames? workingGroupNames;
+  final ApiLocalizedNames? categoryNames;
+  String category(String value) =>
+      categoryNames?.display(value, language) ?? value;
+  String workingGroup(String value) =>
+      workingGroupNames?.display(value, language) ?? value;
   String number(Object? value, {int? decimalPlaces}) => numbers.formatNumber(
     value,
     language: language,
@@ -103,6 +113,8 @@ class AppLocalizations {
           ? 'account_setting'
           : page ?? TranslationPageScope.maybeOf(context),
       module: settings.moduleType,
+      workingGroupNames: settings.workingGroupNames,
+      categoryNames: settings.categoryNames,
     );
   }
 

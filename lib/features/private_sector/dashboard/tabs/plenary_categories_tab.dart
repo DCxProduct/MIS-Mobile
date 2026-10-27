@@ -56,7 +56,7 @@ class _PlenaryCategoriesTabState extends State<PlenaryCategoriesTab> {
                             SizedBox(
                               width: labelWidth,
                               child: Text(
-                                row.displayName(l10n.language),
+                                l10n.category(row.displayName(l10n.language)),
                                 style: TextStyle(
                                   fontSize: 12,
                                   height: 1.5,
@@ -74,7 +74,9 @@ class _PlenaryCategoriesTabState extends State<PlenaryCategoriesTab> {
                             ),
                             const SizedBox(width: 8),
                             Semantics(
-                              label: row.displayName(l10n.language),
+                              label: l10n.category(
+                                row.displayName(l10n.language),
+                              ),
                               value:
                                   '${l10n.text('solved')}: ${l10n.number(row.solved)}, ${l10n.text('inProgress')}: ${l10n.number(row.inProgress)}, ${l10n.text('notAddressed')}: ${l10n.number(row.notAddressed)}',
                               child: SizedBox(
@@ -142,7 +144,11 @@ class _PlenaryCategoriesTabState extends State<PlenaryCategoriesTab> {
                           onPressed: () =>
                               setState(() => _expanded = !_expanded),
                           child: Text(
-                            l10n.text(_expanded ? 'viewLess' : 'viewAll'),
+                            l10n.text(
+                              _expanded
+                                  ? 'dashboardShowLess'
+                                  : 'dashboardShowMore',
+                            ),
                           ),
                         ),
                       ),

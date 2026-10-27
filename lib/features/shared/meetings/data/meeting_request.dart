@@ -2,6 +2,7 @@ import '../../../../core/text/document_metadata.dart';
 import '../../../../core/widgets/filters/filter_models.dart';
 import '../../../../core/text/html_text.dart';
 import '../../issues/data/working_group_issue.dart';
+import '../../../../translations/app_language.dart';
 
 class MeetingRequest {
   MeetingRequest(Map<String, dynamic> json)
@@ -15,6 +16,14 @@ class MeetingRequest {
       submittedBy = _string(_object(json['user'])['name']),
       receivedBy = _personName(json['receivedBy']),
       agencyLogo = _agencyLogo(json),
+      groupKhmer = (_object(json['user'])['stakeholders'] as List? ?? [])
+          .map((entry) {
+            final stakeholder = _object(_object(entry)['stakeholder']);
+            final khmer = _string(stakeholder['khName']).trim();
+            return khmer.isNotEmpty ? khmer : _string(stakeholder['name']);
+          })
+          .where((name) => name.isNotEmpty)
+          .join(', '),
       groupNames = (_object(json['user'])['stakeholders'] as List? ?? [])
           .map((entry) => _string(_object(entry)['stakeholder']?['name']))
           .where((name) => name.isNotEmpty)
@@ -58,6 +67,13 @@ class MeetingRequest {
       );
 
   final List<String> groupNames, agencyNames;
+  final String groupKhmer;
+
+  String displayGroup(AppLanguage language) =>
+      language == AppLanguage.khmer && groupKhmer.isNotEmpty
+      ? groupKhmer
+      : group;
+
   Map<String, Iterable<String>> get filterValues => {
     'local.workingGroup': groupNames,
     'local.primaryAgency': agencyNames,

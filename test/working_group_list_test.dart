@@ -11,6 +11,69 @@ import 'package:gpsf_app/features/shared/dashboard/widgets/working_group_list.da
 import 'package:gpsf_app/translations/app_language.dart';
 
 void main() {
+  testWidgets('Status bars use API counts, shared scale and empty tracks', (
+    tester,
+  ) async {
+    final settings = AppSettingsController()..setLanguage(AppLanguage.khmer);
+    addTearDown(settings.dispose);
+    await tester.pumpWidget(
+      AppSettings(
+        controller: settings,
+        child: MaterialApp(
+          home: Scaffold(
+            body: WorkingGroupList(
+              groups: const [
+                WorkingGroupSummary(
+                  id: 1,
+                  name: 'Mixed',
+                  total: 4,
+                  solved: 2,
+                  inProgress: 1,
+                  notAddressed: 1,
+                ),
+                WorkingGroupSummary(
+                  id: 2,
+                  name: 'Solved',
+                  total: 2,
+                  solved: 2,
+                  inProgress: 0,
+                  notAddressed: 0,
+                ),
+                WorkingGroupSummary(
+                  id: 3,
+                  name: 'Empty',
+                  total: 0,
+                  solved: 0,
+                  inProgress: 0,
+                  notAddressed: 0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final track = tester
+        .getSize(find.byKey(const ValueKey('group-track-1')))
+        .width;
+    expect(
+      tester.getSize(find.byKey(const ValueKey('group-1-solved'))).width,
+      closeTo(track / 2, 0.1),
+    );
+    expect(
+      tester.getSize(find.byKey(const ValueKey('group-1-inProgress'))).width,
+      closeTo(track / 4, 0.1),
+    );
+    expect(
+      tester.getSize(find.byKey(const ValueKey('group-2-solved'))).width,
+      closeTo(track / 2, 0.1),
+    );
+    expect(find.byKey(const ValueKey('group-track-3')), findsOneWidget);
+    expect(find.byKey(const ValueKey('group-3-solved')), findsNothing);
+    expect(find.text('២'), findsNWidgets(2));
+    expect(tester.takeException(), isNull);
+  });
+
   final json =
       jsonDecode(
             File(
@@ -79,16 +142,16 @@ void main() {
         tester.getTopLeft(find.byKey(const ValueKey('working-group-16'))).dy,
       ),
     );
-    await tester.ensureVisible(find.text('មើលទាំងអស់'));
-    await tester.tap(find.text('មើលទាំងអស់'));
+    await tester.ensureVisible(find.text('មើលបន្ថែម'));
+    await tester.tap(find.text('មើលបន្ថែម'));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('working-group-29')), findsOneWidget);
     settings.setLanguage(AppLanguage.english);
     await tester.pumpAndSettle();
     expect(find.text('Tourism'), findsOneWidget);
     expect(find.byKey(const ValueKey('working-group-29')), findsOneWidget);
-    await tester.ensureVisible(find.text('View Less'));
-    await tester.tap(find.text('View Less'));
+    await tester.ensureVisible(find.text('Show less'));
+    await tester.tap(find.text('Show less'));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('working-group-22')), findsNothing);
     expect(tester.takeException(), isNull);

@@ -92,7 +92,7 @@ class _CalendarTabState extends State<CalendarTab> {
               AppLocalizations.of(
                 context,
                 page: 'meeting_calendar',
-              ).text('noMeetings'),
+              ).text('calendarNoMeetings'),
               style: const TextStyle(color: AppColors.mutedText, fontSize: 13),
             ),
           )

@@ -136,11 +136,8 @@ void main() {
       expect(inSheet(find.text('Agriculture & Agro-Industry')), findsOneWidget);
       expect(inSheet(find.text('Not Addressed')), findsOneWidget);
       expect(inSheet(find.text('Submitted By: Actual author')), findsOneWidget);
-      final formatted = MaterialLocalizations.of(
-        tester.element(find.byType(ReportDetailScreen)),
-      ).formatMediumDate(DateTime(2026, 9, 3));
       expect(
-        inSheet(find.text('Submitted Date: $formatted 2026')),
+        inSheet(find.text('Submitted Date: Sep 3, 2026')),
         findsOneWidget,
       );
       final pdf = tester.widget<PdfAttachmentPreview>(

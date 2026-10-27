@@ -61,8 +61,8 @@ void main() {
       lessThan(tester.getTopLeft(find.text(data.categories[1].name)).dy),
     );
     expect(find.byType(FittedBox), findsOneWidget);
-    await tester.ensureVisible(find.text('View All'));
-    await tester.tap(find.text('View All'));
+    await tester.ensureVisible(find.text('Show more'));
+    await tester.tap(find.text('Show more'));
     await tester.pumpAndSettle();
     expect(find.text(data.categories.last.name), findsOneWidget);
     settings.setLanguage(AppLanguage.khmer);
@@ -76,8 +76,8 @@ void main() {
     expect(tester.takeException(), isNull);
     settings.setLanguage(AppLanguage.english);
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('View Less'));
-    await tester.tap(find.text('View Less'));
+    await tester.ensureVisible(find.text('Show less'));
+    await tester.tap(find.text('Show less'));
     await tester.pumpAndSettle();
     expect(find.text(data.categories.last.name), findsNothing);
     expect(tester.takeException(), isNull);

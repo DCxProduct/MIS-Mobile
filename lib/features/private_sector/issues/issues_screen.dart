@@ -597,7 +597,7 @@ class _IssueCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        category,
+                        AppLocalizations.of(context).category(category),
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontSize: 12,
@@ -637,7 +637,9 @@ class _IssueCard extends StatelessWidget {
                         ? 'Agriculture and Agro...'
                         : (issue!.submittedBy.isEmpty
                               ? '—'
-                              : issue!.submittedBy),
+                              : AppLocalizations.of(
+                                  context,
+                                ).workingGroup(issue!.submittedBy)),
                     iconColor: const Color(0xFFB642FF),
                     iconBackground: const Color(0xFFF2DDFF),
                   ),

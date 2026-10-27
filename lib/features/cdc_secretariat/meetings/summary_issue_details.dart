@@ -77,7 +77,7 @@ class CdcSummaryIssueDetails extends StatelessWidget {
       ],
     );
     final fields = [
-      field('submittedBy', text(issue.submittedBy)),
+      field('submittedBy', text(l10n.workingGroup(issue.submittedBy))),
       field(
         'submittedDate',
         text(issueDateWithYear(context, issue.submittedDate?.toLocal())),
@@ -90,7 +90,7 @@ class CdcSummaryIssueDetails extends StatelessWidget {
           issue.attachmentSize,
         ),
       ),
-      field('categories', text(issue.category)),
+      field('categories', text(l10n.category(issue.category))),
       field('governmentAgency', agency(1)),
       field(
         'status',

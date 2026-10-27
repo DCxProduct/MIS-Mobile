@@ -77,7 +77,7 @@ class LineMinistryIssueCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        category,
+                        AppLocalizations.of(context).category(category),
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontSize: 12,

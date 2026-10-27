@@ -284,7 +284,9 @@ class _DecisionPanel extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: field('categories', decision.category)),
+            Expanded(
+              child: field('categories', l10n.category(decision.category)),
+            ),
             const SizedBox(width: 18),
             Expanded(child: field('focalPersonHE', decision.focalPerson)),
           ],

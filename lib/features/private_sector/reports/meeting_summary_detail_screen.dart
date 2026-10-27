@@ -350,7 +350,10 @@ class _CdcSummaryInfo extends StatelessWidget {
       children: [
         heading('meetingRequest'),
         grid([
-          field('workingGroup', summary.pswg),
+          field(
+            'workingGroup',
+            AppLocalizations.of(context).workingGroup(summary.pswg),
+          ),
           _DocumentBlock(
             label: l10n.text('meetingRequestDocument'),
             path: summary.requestDocumentPath,
@@ -371,7 +374,9 @@ class _CdcSummaryInfo extends StatelessWidget {
         grid([
           field(
             'workingGroup',
-            summary.meetingPswg.isEmpty ? summary.pswg : summary.meetingPswg,
+            AppLocalizations.of(context).workingGroup(
+              summary.meetingPswg.isEmpty ? summary.pswg : summary.meetingPswg,
+            ),
           ),
           _DocumentBlock(
             label: l10n.text('meetingDocument'),
@@ -700,7 +705,9 @@ class _ClimateIssueCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              issue?.category.isNotEmpty == true ? issue!.category : '—',
+              AppLocalizations.of(context).category(
+                issue?.category.isNotEmpty == true ? issue!.category : '—',
+              ),
               style: TextStyle(
                 color: Color(0xFF7C3AED),
                 fontSize: 12,
@@ -799,7 +806,9 @@ class _IssueDetailsSheet extends StatelessWidget {
                             page: 'meeting_summary_issue',
                           ).text('submittedBy'),
                           name: issue?.submittedBy.isNotEmpty == true
-                              ? issue!.submittedBy
+                              ? AppLocalizations.of(
+                                  context,
+                                ).workingGroup(issue!.submittedBy)
                               : '—',
                         ),
                         const SizedBox(width: 10),
@@ -878,7 +887,9 @@ class _IssueSheetInfoGrid extends StatelessWidget {
                   page: 'meeting_summary_issue',
                 ).text('submittedBy'),
                 value: issue?.submittedBy.isNotEmpty == true
-                    ? issue!.submittedBy
+                    ? AppLocalizations.of(
+                        context,
+                      ).workingGroup(issue!.submittedBy)
                     : '—',
               ),
             ),
@@ -905,9 +916,9 @@ class _IssueSheetInfoGrid extends StatelessWidget {
                   context,
                   page: 'meeting_summary_issue',
                 ).text('categories'),
-                value: issue?.category.isNotEmpty == true
-                    ? issue!.category
-                    : '—',
+                value: AppLocalizations.of(context).category(
+                  issue?.category.isNotEmpty == true ? issue!.category : '—',
+                ),
               ),
             ),
             SizedBox(width: 18),

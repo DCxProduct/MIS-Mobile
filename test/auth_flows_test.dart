@@ -261,6 +261,12 @@ void main() {
               if (request.url.path.contains('/translations')) {
                 return http.Response('{"success":true,"data":{}}', 200);
               }
+              if (request.url.path.endsWith('/stakeholders/working-groups') ||
+                  request.url.path.endsWith(
+                    '/working-group-issues/categories',
+                  )) {
+                return http.Response('{"success":true,"data":[]}', 200);
+              }
               expect(request.method, 'POST');
               expect(request.url.path, '/api/v1/auth/logout');
               expect(request.body, isEmpty);

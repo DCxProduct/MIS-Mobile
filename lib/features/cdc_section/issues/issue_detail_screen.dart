@@ -203,7 +203,7 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                     flex: 2,
                     child: CdcDetailInfoValue(
                       label: l10n.text('issueCategory'),
-                      value: category,
+                      value: l10n.category(category),
                     ),
                   ),
                 ],
