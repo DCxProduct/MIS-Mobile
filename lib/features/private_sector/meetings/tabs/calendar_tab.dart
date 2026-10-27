@@ -8,10 +8,22 @@ import '../../../shared/meetings/widgets/monthly_meeting_calendar.dart';
 import '../meeting_request_detail_screen.dart';
 
 class CalendarTab extends StatefulWidget {
-  const CalendarTab({super.key, this.initialMeetingId, this.detailBuilder});
+  const CalendarTab({
+    super.key,
+    this.initialMeetingId,
+    this.detailBuilder,
+    this.selectedDate,
+    this.onDateSelected,
+    this.selectedMonths = const {},
+    this.showMonthResults = false,
+  });
 
   final int? initialMeetingId;
   final Widget Function(CalendarMeeting meeting)? detailBuilder;
+  final DateTime? selectedDate;
+  final ValueChanged<DateTime>? onDateSelected;
+  final Set<String> selectedMonths;
+  final bool showMonthResults;
 
   @override
   State<CalendarTab> createState() => _CalendarTabState();
@@ -29,9 +41,14 @@ class _CalendarTabState extends State<CalendarTab> {
   }
 
   Widget _buildCalendar(BuildContext context, List<CalendarMeeting> meetings) {
-    final datedMeetings =
-        meetings.where((meeting) => meeting.date != null).toList()
-          ..sort((a, b) => a.date!.compareTo(b.date!));
+    final datedMeetings = meetings.where((meeting) {
+      final date = meeting.date?.toLocal();
+      return date != null &&
+          (widget.selectedMonths.isEmpty ||
+              widget.selectedMonths.contains(
+                '${date.year}-${date.month.toString().padLeft(2, '0')}',
+              ));
+    }).toList()..sort((a, b) => a.date!.compareTo(b.date!));
     if (_selectedDate == null && widget.initialMeetingId != null) {
       for (final meeting in datedMeetings) {
         if (meeting.details.id == widget.initialMeetingId) {
@@ -42,14 +59,17 @@ class _CalendarTabState extends State<CalendarTab> {
     }
     // Open on the device's current day, not the oldest API meeting.
     // An explicitly opened meeting or a user's date selection takes priority.
-    final date = _selectedDate ?? DateTime.now();
+    final date = widget.selectedDate ?? _selectedDate ?? DateTime.now();
     final selected = DateTime(date.year, date.month, date.day);
     final monthMeetings = datedMeetings
         .where((meeting) => _sameMonth(meeting.date!.toLocal(), selected))
         .toList();
-    final selectedMeetings = monthMeetings
-        .where((meeting) => _sameDay(meeting.date!.toLocal(), selected))
-        .toList();
+    final selectedMeetings =
+        widget.showMonthResults && widget.selectedMonths.isNotEmpty
+        ? datedMeetings
+        : monthMeetings
+              .where((meeting) => _sameDay(meeting.date!.toLocal(), selected))
+              .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +79,10 @@ class _CalendarTabState extends State<CalendarTab> {
           meetingDates: monthMeetings
               .map((meeting) => meeting.date!.toLocal())
               .toList(),
-          onSelected: (date) => setState(() => _selectedDate = date),
+          onSelected: (date) {
+            setState(() => _selectedDate = date);
+            widget.onDateSelected?.call(date);
+          },
         ),
         const SizedBox(height: 18),
         if (selectedMeetings.isEmpty)

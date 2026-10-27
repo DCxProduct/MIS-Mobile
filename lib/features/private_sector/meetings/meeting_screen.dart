@@ -1,3 +1,4 @@
+import '../../../core/widgets/filters/app_filter_button.dart';
 import '../../../core/app_settings.dart';
 import '../../../core/config/module_config.dart';
 import '../../cdc_secretariat/meetings/meeting_request_tab.dart';
@@ -9,6 +10,7 @@ import '../../../core/app_colors.dart';
 import '../../../screens/report/tabs/meeting_summary_tab.dart';
 import '../../../translations/app_localizations.dart';
 import 'tabs/calendar_tab.dart';
+import '../../shared/meetings/widgets/calendar_date_filter_button.dart';
 import 'tabs/meeting_request_tab.dart';
 
 class MeetingScreen extends StatefulWidget {
@@ -20,6 +22,9 @@ class MeetingScreen extends StatefulWidget {
 
 class _MeetingScreenState extends State<MeetingScreen> {
   int _selectedTab = 0;
+  DateTime? _calendarDate;
+  Set<String> _calendarMonths = {};
+  bool _showCalendarMonthResults = false;
 
   final _filters = [FilterSelection(), FilterSelection(), FilterSelection()];
   Future<void> _openMeetingFilterSheet(BuildContext context) async {
@@ -111,8 +116,21 @@ class _MeetingScreenState extends State<MeetingScreen> {
                           ),
                         ),
                       ),
-                      if (_selectedTab != 1)
-                        _FilterButton(
+                      if (_selectedTab == 1)
+                        CalendarDateFilterButton(
+                          selectedMonths: _calendarMonths,
+                          onMonthsSelected: (months) => setState(() {
+                            _calendarMonths = months;
+                            _showCalendarMonthResults = months.isNotEmpty;
+                          }),
+                          selectedDate:
+                              _calendarDate ??
+                              DateUtils.dateOnly(DateTime.now()),
+                          onSelected: (date) =>
+                              setState(() => _calendarDate = date),
+                        )
+                      else
+                        AppFilterButton(
                           activeCount: _activeFilterCount,
                           onTap: () {
                             if (_selectedTab == 0) {
@@ -144,78 +162,19 @@ class _MeetingScreenState extends State<MeetingScreen> {
                             key: ValueKey('cdc-requests'),
                           )
                         : const MeetingRequestTab(key: ValueKey('requests')),
-                  1 => const CalendarTab(key: ValueKey('calendar')),
+                  1 => CalendarTab(
+                    selectedMonths: _calendarMonths,
+                    showMonthResults: _showCalendarMonthResults,
+                    key: const ValueKey('calendar'),
+                    selectedDate: _calendarDate,
+                    onDateSelected: (date) => setState(() {
+                      _calendarDate = date;
+                      _showCalendarMonthResults = false;
+                    }),
+                  ),
                   _ => MeetingSummaryTab(key: const ValueKey('summary')),
                 },
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FilterButton extends StatelessWidget {
-  const _FilterButton({required this.activeCount, required this.onTap});
-
-  final int activeCount;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(7),
-      child: Container(
-        height: 36,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkCard : Colors.white,
-          borderRadius: BorderRadius.circular(7),
-          border: Border.all(
-            color: isDark ? AppColors.darkBorder : const Color(0xFFE3E7EC),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              AppLocalizations.of(context).text('filter'),
-              style: const TextStyle(
-                color: AppColors.mutedText,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            if (activeCount > 0) ...[
-              const SizedBox(width: 6),
-              Container(
-                constraints: const BoxConstraints(minWidth: 18),
-                height: 18,
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.accent(context),
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: Text(
-                  AppLocalizations.of(context).number(activeCount),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-            const SizedBox(width: 7),
-            Icon(
-              Icons.filter_list,
-              color: Theme.of(context).colorScheme.onSurface,
-              size: 18,
             ),
           ],
         ),

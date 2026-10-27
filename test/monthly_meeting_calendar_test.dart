@@ -12,6 +12,67 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 void main() {
+  testWidgets('all months fit mobile widths in both languages and large text', (
+    tester,
+  ) async {
+    final settings = AppSettingsController();
+    addTearDown(settings.dispose);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    for (final width in [320.0, 390.0, 430.0]) {
+      tester.view.physicalSize = Size(width, 900);
+      for (final language in AppLanguage.values) {
+        settings.setLanguage(language);
+        for (var month = 1; month <= 12; month++) {
+          final lastDay = DateTime(2028, month + 1, 0).day;
+          await tester.pumpWidget(
+            AppSettings(
+              controller: settings,
+              child: MaterialApp(
+                home: Scaffold(
+                  body: MediaQuery(
+                    data: MediaQueryData(
+                      size: Size(width, 900),
+                      textScaler: TextScaler.linear(1.6),
+                    ),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(14),
+                      child: MonthlyMeetingCalendar(
+                        selectedDate: DateTime(2028, month, lastDay),
+                        meetingDates: List.generate(
+                          4,
+                          (_) => DateTime(2028, month, lastDay),
+                        ),
+                        onSelected: (_) {},
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pump();
+          expect(find.byKey(ValueKey('calendar-day-$lastDay')), findsOneWidget);
+          expect(
+            find.byKey(ValueKey('calendar-day-${lastDay + 1}')),
+            findsNothing,
+          );
+          expect(
+            find.byKey(ValueKey('calendar-dot-$lastDay-2')),
+            findsOneWidget,
+          );
+          expect(find.byKey(ValueKey('calendar-dot-$lastDay-3')), findsNothing);
+          expect(
+            tester.takeException(),
+            isNull,
+            reason: '$width / $language / $month',
+          );
+        }
+      }
+    }
+  });
+
   testWidgets(
     'month grid aligns weekdays, marks meetings, and switches language',
     (tester) async {
