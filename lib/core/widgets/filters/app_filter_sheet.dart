@@ -77,6 +77,12 @@ class _AppFilterSheetState extends State<AppFilterSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    // Keep year first across API and local filters, preserving all other order.
+    const yearIds = {'year', 'years', 'local.year'};
+    final sections = [
+      ...widget.sections.where((section) => yearIds.contains(section.id)),
+      ...widget.sections.where((section) => !yearIds.contains(section.id)),
+    ];
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : Colors.white;
     final border = isDark ? AppColors.darkBorder : const Color(0xFFF0F1F4);
@@ -103,11 +109,10 @@ class _AppFilterSheetState extends State<AppFilterSheet> {
               Expanded(
                 child: ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
-                  itemCount: widget.sections.length,
+                  itemCount: sections.length,
                   separatorBuilder: (_, _) =>
                       SizedBox(height: widget.compact ? 14 : 18),
-                  itemBuilder: (context, index) =>
-                      _section(widget.sections[index]),
+                  itemBuilder: (context, index) => _section(sections[index]),
                 ),
               ),
               Container(

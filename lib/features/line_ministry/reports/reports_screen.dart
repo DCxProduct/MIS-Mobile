@@ -1,3 +1,4 @@
+import 'package:gpsf_app/core/status_colors.dart';
 import '../../shared/issues/widgets/issue_display.dart';
 import '../../cdc_section/reports/rgc_decision_details.dart' show plenaryDate;
 
@@ -284,6 +285,7 @@ class _PlenaryCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context);
     final translatedStatus = status == 'Sent' ? l10n.text('sent') : status;
+    final statusColor = StatusColors.plenaryChip(context, status);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -315,22 +317,14 @@ class _PlenaryCard extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF123B2A)
-                      : const Color(0xFFEAFBF0),
+                  color: statusColor.withValues(alpha: .08),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: isDark
-                        ? const Color(0xFF166534)
-                        : const Color(0xFF9BE2B4),
-                  ),
+                  border: Border.all(color: statusColor.withValues(alpha: .3)),
                 ),
                 child: Text(
                   AppLocalizations.of(context).status(translatedStatus),
                   style: TextStyle(
-                    color: isDark
-                        ? const Color(0xFF86EFAC)
-                        : const Color(0xFF16A34A),
+                    color: statusColor,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                   ),

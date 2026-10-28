@@ -1,3 +1,5 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
+import 'package:gpsf_app/core/status_colors.dart';
 import '../../core/widgets/editor_content.dart';
 import '../../features/shared/issues/widgets/issue_agency_logo.dart';
 import '../../core/app_settings.dart';
@@ -177,7 +179,14 @@ class _PlenaryDetailScreenState extends State<PlenaryDetailScreen> {
                     value: plenary == null
                         ? '—'
                         : '• ${AppLocalizations.of(context).status(plenary.status.isEmpty ? plenary.statusCode : plenary.status)}',
-                    valueColor: Color(0xFF1E73BE),
+                    valueColor: StatusColors.plenaryChip(
+                      context,
+                      plenary == null
+                          ? ''
+                          : plenary.status.isEmpty
+                          ? plenary.statusCode
+                          : plenary.status,
+                    ),
                   ),
                 ),
               ],
@@ -202,11 +211,7 @@ class _PlenaryDetailScreenState extends State<PlenaryDetailScreen> {
                     ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.picture_as_pdf,
-                    color: Color(0xFFE53935),
-                    size: 18,
-                  ),
+                  const PdfIcon(size: 18),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Column(
@@ -415,14 +420,14 @@ class _PlenaryIssueItemCard extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(
-                  color: _decisionStatusColor(decision),
+                  color: _decisionStatusColor(context, decision),
                   width: 1,
                 ),
               ),
               child: Text(
                 status,
                 style: TextStyle(
-                  color: _decisionStatusColor(decision),
+                  color: _decisionStatusColor(context, decision),
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
@@ -517,7 +522,7 @@ class _RgcDecisionBottomSheet extends StatelessWidget {
                             label: AppLocalizations.of(context).text('status'),
                             value:
                                 '• ${AppLocalizations.of(context).status(decision.status.isEmpty ? decision.statusCode : decision.status)}',
-                            valueColor: _decisionStatusColor(decision),
+                            valueColor: _decisionStatusColor(context, decision),
                           ),
                         ),
                       ],
@@ -742,18 +747,11 @@ class _MetaItem extends StatelessWidget {
 
 String _display(String value) => value.trim().isEmpty ? '—' : value;
 
-Color _decisionStatusColor(RgcDecision decision) {
-  final status =
-      (decision.statusCode.isEmpty ? decision.status : decision.statusCode)
-          .toUpperCase()
-          .replaceAll(' ', '_');
-  return switch (status) {
-    'SOLVED' || 'COMPLETED' => const Color(0xFF16A34A),
-    'NOT_ADDRESSED' => const Color(0xFFE53935),
-    'IN_PROGRESS' => const Color(0xFFFF8A00),
-    _ => AppColors.mutedText,
-  };
-}
+Color _decisionStatusColor(BuildContext context, RgcDecision decision) =>
+    StatusColors.workflow(
+      context,
+      decision.statusCode.isEmpty ? decision.status : decision.statusCode,
+    );
 
 class _DecisionSection extends StatelessWidget {
   const _DecisionSection({required this.label, required this.child});

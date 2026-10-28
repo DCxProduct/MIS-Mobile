@@ -1,3 +1,4 @@
+import 'package:gpsf_app/core/status_colors.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -152,11 +153,7 @@ class _DecisionPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final decision = detail.decision;
-    final statusColor = switch (decision.status.toLowerCase()) {
-      'solved' => const Color(0xFF00BA36),
-      'sent' => AppColors.primary,
-      _ => const Color(0xFFFF8A00),
-    };
+    final statusColor = StatusColors.workflow(context, decision.status);
     Widget field(String label, String value, {Color? color}) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

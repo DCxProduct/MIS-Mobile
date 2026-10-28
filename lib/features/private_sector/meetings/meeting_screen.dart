@@ -90,8 +90,7 @@ class _MeetingScreenState extends State<MeetingScreen> {
       },
       child: ColoredBox(
         color: contentBackground,
-        child: ListView(
-          padding: EdgeInsets.zero,
+        child: Column(
           children: [
             Container(
               color: headerBackground,
@@ -150,30 +149,36 @@ class _MeetingScreenState extends State<MeetingScreen> {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 96),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 180),
-                child: switch (_selectedTab) {
-                  0 =>
-                    AppSettings.of(context).moduleType ==
-                            AppModuleType.cdcSecretariat
-                        ? const CdcMeetingRequestTab(
-                            key: ValueKey('cdc-requests'),
-                          )
-                        : const MeetingRequestTab(key: ValueKey('requests')),
-                  1 => CalendarTab(
-                    selectedMonths: _calendarMonths,
-                    showMonthResults: _showCalendarMonthResults,
-                    key: const ValueKey('calendar'),
-                    selectedDate: _calendarDate,
-                    onDateSelected: (date) => setState(() {
-                      _calendarDate = date;
-                      _showCalendarMonthResults = false;
-                    }),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 96),
+                children: [
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 180),
+                    child: switch (_selectedTab) {
+                      0 =>
+                        AppSettings.of(context).moduleType ==
+                                AppModuleType.cdcSecretariat
+                            ? const CdcMeetingRequestTab(
+                                key: ValueKey('cdc-requests'),
+                              )
+                            : const MeetingRequestTab(
+                                key: ValueKey('requests'),
+                              ),
+                      1 => CalendarTab(
+                        selectedMonths: _calendarMonths,
+                        showMonthResults: _showCalendarMonthResults,
+                        key: const ValueKey('calendar'),
+                        selectedDate: _calendarDate,
+                        onDateSelected: (date) => setState(() {
+                          _calendarDate = date;
+                          _showCalendarMonthResults = false;
+                        }),
+                      ),
+                      _ => MeetingSummaryTab(key: const ValueKey('summary')),
+                    },
                   ),
-                  _ => MeetingSummaryTab(key: const ValueKey('summary')),
-                },
+                ],
               ),
             ),
           ],

@@ -1,3 +1,5 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
+import 'package:gpsf_app/core/status_colors.dart';
 import '../../translations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
@@ -153,10 +155,11 @@ class _SummaryInfoGrid extends StatelessWidget {
 }
 
 class _InfoBlock extends StatelessWidget {
-  const _InfoBlock({required this.label, required this.value});
+  const _InfoBlock({required this.label, required this.value, this.valueColor});
 
   final String label;
   final String value;
+  final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +180,7 @@ class _InfoBlock extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: AppColors.primaryText(context),
+            color: valueColor ?? AppColors.primaryText(context),
             fontSize: 12,
             height: 1.35,
             fontWeight: FontWeight.w700,
@@ -211,11 +214,7 @@ class _DocumentBlock extends StatelessWidget {
         const SizedBox(height: 7),
         Row(
           children: [
-            const Icon(
-              Icons.picture_as_pdf,
-              color: Color(0xFFE53935),
-              size: 18,
-            ),
+            const PdfIcon(size: 18),
             const SizedBox(width: 7),
             Expanded(
               child: Column(
@@ -498,6 +497,7 @@ class _IssueSheetInfoGrid extends StatelessWidget {
                 label: AppLocalizations.of(context).text('status'),
                 value:
                     '• ${AppLocalizations.of(context).status('Not Addressed')}',
+                valueColor: StatusColors.workflow(context, 'NOT_ADDRESSED'),
               ),
             ),
           ],

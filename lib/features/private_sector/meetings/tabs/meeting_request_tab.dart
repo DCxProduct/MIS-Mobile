@@ -1,3 +1,4 @@
+import 'package:gpsf_app/core/status_colors.dart';
 import '../../../shared/meetings/data/meeting_request.dart';
 import '../../../shared/meetings/widgets/meeting_requests_list.dart';
 import '../../../shared/issues/widgets/issue_display.dart';
@@ -252,43 +253,43 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = StatusColors.meetingRequest(context, status);
     final config = switch (status) {
       'DRAFT' || 'DRAFTED' => (
         label: AppLocalizations.of(
           context,
           page: 'meeting_requests',
         ).text('drafted'),
-        color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF6B7280),
-        background: isDark ? const Color(0xFF222835) : const Color(0xFFF3F4F6),
-        border: isDark ? const Color(0xFF4B5563) : const Color(0xFFD1D5DB),
+        color: color,
+        background: color.withValues(alpha: .08),
+        border: color.withValues(alpha: .3),
       ),
       'SUBMITTED' => (
         label: AppLocalizations.of(
           context,
           page: 'meeting_requests',
         ).text('submitted'),
-        color: isDark ? const Color(0xFF5EEAD4) : const Color(0xFF0E9384),
-        background: isDark ? const Color(0xFF123B3A) : const Color(0xFFE6FFFB),
-        border: isDark ? const Color(0xFF0F766E) : const Color(0xFF79D7CD),
+        color: color,
+        background: color.withValues(alpha: .08),
+        border: color.withValues(alpha: .3),
       ),
       'COMPLETED' => (
         label: AppLocalizations.of(
           context,
           page: 'meeting_requests',
         ).text('completed'),
-        color: isDark ? const Color(0xFF86EFAC) : const Color(0xFF16A34A),
-        background: isDark ? const Color(0xFF123B2A) : const Color(0xFFEAFBF0),
-        border: isDark ? const Color(0xFF166534) : const Color(0xFF9BE2B4),
+        color: color,
+        background: color.withValues(alpha: .08),
+        border: color.withValues(alpha: .3),
       ),
       'UNDER_REVIEW' => (
         label: AppLocalizations.of(
           context,
           page: 'meeting_requests',
         ).text('underReview'),
-        color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFFF8A00),
-        background: isDark ? const Color(0xFF423415) : const Color(0xFFFFF6E8),
-        border: isDark ? const Color(0xFF92400E) : const Color(0xFFFFC166),
+        color: color,
+        background: color.withValues(alpha: .08),
+        border: color.withValues(alpha: .3),
       ),
       _ => (
         label: status == 'SCHEDULED'
@@ -300,9 +301,9 @@ class _StatusBadge extends StatelessWidget {
                 context,
                 page: 'meeting_requests',
               ).status(status),
-        color: isDark ? const Color(0xFF75BFFF) : const Color(0xFF1675C6),
-        background: isDark ? const Color(0xFF142E45) : const Color(0xFFF0F8FF),
-        border: isDark ? const Color(0xFF356992) : const Color(0xFFB8DCFA),
+        color: color,
+        background: color.withValues(alpha: .08),
+        border: color.withValues(alpha: .3),
       ),
     };
 

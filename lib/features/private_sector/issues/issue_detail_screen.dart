@@ -1,3 +1,5 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
+import 'package:gpsf_app/core/status_colors.dart';
 import 'dart:async';
 
 import '../../shared/issues/data/working_group_issue.dart';
@@ -303,12 +305,7 @@ class _IssueHeader extends StatelessWidget {
       documentPath,
       name: issue?.meetingRequestDocumentName,
     );
-    final statusColor = switch (issue?.statusCode.toUpperCase()) {
-      'SOLVED' => const Color(0xFF16A34A),
-      'IN_PROGRESS' => const Color(0xFFFF8A00),
-      'NOT_ADDRESSED' => const Color(0xFFEF4444),
-      _ => AppColors.mutedText,
-    };
+    final statusColor = StatusColors.workflow(context, issue?.statusCode ?? '');
     Widget field(String label, Widget child) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -413,11 +410,7 @@ class _IssueHeader extends StatelessWidget {
                           name: documentName,
                           child: Row(
                             children: [
-                              const Icon(
-                                Icons.picture_as_pdf,
-                                size: 18,
-                                color: Color(0xFFFF4842),
-                              ),
+                              const PdfIcon(size: 18),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Tooltip(

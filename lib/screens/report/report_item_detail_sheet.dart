@@ -1,3 +1,5 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
+import 'package:gpsf_app/core/status_colors.dart';
 import '../../features/shared/issues/widgets/issue_display.dart';
 import '../../features/shared/issues/widgets/issue_agency_logo.dart';
 import '../../core/text/document_metadata.dart';
@@ -329,9 +331,7 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
             child: _Info(
               label: l10n.text('status'),
               value: AppLocalizations.of(context).status(status),
-              color: status == 'Solved'
-                  ? Colors.green
-                  : const Color(0xFFFF4842),
+              color: StatusColors.workflow(context, status),
             ),
           ),
         ],
@@ -368,11 +368,7 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
                       name: document.value,
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.picture_as_pdf,
-                            color: Color(0xFFE53935),
-                            size: 18,
-                          ),
+                          const PdfIcon(size: 18),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
@@ -505,11 +501,7 @@ class _ReportItemDetailSheetState extends State<_ReportItemDetailSheet> {
                 name: name,
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.picture_as_pdf,
-                      color: Colors.red,
-                      size: 32,
-                    ),
+                    const PdfIcon(size: 32),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(

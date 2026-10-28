@@ -84,8 +84,7 @@ class _ReportScreenState extends State<ReportScreen> {
       selections: {'meeting-summaries': _summaryFilters},
       child: ColoredBox(
         color: contentBackground,
-        child: ListView(
-          padding: EdgeInsets.zero,
+        child: Column(
           children: [
             Container(
               color: headerBackground,
@@ -130,11 +129,15 @@ class _ReportScreenState extends State<ReportScreen> {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 14, 14, 96),
-              child: _selectedTab == 0
-                  ? const ReportProgressReportTab()
-                  : const MeetingSummaryTab(),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 96),
+                children: [
+                  _selectedTab == 0
+                      ? const ReportProgressReportTab()
+                      : const MeetingSummaryTab(),
+                ],
+              ),
             ),
           ],
         ),

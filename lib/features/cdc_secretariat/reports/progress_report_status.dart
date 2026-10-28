@@ -1,3 +1,4 @@
+import 'package:gpsf_app/core/status_colors.dart';
 import 'package:flutter/material.dart';
 import '../../../translations/app_localizations.dart';
 
@@ -25,18 +26,7 @@ class ProgressReportMinistryStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = switch (status.trim().toUpperCase()) {
-      'COMPLETED' => const Color(0xFF32D583),
-      'SUBMITTED' || 'RESUBMITTED' => const Color(0xFF079455),
-      'REQUESTED' || 'SHARED_WITH_PSWG' => const Color(0xFF175CD3),
-      'PSWG_REVIEWED' => const Color(0xFF6941C6),
-      'RETURNED' => const Color(0xFFB93815),
-      'PREPARING' ||
-      'UPDATING' ||
-      'CDC_UNDER_REVIEW' ||
-      'CDC_RE_REVIEWING' => const Color(0xFFF79009),
-      _ => const Color(0xFF717680),
-    };
+    final color = StatusColors.workflow(context, status);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(

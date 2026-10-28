@@ -1,3 +1,5 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
+import 'package:gpsf_app/core/status_colors.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -41,11 +43,7 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
     final documentName = hasMeetingDocument
         ? meetingDocumentName
         : report.attachmentNames[documentPath];
-    final statusColor = switch (issueStatus.toUpperCase()) {
-      'SOLVED' || 'COMPLETE' || 'COMPLETED' => const Color(0xFF16A34A),
-      'IN_PROGRESS' => const Color(0xFFFF8A00),
-      _ => AppColors.mutedText,
-    };
+    final statusColor = StatusColors.workflow(context, issueStatus);
     Widget section(String key, String value, {String? labelKey}) => Padding(
       padding: const EdgeInsets.only(top: 18),
       child: CdcDetailTextPanel(
@@ -65,7 +63,7 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
       name: pdfAttachmentName(path, name: name),
       child: Row(
         children: [
-          const Icon(Icons.picture_as_pdf, color: Color(0xFFFF4842), size: 19),
+          const PdfIcon(size: 19),
           const SizedBox(width: 8),
           Expanded(
             child: Column(

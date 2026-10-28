@@ -91,7 +91,7 @@ void main() {
       final status = tester.widget<Text>(
         find.text('• ${l10n.status('Not Addressed')}'),
       );
-      expect(status.style?.color, const Color(0xFFE53935));
+      expect(status.style?.color, const Color(0xFFF04438));
       expect(find.text('Milestone 1'), findsOneWidget);
       expect(
         find.text('Problems on direct flights to Cambodia'),

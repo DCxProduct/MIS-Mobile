@@ -1,3 +1,5 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
+import 'package:gpsf_app/core/status_colors.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
@@ -37,7 +39,7 @@ class CdcSummaryIssueDetails extends StatelessWidget {
             name: name,
             child: Row(
               children: [
-                const Icon(Icons.picture_as_pdf, color: Colors.red, size: 18),
+                const PdfIcon(size: 18),
                 const SizedBox(width: 5),
                 Expanded(
                   child: Column(
@@ -98,11 +100,7 @@ class CdcSummaryIssueDetails extends StatelessWidget {
           l10n.status(issue.status),
           style: TextStyle(
             fontSize: 12,
-            color: switch (issue.status.toUpperCase()) {
-              'IN_PROGRESS' => const Color(0xFFFF8A00),
-              'SOLVED' => const Color(0xFF16A34A),
-              _ => const Color(0xFFEF4444),
-            },
+            color: StatusColors.workflow(context, issue.status),
           ),
         ),
       ),

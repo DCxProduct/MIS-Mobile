@@ -1,3 +1,4 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
@@ -215,7 +216,7 @@ class _DocumentInfoBlock extends StatelessWidget {
         const SizedBox(height: 7),
         Row(
           children: [
-            Icon(Icons.picture_as_pdf, color: Color(0xFFE53935), size: 18),
+            const PdfIcon(size: 18),
             const SizedBox(width: 7),
             Expanded(
               child: Column(

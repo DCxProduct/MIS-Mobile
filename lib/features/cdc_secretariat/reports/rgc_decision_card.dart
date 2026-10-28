@@ -1,3 +1,4 @@
+import 'package:gpsf_app/core/status_colors.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
@@ -14,11 +15,10 @@ class CdcGpsfRgcDecisionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final statusColor = switch (decision.statusCode.toUpperCase()) {
-      'SOLVED' => const Color(0xFF16A34A),
-      'IN_PROGRESS' => const Color(0xFFFF8A00),
-      _ => const Color(0xFFEF4444),
-    };
+    final statusColor = StatusColors.workflow(
+      context,
+      decision.statusCode.isEmpty ? decision.status : decision.statusCode,
+    );
     Widget row(String label, String value) => Padding(
       padding: const EdgeInsets.only(top: 10),
       child: Row(

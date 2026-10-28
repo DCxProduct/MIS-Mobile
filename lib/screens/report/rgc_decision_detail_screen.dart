@@ -1,3 +1,5 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
+import 'package:gpsf_app/core/status_colors.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -153,11 +155,12 @@ class CdcGpsfRgcDecisionDetail extends StatelessWidget {
                   _DetailMetadataField(
                     label: l10n.text('status'),
                     value: l10n.status(decision.status),
-                    valueColor: switch (decision.statusCode.toUpperCase()) {
-                      'SOLVED' => const Color(0xFF16A34A),
-                      'IN_PROGRESS' => const Color(0xFFFF8A00),
-                      _ => const Color(0xFFEF4444),
-                    },
+                    valueColor: StatusColors.workflow(
+                      context,
+                      decision.statusCode.isEmpty
+                          ? decision.status
+                          : decision.statusCode,
+                    ),
                   ),
                   if (detail.workflowStatus.isNotEmpty &&
                       AppSettings.of(context).moduleType !=
@@ -165,7 +168,10 @@ class CdcGpsfRgcDecisionDetail extends StatelessWidget {
                     _DetailMetadataField(
                       label: '${l10n.text('status')} RGC',
                       value: l10n.status(detail.workflowStatus),
-                      valueColor: AppColors.accent(context),
+                      valueColor: StatusColors.workflow(
+                        context,
+                        detail.workflowStatus,
+                      ),
                     ),
                   _DetailMetadataField(
                     label: l10n.text('focalPersonHE'),
@@ -358,10 +364,7 @@ class RgcDecisionProgressReportsState
                     horizontal: 12,
                     vertical: 4,
                   ),
-                  leading: const Icon(
-                    Icons.picture_as_pdf,
-                    color: Color(0xFFEF4444),
-                  ),
+                  leading: const PdfIcon(size: 24),
                   title: Text(
                     pdfAttachmentName(path, name: report.attachmentNames[path]),
                     style: const TextStyle(fontSize: 12),

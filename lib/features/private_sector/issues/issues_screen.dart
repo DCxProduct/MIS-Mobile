@@ -1,3 +1,4 @@
+import 'package:gpsf_app/core/status_colors.dart';
 import '../../../core/app_settings.dart';
 import '../../../core/widgets/filters/api_filter_sheet.dart';
 import '../../shared/issues/data/working_group_issue.dart';
@@ -67,8 +68,7 @@ class _IssuesScreenState extends State<IssuesScreen> {
 
     return ColoredBox(
       color: contentBackground,
-      child: ListView(
-        padding: EdgeInsets.zero,
+      child: Column(
         children: [
           Container(
             color: headerBackground,
@@ -97,9 +97,9 @@ class _IssuesScreenState extends State<IssuesScreen> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 10, 14, 96),
-            child: Column(
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 96),
               children: [
                 Row(
                   children: [
@@ -609,6 +609,9 @@ class _IssueCard extends StatelessWidget {
                 ),
                 _IssueStatusBadge(
                   status: status,
+                  rawStatus: issue?.statusCode.isEmpty == true
+                      ? issue?.statusName
+                      : issue?.statusCode,
                   label: issue == null
                       ? null
                       : issueStatusLabel(context, issue!),
@@ -784,33 +787,37 @@ class _IssueMeta extends StatelessWidget {
 }
 
 class _IssueStatusBadge extends StatelessWidget {
-  const _IssueStatusBadge({required this.status, this.label});
+  const _IssueStatusBadge({required this.status, this.rawStatus, this.label});
 
   final _IssueCardStatus status;
+  final String? rawStatus;
   final String? label;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = StatusColors.workflow(
+      context,
+      rawStatus?.isNotEmpty == true ? rawStatus! : status.name,
+    );
     final config = switch (status) {
       _IssueCardStatus.solved => (
         label: l10n.text('solved'),
-        color: isDark ? const Color(0xFF86EFAC) : const Color(0xFF16A34A),
-        background: isDark ? const Color(0xFF123B2A) : const Color(0xFFEAFBF0),
-        border: isDark ? const Color(0xFF166534) : const Color(0xFF6EE7A0),
+        color: color,
+        background: color.withValues(alpha: .08),
+        border: color.withValues(alpha: .3),
       ),
       _IssueCardStatus.inProgress => (
         label: l10n.text('inProgress'),
-        color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFFF8A00),
-        background: isDark ? const Color(0xFF423415) : const Color(0xFFFFF6E8),
-        border: isDark ? const Color(0xFF92400E) : const Color(0xFFFFC166),
+        color: color,
+        background: color.withValues(alpha: .08),
+        border: color.withValues(alpha: .3),
       ),
       _IssueCardStatus.notAddressed => (
         label: l10n.text('notAddressed'),
-        color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF6B7280),
-        background: isDark ? const Color(0xFF222835) : const Color(0xFFF3F4F6),
-        border: isDark ? const Color(0xFF4B5563) : const Color(0xFFD1D5DB),
+        color: color,
+        background: color.withValues(alpha: .08),
+        border: color.withValues(alpha: .3),
       ),
     };
 

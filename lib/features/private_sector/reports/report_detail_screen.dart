@@ -1,3 +1,5 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
+import 'package:gpsf_app/core/status_colors.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_colors.dart';
@@ -171,7 +173,7 @@ class _CdcInfoSection extends StatelessWidget {
               child: _InfoBlock(
                 label: l10n.text('status'),
                 value: '• ${l10n.text('underReview')}',
-                valueColor: const Color(0xFFFF8A00),
+                valueColor: StatusColors.workflow(context, 'UNDER_REVIEW'),
               ),
             ),
             const SizedBox(width: 18),
@@ -374,7 +376,7 @@ class _DocumentInfoBlock extends StatelessWidget {
         const SizedBox(height: 7),
         Row(
           children: [
-            Icon(Icons.picture_as_pdf, color: Color(0xFFE53935), size: 18),
+            const PdfIcon(size: 18),
             const SizedBox(width: 7),
             Expanded(
               child: Column(
@@ -522,7 +524,6 @@ class _ReportIssueCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context, page: 'progress_report');
     final solved = status == _ReportIssueStatus.solved;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       width: double.infinity,
@@ -549,25 +550,15 @@ class _ReportIssueCard extends StatelessWidget {
               ),
               _SmallStatusBadge(
                 label: solved ? l10n.text('solved') : l10n.text('notAddressed'),
-                color: solved
-                    ? (isDark
-                          ? const Color(0xFF86EFAC)
-                          : const Color(0xFF16A34A))
-                    : (isDark
-                          ? const Color(0xFFD1D5DB)
-                          : const Color(0xFF4B5563)),
-                background: solved
-                    ? (isDark
-                          ? const Color(0xFF123B2A)
-                          : const Color(0xFFF0FDF4))
-                    : AppColors.cardBackground(context),
-                border: solved
-                    ? (isDark
-                          ? const Color(0xFF166534)
-                          : const Color(0xFF86EFAC))
-                    : (isDark
-                          ? const Color(0xFF4B5563)
-                          : const Color(0xFFE5E7EB)),
+                color: StatusColors.workflow(context, status.name),
+                background: StatusColors.workflow(
+                  context,
+                  status.name,
+                ).withValues(alpha: .08),
+                border: StatusColors.workflow(
+                  context,
+                  status.name,
+                ).withValues(alpha: .3),
               ),
             ],
           ),

@@ -1,3 +1,4 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
 import '../../core/text/document_metadata.dart';
 import '../../core/widgets/editor_content.dart';
 import 'package:flutter/material.dart';
@@ -278,7 +279,7 @@ class _ResourceDetailState extends State<_ResourceDetail> {
       children.add(
         ListTile(
           contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.description_outlined),
+          leading: const PdfIcon(),
           title: Text(
             pdfAttachmentName(path, name: documentOriginalName(value)),
           ),

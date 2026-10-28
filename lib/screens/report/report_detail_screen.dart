@@ -1,3 +1,5 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
+import 'package:gpsf_app/core/status_colors.dart';
 import '../../features/shared/issues/widgets/issue_display.dart';
 import '../../core/widgets/editor_content.dart';
 import 'package:flutter/material.dart';
@@ -239,13 +241,10 @@ class _CdcInfoSection extends StatelessWidget {
                 value: report?.cdcStatus.isNotEmpty == true
                     ? '• ${_reportStatus(context, report?.cdcStatus)}'
                     : '—',
-                valueColor: switch (report?.cdcStatus.toUpperCase()) {
-                  'COMPLETED' ||
-                  'SOLVED' ||
-                  'APPROVED' => const Color(0xFF16A34A),
-                  'REJECTED' || 'NOT_ADDRESSED' => const Color(0xFFE53935),
-                  _ => const Color(0xFFFF8A00),
-                },
+                valueColor: StatusColors.workflow(
+                  context,
+                  report?.cdcStatus ?? '',
+                ),
               ),
             ),
             const SizedBox(width: 18),
@@ -463,7 +462,7 @@ class _DocumentInfoBlock extends StatelessWidget {
           const SizedBox(height: 7),
           Row(
             children: [
-              Icon(Icons.picture_as_pdf, color: Color(0xFFE53935), size: 18),
+              const PdfIcon(size: 18),
               const SizedBox(width: 7),
               Expanded(
                 child: Column(
@@ -636,8 +635,6 @@ class _ReportIssueCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final status = _named(item['status']);
-    final solved = status.toUpperCase() == 'SOLVED';
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return InkWell(
       key: ValueKey('report-${type.name}-${item['id']}'),
@@ -683,25 +680,15 @@ class _ReportIssueCard extends StatelessWidget {
                     context,
                     page: 'progress_report',
                   ).status(_value(status)),
-                  color: solved
-                      ? (isDark
-                            ? const Color(0xFF86EFAC)
-                            : const Color(0xFF16A34A))
-                      : (isDark
-                            ? const Color(0xFFD1D5DB)
-                            : const Color(0xFF4B5563)),
-                  background: solved
-                      ? (isDark
-                            ? const Color(0xFF123B2A)
-                            : const Color(0xFFF0FDF4))
-                      : AppColors.cardBackground(context),
-                  border: solved
-                      ? (isDark
-                            ? const Color(0xFF166534)
-                            : const Color(0xFF86EFAC))
-                      : (isDark
-                            ? const Color(0xFF4B5563)
-                            : const Color(0xFFE5E7EB)),
+                  color: StatusColors.workflow(context, status),
+                  background: StatusColors.workflow(
+                    context,
+                    status,
+                  ).withValues(alpha: .08),
+                  border: StatusColors.workflow(
+                    context,
+                    status,
+                  ).withValues(alpha: .3),
                 ),
               ],
             ),
@@ -827,11 +814,7 @@ class _AttachmentCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.picture_as_pdf,
-              color: Color(0xFFE53935),
-              size: 18,
-            ),
+            const PdfIcon(size: 18),
             const SizedBox(width: 8),
             Expanded(
               child: Text(

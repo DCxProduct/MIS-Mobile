@@ -1,3 +1,4 @@
+import 'package:gpsf_app/core/status_colors.dart';
 import '../../../features/shared/issues/widgets/issue_agency_logo.dart';
 import '../../../features/shared/issues/widgets/issue_display.dart';
 import 'package:flutter/material.dart';
@@ -320,20 +321,18 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shared = status.toUpperCase() == 'SHARED';
+    final color = StatusColors.meetingSummary(context, status);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
-        color: shared ? const Color(0xFFE6F6FF) : const Color(0xFFF2F3F5),
+        color: color.withValues(alpha: .08),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(
-          color: shared ? const Color(0xFF63B9EA) : const Color(0xFFD4D8DE),
-        ),
+        border: Border.all(color: color.withValues(alpha: .3)),
       ),
       child: Text(
         AppLocalizations.of(context, page: 'meeting_summary').status(status),
         style: TextStyle(
-          color: shared ? const Color(0xFF1475A8) : AppColors.mutedText,
+          color: color,
           fontSize: 10,
           fontWeight: FontWeight.w700,
         ),

@@ -1,3 +1,5 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
+import 'package:gpsf_app/core/status_colors.dart';
 import '../../../core/formatters/date_formatter.dart';
 import '../../../translations/app_language.dart';
 import 'package:flutter/material.dart';
@@ -37,20 +39,22 @@ String plenaryDate(DateTime? date, {BuildContext? context}) => context == null
     : AppLocalizations.of(context).date(date);
 String rgcValue(String value) => value.trim().isEmpty ? '—' : value;
 
-Color _statusColor(String status) => switch (status.toLowerCase()) {
-  'sent' => AppColors.primary,
-  'solved' => const Color(0xFF00BA36),
-  _ => const Color(0xFFFF8A00),
-};
-
 class CdcRgcStatus extends StatelessWidget {
-  const CdcRgcStatus({super.key, required this.status, this.fullWidth = false});
+  const CdcRgcStatus({
+    super.key,
+    required this.status,
+    this.fullWidth = false,
+    this.isList = false,
+  });
   final String status;
   final bool fullWidth;
+  final bool isList;
 
   @override
   Widget build(BuildContext context) {
-    final color = _statusColor(status);
+    final color = isList
+        ? StatusColors.workflow(context, status)
+        : StatusColors.rgcDecisionChip(context, status);
     return Container(
       width: fullWidth ? double.infinity : null,
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
@@ -218,7 +222,10 @@ class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
                             value: AppLocalizations.of(
                               context,
                             ).status(rgcValue(decision.status)),
-                            color: _statusColor(decision.status),
+                            color: StatusColors.workflow(
+                              context,
+                              decision.status,
+                            ),
                           ),
                         ),
                       ],
@@ -235,11 +242,7 @@ class _OverviewState extends State<CdcRgcDecisionOverviewScreen> {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(
-                            Icons.picture_as_pdf,
-                            size: 18,
-                            color: Color(0xFFFF4842),
-                          ),
+                          const PdfIcon(size: 18),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -568,7 +571,10 @@ class _IssueDetailsState extends State<_CdcRgcDecisionIssuePanel> {
                 value: l10n.status(
                   issue.status.isEmpty ? detail.decision.status : issue.status,
                 ),
-                color: _statusColor(issue.status),
+                color: StatusColors.workflow(
+                  context,
+                  issue.status.isEmpty ? detail.decision.status : issue.status,
+                ),
               ),
             ),
           ],
@@ -627,11 +633,7 @@ class _IssueDetailsState extends State<_CdcRgcDecisionIssuePanel> {
                               name: document.value,
                               child: Row(
                                 children: [
-                                  const Icon(
-                                    Icons.picture_as_pdf,
-                                    size: 18,
-                                    color: Color(0xFFFF4842),
-                                  ),
+                                  const PdfIcon(size: 18),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(

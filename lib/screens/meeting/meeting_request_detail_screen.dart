@@ -1,3 +1,5 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
+import 'package:gpsf_app/core/status_colors.dart';
 import '../../translations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
@@ -223,11 +225,7 @@ class _PdfBlock extends StatelessWidget {
         const SizedBox(height: 6),
         Row(
           children: [
-            const Icon(
-              Icons.picture_as_pdf,
-              color: Color(0xFFE53935),
-              size: 18,
-            ),
+            const PdfIcon(size: 18),
             const SizedBox(width: 6),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -413,16 +411,9 @@ class _IssueCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final isSolved = status == 'Solved';
-    final statusColor = isSolved
-        ? (isDark ? const Color(0xFF86EFAC) : const Color(0xFF16A34A))
-        : (isDark ? const Color(0xFFD1D5DB) : const Color(0xFF6B7280));
-    final statusBg = isSolved
-        ? (isDark ? const Color(0xFF123B2A) : const Color(0xFFEAFBF0))
-        : (isDark ? const Color(0xFF222835) : const Color(0xFFF3F4F6));
-    final statusBorder = isSolved
-        ? (isDark ? const Color(0xFF166534) : const Color(0xFF9BE2B4))
-        : (isDark ? const Color(0xFF4B5563) : const Color(0xFFD1D5DB));
+    final statusColor = StatusColors.workflow(context, status);
+    final statusBg = statusColor.withValues(alpha: .08);
+    final statusBorder = statusColor.withValues(alpha: .3);
 
     return InkWell(
       onTap: () {
@@ -612,9 +603,7 @@ void _showIssueDetailsSheet(
                         Text(
                           '• ${AppLocalizations.of(context).status(status)}',
                           style: TextStyle(
-                            color: status == 'Solved'
-                                ? const Color(0xFF16A34A)
-                                : const Color(0xFFFF4842),
+                            color: StatusColors.workflow(context, status),
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
@@ -669,11 +658,7 @@ void _showIssueDetailsSheet(
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Icon(
-                              Icons.picture_as_pdf,
-                              color: Color(0xFFE53935),
-                              size: 16,
-                            ),
+                            const PdfIcon(size: 16),
                             SizedBox(width: 6),
                             Text(
                               '—',

@@ -1,3 +1,4 @@
+import 'package:gpsf_app/core/status_colors.dart';
 import '../../../../translations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
@@ -92,10 +93,10 @@ class LineMinistryIssueCard extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               AppLocalizations.of(context).status(status),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: AppColors.primary,
+                color: StatusColors.workflow(context, status),
               ),
             ),
           ],

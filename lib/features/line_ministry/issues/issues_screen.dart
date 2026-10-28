@@ -1,3 +1,4 @@
+import 'package:gpsf_app/core/status_colors.dart';
 import '../../../core/app_settings.dart';
 import '../../../core/config/module_config.dart';
 import '../../../core/widgets/filters/api_filter_sheet.dart';
@@ -503,27 +504,12 @@ class _LineMinistryIssueListCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final isSolved = issue == null
-        ? status == 'Solved'
-        : issue!.statusCode == 'SOLVED';
-    final isProgress = issue == null
-        ? status == 'In Progress'
-        : issue!.statusCode == 'IN_PROGRESS';
-    final statusColor = isSolved
-        ? (isDark ? const Color(0xFF86EFAC) : const Color(0xFF16A34A))
-        : (isProgress
-              ? (isDark ? const Color(0xFFFBBF24) : const Color(0xFFFF8A00))
-              : (isDark ? const Color(0xFFFCA5A5) : const Color(0xFFFF4842)));
-    final statusBg = isSolved
-        ? (isDark ? const Color(0xFF123B2A) : const Color(0xFFEAFBF0))
-        : (isProgress
-              ? (isDark ? const Color(0xFF423415) : const Color(0xFFFFF6E8))
-              : (isDark ? const Color(0xFF3B1212) : const Color(0xFFFFEEEE)));
-    final statusBorder = isSolved
-        ? (isDark ? const Color(0xFF166534) : const Color(0xFF9BE2B4))
-        : (isProgress
-              ? (isDark ? const Color(0xFF92400E) : const Color(0xFFFFC166))
-              : (isDark ? const Color(0xFF991B1B) : const Color(0xFFFFB3B3)));
+    final statusColor = StatusColors.workflow(
+      context,
+      issue?.statusCode ?? status,
+    );
+    final statusBg = statusColor.withValues(alpha: .08);
+    final statusBorder = statusColor.withValues(alpha: .3);
 
     return InkWell(
       onTap: () {

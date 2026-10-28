@@ -1,3 +1,5 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
+import 'package:gpsf_app/core/status_colors.dart';
 import '../../../core/text/html_text.dart';
 import '../../../core/widgets/editor_content.dart';
 import 'package:flutter/material.dart';
@@ -111,7 +113,7 @@ class CdcIssueProgressReportDataDetailScreen extends StatelessWidget {
                     child: CdcDetailInfoValue(
                       label: '${l10n.text('status')}:',
                       value: l10n.status(issueStatus),
-                      color: AppColors.accent(context),
+                      color: StatusColors.workflow(context, issueStatus),
                     ),
                   ),
                 ],
@@ -144,11 +146,7 @@ class CdcIssueProgressReportDataDetailScreen extends StatelessWidget {
                           name: documentName,
                           child: Row(
                             children: [
-                              const Icon(
-                                Icons.picture_as_pdf,
-                                color: Color(0xFFFF4842),
-                                size: 18,
-                              ),
+                              const PdfIcon(size: 18),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Column(
@@ -243,10 +241,7 @@ class CdcIssueProgressReportDataDetailScreen extends StatelessWidget {
                     name: report.attachmentNames[path],
                   ),
                   child: ListTile(
-                    leading: const Icon(
-                      Icons.picture_as_pdf,
-                      color: Color(0xFFFF4842),
-                    ),
+                    leading: const PdfIcon(size: 24),
                     title: Text(
                       pdfAttachmentName(
                         path,

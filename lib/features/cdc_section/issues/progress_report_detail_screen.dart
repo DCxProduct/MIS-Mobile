@@ -1,3 +1,4 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
@@ -109,11 +110,7 @@ class _CdcIssueProgressReportDetailScreenState
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            Icon(
-                              Icons.picture_as_pdf,
-                              size: 18,
-                              color: Color(0xFFFF4842),
-                            ),
+                            const PdfIcon(size: 18),
                             SizedBox(width: 8),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

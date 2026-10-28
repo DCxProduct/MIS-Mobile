@@ -1,3 +1,4 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
 import 'dart:async';
 
 import 'progress_report_status.dart';
@@ -390,11 +391,7 @@ class _MinistryDocument extends StatelessWidget {
           name: pdfAttachmentName(path, name: name),
           child: Row(
             children: [
-              const Icon(
-                Icons.picture_as_pdf,
-                color: Color(0xFFE53935),
-                size: 18,
-              ),
+              const PdfIcon(size: 18),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(

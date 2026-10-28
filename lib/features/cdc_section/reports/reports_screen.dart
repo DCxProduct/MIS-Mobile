@@ -182,7 +182,7 @@ class _ReportCard extends StatelessWidget {
                   style: const TextStyle(fontSize: 13),
                 ),
               ),
-              CdcRgcStatus(status: decision.status),
+              CdcRgcStatus(status: decision.status, isList: true),
             ],
           ),
           const SizedBox(height: 12),

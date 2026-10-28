@@ -194,103 +194,119 @@ class _NotificationScreenState extends State<NotificationScreen>
     return Scaffold(
       backgroundColor: AppColors.pageBackground(context),
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () => _load(),
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 32),
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.arrow_back),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Text(
-                      l10n.text('notifications'),
-                      style: TextStyle(
-                        color: AppColors.primaryText(context),
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                      ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.arrow_back),
                     ),
                   ),
-                  IconButton(
-                    tooltip: l10n.text('refresh'),
-                    onPressed: _loading ? null : () => _load(),
-                    icon: const Icon(Icons.refresh),
-                  ),
-                  PopupMenuButton<String>(
-                    onSelected: (_) => _markAllRead(),
-                    itemBuilder: (_) => [
-                      PopupMenuItem(
-                        value: 'read-all',
-                        child: Text(l10n.text('markAllNotificationsRead')),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.text('notifications'),
+                          style: TextStyle(
+                            color: AppColors.primaryText(context),
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: l10n.text('refresh'),
+                        onPressed: _loading ? null : () => _load(),
+                        icon: const Icon(Icons.refresh),
+                      ),
+                      PopupMenuButton<String>(
+                        onSelected: (_) => _markAllRead(),
+                        itemBuilder: (_) => [
+                          PopupMenuItem(
+                            value: 'read-all',
+                            child: Text(l10n.text('markAllNotificationsRead')),
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                  ListenableBuilder(
+                    listenable: _repository!,
+                    builder: (_, _) {
+                      final count = _repository!.unreadCount;
+                      return count == null
+                          ? const SizedBox.shrink()
+                          : Text(
+                              l10n
+                                  .text('unreadNotifications')
+                                  .replaceAll('{count}', l10n.number(count)),
+                              style: TextStyle(
+                                color: AppColors.accent(context),
+                                fontSize: 13,
+                              ),
+                            );
+                    },
+                  ),
                 ],
               ),
-              ListenableBuilder(
-                listenable: _repository!,
-                builder: (_, _) {
-                  final count = _repository!.unreadCount;
-                  return count == null
-                      ? const SizedBox.shrink()
-                      : Text(
-                          l10n
-                              .text('unreadNotifications')
-                              .replaceAll('{count}', l10n.number(count)),
-                          style: TextStyle(
-                            color: AppColors.accent(context),
-                            fontSize: 13,
-                          ),
-                        );
-                },
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () => _load(),
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                  children: [
+                    for (final item in _items) ...[
+                      _NotificationCard(
+                        item: item,
+                        isRead: item.isRead || _readIds.contains(item.id),
+                        opening: _openingId == item.id,
+                        hasDestination:
+                            NotificationDestination.resolve(item, module) !=
+                            null,
+                        onTap: _openingId != null ? null : () => _open(item),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                    if (_loading)
+                      const Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    if (_error != null) ...[
+                      Text(_error!, textAlign: TextAlign.center),
+                      TextButton(
+                        onPressed: () => _load(more: _retryMore),
+                        child: Text(l10n.text('retry')),
+                      ),
+                    ] else if (!_loading && _items.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          l10n.text('noNotifications'),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    if (!_loading &&
+                        _error == null &&
+                        (_page?.hasMore ?? false))
+                      TextButton(
+                        onPressed: () => _load(more: true),
+                        child: Text(l10n.text('loadMoreNotifications')),
+                      ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 22),
-              for (final item in _items) ...[
-                _NotificationCard(
-                  item: item,
-                  isRead: item.isRead || _readIds.contains(item.id),
-                  opening: _openingId == item.id,
-                  hasDestination:
-                      NotificationDestination.resolve(item, module) != null,
-                  onTap: _openingId != null ? null : () => _open(item),
-                ),
-                const SizedBox(height: 20),
-              ],
-              if (_loading)
-                const Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              if (_error != null) ...[
-                Text(_error!, textAlign: TextAlign.center),
-                TextButton(
-                  onPressed: () => _load(more: _retryMore),
-                  child: Text(l10n.text('retry')),
-                ),
-              ] else if (!_loading && _items.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    l10n.text('noNotifications'),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              if (!_loading && _error == null && (_page?.hasMore ?? false))
-                TextButton(
-                  onPressed: () => _load(more: true),
-                  child: Text(l10n.text('loadMoreNotifications')),
-                ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -1,3 +1,5 @@
+import 'package:gpsf_app/core/widgets/pdf_icon.dart';
+import 'package:gpsf_app/core/status_colors.dart';
 import 'package:flutter/material.dart';
 import 'detail_widgets.dart';
 
@@ -58,13 +60,10 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
     final status = issue == null
         ? l10n.text(generalIssue ? 'complete' : 'inProgress')
         : issueStatusLabel(context, issue!);
-    final statusColor = generalIssue && issue == null
-        ? AppColors.accent(context)
-        : switch (issue?.statusCode) {
-            'SOLVED' => const Color(0xFF16A34A),
-            'NOT_ADDRESSED' => const Color(0xFFEF4444),
-            _ => const Color(0xFFFF8A00),
-          };
+    final statusColor = StatusColors.workflow(
+      context,
+      issue?.statusCode ?? (generalIssue ? 'COMPLETED' : 'IN_PROGRESS'),
+    );
     return Scaffold(
       backgroundColor: AppColors.pageBackground(context),
       appBar: AppBar(
@@ -155,11 +154,7 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                           name: documentName,
                           child: Row(
                             children: [
-                              const Icon(
-                                Icons.picture_as_pdf,
-                                size: 18,
-                                color: Color(0xFFFF4842),
-                              ),
+                              const PdfIcon(size: 18),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Column(

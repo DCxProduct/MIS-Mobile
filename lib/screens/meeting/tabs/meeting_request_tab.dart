@@ -1,3 +1,4 @@
+import 'package:gpsf_app/core/status_colors.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
@@ -313,31 +314,31 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = StatusColors.meetingRequest(context, status.name);
     final config = switch (status) {
       _MeetingStatus.drafted => (
         label: AppLocalizations.of(context).text('drafted'),
-        color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF6B7280),
-        background: isDark ? const Color(0xFF222835) : const Color(0xFFF3F4F6),
-        border: isDark ? const Color(0xFF4B5563) : const Color(0xFFD1D5DB),
+        color: color,
+        background: color.withValues(alpha: .08),
+        border: color.withValues(alpha: .3),
       ),
       _MeetingStatus.submitted => (
         label: AppLocalizations.of(context).text('submitted'),
-        color: isDark ? const Color(0xFF5EEAD4) : const Color(0xFF0E9384),
-        background: isDark ? const Color(0xFF123B3A) : const Color(0xFFE6FFFB),
-        border: isDark ? const Color(0xFF0F766E) : const Color(0xFF79D7CD),
+        color: color,
+        background: color.withValues(alpha: .08),
+        border: color.withValues(alpha: .3),
       ),
       _MeetingStatus.completed => (
         label: AppLocalizations.of(context).text('completed'),
-        color: isDark ? const Color(0xFF86EFAC) : const Color(0xFF16A34A),
-        background: isDark ? const Color(0xFF123B2A) : const Color(0xFFEAFBF0),
-        border: isDark ? const Color(0xFF166534) : const Color(0xFF9BE2B4),
+        color: color,
+        background: color.withValues(alpha: .08),
+        border: color.withValues(alpha: .3),
       ),
       _MeetingStatus.underReview => (
         label: AppLocalizations.of(context).text('underReview'),
-        color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFFF8A00),
-        background: isDark ? const Color(0xFF423415) : const Color(0xFFFFF6E8),
-        border: isDark ? const Color(0xFF92400E) : const Color(0xFFFFC166),
+        color: color,
+        background: color.withValues(alpha: .08),
+        border: color.withValues(alpha: .3),
       ),
     };
 
