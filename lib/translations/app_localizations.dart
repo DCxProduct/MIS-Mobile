@@ -161,6 +161,9 @@ class AppLocalizations {
     }
     if (_isCdcGpsf) {
       final statusKey = switch (page) {
+        'plenary_plenaries' => 'plenary_plenaries.plenary_table.$token',
+        'cdc_plenary_detail' => 'plenary_plenaries.plenary_detail_info.$token',
+        'cdc_plenary_rgc' => 'plenary_plenaries.status.$token',
         'cdc_rgc' || 'cdc_rgc_detail' || 'plenary_rgc_decisions' =>
           'issue_matrix_rgc_decision.rgc.status.$token',
         'cdc_progress_ministries' =>

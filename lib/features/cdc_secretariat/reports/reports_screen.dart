@@ -237,7 +237,7 @@ class _PlenaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context);
-    final translatedStatus = status == 'Sent' ? l10n.text('sent') : status;
+    final translatedStatus = l10n.status(status);
     final statusColor = StatusColors.plenaryChip(context, status);
 
     return Container(

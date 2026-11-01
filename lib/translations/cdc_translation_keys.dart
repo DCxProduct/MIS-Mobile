@@ -70,6 +70,9 @@ final cdcPageKeys = <String, Map<String, String>>{
     'noIssuesFound': 'issue_matrix.no_data',
   },
   'issue_matrix_detail': {
+    'governmentPrimaryAgency':
+        'issue_matrix.submitted_detail.government_primary_agency',
+    'issueCategory': 'issue_matrix.submitted_detail.category',
     'governmentAgency':
         'issue_matrix.submitted_detail.government_primary_agency',
     'status': 'issue_matrix.submitted_detail.status',

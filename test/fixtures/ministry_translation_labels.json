@@ -403,7 +403,8 @@
     "meeting_summary.details.meeting_document": "ឯកសារកិច្ចប្រជុំ",
     "meeting_summary.details.sent_by": "ផ្ញើដោយ",
     "meeting_summary.details.summary_reference": "ឯកសារយោងសង្ខេបកិច្ចប្រជុំ",
-    "plenary_rgc_decisions.rgc.date_of_issue_solution": "កាលបរិច្ឆេទដោះស្រាយបញ្ហា"
+    "plenary_rgc_decisions.rgc.date_of_issue_solution": "កាលបរិច្ឆេទដោះស្រាយបញ្ហា",
+    "meeting_calendar.meeting_calendar.table.issue_count": "ចំនួនបញ្ហា"
   },
   "en": {
     "dashboard.apply_filters": "Apply Filters",
@@ -809,6 +810,7 @@
     "meeting_summary.details.meeting_document": "Meeting Document",
     "meeting_summary.details.sent_by": "Sent by",
     "meeting_summary.details.summary_reference": "Summary Meeting Reference",
-    "plenary_rgc_decisions.rgc.date_of_issue_solution": "Date of Issue Solution"
+    "plenary_rgc_decisions.rgc.date_of_issue_solution": "Date of Issue Solution",
+    "meeting_calendar.meeting_calendar.table.issue_count": "# of Issues"
   }
 }

@@ -14,6 +14,7 @@ const cdcGpsfPageParents = <String, String>{
   'cdc_rgc_detail': 'cdc_rgc',
   'cdc_rgc_report': 'cdc_rgc_detail',
   'cdc_progress_ministries': 'progress_report',
+  'cdc_plenary_detail': 'plenary_plenaries',
 };
 
 const _rgcKeys = <String, String>{
@@ -73,6 +74,10 @@ final _rgcDetailKeys = <String, String>{
 
 final cdcGpsfPageKeys = <String, Map<String, String>>{
   ...ministryPageKeys,
+  'issue_matrix': {
+    ...ministryPageKeys['issue_matrix']!,
+    'descriptions': 'issue_matrix.column.issue_description',
+  },
   'meeting_summary_issue': {
     ...ministryPageKeys['meeting_summary_issue']!,
     'issueEscalation': 'meeting_summary.issue_dialog.escalation',
@@ -82,13 +87,52 @@ final cdcGpsfPageKeys = <String, Map<String, String>>{
     'nextStep': 'meeting_summary.issue_dialog.next_step',
     'remark': 'meeting_summary.issue_dialog.remark',
   },
-  // CDC's API currently exposes only a title for the standalone plenary page.
-  'plenary_plenaries': {'plenary': 'plenary_plenaries.title'},
+  'plenary_plenaries': {
+    'plenary': 'plenary_plenaries.title',
+    'meetingDate': 'plenary_plenaries.plenary_table.meeting_date',
+    'deadline': 'plenary_plenaries.plenary_table.deadline',
+    'rgcDecision': 'plenary_plenaries.plenary_table.rgc_decision',
+    'numberOfRgcDecision': 'plenary_plenaries.plenary_table.rgc_decision',
+    'status': 'plenary_plenaries.plenary_table.status',
+    'viewDetails': 'plenary_plenaries.plenary_table.view_detail',
+    'approvalReport': 'plenary_plenaries.plenary_table.document',
+    'attachmentsLabel': 'plenary_plenaries.plenary_detail_info.attachment',
+    'noPlenaries': 'plenary_plenaries.plenary_table.empty_title',
+    'plenariesLoadError': 'plenary_plenaries.message.unable_to_load_plenary',
+    'noData': 'plenary_plenaries.grid_locale.no_rows_label',
+    'primaryAgency': 'plenary_plenaries.plenary_filters.ministry',
+    'filter': 'plenary_plenaries.filter_panel.filter',
+    'filters': 'plenary_plenaries.filter_panel.filters',
+    'applyFilters': 'plenary_plenaries.filter_panel.apply_filters',
+    'clearAllFilters': 'plenary_plenaries.filter_panel.clear_all',
+    'viewAll': 'plenary_plenaries.filter_panel.view_all',
+    'viewLess': 'plenary_plenaries.filter_panel.view_less',
+    'year': 'plenary_plenaries.filter_panel.year',
+  },
+  'cdc_plenary_detail': {
+    'meetingRequestDetails': 'plenary_plenaries.plenary_detail_screen.title',
+    'meetingDate': 'plenary_plenaries.plenary_detail_info.meeting_date',
+    'deadline': 'plenary_plenaries.plenary_detail_info.deadline',
+    'numberOfRgcDecision':
+        'plenary_plenaries.plenary_detail_info.rgc_decision_count',
+    'status': 'plenary_plenaries.plenary_detail_info.status',
+    'approvalReport': 'plenary_plenaries.plenary_detail_info.document',
+    'plenariesLoadError': 'plenary_plenaries.plenary_detail_screen.load_error',
+    'noData': 'plenary_plenaries.plenary_detail_screen.no_data',
+    'noRgcDecisions': 'plenary_plenaries.plenary_rgc_decision_table.no_data',
+  },
+  'cdc_plenary_rgc': {
+    'meetingDate': 'plenary_plenaries.plenary_rgc_decision_table.meeting_date',
+    'categories': 'plenary_plenaries.plenary_rgc_decision_table.category',
+    'focalPerson': 'plenary_plenaries.plenary_rgc_decision_table.focal_person',
+    'status': 'plenary_plenaries.plenary_rgc_decision_table.status',
+  },
   'plenary_rgc_decisions': _rgcDetailKeys,
   'cdc_rgc': _rgcKeys,
   'cdc_rgc_detail': _rgcDetailKeys,
   'cdc_rgc_report': {
-    'rgcReportNoReference': 'issue_matrix_rgc_decision.rgc.report.not_available',
+    'rgcReportNoReference':
+        'issue_matrix_rgc_decision.rgc.report.not_available',
     'rgcReportReferenceName':
         'issue_matrix_rgc_decision.rgc.report.referenceName',
     'rgcReportReferenceAttachment':
@@ -163,6 +207,10 @@ const _rgcFilterKeys = <String, String>{
 
 const cdcGpsfFilterKeys = <String, Map<String, String>>{
   ...ministryFilterKeys,
+  'plenary_plenaries': {
+    'status': 'plenary_plenaries.plenary_filters.status',
+    'primaryAgency': 'plenary_plenaries.plenary_filters.ministry',
+  },
   'cdc_rgc': _rgcFilterKeys,
   'cdc_rgc_detail': _rgcFilterKeys,
   'plenary_rgc_decisions': _rgcFilterKeys,

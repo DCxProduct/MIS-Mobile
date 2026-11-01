@@ -184,6 +184,74 @@ void main() {
     }
   }
 
+  for (final language in AppLanguage.values) {
+    testWidgets(
+      'report Read more shows the full text and collapses again: $language',
+      (tester) async {
+        final settings = AppSettingsController()..setLanguage(language);
+        addTearDown(settings.dispose);
+        final paragraphs = List.filled(
+          30,
+          'កសិកម្មនិងការវិនិយោគក្នុងវិស័យឯកជន',
+        ).join();
+        final body = '$paragraphs\nFinal paragraph';
+        final more = language == AppLanguage.khmer ? 'អានបន្ថែម' : 'Read more';
+        final less = language == AppLanguage.khmer ? 'បង្ហាញតិច' : 'Show less';
+        await tester.pumpWidget(
+          AppSettings(
+            controller: settings,
+            child: MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: SizedBox(
+                    width: 320,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ExpandableEditorContent(
+                          body,
+                          style: const TextStyle(fontSize: 12, height: 1.5),
+                        ),
+                        EditorContent(
+                          body,
+                          key: const ValueKey('full-reference'),
+                          style: const TextStyle(fontSize: 12, height: 1.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final content = find.descendant(
+          of: find.byType(ExpandableEditorContent),
+          matching: find.byType(EditorContent),
+        );
+        final collapsedHeight = tester.getSize(content).height;
+        final fullHeight = tester
+            .getSize(find.byKey(const ValueKey('full-reference')))
+            .height;
+        expect(fullHeight, greaterThan(collapsedHeight));
+        for (var attempt = 0; attempt < 2; attempt++) {
+          await tester.ensureVisible(find.text(more));
+          await tester.tap(find.text(more));
+          await tester.pumpAndSettle();
+          expect(find.text(less), findsOneWidget);
+          expect(tester.getSize(content).height, closeTo(fullHeight, 0.5));
+          await tester.ensureVisible(find.text(less));
+          await tester.tap(find.text(less));
+          await tester.pumpAndSettle();
+          expect(find.text(more), findsOneWidget);
+          expect(tester.getSize(content).height, closeTo(collapsedHeight, 0.5));
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets('Read more follows rendered overflow as width and content change', (
     tester,
   ) async {

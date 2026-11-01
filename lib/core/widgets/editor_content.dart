@@ -229,7 +229,8 @@ class _ExpandableEditorContentState extends State<ExpandableEditorContent> {
             widget.data,
             style: style,
             maxLines: _expanded ? null : widget.collapsedLines,
-            overflow: TextOverflow.ellipsis,
+            // Ellipsis without maxLines can truncate an unbroken Khmer line.
+            overflow: _expanded ? TextOverflow.clip : TextOverflow.ellipsis,
             onOverflowChanged: _overflowChanged,
           ),
           if (_canExpand)

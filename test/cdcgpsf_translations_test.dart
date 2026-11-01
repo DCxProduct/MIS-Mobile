@@ -10,6 +10,8 @@ import 'package:gpsf_app/core/widgets/filters/api_filter_sheet.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/auth/data/auth_user.dart';
 import 'package:gpsf_app/features/cdc_secretariat/issues/issues_screen.dart';
+import 'package:gpsf_app/features/cdc_secretariat/reports/reports_screen.dart';
+import 'package:gpsf_app/features/private_sector/issues/issue_detail_screen.dart';
 import 'package:gpsf_app/features/cdc_secretariat/meetings/meeting_screen.dart';
 import 'package:gpsf_app/features/cdc_secretariat/meetings/summary_issue_details.dart';
 import 'package:gpsf_app/features/shared/meetings/data/meeting_summary.dart';
@@ -50,6 +52,8 @@ AppSettingsController settingsWith(
 )..setModuleType(AppModuleType.cdcSecretariat);
 
 void main() {
+  // Captured labels extended with the supplied Khmer response and Web English
+  // seeds for newly mapped plenary labels and calendar issue count.
   final captured =
       jsonDecode(
             File(
@@ -60,6 +64,184 @@ void main() {
   for (final language in AppLanguage.values) {
     final code = language == AppLanguage.khmer ? 'km' : 'en';
     final labels = Map<String, String>.from(captured[code] as Map);
+    testWidgets('$code CDC matrix description tab uses API label', (
+      tester,
+    ) async {
+      var label = 'CDC issue description';
+      final settings = settingsWith(
+        (_) async => dictionary('cdcgpsf', code, {
+          'issue_matrix.column.issue_description': label,
+        }),
+      )..setLanguage(language);
+      addTearDown(settings.dispose);
+      await settings.loadTranslations();
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: const MaterialApp(
+            home: IssueDetailScreen(
+              title: 'Authored issue',
+              category: '',
+              translationPage: 'issue_matrix',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsNWidgets(2));
+      label = 'Updated CDC description';
+      await settings.loadTranslations(refresh: true);
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsNWidgets(2));
+      expect(find.text('CDC issue description'), findsNothing);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+    testWidgets('$code CDC plenary list and detail keep API labels separate', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(430, 1100);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      var revision = 'Initial';
+      final fields = {
+        'plenary_table.meeting_date': 'list meeting',
+        'plenary_table.deadline': 'list deadline',
+        'plenary_table.rgc_decision': 'decision count',
+        'plenary_table.sent': 'list sent',
+        'plenary_table.view_detail': 'open detail',
+        'filter_panel.filter': 'filter',
+        'plenary_detail_screen.title': 'detail title',
+        'plenary_detail_info.meeting_date': 'detail meeting',
+        'plenary_detail_info.deadline': 'detail deadline',
+        'plenary_detail_info.rgc_decision_count': 'detail count',
+        'plenary_detail_info.status': 'detail status',
+        'plenary_detail_info.sent': 'detail sent',
+        'plenary_detail_info.document': 'detail document',
+        'plenary_rgc_decision_table.meeting_date': 'decision meeting',
+        'plenary_rgc_decision_table.category': 'decision category',
+        'plenary_rgc_decision_table.focal_person': 'decision focal person',
+        'status.solved': 'decision solved',
+      };
+      final plenary = {
+        'id': 7,
+        'name': 'Authored plenary',
+        'status': 'Sent',
+        'statusCode': 'SENT',
+        'numberOfRgcDecisions': 1,
+      };
+      final settings = settingsWith((request) async {
+        if (request.url.path.endsWith('translations/dictionary')) {
+          expect(request.url.queryParameters['module'], 'cdcgpsf');
+          return dictionary('cdcgpsf', code, {
+            ...labels,
+            'plenary_plenaries.title': 'Plenaries tab',
+            for (final field in fields.entries)
+              'plenary_plenaries.${field.key}': '$revision ${field.value}',
+          });
+        }
+        if (request.url.path.endsWith('/plenaries/7')) return ok(plenary);
+        if (request.url.path.endsWith('/plenaries')) {
+          return ok({
+            'items': [plenary],
+          });
+        }
+        if (request.url.path.endsWith('/rgc-decisions')) {
+          expect(request.url.queryParameters['plenaryId'], '7');
+          return ok({
+            'items': [
+              {
+                'id': 8,
+                'decision': 'Authored decision',
+                'status': 'SOLVED',
+                'category': 'Business',
+                'focalPerson': 'Official',
+              },
+            ],
+          });
+        }
+        return ok({'items': []});
+      })..setLanguage(language);
+      addTearDown(settings.dispose);
+      await settings.loadTranslations();
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: const MaterialApp(
+            home: Scaffold(body: CdcSecretariatReportsScreenView()),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Plenaries tab'));
+      await tester.tap(find.text('Plenaries tab'));
+      await tester.pumpAndSettle();
+      for (final value in [
+        'list meeting',
+        'list deadline',
+        'decision count',
+        'list sent',
+        'filter',
+      ]) {
+        expect(find.text('Initial $value'), findsWidgets);
+      }
+      expect(find.text('Authored plenary'), findsOneWidget);
+      await tester.ensureVisible(find.text('Initial open detail'));
+      await tester.tap(find.text('Initial open detail'));
+      await tester.pumpAndSettle();
+      for (final value in [
+        'detail title',
+        'detail meeting',
+        'detail deadline',
+        'detail count',
+        'detail status',
+        'detail document',
+        'decision meeting',
+        'decision category',
+        'decision focal person',
+        'decision solved',
+      ]) {
+        expect(find.text('Initial $value'), findsOneWidget);
+      }
+      expect(find.text('• Initial detail sent'), findsOneWidget);
+      expect(find.text('Authored decision'), findsOneWidget);
+      revision = 'Edited';
+      await settings.loadTranslations(refresh: true);
+      await tester.pumpAndSettle();
+      expect(find.text('Edited detail title'), findsOneWidget);
+      expect(find.text('Edited decision solved'), findsOneWidget);
+      expect(find.text('Initial detail title'), findsNothing);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+    test('$code CDC plenary status and filter labels use their own context', () {
+      AppLocalizations page(String name) => AppLocalizations(
+        language,
+        module: AppModuleType.cdcSecretariat,
+        page: name,
+        dictionary: labels,
+      );
+      for (final status in ['DRAFT', 'SENT']) {
+        expect(
+          page('plenary_plenaries').status(status),
+          labels['plenary_plenaries.plenary_table.${status.toLowerCase()}'],
+        );
+        expect(
+          page('cdc_plenary_detail').status(status),
+          labels['plenary_plenaries.plenary_detail_info.${status.toLowerCase()}'],
+        );
+      }
+      expect(
+        page('cdc_plenary_rgc').status('SOLVED'),
+        labels['plenary_plenaries.status.solved'],
+      );
+      expect(
+        page('plenary_plenaries').filterLabel('status'),
+        labels['plenary_plenaries.plenary_filters.status'],
+      );
+    });
+
     testWidgets('$code CDC summary issue reads CDC-only fields from API', (
       tester,
     ) async {

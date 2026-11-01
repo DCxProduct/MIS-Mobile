@@ -11,6 +11,8 @@ import 'package:gpsf_app/core/widgets/filters/api_filter_sheet.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/auth/data/auth_user.dart';
 import 'package:gpsf_app/features/cefp/issues/cdc_issues_matrix_screen.dart';
+import 'package:gpsf_app/features/cdc_section/issues/issue_detail_screen.dart';
+import 'package:gpsf_app/features/shared/issues/data/working_group_issue.dart';
 import 'package:gpsf_app/features/cefp/reports/reports_screen.dart';
 import 'package:gpsf_app/features/shared/meetings/data/rgc_decision.dart';
 import 'package:gpsf_app/screens/report/rgc_decision_detail_screen.dart';
@@ -57,6 +59,64 @@ void main() {
   for (final language in AppLanguage.values) {
     final code = language == AppLanguage.khmer ? 'km' : 'en';
     final labels = Map<String, String>.from(fixture[code] as Map);
+    for (final generalIssue in [true, false]) {
+      testWidgets(
+        '$code CEFP detail metadata keeps its namespace; general=$generalIssue',
+        (tester) async {
+          var revision = 'Initial';
+          final agencyKey = generalIssue
+              ? 'issue_matrix.submitted_detail.government_primary_agency'
+              : 'cefp_issue_matrix.detail.ministry_name';
+          final categoryKey = generalIssue
+              ? 'issue_matrix.submitted_detail.category'
+              : 'cefp_issue_matrix.detail.category';
+          final settings = settingsWith((request) async {
+            expect(request.url.queryParameters['module'], 'cefp');
+            expect(request.url.queryParameters['language'], code);
+            return dictionary('cefp', code, {
+              ...labels,
+              agencyKey: '$revision CEFP agency',
+              categoryKey: '$revision CEFP category',
+              'cdc_issue_matrix.detail.ministry_name': 'Wrong CDC agency',
+              'cdc_issue_matrix.detail.category': 'Wrong CDC category',
+            });
+          })..setLanguage(language);
+          addTearDown(settings.dispose);
+          await settings.loadTranslations();
+          await tester.pumpWidget(
+            AppSettings(
+              controller: settings,
+              child: MaterialApp(
+                home: CdcSectionIssueDetailScreen(
+                  title: 'Authored issue',
+                  category: 'Business',
+                  generalIssue: generalIssue,
+                  issue: WorkingGroupIssue.fromJson({
+                    'id': 1,
+                    'title': 'Authored issue',
+                    'description': 'Authored description',
+                  }),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(find.text('Initial CEFP agency:'), findsOneWidget);
+          expect(find.text('Initial CEFP category'), findsOneWidget);
+          expect(find.text('Wrong CDC agency:'), findsNothing);
+          expect(find.text('Wrong CDC category'), findsNothing);
+          revision = 'Edited';
+          await settings.loadTranslations(refresh: true);
+          await tester.pumpAndSettle();
+          expect(find.text('Edited CEFP agency:'), findsOneWidget);
+          expect(find.text('Edited CEFP category'), findsOneWidget);
+          expect(find.text('Initial CEFP agency:'), findsNothing);
+          expect(tester.takeException(), isNull);
+          await tester.pumpWidget(const SizedBox.shrink());
+        },
+      );
+    }
+
     test(
       '$code CEFP aliases exist in live API and preserve page namespaces',
       () {

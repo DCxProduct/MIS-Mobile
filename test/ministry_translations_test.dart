@@ -10,6 +10,9 @@ import 'package:gpsf_app/core/network/api_client.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/auth/data/auth_user.dart';
 import 'package:gpsf_app/features/line_ministry/reports/ministry_rgc_decision_sheet.dart';
+import 'package:gpsf_app/features/line_ministry/issues/issue_detail_screen.dart';
+import 'package:gpsf_app/features/private_sector/dashboard/dashboard_screen.dart';
+import 'package:gpsf_app/features/private_sector/meetings/tabs/calendar_tab.dart';
 import 'package:gpsf_app/features/shared/meetings/data/rgc_decision.dart';
 import 'package:gpsf_app/screens/report/rgc_decision_detail_screen.dart';
 import 'package:gpsf_app/translations/app_language.dart';
@@ -48,6 +51,8 @@ AppSettingsController controller(
 );
 
 void main() {
+  // Captured API labels; calendar issue count added from the supplied km
+  // response and the Web English seed.
   final fixtures =
       jsonDecode(
             File(
@@ -58,6 +63,151 @@ void main() {
   for (final language in AppLanguage.values) {
     final code = language == AppLanguage.khmer ? 'km' : 'en';
     final labels = Map<String, String>.from(fixtures[code] as Map);
+    testWidgets(
+      '$code ministry issue description tab refreshes its own label',
+      (tester) async {
+        var label = 'Ministry detail description';
+        final settings = controller(
+          (_) async => response('ministry', code, {
+            'issue_matrix.submitted_detail.issue_description': label,
+            'issue_matrix.column.issue_description': 'Wrong list description',
+          }),
+        )..setLanguage(language);
+        addTearDown(settings.dispose);
+        await settings.loadTranslations();
+        await tester.pumpWidget(
+          AppSettings(
+            controller: settings,
+            child: const MaterialApp(
+              home: LineMinistryIssueDetailScreen(
+                title: 'Authored issue',
+                category: '',
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text(label), findsNWidgets(2));
+        expect(find.text('Wrong list description'), findsNothing);
+        label = 'Updated ministry description';
+        await settings.loadTranslations(refresh: true);
+        await tester.pumpAndSettle();
+        expect(find.text(label), findsNWidgets(2));
+        expect(find.text('Ministry detail description'), findsNothing);
+        expect(find.text('Authored issue'), findsWidgets);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+    testWidgets('$code ministry calendar uses its own empty label', (
+      tester,
+    ) async {
+      var label = 'Ministry empty calendar';
+      final settings = controller((request) async {
+        if (request.url.path.endsWith('translations/dictionary')) {
+          return response('ministry', code, {
+            'meeting_calendar.meeting_calendar.table.empty': label,
+            'meeting_requests.meeting_calendar.table.empty':
+                'Wrong request empty',
+          });
+        }
+        return http.Response(
+          jsonEncode({
+            'success': true,
+            'data': {'items': []},
+          }),
+          200,
+        );
+      })..setLanguage(language);
+      addTearDown(settings.dispose);
+      await settings.loadTranslations();
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: MaterialApp(
+            home: Scaffold(
+              body: CalendarTab(selectedDate: DateTime(2026, 10, 21)),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsOneWidget);
+      expect(find.text('Wrong request empty'), findsNothing);
+      label = 'Updated ministry empty';
+      await settings.loadTranslations(refresh: true);
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsOneWidget);
+      expect(find.text('Ministry empty calendar'), findsNothing);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+    for (final scope in [0, 1]) {
+      testWidgets('$code ministry dashboard scope $scope uses API tab label', (
+        tester,
+      ) async {
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        var label = 'Ministry overall status';
+        final prefix = scope == 0 ? 'plenary_dashboard' : 'dashboard';
+        final settings = controller((request) async {
+          if (request.url.path.endsWith('translations/dictionary')) {
+            return response('ministry', code, {
+              '$prefix.overall_status': label,
+              'dashboard_plenary.overall_status': 'Wrong PSWG label',
+              'dashboard_working_group.overall_status': 'Wrong PSWG label',
+            });
+          }
+          return http.Response(
+            File(
+              scope == 0
+                  ? 'test/fixtures/plenary.json'
+                  : 'test/fixtures/working_groups.json',
+            ).readAsStringSync(),
+            200,
+          );
+        })..setLanguage(language);
+        addTearDown(settings.dispose);
+        await settings.loadTranslations();
+        await tester.pumpWidget(
+          AppSettings(
+            controller: settings,
+            child: MaterialApp(
+              home: Scaffold(body: DashboardPage(initialScopeTab: scope)),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text(label), findsNWidgets(2));
+        expect(find.text('Wrong PSWG label'), findsNothing);
+        label = 'Updated ministry overall';
+        await settings.loadTranslations(refresh: true);
+        await tester.pumpAndSettle();
+        expect(find.text(label), findsNWidgets(2));
+        expect(find.text('Ministry overall status'), findsNothing);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      });
+    }
+    test(
+      '$code calendar issue count stays separate from request issue count',
+      () {
+        final l10n = AppLocalizations(
+          language,
+          module: AppModuleType.lineMinistry,
+          page: 'meeting_calendar',
+          dictionary: {
+            'meeting_calendar.meeting_calendar.table.issue_count':
+                'Calendar count',
+            'meeting_calendar.table.issues': 'Wrong request count',
+          },
+        );
+        expect(l10n.text('totalIssues'), 'Calendar count');
+      },
+    );
+
     testWidgets(
       '$code ministry RGC report uses and refreshes ministry labels',
       (tester) async {
@@ -134,62 +284,59 @@ void main() {
         await tester.pumpWidget(const SizedBox.shrink());
       },
     );
-    test(
-      '$code ministry aliases exist in the captured live API dictionary',
-      () {
-        final keys = {
-          ...ministryCommonKeys.values,
-          ...ministryPageKeys.values.expand((map) => map.values),
-          ...ministryFilterKeys.values.expand((map) => map.values),
-        };
-        for (final key in keys) {
-          expect(labels[key], isNotNull, reason: key);
-        }
-        AppLocalizations page(String name) => AppLocalizations(
-          language,
-          module: AppModuleType.lineMinistry,
-          dictionary: labels,
-          page: name,
-        );
+    test('$code ministry aliases exist in the reference dictionary', () {
+      final keys = {
+        ...ministryCommonKeys.values,
+        ...ministryPageKeys.values.expand((map) => map.values),
+        ...ministryFilterKeys.values.expand((map) => map.values),
+      };
+      for (final key in keys) {
+        expect(labels[key], isNotNull, reason: key);
+      }
+      AppLocalizations page(String name) => AppLocalizations(
+        language,
+        module: AppModuleType.lineMinistry,
+        dictionary: labels,
+        page: name,
+      );
+      expect(
+        page(
+          'progress_report',
+        ).api('progress_report.shared.decisions.title', fallback: 'fallback'),
+        labels['progress_reports.shared.decisions.title'],
+      );
+      expect(
+        page('plenary_rgc_decisions').text('linkedIssues'),
+        labels['plenary_rgc_decisions.rgc.linked_issues'],
+      );
+      expect(
+        page('meeting_calendar').text('filters'),
+        labels['meeting_calendar.filter_panel.filters'],
+      );
+      expect(
+        page('meeting_calendar').text('meetingRequests'),
+        labels['meeting_requests.title'],
+        reason: 'Calendar inheritance must not rename the Requests tab',
+      );
+      expect(
+        page('meeting_calendar').status('SCHEDULED'),
+        labels['meeting_calendar.status_labels.scheduled'],
+      );
+      expect(
+        page('meeting_summary').status('SUBMITTED'),
+        labels['meeting_summary.status_labels.submitted'],
+      );
+      for (final entry in {
+        'summaryReferenceDocument': 'summary_reference',
+        'meetingDocument': 'meeting_document',
+        'sentBy': 'sent_by',
+      }.entries) {
         expect(
-          page(
-            'progress_report',
-          ).api('progress_report.shared.decisions.title', fallback: 'fallback'),
-          labels['progress_reports.shared.decisions.title'],
+          page('meeting_summary').text(entry.key),
+          labels['meeting_summary.details.${entry.value}'],
         );
-        expect(
-          page('plenary_rgc_decisions').text('linkedIssues'),
-          labels['plenary_rgc_decisions.rgc.linked_issues'],
-        );
-        expect(
-          page('meeting_calendar').text('filters'),
-          labels['meeting_calendar.filter_panel.filters'],
-        );
-        expect(
-          page('meeting_calendar').text('meetingRequests'),
-          labels['meeting_requests.title'],
-          reason: 'Calendar inheritance must not rename the Requests tab',
-        );
-        expect(
-          page('meeting_calendar').status('SCHEDULED'),
-          labels['meeting_calendar.status_labels.scheduled'],
-        );
-        expect(
-          page('meeting_summary').status('SUBMITTED'),
-          labels['meeting_summary.status_labels.submitted'],
-        );
-        for (final entry in {
-          'summaryReferenceDocument': 'summary_reference',
-          'meetingDocument': 'meeting_document',
-          'sentBy': 'sent_by',
-        }.entries) {
-          expect(
-            page('meeting_summary').text(entry.key),
-            labels['meeting_summary.details.${entry.value}'],
-          );
-        }
-      },
-    );
+      }
+    });
     test(
       '$code repository fetches and validates the ministry envelope',
       () async {

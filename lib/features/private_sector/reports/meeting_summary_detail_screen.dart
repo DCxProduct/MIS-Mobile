@@ -667,6 +667,8 @@ class _ClimateIssueCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     issue?.title.isNotEmpty == true ? issue!.title : '—',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: AppColors.primaryText(context),
                       fontSize: 14,

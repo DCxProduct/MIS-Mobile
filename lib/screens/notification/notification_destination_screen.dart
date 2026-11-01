@@ -9,6 +9,7 @@ import '../../core/text/html_text.dart';
 import '../../core/widgets/filters/api_filter_scope.dart';
 import '../../core/widgets/pdf_attachment_preview.dart';
 import '../../features/cdc_section/reports/rgc_decision_details.dart';
+import '../../features/cdc_secretariat/reports/progress_report_ministries_screen.dart';
 import '../../features/line_ministry/issues/issues_screen.dart';
 import '../../features/private_sector/issues/issue_detail_screen.dart' as ps;
 import '../../features/private_sector/meetings/meeting_request_detail_screen.dart'
@@ -38,6 +39,15 @@ class NotificationDestinationScreen extends StatelessWidget {
         id: destination.id!,
         scope: ProgressReportDetailScope.ministry,
       ),
+      NotificationDestinationKind.cdcProgressReport =>
+        ProgressReportDetailLoader(
+          id: destination.id!,
+          ministryId: destination.ministryId,
+          scope: ProgressReportDetailScope.report,
+          detailBuilder: destination.ministryId == null
+              ? (report) => CdcProgressReportMinistriesScreen(report: report)
+              : null,
+        ),
       NotificationDestinationKind.sharedProgressReport =>
         ProgressReportDetailLoader(
           id: destination.id!,

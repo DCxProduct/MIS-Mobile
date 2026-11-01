@@ -49,7 +49,9 @@ class _PlenaryDetailScreenState extends State<PlenaryDetailScreen> {
 
   @override
   Widget build(BuildContext context) => TranslationPageScope(
-    page: 'plenary_plenaries',
+    page: AppSettings.of(context).moduleType == AppModuleType.cdcSecretariat
+        ? 'cdc_plenary_detail'
+        : 'plenary_plenaries',
     child: Builder(builder: _buildContent),
   );
 
@@ -246,21 +248,30 @@ class _PlenaryDetailScreenState extends State<PlenaryDetailScreen> {
             ),
             const SizedBox(height: 20),
             for (final decision in decisions) ...[
-              _PlenaryIssueItemCard(
-                decision: decision,
-                meetingDate: issueDateWithYear(
-                  context,
-                  decision.meetingDate?.toLocal(),
-                ),
-                category: _display(
-                  AppLocalizations.of(context).category(decision.category),
-                ),
-                focalPerson: _display(decision.focalPerson),
-                description: _display(decision.content),
-                status: AppLocalizations.of(context).status(
-                  decision.status.isEmpty
-                      ? decision.statusCode
-                      : decision.status,
+              TranslationPageScope(
+                page:
+                    AppSettings.of(context).moduleType ==
+                        AppModuleType.cdcSecretariat
+                    ? 'cdc_plenary_rgc'
+                    : 'plenary_plenaries',
+                child: Builder(
+                  builder: (context) => _PlenaryIssueItemCard(
+                    decision: decision,
+                    meetingDate: issueDateWithYear(
+                      context,
+                      decision.meetingDate?.toLocal(),
+                    ),
+                    category: _display(
+                      AppLocalizations.of(context).category(decision.category),
+                    ),
+                    focalPerson: _display(decision.focalPerson),
+                    description: _display(decision.content),
+                    status: AppLocalizations.of(context).status(
+                      decision.status.isEmpty
+                          ? decision.statusCode
+                          : decision.status,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 14),

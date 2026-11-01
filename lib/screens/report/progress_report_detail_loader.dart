@@ -15,10 +15,12 @@ class ProgressReportDetailLoader extends StatefulWidget {
     required this.id,
     this.scope,
     this.ministryId,
+    this.detailBuilder,
   });
   final int id;
   final int? ministryId;
   final ProgressReportDetailScope? scope;
+  final Widget Function(ProgressReport)? detailBuilder;
 
   @override
   State<ProgressReportDetailLoader> createState() =>
@@ -60,10 +62,11 @@ class _ProgressReportDetailLoaderState
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.done &&
           snapshot.hasData) {
-        return ReportDetailScreen(
-          title: snapshot.data!.title,
-          report: snapshot.data!,
-        );
+        return widget.detailBuilder?.call(snapshot.data!) ??
+            ReportDetailScreen(
+              title: snapshot.data!.title,
+              report: snapshot.data!,
+            );
       }
       final l10n = AppLocalizations.of(context, page: 'progress_report');
       return Scaffold(

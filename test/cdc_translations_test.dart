@@ -11,6 +11,8 @@ import 'package:gpsf_app/core/widgets/filters/api_filter_sheet.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/auth/data/auth_user.dart';
 import 'package:gpsf_app/features/cdc_section/issues/cdc_issues_matrix_screen.dart';
+import 'package:gpsf_app/features/cdc_section/issues/issue_detail_screen.dart';
+import 'package:gpsf_app/features/shared/issues/data/working_group_issue.dart';
 import 'package:gpsf_app/features/cdc_section/reports/reports_screen.dart';
 import 'package:gpsf_app/features/shared/meetings/data/rgc_decision.dart';
 import 'package:gpsf_app/screens/report/rgc_decision_detail_screen.dart';
@@ -57,6 +59,56 @@ void main() {
   for (final language in AppLanguage.values) {
     final code = language == AppLanguage.khmer ? 'km' : 'en';
     final labels = Map<String, String>.from(fixture[code] as Map);
+    testWidgets(
+      '$code CDC general issue metadata uses detail labels and refreshes',
+      (tester) async {
+        var revision = 'Initial';
+        final settings = settingsWith(
+          (_) async => dictionary('cdc', code, {
+            ...labels,
+            'issue_matrix.submitted_detail.government_primary_agency':
+                '$revision agency',
+            'issue_matrix.submitted_detail.category': '$revision category',
+            'cdc_issue_matrix.detail.ministry_name': 'Wrong CDC matrix agency',
+            'cdc_issue_matrix.detail.category': 'Wrong CDC matrix category',
+          }),
+        )..setLanguage(language);
+        addTearDown(settings.dispose);
+        await settings.loadTranslations();
+        await tester.pumpWidget(
+          AppSettings(
+            controller: settings,
+            child: MaterialApp(
+              home: CdcSectionIssueDetailScreen(
+                title: 'Authored issue',
+                category: 'Business',
+                generalIssue: true,
+                issue: WorkingGroupIssue.fromJson({
+                  'id': 1,
+                  'title': 'Authored issue',
+                  'description': 'Authored description',
+                }),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Initial agency:'), findsOneWidget);
+        expect(find.text('Initial category'), findsOneWidget);
+        expect(find.text('Wrong CDC matrix agency:'), findsNothing);
+        expect(find.text('Wrong CDC matrix category'), findsNothing);
+        revision = 'Edited';
+        await settings.loadTranslations(refresh: true);
+        await tester.pumpAndSettle();
+        expect(find.text('Edited agency:'), findsOneWidget);
+        expect(find.text('Edited category'), findsOneWidget);
+        expect(find.text('Initial agency:'), findsNothing);
+        expect(find.text('Authored issue'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+
     test(
       '$code CDC aliases exist in live API and preserve page namespaces',
       () {

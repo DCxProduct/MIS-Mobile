@@ -58,6 +58,89 @@ AppSettingsController settingsWith(
 void main() {
   for (final language in AppLanguage.values) {
     final code = language == AppLanguage.khmer ? 'km' : 'en';
+    for (final page in ['wg_issues', 'issue_matrix']) {
+      testWidgets('$code $page description tab uses its API label', (
+        tester,
+      ) async {
+        var label = 'API description tab';
+        final settings =
+            settingsWith(
+                (_) async => dictionaryResponse(code, {
+                  '$page.column.issue_description': label,
+                }),
+              )
+              ..setModuleType(AppModuleType.privateSector)
+              ..setLanguage(language);
+        addTearDown(settings.dispose);
+        await settings.loadTranslations();
+        await tester.pumpWidget(
+          AppSettings(
+            controller: settings,
+            child: MaterialApp(
+              home: IssueDetailScreen(
+                title: 'Authored issue title',
+                category: '',
+                translationPage: page,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        // The tab and its description panel must use the same page label.
+        expect(find.text(label), findsNWidgets(2));
+        label = 'Edited description tab';
+        await settings.loadTranslations(refresh: true);
+        await tester.pumpAndSettle();
+        expect(find.text(label), findsNWidgets(2));
+        expect(find.text('API description tab'), findsNothing);
+        expect(find.text('Authored issue title'), findsWidgets);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      });
+    }
+    testWidgets('$code calendar empty message uses API and refreshes', (
+      tester,
+    ) async {
+      var label = 'API no meetings';
+      final settings =
+          settingsWith((request) async {
+              if (request.url.path.endsWith('translations/dictionary')) {
+                return dictionaryResponse(code, {
+                  'meeting_requests.meeting_calendar.table.empty': label,
+                });
+              }
+              return http.Response(
+                jsonEncode({
+                  'success': true,
+                  'data': {'items': []},
+                }),
+                200,
+              );
+            })
+            ..setModuleType(AppModuleType.privateSector)
+            ..setLanguage(language);
+      addTearDown(settings.dispose);
+      await settings.loadTranslations();
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: MaterialApp(
+            home: Scaffold(
+              body: CalendarTab(selectedDate: DateTime(2026, 10, 21)),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsOneWidget);
+      label = 'Edited empty calendar';
+      await settings.loadTranslations(refresh: true);
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsOneWidget);
+      expect(find.text('API no meetings'), findsNothing);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
     testWidgets('$code PSWG schedule uses API templates and refreshes labels', (
       tester,
     ) async {
@@ -584,7 +667,10 @@ void main() {
   ) async {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     var requests = 0;
-    final settings = settingsWith((_) async {
+    final settings = settingsWith((request) async {
+      if (!request.url.path.endsWith('translations/dictionary')) {
+        return http.Response(jsonEncode({'success': true, 'data': []}), 200);
+      }
       requests++;
       return dictionaryResponse('km', {'dashboard.title': '$requests'});
     });
@@ -675,11 +761,11 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('សម័យប្រជុំពេញអង្គ'), findsWidgets);
-      expect(find.text('Plenary API status'), findsOneWidget);
+      expect(find.text('Plenary API status'), findsNWidgets(2));
       await tester.ensureVisible(find.text('កិច្ចប្រជុំការងារតាមវិស័យ').first);
       await tester.tap(find.text('កិច្ចប្រជុំការងារតាមវិស័យ').first);
       await tester.pumpAndSettle();
-      expect(find.text('WG API status'), findsOneWidget);
+      expect(find.text('WG API status'), findsNWidgets(2));
       expect(tester.takeException(), isNull);
     },
   );
@@ -726,11 +812,15 @@ void main() {
     await tester.pumpWidget(
       AppSettings(
         controller: settings,
-        child: const MaterialApp(home: Scaffold(body: CalendarTab())),
+        child: MaterialApp(
+          home: Scaffold(
+            body: CalendarTab(selectedDate: DateTime(2026, 10, 21)),
+          ),
+        ),
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('ខែតុលាពី API 2026'), findsOneWidget);
+    expect(find.text('២១ ខែតុលាពី API ២០២៦'), findsOneWidget);
     expect(find.text('ថ្ងៃពុធពី API'), findsWidgets);
     await tester.tap(find.text('Test meeting'));
     await tester.pumpAndSettle();
@@ -784,6 +874,9 @@ void main() {
     () async {
       final requested = <String>[];
       final settings = settingsWith((request) async {
+        if (!request.url.path.endsWith('translations/dictionary')) {
+          return http.Response(jsonEncode({'success': true, 'data': []}), 200);
+        }
         final language = request.url.queryParameters['language']!;
         requested.add(language);
         return dictionaryResponse(language, {

@@ -25,6 +25,7 @@ const ministryPageParents = <String, String>{
 
 const ministryPageKeys = <String, Map<String, String>>{
   'issue_matrix_detail': {
+    'descriptions': 'issue_matrix.submitted_detail.issue_description',
     'governmentAgency':
         'issue_matrix.submitted_detail.government_primary_agency',
     'status': 'issue_matrix.submitted_detail.status',
@@ -43,6 +44,7 @@ const ministryPageKeys = <String, Map<String, String>>{
     'inProgress': 'plenary_dashboard.in_progress',
     'notAddressed': 'plenary_dashboard.not_addressed',
     'overallStatus': 'plenary_dashboard.overall_status',
+    'overall': 'plenary_dashboard.overall_status',
     'categoriesOfIssues': 'plenary_dashboard.category_of_issues',
     'categories': 'plenary_dashboard.category',
     'filterCategory': 'plenary_dashboard.category',
@@ -74,6 +76,7 @@ const ministryPageKeys = <String, Map<String, String>>{
     'inProgress': 'dashboard.in_progress',
     'notAddressed': 'dashboard.not_addressed',
     'overallStatus': 'dashboard.overall_status',
+    'overall': 'dashboard.overall_status',
     'categoriesOfIssues': 'dashboard.category_of_issues',
     'categories': 'dashboard.category',
     'filterCategory': 'dashboard.category',
@@ -186,6 +189,8 @@ const ministryPageKeys = <String, Map<String, String>>{
     'numberOfIssues': 'meeting_requests.number_of_issues',
   },
   'meeting_calendar': {
+    'calendarNoMeetings': 'meeting_calendar.meeting_calendar.table.empty',
+    'totalIssues': 'meeting_calendar.meeting_calendar.table.issue_count',
     'issueDocument': 'meeting_calendar.meeting_calendar.detail.issue_document',
     'meetingRequestDetails':
         'meeting_calendar.meeting_calendar.detail.meeting_detail',
@@ -485,7 +490,8 @@ const ministryPageKeys = <String, Map<String, String>>{
     'implementationDate': 'plenary_rgc_decisions.rgc.date_of_issue_solution',
     'rgcReportReferenceAttachment': 'plenary_rgc_decisions.rgc.attachment',
     'rgcReportSolutionIndicators': 'plenary_rgc_decisions.rgc.indicators',
-    'rgcReportChallenges': 'plenary_rgc_decisions.rgc.implementation_challenges',
+    'rgcReportChallenges':
+        'plenary_rgc_decisions.rgc.implementation_challenges',
     'requests': 'plenary_rgc_decisions.rgc.request',
     'plenary': 'plenary_rgc_decisions.rgc.plenary',
     'meetingRequestDetails': 'plenary_rgc_decisions.core.plenary_detail',

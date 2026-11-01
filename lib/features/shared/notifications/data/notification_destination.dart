@@ -7,6 +7,7 @@ enum NotificationDestinationKind {
   calendar,
   plenary,
   progressReport,
+  cdcProgressReport,
   sharedProgressReport,
   meetingSummary,
   editMeetingSummary,
@@ -17,10 +18,16 @@ enum NotificationDestinationKind {
 }
 
 class NotificationDestination {
-  const NotificationDestination(this.kind, this.route, {this.id});
+  const NotificationDestination(
+    this.kind,
+    this.route, {
+    this.id,
+    this.ministryId,
+  });
   final NotificationDestinationKind kind;
   final String route;
   final int? id;
+  final int? ministryId;
 
   String? get endpoint => switch (kind) {
     NotificationDestinationKind.meetingRequest => 'meeting-requests/$id',
@@ -28,6 +35,10 @@ class NotificationDestination {
     NotificationDestinationKind.plenary => 'plenaries/$id',
     NotificationDestinationKind.progressReport =>
       'progress-reports/$id/ministries/me',
+    NotificationDestinationKind.cdcProgressReport =>
+      ministryId == null
+          ? 'progress-reports/$id'
+          : 'progress-reports/$id/ministries/$ministryId',
     NotificationDestinationKind.sharedProgressReport =>
       'progress-reports/assignments/$id',
     NotificationDestinationKind.meetingSummary ||
@@ -78,6 +89,13 @@ class NotificationDestination {
         // progress report. Never substitute progressReportId for this ID.
         id = notification.resourceId('assignmentId');
         if (id != null) route = '/pswg/progress-report/$id';
+      case 'PROGRESS_REPORT_SUBMITTED' ||
+              'PROGRESS_REPORT_RESUBMITTED' ||
+              'PROGRESS_REPORT_MINISTRY_SUBMITTED' ||
+              'PROGRESS_REPORT_MINISTRY_RESUBMITTED'
+          when gpsf:
+        id = notification.resourceId('progressReportId');
+        if (id != null) route = '/cdc-gpsf/progress-reports/$id';
       case 'MEETING_SUMMARY_SENT_BACK' when ministry:
         id = notification.resourceId('meetingSummaryId');
         if (id != null) route = '/ministry/meeting-summary/$id/edit';
@@ -121,6 +139,31 @@ class NotificationDestination {
       return null;
     }
     final path = uri.path;
+    if (n.type.startsWith('PROGRESS_REPORT_')) {
+      final match = RegExp(
+        r'^/cdc-gpsf/progress-reports/(\d+)(?:/ministries/(\d+))?$',
+      ).firstMatch(path);
+      if (match != null) {
+        final reportId = int.tryParse(match.group(1)!);
+        final ministryValue =
+            match.group(2) ?? uri.queryParameters['ministryId'];
+        final ministryId = ministryValue == null
+            ? n.resourceId('ministryId')
+            : int.tryParse(ministryValue);
+        if (reportId == null ||
+            reportId <= 0 ||
+            (ministryValue != null &&
+                (ministryId == null || ministryId <= 0))) {
+          return null;
+        }
+        return NotificationDestination(
+          NotificationDestinationKind.cdcProgressReport,
+          url,
+          id: reportId,
+          ministryId: ministryId,
+        );
+      }
+    }
     NotificationDestination? detail(
       String pattern,
       NotificationDestinationKind kind,
