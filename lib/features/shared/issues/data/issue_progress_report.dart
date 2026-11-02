@@ -12,6 +12,7 @@ class IssueProgressReport {
     required this.implementationDate,
     required this.referenceName,
     required this.attachmentPaths,
+    this.attachmentPath = '',
     required this.description,
     required this.indicators,
     required this.implementationChallenges,
@@ -33,6 +34,8 @@ class IssueProgressReport {
   final String title;
   final DateTime? implementationDate;
   final String referenceName;
+  // The report attachment, separate from meeting/reference documents.
+  final String attachmentPath;
   final List<String> attachmentPaths;
   final Map<String, String> attachmentNames;
   final String description;
@@ -233,6 +236,7 @@ class IssueProgressReport {
         json['linkToVerificationSource'] ?? report['linkToVerificationSource'],
       ),
       sourceOfVerification: sourceOfVerification,
+      attachmentPath: path(attachment),
       attachmentName: documentOriginalName(attachment),
       attachmentSize: attachment['size'] is int
           ? attachment['size'] as int

@@ -1,10 +1,10 @@
 import 'package:gpsf_app/core/widgets/pdf_icon.dart';
 import 'package:gpsf_app/core/status_colors.dart';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
+import '../../../core/text/html_text.dart';
 import '../../../core/widgets/editor_content.dart';
 import '../../../core/widgets/pdf_attachment_preview.dart';
 import '../../../translations/app_localizations.dart';
@@ -36,20 +36,19 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
 
   Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final hasMeetingDocument = meetingDocumentPath.isNotEmpty;
-    final documentPath = hasMeetingDocument
-        ? meetingDocumentPath
-        : report.attachmentPaths.firstOrNull ?? '';
-    final documentName = hasMeetingDocument
-        ? meetingDocumentName
-        : report.attachmentNames[documentPath];
+    final documentPath = report.attachmentPath;
+    final documentName = report.attachmentName;
     final statusColor = StatusColors.workflow(context, issueStatus);
+    String displayValue(String value) =>
+        htmlToPlainText(value).trim().isEmpty ? l10n.text('noData') : value;
+    String reportValue(String key, String value) =>
+        displayValue(report.richText[key] ?? value);
     Widget section(String key, String value, {String? labelKey}) => Padding(
       padding: const EdgeInsets.only(top: 18),
       child: CdcDetailTextPanel(
         key: ValueKey('report-$key'),
         label: l10n.text(labelKey ?? key),
-        body: report.richText[key] ?? value,
+        body: reportValue(key, value),
         collapsedLines: 3,
         inlineLink: true,
       ),
@@ -91,11 +90,6 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
         ],
       ),
     );
-    final link = Uri.tryParse(report.verificationLink);
-    final canOpenLink =
-        link != null &&
-        (link.scheme == 'https' || link.scheme == 'http') &&
-        link.host.isNotEmpty;
     return Scaffold(
       backgroundColor: AppColors.pageBackground(context),
       appBar: AppBar(
@@ -141,9 +135,12 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
                 Expanded(
                   flex: 3,
                   child: _InfoBlock(
+                    showBorder: false,
                     label: l10n.text('implementationDate'),
                     child: Text(
-                      issueDate(context, report.implementationDate),
+                      report.implementationDate == null
+                          ? l10n.text('noData')
+                          : issueDate(context, report.implementationDate),
                       style: const TextStyle(fontSize: 12),
                     ),
                   ),
@@ -152,89 +149,60 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
                 Expanded(
                   flex: 2,
                   child: _InfoBlock(
+                    showBorder: false,
                     label: '${l10n.text('status')} :',
                     child: Text(
-                      issueStatus.isEmpty ? '—' : l10n.status(issueStatus),
+                      issueStatus.isEmpty
+                          ? l10n.text('noData')
+                          : l10n.status(issueStatus),
                       style: TextStyle(fontSize: 12, color: statusColor),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 15),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: _InfoBlock(
-                    label:
-                        '${l10n.text(hasMeetingDocument ? 'meetingReferenceDocument' : 'attachmentsLabel')} :',
-                    child: documentPath.isEmpty
-                        ? const Text('—')
-                        : document(
-                            documentPath,
-                            documentName,
-                            showSize: !hasMeetingDocument,
+            section('referenceName', report.referenceName),
+            const SizedBox(height: 18),
+            _InfoBlock(
+              key: const ValueKey('report-referenceLink'),
+              label: l10n.text('linkToVerificationSource'),
+              child: documentPath.isNotEmpty
+                  ? document(documentPath, documentName, showSize: true)
+                  : Row(
+                      children: [
+                        const PdfIcon(size: 24),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            l10n.text('noData'),
+                            style: const TextStyle(fontSize: 12),
                           ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 2,
-                  child: _InfoBlock(
-                    label: l10n.text('referenceName'),
-                    child: ExpandableEditorContent(
-                      report.richText['referenceName'] ??
-                          (report.referenceName.isEmpty
-                              ? '—'
-                              : report.referenceName),
-                      collapsedLines: 2,
-                      style: const TextStyle(fontSize: 12, height: 1.4),
-                      buttonStyle: _readMoreStyle(context),
+                        ),
+                      ],
                     ),
-                  ),
-                ),
-              ],
             ),
-            if (report.description.isNotEmpty) ...[
-              const SizedBox(height: 20),
-              _ReportDescription(
-                text: report.richText['description'] ?? report.description,
+            const SizedBox(height: 20),
+            _InfoBlock(
+              key: const ValueKey('report-progressSolution'),
+              label: l10n.text('progressSolution'),
+              child: _ReportDescription(
+                text: reportValue('description', report.description),
               ),
-            ],
-            if (report.indicators.isNotEmpty)
-              section(
-                'indicators',
-                report.indicators,
-                labelKey: 'solutionIndicators',
-              ),
-            if (report.implementationChallenges.isNotEmpty)
-              section(
-                'implementationChallenges',
-                report.implementationChallenges,
-                labelKey: 'challenges',
-              ),
-            if (report.requests.isNotEmpty)
-              section('requests', report.requests),
+            ),
+            section(
+              'indicators',
+              report.indicators,
+              labelKey: 'solutionIndicators',
+            ),
+            section(
+              'implementationChallenges',
+              report.implementationChallenges,
+              labelKey: 'challenges',
+            ),
+            section('requests', report.requests),
+            section('rgcDecision', report.rgcDecision),
             if (report.nextStep.isNotEmpty)
               section('nextStep', report.nextStep),
-            if (report.rgcDecision.isNotEmpty)
-              section('rgcDecision', report.rgcDecision),
-            if (report.sourceOfVerification.isNotEmpty)
-              section('sourceOfVerification', report.sourceOfVerification),
-            if (report.verificationLink.isNotEmpty) ...[
-              const SizedBox(height: 18),
-              _InfoBlock(
-                label: l10n.text('linkToVerificationSource'),
-                child: EditorContent(
-                  canOpenLink
-                      ? '<a href="${htmlEscape.convert(report.verificationLink)}">${htmlEscape.convert(report.verificationLink)}</a>'
-                      : report.verificationLink,
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ),
-            ],
             for (final path in report.attachmentPaths)
               if (path != documentPath)
                 Padding(
@@ -252,21 +220,16 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
   }
 }
 
-ButtonStyle _readMoreStyle(BuildContext context) => TextButton.styleFrom(
-  foregroundColor: AppColors.accent(context),
-  padding: EdgeInsets.zero,
-  minimumSize: const Size(0, 22),
-  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-  textStyle: const TextStyle(
-    fontSize: 12,
-    decoration: TextDecoration.underline,
-  ),
-);
-
 class _InfoBlock extends StatelessWidget {
-  const _InfoBlock({required this.label, required this.child});
+  const _InfoBlock({
+    super.key,
+    required this.label,
+    required this.child,
+    this.showBorder = true,
+  });
   final String label;
   final Widget child;
+  final bool showBorder;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -277,7 +240,18 @@ class _InfoBlock extends StatelessWidget {
         style: const TextStyle(fontSize: 12, color: AppColors.mutedText),
       ),
       const SizedBox(height: 7),
-      child,
+      Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(minHeight: 52),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          border: showBorder
+              ? Border.all(color: AppColors.border(context))
+              : null,
+          borderRadius: BorderRadius.circular(7),
+        ),
+        child: child,
+      ),
     ],
   );
 }
