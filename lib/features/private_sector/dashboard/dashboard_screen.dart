@@ -804,7 +804,7 @@ class _MetricCard extends StatelessWidget {
                     AppLocalizations.of(context).number(value),
                     style: TextStyle(
                       color: isDark ? Colors.white : const Color(0xFF27364A),
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -875,7 +875,7 @@ class _WideMetricCard extends StatelessWidget {
                   ),
                   style: TextStyle(
                     color: isDark ? Colors.white : const Color(0xFF27364A),
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
