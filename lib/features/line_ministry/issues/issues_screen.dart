@@ -376,7 +376,7 @@ class _MetricCard extends StatelessWidget {
                     style: TextStyle(
                       color: isDark ? Colors.white : const Color(0xFF27364A),
                       fontSize: 18,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -442,8 +442,8 @@ class _TotalPrimaryAgenciesCard extends StatelessWidget {
                 AppLocalizations.of(context).number(value),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
