@@ -10,9 +10,11 @@ class MeetingRequestsList extends StatefulWidget {
     super.key,
     required this.itemBuilder,
     this.query = '',
+    this.excludedStatuses = const {},
   });
   final Widget Function(MeetingRequest) itemBuilder;
   final String query;
+  final Set<String> excludedStatuses;
   @override
   State<MeetingRequestsList> createState() => _MeetingRequestsListState();
 }
@@ -61,6 +63,11 @@ class _MeetingRequestsListState extends State<MeetingRequestsList> {
       final query = widget.query.trim().toLowerCase();
       final selection = ApiFilterScope.selection(context, 'meeting-requests');
       final items = snapshot.data!
+          .where(
+            (item) => !widget.excludedStatuses.contains(
+              item.status.trim().toUpperCase(),
+            ),
+          )
           .where((item) => selection.matchesLocal(item.filterValues))
           .where(
             (issue) =>

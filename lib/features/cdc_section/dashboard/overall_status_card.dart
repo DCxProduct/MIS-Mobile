@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
 import '../../../translations/app_localizations.dart';
+import '../../shared/dashboard/widgets/donut_label_layout.dart';
 
 class CdcOverallStatusCard extends StatelessWidget {
   const CdcOverallStatusCard({
@@ -49,7 +50,8 @@ class CdcOverallStatusCard extends StatelessWidget {
           child: Column(
             children: [
               SizedBox(
-                height: 210,
+                width: double.infinity,
+                height: 240,
                 child: LayoutBuilder(
                   builder: (context, constraints) => Stack(
                     alignment: Alignment.center,
@@ -59,7 +61,9 @@ class CdcOverallStatusCard extends StatelessWidget {
                         label:
                             '${l10n.text('totalIssues')}: ${l10n.number(total)}',
                         child: CustomPaint(
-                          size: const Size(170, 170),
+                          size: Size.square(
+                            donutChartRadius(constraints.biggest) * 2,
+                          ),
                           painter: _StatusRing(shares, colors),
                         ),
                       ),
@@ -82,24 +86,13 @@ class CdcOverallStatusCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      if (shares[1] > 0)
-                        Positioned(
-                          top: 8,
-                          right: 38,
-                          child: _Badge(share: shares[1], color: colors[1]),
+                      Positioned.fill(
+                        child: _RingPercentageLabels(
+                          shares: [shares[0], shares[2], shares[1]],
+                          colors: [colors[0], colors[2], colors[1]],
+                          startAngle: -.4,
                         ),
-                      if (shares[2] > 0)
-                        Positioned(
-                          left: -45,
-                          top: 82,
-                          child: _Badge(share: shares[2], color: colors[2]),
-                        ),
-                      if (shares[0] > 0)
-                        Positioned(
-                          right: 4,
-                          bottom: 23,
-                          child: _Badge(share: shares[0], color: colors[0]),
-                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -147,6 +140,96 @@ class CdcOverallStatusCard extends StatelessWidget {
   }
 }
 
+class _RingPercentageLabels extends StatelessWidget {
+  const _RingPercentageLabels({
+    required this.shares,
+    required this.colors,
+    required this.startAngle,
+  });
+
+  final List<double> shares;
+  final List<Color> colors;
+  final double startAngle;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final positions = donutLabelLayout(
+        fractions: shares,
+        size: constraints.biggest,
+        radius: donutChartRadius(constraints.biggest),
+        startAngle: startAngle,
+      );
+      return Stack(
+        children: [
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _RingLabelConnectorPainter(
+                  positions: positions,
+                  shares: shares,
+                  colors: colors,
+                ),
+              ),
+            ),
+          ),
+          for (var i = 0; i < shares.length; i++)
+            if (shares[i] > 0)
+              Positioned.fromRect(
+                rect: Rect.fromCenter(
+                  center: positions[i].center,
+                  width: donutLabelSize.width,
+                  height: donutLabelSize.height,
+                ),
+                child: _Badge(share: shares[i], color: colors[i]),
+              ),
+        ],
+      );
+    },
+  );
+}
+
+class _RingLabelConnectorPainter extends CustomPainter {
+  const _RingLabelConnectorPainter({
+    required this.positions,
+    required this.shares,
+    required this.colors,
+  });
+
+  final List<({Offset anchor, Offset center})> positions;
+  final List<double> shares;
+  final List<Color> colors;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (var i = 0; i < positions.length; i++) {
+      if (shares[i] <= 0) continue;
+      final position = positions[i];
+      final labelEdge = position.center.dx < size.width / 2
+          ? position.center.dx + donutLabelSize.width / 2
+          : position.center.dx - donutLabelSize.width / 2;
+      canvas.drawPath(
+        Path()
+          ..moveTo(position.anchor.dx, position.anchor.dy)
+          ..lineTo(labelEdge, position.anchor.dy)
+          ..lineTo(labelEdge, position.center.dy),
+        Paint()
+          ..color = colors[i]
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _RingLabelConnectorPainter oldDelegate) =>
+      oldDelegate.positions != positions ||
+      oldDelegate.shares != shares ||
+      oldDelegate.colors != colors;
+}
+
 class _Badge extends StatelessWidget {
   const _Badge({required this.share, required this.color});
   final double share;
@@ -169,6 +252,7 @@ class _Badge extends StatelessWidget {
       ],
     ),
     child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
@@ -177,11 +261,16 @@ class _Badge extends StatelessWidget {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 4),
-        Text(
-          AppLocalizations.of(
-            context,
-          ).number('${(share * 100).toStringAsFixed(2)}%'),
-          style: const TextStyle(fontSize: 10),
+        Flexible(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              AppLocalizations.of(
+                context,
+              ).number('${(share * 100).toStringAsFixed(2)}%'),
+              style: const TextStyle(fontSize: 10),
+            ),
+          ),
         ),
       ],
     ),
@@ -337,69 +426,69 @@ class _PlenaryRingCard extends StatelessWidget {
             children: [
               SizedBox(
                 width: double.infinity,
-                height: 185,
-                child: Stack(
-                  alignment: Alignment.center,
-                  clipBehavior: Clip.none,
-                  children: [
-                    if (!progressStyle || value > 0)
-                      CustomPaint(
-                        size: const Size(170, 170),
-                        painter: _StatusRing(
-                          shares.any((share) => share > 0)
-                              ? [shares[0], shares[1], 0]
-                              : [1, 0, 0],
-                          shares.any((share) => share > 0)
-                              ? [colors[0], colors[1], Colors.transparent]
-                              : [
-                                  const Color(0xFFE5E8ED),
-                                  Colors.transparent,
-                                  Colors.transparent,
-                                ],
+                height: 240,
+                child: LayoutBuilder(
+                  builder: (context, constraints) => Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      if (!progressStyle || value > 0)
+                        CustomPaint(
+                          size: Size.square(
+                            donutChartRadius(constraints.biggest) * 2,
+                          ),
+                          painter: _StatusRing(
+                            shares.any((share) => share > 0)
+                                ? [shares[0], shares[1], 0]
+                                : [1, 0, 0],
+                            shares.any((share) => share > 0)
+                                ? [colors[0], colors[1], Colors.transparent]
+                                : [
+                                    const Color(0xFFE5E8ED),
+                                    Colors.transparent,
+                                    Colors.transparent,
+                                  ],
+                            startAngle: 1.0,
+                          ),
+                        ),
+                      if (progressStyle)
+                        Container(
+                          width: donutChartRadius(constraints.biggest) * 2 - 60,
+                          height:
+                              donutChartRadius(constraints.biggest) * 2 - 60,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFBAD9F2),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            l10n.text(centerKey),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: AppColors.mutedText,
+                            ),
+                          ),
+                          Text(
+                            AppLocalizations.of(context).number(value),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Positioned.fill(
+                        child: _RingPercentageLabels(
+                          shares: shares,
+                          colors: colors,
                           startAngle: 1.0,
                         ),
                       ),
-                    if (progressStyle)
-                      Container(
-                        width: 110,
-                        height: 110,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFBAD9F2),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          l10n.text(centerKey),
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: AppColors.mutedText,
-                          ),
-                        ),
-                        Text(
-                          AppLocalizations.of(context).number(value),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (shares[0] > 0)
-                      Positioned(
-                        left: 28,
-                        top: 36,
-                        child: _Badge(share: shares[0], color: colors[0]),
-                      ),
-                    if (shares[1] > 0)
-                      Positioned(
-                        right: 45,
-                        bottom: 0,
-                        child: _Badge(share: shares[1], color: colors[1]),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               for (final index in [0, 1])

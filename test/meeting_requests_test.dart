@@ -81,6 +81,65 @@ void main() {
     },
   );
   for (final role in AppModuleType.values) {
+    testWidgets('$role meeting request list applies its draft visibility', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(430, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final pages = <int>[];
+      final rows = [
+        {'id': 101, 'title': 'Draft request', 'status': 'DRAFT'},
+        {'id': 102, 'title': 'Drafted request', 'status': 'DRAFTED'},
+        {'id': 103, 'title': 'Submitted request', 'status': 'SUBMITTED'},
+        {'id': 104, 'title': 'Under review request', 'status': 'UNDER_REVIEW'},
+      ];
+      final settings =
+          AppSettingsController(
+              authRepository: AuthRepository(
+                ApiClient(
+                  client: MockClient((request) async {
+                    expect(request.url.path, '/api/v1/meeting-requests');
+                    final page = int.parse(
+                      request.url.queryParameters['page']!,
+                    );
+                    pages.add(page);
+                    return http.Response(
+                      jsonEncode({
+                        'success': true,
+                        'data': page == 1
+                            ? rows.take(2).toList()
+                            : rows.skip(2).toList(),
+                        'meta': {'totalPages': 2},
+                      }),
+                      200,
+                    );
+                  }),
+                ),
+              ),
+            )
+            ..setLanguage(AppLanguage.english)
+            ..setModuleType(role);
+      addTearDown(settings.dispose);
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: const MaterialApp(home: Scaffold(body: MeetingScreen())),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(pages, [1, 2]);
+      final drafts = role == AppModuleType.lineMinistry
+          ? findsNothing
+          : findsOneWidget;
+      expect(find.text('Draft request'), drafts);
+      expect(find.text('Drafted request'), drafts);
+      expect(find.text('Submitted request'), findsOneWidget);
+      expect(find.text('Under review request'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('$role loads meeting cards and nested issue details', (
       tester,
     ) async {

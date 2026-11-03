@@ -34,7 +34,7 @@ class OverallTab extends StatelessWidget {
             children: [
               SizedBox(
                 width: 320,
-                height: 195,
+                height: 240,
                 child: CustomPaint(
                   painter: _DonutChartPainter(
                     isDark: isDark,
@@ -96,7 +96,7 @@ class _DonutChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final outerRadius = math.min(size.width, size.height) * 0.43;
+    final outerRadius = math.min(size.width / 2, 84.0);
     final innerRadius = outerRadius * 0.65;
     const gapAngle = 0.02;
 
@@ -127,7 +127,7 @@ class _DonutChartPainter extends CustomPainter {
                   percent: cards![item.key]! / total,
                   color: item.color,
                   label:
-                      '${(100 * cards![item.key]! / total).toStringAsFixed(1)}%',
+                      '${(100 * cards![item.key]! / total).toStringAsFixed(2)}%',
                 ),
           ];
     for (final segment in segments) {
@@ -161,15 +161,19 @@ class _DonutChartPainter extends CustomPainter {
       size: size,
       radius: outerRadius,
       startAngle: -math.pi / 2,
+      sideLabels: false,
     );
     for (var i = 0; i < segments.length; i++) {
       final segment = segments[i];
       final position = labelPositions[i];
-      canvas.drawLine(
-        position.anchor,
-        position.center,
+      canvas.drawPath(
+        Path()
+          ..moveTo(position.anchor.dx, position.anchor.dy)
+          ..lineTo(position.anchor.dx, position.center.dy)
+          ..lineTo(position.center.dx, position.center.dy),
         Paint()
           ..color = segment.color
+          ..style = PaintingStyle.stroke
           ..strokeWidth = 1,
       );
       _drawPercentChip(canvas, position.center, segment.label, segment.color);
@@ -287,8 +291,8 @@ class _DonutChartPainter extends CustomPainter {
 
     final chipRect = Rect.fromCenter(
       center: center,
-      width: painter.width + 24,
-      height: 24,
+      width: donutOverallLabelSize.width,
+      height: donutOverallLabelSize.height,
     );
 
     final rrect = RRect.fromRectAndRadius(chipRect, const Radius.circular(5));

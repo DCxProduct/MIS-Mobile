@@ -445,6 +445,7 @@ class _LineMinistryMeetingRequestTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MeetingRequestsList(
+      excludedStatuses: const {'DRAFT', 'DRAFTED'},
       itemBuilder: (request) => _LineMinistryMeetingCard(request: request),
     );
   }
