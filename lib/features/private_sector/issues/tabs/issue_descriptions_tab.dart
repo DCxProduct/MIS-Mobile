@@ -19,12 +19,12 @@ class IssueDescriptionsTab extends StatelessWidget {
       children: [
         _TextPanel(
           title: l10n.text('issuesDescription'),
-          body: issue?.descriptionHtml ?? issue?.description ?? '—',
+          body: issue?.localizedText('description', l10n.language) ?? '—',
         ),
         const SizedBox(height: 14),
         _TextPanel(
           title: l10n.text('recommendation'),
-          body: issue?.recommendationHtml ?? issue?.recommendation ?? '—',
+          body: issue?.localizedText('recommendation', l10n.language) ?? '—',
         ),
       ],
     );

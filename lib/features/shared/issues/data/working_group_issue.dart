@@ -1,3 +1,5 @@
+import '../../../../core/text/api_localized_names.dart';
+import '../../../../translations/app_language.dart';
 import '../../../../core/text/document_metadata.dart';
 import '../../../../core/text/html_text.dart';
 import 'issue_progress_report.dart';
@@ -32,7 +34,22 @@ class WorkingGroupIssue {
     this.plenaryEscalation,
     this.descriptionHtml,
     this.recommendationHtml,
+    this.khmerTexts = const {},
   });
+  final Map<String, String> khmerTexts;
+  String localizedText(String field, AppLanguage language) {
+    final english = switch (field) {
+      'title' => title,
+      'description' => descriptionHtml ?? description,
+      'recommendation' => recommendationHtml ?? recommendation,
+      'category' => category,
+      'submittedBy' => submittedBy,
+      'agency' => agency,
+      _ => '',
+    };
+    return apiLocalizedText(english, khmerTexts[field], language);
+  }
+
   final int id;
   final bool? plenaryEscalation;
   final String title,
@@ -103,7 +120,8 @@ class WorkingGroupIssue {
 
     final id = json['id'];
     final title = string(json['title']);
-    if (id is! int || title.trim().isEmpty) {
+    if (id is! int ||
+        (title.trim().isEmpty && string(json['titleKh']).trim().isEmpty)) {
       throw const FormatException('Invalid issue');
     }
     final status = object(json['issueStatus']);
@@ -156,8 +174,32 @@ class WorkingGroupIssue {
       if (value is! Map<String, dynamic>) {
         throw const FormatException('Invalid issue progress report');
       }
+      final translatedReport = Map<String, dynamic>.from(value);
+      for (final field in [
+        'rgcDecision',
+        'indicators',
+        'progressSolution',
+        'implementationChallenges',
+        'requests',
+        'nextStep',
+        'sourceOfVerification',
+      ]) {
+        final khKey = '${field}Kh';
+        final nested = value['progressReport'] is Map
+            ? value['progressReport'] as Map
+            : const {};
+        final reportText = value[field] ?? nested[field];
+        final reportKh = value[khKey] ?? nested[khKey];
+        if ((reportKh is! String || reportKh.trim().isEmpty) &&
+            (reportText == json[field] ||
+                (field == 'sourceOfVerification' &&
+                    rawReports.length == 1 &&
+                    (reportText == null || reportText == '')))) {
+          translatedReport[khKey] = json[khKey];
+        }
+      }
       return IssueProgressReport.fromJson(
-        value,
+        translatedReport,
         issueSourceOfVerification: rawReports.length == 1
             ? string(json['sourceOfVerification'])
             : '',
@@ -169,6 +211,19 @@ class WorkingGroupIssue {
     final escalation = json['plenaryEscalation'] ?? json['escalation'];
     return WorkingGroupIssue(
       id: id,
+      khmerTexts: Map.unmodifiable({
+        for (final field in ['title', 'description', 'recommendation'])
+          field: string(json['${field}Kh']),
+        'category': json['category'] is String
+            ? ''
+            : string(object(json['category'])['khName']),
+        'submittedBy': stakeholder.isNotEmpty
+            ? string(object(json['stakeholder'])['khName'])
+            : '',
+        'agency': agencies.isEmpty
+            ? ''
+            : string(object(agencies.first['stakeholder'])['khName']),
+      }),
       plenaryEscalation: escalation is bool
           ? escalation
           : hasEscalation && escalation == null

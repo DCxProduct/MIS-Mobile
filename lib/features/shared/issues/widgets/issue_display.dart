@@ -9,7 +9,9 @@ String issueProgressReportTitle(
 ) {
   final l10n = AppLocalizations.of(context, page: 'issue_report');
   if (report.title.isEmpty) return l10n.text('progressReport');
-  if (!report.hasGeneratedTitle) return report.title;
+  if (!report.hasGeneratedTitle) {
+    return report.localizedText('title', l10n.language, fallback: report.title);
+  }
   return l10n.number(
     l10n
         .api('issue_matrix.report_tab', fallback: report.title)

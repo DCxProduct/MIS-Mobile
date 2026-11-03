@@ -1,5 +1,6 @@
 import 'package:gpsf_app/core/status_colors.dart';
 import '../../../core/app_settings.dart';
+import '../../../core/text/html_text.dart';
 import '../../../core/widgets/filters/api_filter_sheet.dart';
 import '../../shared/issues/data/working_group_issue.dart';
 import '../../shared/issues/widgets/wg_issues_list.dart';
@@ -586,7 +587,11 @@ class _IssueCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title,
+                        issue?.localizedText(
+                              'title',
+                              AppLocalizations.of(context).language,
+                            ) ??
+                            title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -597,7 +602,13 @@ class _IssueCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        AppLocalizations.of(context).category(category),
+                        AppLocalizations.of(context).category(
+                          issue?.localizedText(
+                                'category',
+                                AppLocalizations.of(context).language,
+                              ) ??
+                              category,
+                        ),
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontSize: 12,
@@ -640,9 +651,12 @@ class _IssueCard extends StatelessWidget {
                         ? 'Agriculture and Agro...'
                         : (issue!.submittedBy.isEmpty
                               ? '—'
-                              : AppLocalizations.of(
-                                  context,
-                                ).workingGroup(issue!.submittedBy)),
+                              : AppLocalizations.of(context).workingGroup(
+                                  issue!.localizedText(
+                                    'submittedBy',
+                                    AppLocalizations.of(context).language,
+                                  ),
+                                )),
                     iconColor: const Color(0xFFB642FF),
                     iconBackground: const Color(0xFFF2DDFF),
                   ),
@@ -653,7 +667,12 @@ class _IssueCard extends StatelessWidget {
             Text(
               issue == null
                   ? 'The private sector said that the Economic Land Concession (ELCs), which invest in rubber, cashew, plantations, etc., are now fully developed and som...'
-                  : issue!.description,
+                  : htmlToPlainText(
+                      issue!.localizedText(
+                        'description',
+                        AppLocalizations.of(context).language,
+                      ),
+                    ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(

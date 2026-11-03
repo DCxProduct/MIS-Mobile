@@ -10,6 +10,7 @@ import '../../../core/widgets/pdf_attachment_preview.dart';
 import '../../../translations/app_localizations.dart';
 import '../../cdc_section/issues/detail_widgets.dart';
 import '../../shared/issues/data/issue_progress_report.dart';
+import '../../shared/issues/data/working_group_issue.dart';
 import '../../shared/issues/widgets/issue_display.dart';
 
 class IssueProgressReportDetailScreen extends StatelessWidget {
@@ -17,12 +18,14 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
     super.key,
     required this.title,
     required this.report,
+    this.issue,
     this.issueStatus = '',
     this.meetingDocumentPath = '',
     this.meetingDocumentName = '',
   });
 
   final String title;
+  final WorkingGroupIssue? issue;
   final IssueProgressReport report;
   final String issueStatus;
   final String meetingDocumentPath;
@@ -42,7 +45,7 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
     String displayValue(String value) =>
         htmlToPlainText(value).trim().isEmpty ? l10n.text('noData') : value;
     String reportValue(String key, String value) =>
-        displayValue(report.richText[key] ?? value);
+        displayValue(report.localizedText(key, l10n.language, fallback: value));
     Widget section(String key, String value, {String? labelKey}) => Padding(
       padding: const EdgeInsets.only(top: 18),
       child: CdcDetailTextPanel(
@@ -125,7 +128,7 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
           children: [
             Text(
-              title,
+              issue?.localizedText('title', l10n.language) ?? title,
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
@@ -201,7 +204,13 @@ class IssueProgressReportDetailScreen extends StatelessWidget {
             ),
             section('requests', report.requests),
             section('rgcDecision', report.rgcDecision),
-            if (report.nextStep.isNotEmpty)
+            if (report
+                .localizedText(
+                  'nextStep',
+                  l10n.language,
+                  fallback: report.nextStep,
+                )
+                .isNotEmpty)
               section('nextStep', report.nextStep),
             for (final path in report.attachmentPaths)
               if (path != documentPath)

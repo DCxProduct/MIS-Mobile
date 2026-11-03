@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_colors.dart';
+import '../../../../core/text/html_text.dart';
 import '../../../../translations/app_localizations.dart';
 import '../../../shared/issues/data/issue_progress_report.dart';
 import '../../../shared/issues/data/working_group_issue.dart';
@@ -71,6 +72,13 @@ class _ProgressReportCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context, page: 'issue_report');
+    final referenceName = htmlToPlainText(
+      report.localizedText(
+        'referenceName',
+        l10n.language,
+        fallback: report.referenceName,
+      ),
+    );
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -97,7 +105,7 @@ class _ProgressReportCard extends StatelessWidget {
           const SizedBox(height: 8),
           _ReportMetaRow(
             label: l10n.text('referenceName'),
-            value: report.referenceName.isEmpty ? '—' : report.referenceName,
+            value: referenceName.isEmpty ? '—' : referenceName,
           ),
           if (report.attachmentPaths.isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -139,6 +147,7 @@ class _ProgressReportCard extends StatelessWidget {
                   MaterialPageRoute<void>(
                     builder: (_) => IssueProgressReportDetailScreen(
                       title: issue.title,
+                      issue: issue,
                       report: report,
                       meetingDocumentPath:
                           issue.meetingRequestDocumentPath ?? '',

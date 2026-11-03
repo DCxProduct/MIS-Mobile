@@ -106,9 +106,14 @@ class _WgIssuesListState extends State<WgIssuesList> {
                 (widget.filter?.call(issue) ?? true) &&
                 (widget.selection?.matchesLocal(issue.filterValues) ?? true) &&
                 (query.isEmpty ||
-                    '${issue.title} ${issue.category} ${issue.description}'
-                        .toLowerCase()
-                        .contains(query)),
+                    [
+                      issue.title,
+                      issue.category,
+                      issue.description,
+                      issue.localizedText('title', l10n.language),
+                      issue.localizedText('category', l10n.language),
+                      issue.localizedText('description', l10n.language),
+                    ].join(' ').toLowerCase().contains(query)),
           )
           .toList();
       if (items.isEmpty) {

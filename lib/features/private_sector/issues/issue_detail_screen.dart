@@ -347,7 +347,7 @@ class _IssueHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            issue?.title ?? title,
+            issue?.localizedText('title', l10n.language) ?? title,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -372,7 +372,11 @@ class _IssueHeader extends StatelessWidget {
                         iconSize: 10,
                       ),
                       const SizedBox(width: 8),
-                      Expanded(child: value(issue?.agency ?? '')),
+                      Expanded(
+                        child: value(
+                          issue?.localizedText('agency', l10n.language) ?? '',
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -396,7 +400,12 @@ class _IssueHeader extends StatelessWidget {
               Expanded(
                 child: field(
                   l10n.text('category'),
-                  value(l10n.category(issue?.category ?? category)),
+                  value(
+                    l10n.category(
+                      issue?.localizedText('category', l10n.language) ??
+                          category,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 16),

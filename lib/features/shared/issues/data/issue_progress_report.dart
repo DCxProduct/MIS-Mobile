@@ -1,3 +1,5 @@
+import '../../../../core/text/api_localized_names.dart';
+import '../../../../translations/app_language.dart';
 import '../../../../core/text/document_metadata.dart';
 import '../../../../core/text/html_text.dart';
 
@@ -24,8 +26,20 @@ class IssueProgressReport {
     required this.attachmentName,
     required this.attachmentSize,
     this.richText = const {},
+    this.khmerTexts = const {},
     this.attachmentNames = const {},
   });
+
+  final Map<String, String> khmerTexts;
+  String localizedText(
+    String field,
+    AppLanguage language, {
+    String fallback = '',
+  }) => apiLocalizedText(
+    richText[field] ?? fallback,
+    khmerTexts[field],
+    language,
+  );
 
   final int? progressReportId;
   final String semester;
@@ -71,14 +85,18 @@ class IssueProgressReport {
       'sourceOfVerification',
       'linkToVerificationSource',
     ];
-    if (!progressKeys.any((key) {
+    if (![...progressKeys, ...progressKeys.map((key) => '${key}Kh')].any((key) {
       final value = issue[key];
       return value is String && value.trim().isNotEmpty;
     })) {
       return null;
     }
     return IssueProgressReport.fromJson({
-      for (final key in [...contentKeys, 'dateOfIssueSolution'])
+      for (final key in [
+        ...contentKeys,
+        ...contentKeys.map((key) => '${key}Kh'),
+        'dateOfIssueSolution',
+      ])
         if (issue.containsKey(key)) key: issue[key],
     });
   }
@@ -157,7 +175,28 @@ class IssueProgressReport {
           ? value(report['sourceOfVerification'])
           : issueSourceOfVerification,
     );
+    String khmer(String key) => value(json['${key}Kh']).isNotEmpty
+        ? value(json['${key}Kh'])
+        : value(report['${key}Kh']);
     return IssueProgressReport(
+      khmerTexts: Map.unmodifiable({
+        'title': khmer('title'),
+        'description': khmer('progressSolution').isNotEmpty
+            ? khmer('progressSolution')
+            : khmer('description'),
+        'referenceName': khmer('sourceOfVerification').isNotEmpty
+            ? khmer('sourceOfVerification')
+            : khmer('referenceName'),
+        for (final key in [
+          'indicators',
+          'implementationChallenges',
+          'requests',
+          'nextStep',
+          'rgcDecision',
+          'sourceOfVerification',
+        ])
+          key: khmer(key),
+      }),
       richText: Map.unmodifiable({
         'description': value(json['progressSolution']).isNotEmpty
             ? value(json['progressSolution'])

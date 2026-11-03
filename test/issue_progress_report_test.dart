@@ -4,6 +4,7 @@ import 'package:gpsf_app/core/app_settings.dart';
 import 'package:gpsf_app/features/cdc_section/issues/issue_detail_screen.dart';
 import 'package:gpsf_app/features/cdc_section/issues/progress_report_data_detail_screen.dart';
 import 'package:gpsf_app/features/shared/issues/data/working_group_issue.dart';
+import 'package:gpsf_app/features/shared/issues/data/issue_progress_report.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 
 void main() {
@@ -222,5 +223,89 @@ void main() {
     );
     expect(decision, findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+  test('all report answers retain both languages and rich formatting', () {
+    const fields = {
+      'progressSolution': 'description',
+      'indicators': 'indicators',
+      'implementationChallenges': 'implementationChallenges',
+      'requests': 'requests',
+      'nextStep': 'nextStep',
+      'rgcDecision': 'rgcDecision',
+      'sourceOfVerification': 'referenceName',
+    };
+    final data = <String, dynamic>{
+      for (final field in fields.keys) ...{
+        field: '<p>English $field</p>',
+        '${field}Kh': '<p><strong>ខ្មែរ $field</strong></p>',
+      },
+      'attachment': {'path': '/uploads/reference.pdf', 'name': 'Reference.pdf'},
+      'linkToVerificationSource': 'https://example.com/reference',
+    };
+    for (final report in [
+      IssueProgressReport.fromJson(data),
+      IssueProgressReport.fromJson({'progressReport': data}),
+      IssueProgressReport.fromIssueFields(data)!,
+    ]) {
+      for (final field in fields.entries) {
+        expect(
+          report.localizedText(field.value, AppLanguage.khmer),
+          '<p><strong>ខ្មែរ ${field.key}</strong></p>',
+        );
+        expect(
+          report.localizedText(field.value, AppLanguage.english),
+          '<p>English ${field.key}</p>',
+        );
+        expect(
+          report.localizedText(field.value, AppLanguage.khmer),
+          '<p><strong>ខ្មែរ ${field.key}</strong></p>',
+        );
+      }
+      expect(report.verificationLink, 'https://example.com/reference');
+    }
+    expect(
+      IssueProgressReport.fromJson(data).attachmentPath,
+      '/uploads/reference.pdf',
+    );
+  });
+
+  test('issue-level translations only fill the matching report answer', () {
+    final issue = WorkingGroupIssue.fromJson({
+      'id': 77,
+      'title': 'Issue',
+      'rgcDecision': 'Same decision',
+      'rgcDecisionKh': 'សេចក្តីសម្រេចដូចគ្នា',
+      'sourceOfVerification': 'Reference',
+      'sourceOfVerificationKh': 'ឯកសារយោង',
+      'progressReports': [
+        {'rgcDecision': 'Same decision'},
+      ],
+    });
+    final report = issue.progressReports.single;
+    expect(
+      report.localizedText('rgcDecision', AppLanguage.khmer),
+      'សេចក្តីសម្រេចដូចគ្នា',
+    );
+    expect(
+      report.localizedText('referenceName', AppLanguage.khmer),
+      'ឯកសារយោង',
+    );
+    expect(
+      report.localizedText('referenceName', AppLanguage.english),
+      'Reference',
+    );
+    final distinct = WorkingGroupIssue.fromJson({
+      'id': 77,
+      'title': 'Issue',
+      'rgcDecision': 'Issue decision',
+      'rgcDecisionKh': 'សេចក្តីសម្រេចបញ្ហា',
+      'progressReports': [
+        {'rgcDecision': 'Different report decision'},
+      ],
+    }).progressReports.single;
+    expect(
+      distinct.localizedText('rgcDecision', AppLanguage.khmer),
+      'Different report decision',
+    );
   });
 }

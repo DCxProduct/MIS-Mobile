@@ -1,4 +1,5 @@
 import '../../translations/app_language.dart';
+import 'html_text.dart';
 
 /// API names only: retain original values for filtering and request payloads.
 class ApiLocalizedNames {
@@ -37,4 +38,12 @@ class ApiLocalizedNames {
     }
     return translated.isEmpty ? value : translated.join(', ');
   }
+}
+
+/// Select authored API content without translating it or changing stored values.
+String apiLocalizedText(String english, String? khmer, AppLanguage language) {
+  final kh = khmer ?? '';
+  final preferred = language == AppLanguage.khmer ? kh : english;
+  final fallback = language == AppLanguage.khmer ? english : kh;
+  return htmlToPlainText(preferred).trim().isNotEmpty ? preferred : fallback;
 }
