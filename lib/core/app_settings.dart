@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart' show mapEquals;
 import '../features/shared/meetings/data/meetings_repository.dart';
 
 import '../translations/app_language.dart';
+import '../translations/dashboard_scope_labels.dart';
 import 'config/module_config.dart';
 import 'network/api_client.dart';
 import 'network/filter_catalog_repository.dart';
@@ -32,6 +33,7 @@ class AppSettingsController extends ChangeNotifier {
        _moduleRepositories = Map.unmodifiable(moduleRepositories);
 
   final AuthRepository auth;
+  late final dashboardScopeLabels = DashboardScopeLabels(auth.apiClient);
   final Map<AppModuleType, ModuleRepositories> _moduleRepositories;
   late final ModuleRepositories _defaultRepositories = ModuleRepositories(
     apiClient: auth.apiClient,
@@ -145,7 +147,10 @@ class AppSettingsController extends ChangeNotifier {
     _translationGeneration++;
     _translationRequest = null;
     translationError = null;
-    if (clearCache) _translationCache.clear();
+    if (clearCache) {
+      _translationCache.clear();
+      dashboardScopeLabels.clear();
+    }
   }
 
   /// Failed/missing translations retain the bundled labels. Call with refresh

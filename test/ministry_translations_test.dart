@@ -142,6 +142,58 @@ void main() {
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
     });
+    testWidgets('$code scope labels stay stable while the API is slow', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      var pending = Completer<http.Response>();
+      final settings = controller((request) async {
+        if (request.url.path.endsWith('translations/dictionary')) {
+          expect(request.url.queryParameters['module'], 'pswg');
+          return pending.future;
+        }
+        return http.Response(
+          File('test/fixtures/plenary.json').readAsStringSync(),
+          200,
+        );
+      })..setLanguage(language);
+      addTearDown(settings.dispose);
+      Widget dashboard() => AppSettings(
+        controller: settings,
+        child: const MaterialApp(home: Scaffold(body: DashboardPage())),
+      );
+      await tester.pumpWidget(dashboard());
+      await tester.pumpAndSettle();
+      final initialLabel = language == AppLanguage.khmer
+          ? 'កិច្ចប្រជុំការងារតាមវិស័យ'
+          : 'Working Group';
+      expect(find.text(initialLabel), findsWidgets);
+      expect(pending.isCompleted, isFalse);
+      pending.complete(
+        response('pswg', code, {
+          'dashboard_plenary.title': 'API Plenary',
+          'dashboard_working_group.title': 'Cached WG',
+        }),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Cached WG'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      pending = Completer<http.Response>();
+      await tester.pumpWidget(dashboard());
+      await tester.pumpAndSettle();
+      expect(pending.isCompleted, isFalse);
+      expect(find.text('Cached WG'), findsOneWidget);
+      pending.complete(http.Response('Unavailable', 503));
+      await tester.pumpAndSettle();
+      expect(find.text('Cached WG'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+
     for (final scope in [0, 1]) {
       testWidgets('$code ministry dashboard scope $scope uses API tab label', (
         tester,
@@ -151,11 +203,29 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
         var label = 'Ministry overall status';
+        var workingGroupLabel = 'API Working Group';
+        var pswgPlenary = 'PS Plenary';
+        var pswgWorkingGroup = 'PS WG';
+        var failPswg = false;
         final prefix = scope == 0 ? 'plenary_dashboard' : 'dashboard';
         final settings = controller((request) async {
           if (request.url.path.endsWith('translations/dictionary')) {
+            expect(request.url.queryParameters['language'], code);
+            if (request.url.queryParameters['module'] == 'pswg') {
+              if (failPswg) return http.Response('Unavailable', 503);
+              return response('pswg', code, {
+                'dashboard_plenary.title': pswgPlenary,
+                'dashboard_working_group.title': pswgWorkingGroup,
+                'dashboard_plenary.overall_status': 'Wrong PSWG label',
+                'dashboard_working_group.overall_status': 'Wrong PSWG label',
+              });
+            }
+            expect(request.url.queryParameters['module'], 'ministry');
             return response('ministry', code, {
               '$prefix.overall_status': label,
+              'plenary_plenaries.title': 'API Plenary',
+              'dashboard.working_group': workingGroupLabel,
+              'dashboard.title': 'Wrong dashboard scope title',
               'dashboard_plenary.overall_status': 'Wrong PSWG label',
               'dashboard_working_group.overall_status': 'Wrong PSWG label',
             });
@@ -182,11 +252,67 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text(label), findsNWidgets(2));
         expect(find.text('Wrong PSWG label'), findsNothing);
+        expect(find.text(pswgPlenary), findsOneWidget);
+        expect(find.text(pswgWorkingGroup), findsOneWidget);
+        expect(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is Text &&
+                widget.style?.fontSize == 18 &&
+                widget.data == (scope == 0 ? 'API Plenary' : workingGroupLabel),
+          ),
+          findsOneWidget,
+          reason: 'The page title must keep the Ministry API label',
+        );
+        expect(find.text('Wrong dashboard scope title'), findsNothing);
         label = 'Updated ministry overall';
+        workingGroupLabel = 'Updated API Working Group';
+        pswgPlenary = 'New Plenary';
+        pswgWorkingGroup = 'New WG';
         await settings.loadTranslations(refresh: true);
+        await tester.pump(TranslationSync.refreshInterval);
         await tester.pumpAndSettle();
         expect(find.text(label), findsNWidgets(2));
         expect(find.text('Ministry overall status'), findsNothing);
+        expect(find.text(pswgPlenary), findsOneWidget);
+        expect(find.text(pswgWorkingGroup), findsOneWidget);
+        expect(find.text('PS Plenary'), findsNothing);
+        expect(find.text('PS WG'), findsNothing);
+        expect(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is Text &&
+                widget.style?.fontSize == 18 &&
+                widget.data == (scope == 0 ? 'API Plenary' : workingGroupLabel),
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('API Working Group'), findsNothing);
+        expect(find.text('Wrong dashboard scope title'), findsNothing);
+        failPswg = true;
+        await tester.pump(TranslationSync.refreshInterval);
+        await tester.pumpAndSettle();
+        expect(find.text(pswgPlenary), findsOneWidget);
+        expect(find.text(pswgWorkingGroup), findsOneWidget);
+        expect(find.text(label), findsNWidgets(2));
+        expect(settings.translationModule, 'ministry');
+        expect(settings.translations['$prefix.overall_status'], label);
+        // Real API labels must also fit the compact selector in both languages.
+        final pswgLabels =
+            jsonDecode(
+                  File(
+                    'test/fixtures/pswg_translation_labels.json',
+                  ).readAsStringSync(),
+                )[code]
+                as Map;
+        failPswg = false;
+        pswgPlenary = pswgLabels['dashboard_plenary.title'] as String;
+        pswgWorkingGroup =
+            pswgLabels['dashboard_working_group.title'] as String;
+        await tester.pump(TranslationSync.refreshInterval);
+        await tester.pumpAndSettle();
+        expect(find.text(pswgPlenary), findsOneWidget);
+        expect(find.text(pswgWorkingGroup), findsWidgets);
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox.shrink());
       });

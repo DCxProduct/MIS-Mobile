@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../../core/widgets/filters/api_filter_sheet.dart';
 import '../../shared/dashboard/data/dashboard_repository.dart';
 import '../../shared/dashboard/widgets/pswg_live_dashboard.dart';
@@ -9,6 +11,8 @@ import '../../../core/app_settings.dart';
 import '../../../core/config/module_config.dart';
 import '../../../screens/account/account_screen.dart';
 import '../../../translations/app_localizations.dart';
+import '../../../translations/app_language.dart';
+import '../../../translations/translation_sync.dart';
 import '../../../widgets/app_bottom_nav_bar.dart';
 import '../../../widgets/app_header.dart';
 
@@ -221,31 +225,12 @@ class DashboardPageState extends State<DashboardPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (moduleType != AppModuleType.cdcSecretariat &&
-                        moduleType != AppModuleType.lineMinistry)
+                    if (moduleType != AppModuleType.cdcSecretariat)
                       _ScopeTitle(selectedIndex: _selectedScopeTab),
                     const SizedBox(height: 10),
-                    if (moduleType == AppModuleType.lineMinistry)
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              l10n.text('dashboard'),
-                              style: TextStyle(
-                                color: colors.onSurface,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          _FilterBar(
-                            onTap: () => _openFilterSheet(context),
-                            activeCount: _dashboardFilters[_filterTab].count,
-                          ),
-                        ],
-                      )
-                    else if (const {
+                    if (const {
                       AppModuleType.privateSector,
+                      AppModuleType.lineMinistry,
                       AppModuleType.cdcSection,
                       AppModuleType.cefp,
                     }.contains(moduleType))
@@ -518,6 +503,16 @@ class _DashboardLoadingScreenState extends State<DashboardLoadingScreen>
   }
 }
 
+List<String> _dashboardScopeLabels(AppLocalizations l10n) => [
+  l10n.text('plenary'),
+  l10n.api(
+    l10n.module == AppModuleType.lineMinistry
+        ? 'dashboard.working_group'
+        : 'dashboard_working_group.title',
+    fallback: l10n.text('workingGroup'),
+  ),
+];
+
 class _ScopeTitle extends StatelessWidget {
   const _ScopeTitle({required this.selectedIndex});
 
@@ -527,13 +522,7 @@ class _ScopeTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
-    final labels = [
-      l10n.text('plenary'),
-      l10n.api(
-        'dashboard_working_group.title',
-        fallback: l10n.text('workingGroup'),
-      ),
-    ];
+    final labels = _dashboardScopeLabels(l10n);
 
     return Text(
       labels[selectedIndex],
@@ -546,23 +535,113 @@ class _ScopeTitle extends StatelessWidget {
   }
 }
 
-class _ScopeSelector extends StatelessWidget {
+class _ScopeSelector extends StatefulWidget {
   const _ScopeSelector({required this.selectedIndex, required this.onSelected});
 
   final int selectedIndex;
   final ValueChanged<int> onSelected;
 
   @override
+  State<_ScopeSelector> createState() => _ScopeSelectorState();
+}
+
+class _ScopeSelectorState extends State<_ScopeSelector>
+    with WidgetsBindingObserver {
+  Map<String, String> _privateSectorLabels = const {};
+  (AppSettingsController, AppLanguage, AppModuleType, int?)? _identity;
+  ModalRoute<dynamic>? _route;
+  Timer? _timer;
+  int _generation = 0;
+  bool _loading = false;
+  bool _foreground = true;
+
+  @override
+  void initState() {
+    super.initState();
+    final binding = WidgetsBinding.instance;
+    _foreground =
+        binding.lifecycleState == null ||
+        binding.lifecycleState == AppLifecycleState.resumed;
+    binding.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final settings = AppSettings.of(context);
+    _route = ModalRoute.of(context);
+    final identity = (
+      settings,
+      settings.language,
+      settings.moduleType,
+      settings.currentUser?.id,
+    );
+    if (identity == _identity) return;
+    _identity = identity;
+    _generation++;
+    _loading = false;
+    _privateSectorLabels = settings.dashboardScopeLabels.cached(
+      settings.language,
+    );
+    _timer?.cancel();
+    if (settings.moduleType == AppModuleType.lineMinistry) {
+      _timer = Timer.periodic(
+        TranslationSync.refreshInterval,
+        (_) => unawaited(_refreshLabels()),
+      );
+      unawaited(_refreshLabels());
+    }
+  }
+
+  Future<void> _refreshLabels() async {
+    final identity = _identity;
+    if (!mounted ||
+        !_foreground ||
+        _route?.isCurrent == false ||
+        _loading ||
+        identity == null ||
+        identity.$3 != AppModuleType.lineMinistry) {
+      return;
+    }
+    final generation = _generation;
+    _loading = true;
+    try {
+      final labels = await identity.$1.dashboardScopeLabels.refresh(
+        identity.$2,
+      );
+      if (!mounted || generation != _generation) return;
+      setState(() => _privateSectorLabels = labels);
+    } on Exception {
+      // Keep the last successful labels until the next foreground refresh.
+    } finally {
+      if (mounted && generation == _generation) _loading = false;
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _foreground = state == AppLifecycleState.resumed;
+    if (_foreground) unawaited(_refreshLabels());
+  }
+
+  @override
+  void dispose() {
+    _generation++;
+    _timer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final labels = [
-      l10n.text('plenary'),
-      l10n.api(
-        'dashboard_working_group.title',
-        fallback: l10n.text('workingGroup'),
-      ),
-    ];
+    // Only these two pills share PSWG labels; the page keeps its role dictionary.
+    final labels = _dashboardScopeLabels(
+      l10n.module == AppModuleType.lineMinistry
+          ? AppLocalizations(l10n.language, dictionary: _privateSectorLabels)
+          : l10n,
+    );
 
     return Container(
       height: 30,
@@ -580,8 +659,8 @@ class _ScopeSelector extends StatelessWidget {
           labels.length,
           (index) => _ScopePill(
             label: labels[index],
-            selected: selectedIndex == index,
-            onTap: () => onSelected(index),
+            selected: widget.selectedIndex == index,
+            onTap: () => widget.onSelected(index),
           ),
         ),
       ),

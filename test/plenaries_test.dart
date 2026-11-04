@@ -1,3 +1,4 @@
+import 'package:gpsf_app/features/line_ministry/meetings/meeting_screen.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -12,7 +13,6 @@ import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/auth/data/auth_user.dart';
 import 'package:gpsf_app/features/shared/meetings/data/plenaries_repository.dart';
 import 'package:gpsf_app/features/shared/meetings/widgets/plenaries_loader.dart';
-import 'package:gpsf_app/screens/report/report_screen.dart';
 import 'package:gpsf_app/screens/report/plenary_detail_screen.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 
@@ -215,7 +215,7 @@ void main() {
                       200,
                     );
                   }
-                  if (request.url.path == '/api/v1/progress-reports') {
+                  if (request.url.path == '/api/v1/meeting-requests') {
                     return http.Response(
                       jsonEncode({'success': true, 'data': []}),
                       200,
@@ -243,24 +243,25 @@ void main() {
           )
           ..setLanguage(AppLanguage.english)
           ..setModuleType(AppModuleType.lineMinistry);
-    settings.setCurrentUser(
-      const AuthUser(
-        id: 77,
-        email: 'ministry@example.com',
-        name: 'Ministry user',
-        isActive: true,
-        roles: ['line_ministry'],
-      ),
+    settings.currentUser = const AuthUser(
+      id: 77,
+      email: 'ministry@example.com',
+      name: 'Ministry user',
+      isActive: true,
+      roles: ['line_ministry'],
     );
     addTearDown(settings.dispose);
 
     await tester.pumpWidget(
       AppSettings(
         controller: settings,
-        child: const MaterialApp(home: Scaffold(body: ReportScreen())),
+        child: const MaterialApp(
+          home: Scaffold(body: LineMinistryMeetingScreenView()),
+        ),
       ),
     );
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Plenary'));
     await tester.tap(find.text('Plenary'));
     await tester.pumpAndSettle();
 

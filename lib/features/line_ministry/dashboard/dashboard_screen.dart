@@ -6,5 +6,5 @@ class LineMinistryDashboardScreen extends StatelessWidget {
   const LineMinistryDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => const DashboardPage(initialScopeTab: 1);
+  Widget build(BuildContext context) => const DashboardPage();
 }

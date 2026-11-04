@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gpsf_app/core/app_settings.dart';
+import 'package:gpsf_app/core/config/module_config.dart';
 import 'package:gpsf_app/features/shared/dashboard/data/pswg_dashboard.dart';
 import 'package:gpsf_app/features/shared/dashboard/data/working_group_order.dart';
 import 'package:gpsf_app/features/shared/dashboard/data/working_group_summary.dart';
@@ -11,68 +12,101 @@ import 'package:gpsf_app/features/shared/dashboard/widgets/working_group_list.da
 import 'package:gpsf_app/translations/app_language.dart';
 
 void main() {
-  testWidgets('Status bars use API counts, shared scale and empty tracks', (
-    tester,
-  ) async {
-    final settings = AppSettingsController()..setLanguage(AppLanguage.khmer);
-    addTearDown(settings.dispose);
-    await tester.pumpWidget(
-      AppSettings(
-        controller: settings,
-        child: MaterialApp(
-          home: Scaffold(
-            body: WorkingGroupList(
-              groups: const [
-                WorkingGroupSummary(
-                  id: 1,
-                  name: 'Mixed',
-                  total: 4,
-                  solved: 2,
-                  inProgress: 1,
-                  notAddressed: 1,
+  for (final module in AppModuleType.values) {
+    testWidgets(
+      '$module status colors fill every nonempty row to the right edge',
+      (tester) async {
+        final settings = AppSettingsController()
+          ..setLanguage(AppLanguage.khmer)
+          ..setModuleType(module);
+        addTearDown(settings.dispose);
+        await tester.pumpWidget(
+          AppSettings(
+            controller: settings,
+            child: MaterialApp(
+              home: Scaffold(
+                body: WorkingGroupList(
+                  groups: const [
+                    WorkingGroupSummary(
+                      id: 1,
+                      name: 'Mixed',
+                      total: 4,
+                      solved: 2,
+                      inProgress: 1,
+                      notAddressed: 1,
+                    ),
+                    WorkingGroupSummary(
+                      id: 2,
+                      name: 'Solved',
+                      total: 2,
+                      solved: 2,
+                      inProgress: 0,
+                      notAddressed: 0,
+                    ),
+                    WorkingGroupSummary(
+                      id: 3,
+                      name: 'Empty',
+                      total: 0,
+                      solved: 0,
+                      inProgress: 0,
+                      notAddressed: 0,
+                    ),
+                  ],
                 ),
-                WorkingGroupSummary(
-                  id: 2,
-                  name: 'Solved',
-                  total: 2,
-                  solved: 2,
-                  inProgress: 0,
-                  notAddressed: 0,
-                ),
-                WorkingGroupSummary(
-                  id: 3,
-                  name: 'Empty',
-                  total: 0,
-                  solved: 0,
-                  inProgress: 0,
-                  notAddressed: 0,
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+        final track = tester
+            .getSize(find.byKey(const ValueKey('group-track-1')))
+            .width;
+        expect(
+          tester.getSize(find.byKey(const ValueKey('group-1-solved'))).width,
+          closeTo(track / 2, 0.1),
+        );
+        expect(
+          tester
+              .getSize(find.byKey(const ValueKey('group-1-inProgress')))
+              .width,
+          closeTo(track / 4, 0.1),
+        );
+        expect(
+          tester.getSize(find.byKey(const ValueKey('group-2-solved'))).width,
+          closeTo(track, 0.1),
+        );
+        for (final (id, lastStatus) in [(1, 'notAddressed'), (2, 'solved')]) {
+          expect(
+            tester
+                .getTopRight(find.byKey(ValueKey('group-$id-$lastStatus')))
+                .dx,
+            closeTo(
+              tester.getTopRight(find.byKey(ValueKey('group-track-$id'))).dx,
+              0.1,
+            ),
+          );
+        }
+        final expectedColors = module == AppModuleType.lineMinistry
+            ? const [Color(0xFF0F9D58), Color(0xFFF4B324), Color(0xFFF94144)]
+            : const [Color(0xFF0DA365), Color(0xFFF5B324), Color(0xFFFF3B40)];
+        for (final (index, status) in [
+          'solved',
+          'inProgress',
+          'notAddressed',
+        ].indexed) {
+          expect(
+            tester
+                .widget<ColoredBox>(find.byKey(ValueKey('group-1-$status')))
+                .color,
+            expectedColors[index],
+          );
+        }
+        expect(find.byKey(const ValueKey('group-track-3')), findsOneWidget);
+        expect(find.byKey(const ValueKey('group-3-solved')), findsNothing);
+        expect(find.text('២'), findsNWidgets(2));
+        expect(tester.takeException(), isNull);
+      },
     );
-    final track = tester
-        .getSize(find.byKey(const ValueKey('group-track-1')))
-        .width;
-    expect(
-      tester.getSize(find.byKey(const ValueKey('group-1-solved'))).width,
-      closeTo(track / 2, 0.1),
-    );
-    expect(
-      tester.getSize(find.byKey(const ValueKey('group-1-inProgress'))).width,
-      closeTo(track / 4, 0.1),
-    );
-    expect(
-      tester.getSize(find.byKey(const ValueKey('group-2-solved'))).width,
-      closeTo(track / 2, 0.1),
-    );
-    expect(find.byKey(const ValueKey('group-track-3')), findsOneWidget);
-    expect(find.byKey(const ValueKey('group-3-solved')), findsNothing);
-    expect(find.text('២'), findsNWidgets(2));
-    expect(tester.takeException(), isNull);
-  });
+  }
 
   final json =
       jsonDecode(

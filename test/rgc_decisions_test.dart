@@ -1,3 +1,4 @@
+import 'package:gpsf_app/features/line_ministry/meetings/meeting_screen.dart';
 import 'dart:convert';
 import 'package:gpsf_app/features/cdc_section/reports/rgc_decision_details.dart';
 import 'package:gpsf_app/features/shared/meetings/data/rgc_decision.dart';
@@ -13,7 +14,6 @@ import 'package:gpsf_app/core/widgets/pdf_attachment_preview.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/auth/data/auth_user.dart';
 import 'package:gpsf_app/features/shared/meetings/data/rgc_decisions_repository.dart';
-import 'package:gpsf_app/screens/report/report_screen.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 
 void main() {
@@ -457,12 +457,15 @@ void main() {
             authRepository: AuthRepository(
               ApiClient(
                 client: MockClient((request) async {
-                  if (request.url.path == '/api/v1/progress-reports') {
+                  if (request.url.path == '/api/v1/meeting-requests') {
                     return http.Response(
                       jsonEncode({'success': true, 'data': []}),
                       200,
                     );
                   }
+                  expect(request.url.path, '/api/v1/rgc-decisions');
+                  expect(request.url.queryParameters['ministryOnly'], 'true');
+                  expect(request.headers['x-user-id'], '77');
                   return http.Response(jsonEncode(response), 200);
                 }),
               ),
@@ -481,14 +484,17 @@ void main() {
     await tester.pumpWidget(
       AppSettings(
         controller: settings,
-        child: const MaterialApp(home: Scaffold(body: ReportScreen())),
+        child: const MaterialApp(
+          home: Scaffold(body: LineMinistryMeetingScreenView()),
+        ),
       ),
     );
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('RGC Decision'));
     await tester.tap(find.text('RGC Decision'));
     await tester.pumpAndSettle();
 
     expect(find.text('MAFF'), findsOneWidget);
-    expect(find.text('2 Link'), findsOneWidget);
+    expect(find.text('View Details'), findsOneWidget);
   });
 }

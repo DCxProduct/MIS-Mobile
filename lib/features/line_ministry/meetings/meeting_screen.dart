@@ -14,6 +14,7 @@ import '../../../core/app_colors.dart';
 import '../../shared/meetings/data/calendar_meeting.dart';
 import '../../shared/meetings/widgets/meetings_loader.dart';
 import 'meeting_detail_screen.dart';
+import 'plenary_tabs.dart';
 import '../../private_sector/meetings/tabs/calendar_tab.dart';
 import '../../../screens/report/tabs/meeting_summary_tab.dart';
 import '../../../translations/app_localizations.dart';
@@ -33,9 +34,11 @@ class _LineMinistryMeetingScreenViewState
     'meeting_requests',
     'meeting_calendar',
     'meeting_summary',
+    'plenary_plenaries',
+    'plenary_rgc_decisions',
   ];
   bool _isCalendarListView = true;
-  final _filters = [FilterSelection(), FilterSelection(), FilterSelection()];
+  final _filters = List.generate(5, (_) => FilterSelection());
   Future<void> _openMeetingFilterSheet(BuildContext context) async {
     final catalogs = AppSettings.of(context).filters;
     final tab = _selectedTab;
@@ -48,7 +51,9 @@ class _LineMinistryMeetingScreenViewState
           load: switch (tab) {
             0 => () => catalogs.meetingRequests(ministry: true),
             1 => catalogs.meetings,
-            _ => catalogs.meetingSummaries,
+            2 => catalogs.meetingSummaries,
+            3 => catalogs.plenaries,
+            _ => catalogs.rgc,
           },
         ),
       ),
@@ -56,8 +61,6 @@ class _LineMinistryMeetingScreenViewState
     if (mounted && result != null) setState(() => _filters[tab] = result);
   }
 
-  Future<void> _openMeetingSummaryFilterSheet(BuildContext context) =>
-      _openMeetingFilterSheet(context);
   int get _activeFilterCount => _filters[_selectedTab].count;
 
   @override
@@ -77,7 +80,12 @@ class _LineMinistryMeetingScreenViewState
     final title = switch (_selectedTab) {
       0 => l10n.text('meetingRequests'),
       1 => l10n.text('meetingCalendar'),
-      _ => l10n.text('meetingSummary'),
+      2 => l10n.text('meetingSummary'),
+      3 => l10n.api('plenary_plenaries.title', fallback: l10n.text('plenary')),
+      _ => l10n.api(
+        'plenary_rgc_decisions.title',
+        fallback: l10n.text('rgcDecision'),
+      ),
     };
 
     final topPadding = MediaQuery.of(context).viewPadding.top;
@@ -87,11 +95,15 @@ class _LineMinistryMeetingScreenViewState
         'meeting-requests': _filters[0].toQuery(),
         'meetings': _filters[1].toQuery(),
         'meeting-summaries': _filters[2].toQuery(),
+        'plenaries': _filters[3].toQuery(),
+        'rgc-decisions': _filters[4].toQuery(),
       },
       selections: {
         'meeting-requests': _filters[0],
         'meetings': _filters[1],
         'meeting-summaries': _filters[2],
+        'plenaries': _filters[3],
+        'rgc-decisions': _filters[4],
       },
       child: ColoredBox(
         color: contentBackground,
@@ -130,13 +142,7 @@ class _LineMinistryMeetingScreenViewState
                       ] else ...[
                         _FilterButton(
                           activeCount: _activeFilterCount,
-                          onTap: () {
-                            if (_selectedTab == 0) {
-                              _openMeetingFilterSheet(context);
-                            } else if (_selectedTab == 2) {
-                              _openMeetingSummaryFilterSheet(context);
-                            }
-                          },
+                          onTap: () => _openMeetingFilterSheet(context),
                         ),
                       ],
                     ],
@@ -168,8 +174,14 @@ class _LineMinistryMeetingScreenViewState
                         onOpenFilter: () => _openMeetingFilterSheet(context),
                         activeFilterCount: _activeFilterCount,
                       ),
-                      _ => const MeetingSummaryTab(
+                      2 => const MeetingSummaryTab(
                         key: ValueKey('line_ministry_summary'),
+                      ),
+                      3 => const LineMinistryPlenaryTab(
+                        key: ValueKey('line_ministry_plenaries'),
+                      ),
+                      _ => const LineMinistryRgcDecisionTab(
+                        key: ValueKey('line_ministry_rgc_decisions'),
                       ),
                     },
                   ),
@@ -826,6 +838,20 @@ class _MeetingTabs extends StatelessWidget {
         label: l10n.text('meetingCalendar'),
       ),
       (icon: Icons.assignment_outlined, label: l10n.text('meetingSummary')),
+      (
+        icon: Icons.calendar_month_outlined,
+        label: l10n.api(
+          'plenary_plenaries.title',
+          fallback: l10n.text('plenary'),
+        ),
+      ),
+      (
+        icon: Icons.assignment_outlined,
+        label: l10n.api(
+          'plenary_rgc_decisions.title',
+          fallback: l10n.text('rgcDecision'),
+        ),
+      ),
     ];
 
     return Container(

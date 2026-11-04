@@ -34,6 +34,7 @@ void main() {
         addTearDown(tester.view.resetDevicePixelRatio);
         final hasPlenary = [
           AppModuleType.privateSector,
+          AppModuleType.lineMinistry,
           AppModuleType.cdcSection,
           AppModuleType.cefp,
         ].contains(role);
@@ -43,10 +44,17 @@ void main() {
                 authRepository: AuthRepository(
                   ApiClient(
                     client: MockClient((request) async {
+                      if (request.url.path.endsWith(
+                        'translations/dictionary',
+                      )) {
+                        expect(role, AppModuleType.lineMinistry);
+                        expect(request.url.queryParameters['module'], 'pswg');
+                        return http.Response('{}', 503);
+                      }
                       requests.add(request.url.path);
                       expect(request.method, 'GET');
                       if (request.url.path.contains('/progress-reports')) {
-                        return http.Response('{"data":[]}', 200);
+                        return http.Response('{"success":true,"data":[]}', 200);
                       }
                       expect(
                         request.url.path,
@@ -159,19 +167,14 @@ void main() {
         if (role == AppModuleType.cdcSecretariat) {
           expect(find.text('Agriculture & Agro-Industry'), findsOneWidget);
         }
-        if (role == AppModuleType.lineMinistry ||
-            role == AppModuleType.cdcSecretariat) {
+        if (role == AppModuleType.cdcSecretariat) {
           expect(find.text('Plenary'), findsNothing);
           expect(requests, ['/api/v1/dashboards/pswg/live']);
           await tester.pumpWidget(
             AppSettings(
               controller: settings,
               child: MaterialApp(
-                home: Scaffold(
-                  body: role == AppModuleType.lineMinistry
-                      ? const LineMinistryReportsScreenView()
-                      : const CdcSecretariatReportsScreenView(),
-                ),
+                home: Scaffold(body: const CdcSecretariatReportsScreenView()),
               ),
             ),
           );
@@ -206,6 +209,23 @@ void main() {
         expect(find.byType(PlenaryCategoriesTab), findsOneWidget);
         expect(find.byType(CategoryTotalsChart), findsNothing);
         expect(tester.takeException(), isNull);
+        if (role == AppModuleType.lineMinistry) {
+          final beforeReports = requests.length;
+          await tester.pumpWidget(
+            AppSettings(
+              controller: settings,
+              child: const MaterialApp(
+                home: Scaffold(body: LineMinistryReportsScreenView()),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(find.text('Dashboard'), findsNothing);
+          expect(find.byType(PswgDataScope), findsNothing);
+          expect(find.text('Plenary'), findsNothing);
+          expect(find.text('RGC Decision'), findsNothing);
+          expect(requests.skip(beforeReports), ['/api/v1/progress-reports']);
+        }
       },
     );
   }

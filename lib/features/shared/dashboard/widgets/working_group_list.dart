@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_colors.dart';
+import '../../../../core/config/module_config.dart';
 import '../../../../translations/app_localizations.dart';
 import '../data/working_group_summary.dart';
 import '../data/working_group_order.dart';
@@ -8,6 +9,11 @@ import '../data/working_group_order.dart';
 const _solvedColor = Color(0xFF0DA365);
 const _inProgressColor = Color(0xFFF5B324);
 const _notAddressedColor = Color(0xFFFF3B40);
+const _ministryColors = [
+  Color(0xFF0F9D58),
+  Color(0xFFF4B324),
+  Color(0xFFF94144),
+];
 
 class WorkingGroupList extends StatefulWidget {
   const WorkingGroupList({super.key, required this.groups});
@@ -25,11 +31,11 @@ class _WorkingGroupListState extends State<WorkingGroupList> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isMinistry = l10n.module == AppModuleType.lineMinistry;
+    final colors = isMinistry
+        ? _ministryColors
+        : const [_solvedColor, _inProgressColor, _notAddressedColor];
     final sorted = sortWorkingGroupsByKhmerCode(widget.groups);
-    final maximum = sorted.fold<int>(1, (max, group) {
-      final count = group.solved + group.inProgress + group.notAddressed;
-      return count > max ? count : max;
-    });
     final visible = _expanded ? sorted : sorted.take(_previewCount).toList();
     return Container(
       width: double.infinity,
@@ -49,7 +55,7 @@ class _WorkingGroupListState extends State<WorkingGroupList> {
                 visible[index].displayName(l10n.language),
               ),
               group: visible[index],
-              maximum: maximum,
+              colors: colors,
             ),
           if (sorted.length > _previewCount)
             TextButton(
@@ -67,10 +73,10 @@ class _WorkingGroupListState extends State<WorkingGroupList> {
               spacing: 16,
               runSpacing: 10,
               children: [
-                for (final status in const [
-                  ('solved', _solvedColor),
-                  ('inProgress', _inProgressColor),
-                  ('notAddressed', _notAddressedColor),
+                for (final status in [
+                  ('solved', colors[0]),
+                  ('inProgress', colors[1]),
+                  ('notAddressed', colors[2]),
                 ])
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -107,11 +113,11 @@ class _WorkingGroupRow extends StatelessWidget {
     super.key,
     required this.label,
     required this.group,
-    required this.maximum,
+    required this.colors,
   });
 
   final WorkingGroupSummary group;
-  final int maximum;
+  final List<Color> colors;
   final String label;
 
   @override
@@ -119,7 +125,6 @@ class _WorkingGroupRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final counts = [group.solved, group.inProgress, group.notAddressed];
     final total = counts.fold<int>(0, (sum, count) => sum + count);
-    const colors = [_solvedColor, _inProgressColor, _notAddressedColor];
     const statuses = ['solved', 'inProgress', 'notAddressed'];
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -195,7 +200,6 @@ class _WorkingGroupRow extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                            if (maximum > total) Spacer(flex: maximum - total),
                           ],
                         ),
                 ),
