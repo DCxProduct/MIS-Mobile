@@ -13,12 +13,18 @@ import 'package:gpsf_app/screens/auth/login_screen.dart';
 import 'package:gpsf_app/screens/account/profile_detail_screen.dart';
 import 'package:gpsf_app/widgets/app_bottom_nav_bar.dart';
 import 'package:gpsf_app/widgets/primary_button.dart';
-import 'package:gpsf_app/features/cdc_secretariat/dashboard/agencies_tab.dart';
+import 'package:gpsf_app/features/private_sector/dashboard/tabs/agencies_tab.dart';
+import 'package:gpsf_app/features/private_sector/dashboard/dashboard_screen.dart';
 
 void main() {
   testWidgets('CDC account opens dashboard and displays its profile', (
     tester,
   ) async {
+    Future<void> tap(Finder target) async {
+      await tester.ensureVisible(target);
+      await tester.tap(target);
+    }
+
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -113,6 +119,19 @@ void main() {
                         ],
                       },
                     })
+                  : request.url.path == '/api/v1/users/me'
+                  ? jsonEncode({
+                      'success': true,
+                      'data': {
+                        'id': 1,
+                        'email': 'cdcgpsf@gmail.com',
+                        'name': 'CDC Secretariat',
+                        'isActive': true,
+                        'roles': [
+                          {'name': 'cdc_secretariat'},
+                        ],
+                      },
+                    })
                   : jsonEncode({
                       'success': true,
                       'data': {
@@ -147,7 +166,7 @@ void main() {
     );
     await tester.enterText(find.byType(TextFormField).at(1), '12345678');
     await tester.ensureVisible(find.byType(PrimaryButton));
-    await tester.tap(find.byType(PrimaryButton));
+    await tap(find.byType(PrimaryButton));
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
@@ -159,73 +178,108 @@ void main() {
     expect(find.text('(2)'), findsOneWidget);
     expect(find.byType(AppBottomNavBar), findsOneWidget);
 
-    await tester.tap(find.text('Agencies'));
+    await tap(find.text('Agencies'));
     await tester.pumpAndSettle();
-    expect(find.byType(CdcSecretariatAgenciesTab), findsOneWidget);
+    expect(find.byType(AgenciesTab), findsOneWidget);
     expect(find.text('Agencies'), findsNWidgets(2));
 
-    await tester.tap(find.text('Working Group'));
+    await tap(
+      find.descendant(
+        of: find.byType(SharedDashboardCharts),
+        matching: find.text('Working Group'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tap(find.text('Show more'));
     await tester.pumpAndSettle();
     expect(find.text('Rice and Paddy'), findsOneWidget);
     expect(find.text('Non-Bank Financial Services'), findsOneWidget);
 
-    await tester.tap(find.text('Categories'));
+    await tap(find.text('Categories'));
     await tester.pumpAndSettle();
     expect(find.text('General'), findsOneWidget);
     expect(find.text('Market Access'), findsOneWidget);
     await tester.ensureVisible(find.text('Market Access'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Meeting'));
+    final requestsTab = find.byKey(const ValueKey('cdc-working-group-tab-1'));
+    await tester.ensureVisible(requestsTab);
+    await tap(requestsTab);
     await tester.pumpAndSettle();
     expect(find.text('Scheduled'), findsOneWidget);
     expect(find.text('Another meeting request'), findsOneWidget);
     expect(find.text('Submitted'), findsNothing);
     expect(find.text('Under Review'), findsOneWidget);
-    expect(find.text('WG.Meeting'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('cdc-working-group-tab-2')),
+      findsOneWidget,
+    );
     expect(find.byType(AppBottomNavBar), findsOneWidget);
 
-    await tester.tap(find.text('Issues'));
+    await tap(find.text('Issues'));
     await tester.pumpAndSettle();
     expect(find.text('WG Issues'), findsOneWidget);
     expect(find.text('MAFF'), findsOneWidget);
     expect(find.text('0/1'), findsNWidgets(2));
-    await tester.tap(find.text('View Details').first);
+    await tap(find.text('View Details').first);
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Issues Matrix'));
+    await tap(
+      find
+          .descendant(
+            of: find.byType(AppBottomNavBar),
+            matching: find.byType(InkWell),
+          )
+          .first,
+    );
+    await tester.pumpAndSettle();
+    final matrixTab = find.byKey(const ValueKey('cdc-working-group-tab-4'));
+    await tester.ensureVisible(matrixTab);
+    await tap(matrixTab);
     await tester.pumpAndSettle();
     expect(find.text('Second API issue'), findsOneWidget);
-    await tester.tap(find.text('Filter'));
+    await tap(find.text('Filter'));
     await tester.pumpAndSettle();
     expect(find.text('Filters'), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.close_rounded));
+    await tap(find.byIcon(Icons.close_rounded));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Report').last);
+    await tap(
+      find.descendant(
+        of: find.byType(AppBottomNavBar),
+        matching: find.byIcon(Icons.groups_outlined),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('0/1'), findsNWidgets(2));
-    await tester.tap(find.text('Agencies'));
+    await tap(find.text('Agencies'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Working Group'));
+    await tap(
+      find.descendant(
+        of: find.byType(SharedDashboardCharts),
+        matching: find.text('Working Group'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tap(find.text('Show more'));
     await tester.pumpAndSettle();
     expect(find.text('Law, Tax, and Governance'), findsOneWidget);
-    await tester.tap(find.text('Categories'));
+    await tap(find.text('Categories'));
     await tester.pumpAndSettle();
     expect(find.text('General'), findsOneWidget);
-    await tester.tap(find.text('Plenaries'));
+    await tap(find.text('Plenaries'));
     await tester.pumpAndSettle();
     expect(find.text('19th G-PSF. Plenary'), findsOneWidget);
     expect(find.text('Apr 8, 2025'), findsOneWidget);
-    await tester.tap(find.text('View Details'));
+    await tap(find.text('View Details'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('RGC Decision').first);
+    await tap(find.text('RGC Decision').first);
     await tester.pumpAndSettle();
     expect(find.text('MAFF'), findsOneWidget);
-    expect(find.text('Sep 13, 2026'), findsOneWidget);
+    expect(find.text('Sep 14, 2026'), findsOneWidget);
 
     final context = tester.element(find.byType(AppBottomNavBar));
     Navigator.of(context).push(
@@ -234,5 +288,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('CDC Secretariat'), findsOneWidget);
     expect(find.text('cdcgpsf@gmail.com'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 }

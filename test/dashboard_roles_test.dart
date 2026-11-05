@@ -19,7 +19,7 @@ import 'package:gpsf_app/features/cdc_section/dashboard/overall_status_card.dart
 import 'package:gpsf_app/features/cefp/dashboard/dashboard_screen.dart';
 import 'package:gpsf_app/features/line_ministry/dashboard/dashboard_screen.dart';
 import 'package:gpsf_app/features/line_ministry/reports/reports_screen.dart';
-import 'package:gpsf_app/features/cdc_secretariat/reports/reports_screen.dart';
+import 'package:gpsf_app/features/cdc_secretariat/plenary/plenary_screen.dart';
 import 'package:gpsf_app/features/shared/dashboard/widgets/pswg_live_dashboard.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 
@@ -174,13 +174,10 @@ void main() {
             AppSettings(
               controller: settings,
               child: MaterialApp(
-                home: Scaffold(body: const CdcSecretariatReportsScreenView()),
+                home: Scaffold(body: const CdcPlenaryScreen()),
               ),
             ),
           );
-          await tester.pumpAndSettle();
-          await tester.ensureVisible(find.text('Dashboard').first);
-          await tester.tap(find.text('Dashboard').first);
           await tester.pumpAndSettle();
           expect(requests.last, '/api/v1/dashboards/plenary/live');
           expect(find.byType(SharedDashboardCharts), findsOneWidget);

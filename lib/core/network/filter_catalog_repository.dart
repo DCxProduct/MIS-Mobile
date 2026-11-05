@@ -199,12 +199,22 @@ class FilterCatalogRepository {
     ];
   }
 
-  Future<List<FilterSection>> meetingSummaries() async {
+  Future<List<FilterSection>> meetingSummaries({
+    bool includeMinistries = false,
+  }) async {
     final rows = (await _api.getAllPages(
       'meeting-summaries',
       objectItems: true,
     )).map((row) => MeetingSummary(row as Map<String, dynamic>)).toList();
     return [
+      if (includeMinistries)
+        _strings(
+          'local.primaryAgency',
+          'ministry',
+          rows.map((item) => item.governmentAgency),
+          columns: 3,
+          collapsed: 9,
+        ),
       _strings(
         'local.status',
         'status',
@@ -350,6 +360,7 @@ class FilterCatalogRepository {
   Future<List<FilterSection>> issues({
     required bool matrix,
     bool cdcDesign = false,
+    bool includeMinistries = false,
   }) async {
     final data = await _api.get(
       'working-group-issues/${matrix ? 'issue-matrix' : 'my'}/filter-options',
@@ -371,11 +382,11 @@ class FilterCatalogRepository {
               await _api.getList('stakeholders/working-groups'),
           collapsed: 5,
           valueKey: 'name',
-        )
-      else
+        ),
+      if (!cdcDesign || includeMinistries)
         _section(
           'primaryAgencyIds',
-          'primaryAgency',
+          includeMinistries ? 'ministry' : 'primaryAgency',
           data['governmentAgencies'],
           columns: 3,
           collapsed: 9,

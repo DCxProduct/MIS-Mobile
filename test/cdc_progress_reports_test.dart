@@ -26,7 +26,7 @@ http.Response ok(Object data, {int pages = 1}) => http.Response(
 void main() {
   for (final language in [AppLanguage.english, AppLanguage.khmer]) {
     testWidgets(
-      'CDC GPSF progress reports precede Dashboard and load ministry details: $language',
+      'CDC GPSF progress reports remain standalone and load ministry details: $language',
       (tester) async {
         tester.view.physicalSize = const Size(390, 844);
         tester.view.devicePixelRatio = 1;
@@ -129,28 +129,11 @@ void main() {
         await tester.pumpAndSettle();
         final context = tester.element(find.byType(ReportScreen));
         final l10n = AppLocalizations.of(context);
-        final progressTab = find.text(l10n.text('progressReport')).last;
-        expect(
-          tester.getCenter(progressTab).dx,
-          lessThan(tester.getCenter(find.text(l10n.text('dashboard'))).dx),
-        );
-        final tabStrip = find.byKey(const ValueKey('cdc-report-tabs'));
-        expect(
-          find.descendant(of: tabStrip, matching: find.byType(FittedBox)),
-          findsNothing,
-        );
-        final tabText = tester.widget<Text>(progressTab);
-        expect(tabText.style?.fontSize, 14);
-        await tester.drag(tabStrip, const Offset(-500, 0));
-        await tester.pumpAndSettle();
-        await tester.ensureVisible(find.text(l10n.text('rgcDecision')));
-        await tester.pumpAndSettle();
-        expect(
-          find.text(l10n.text('rgcDecision')).hitTestable(),
-          findsOneWidget,
-        );
-        await tester.ensureVisible(progressTab);
-        await tester.pumpAndSettle();
+        expect(find.text(l10n.text('progressReport')), findsOneWidget);
+        expect(find.byKey(const ValueKey('cdc-report-tabs')), findsNothing);
+        expect(find.byKey(const ValueKey('cdc-plenary-tabs')), findsNothing);
+        expect(find.text(l10n.text('dashboard')), findsNothing);
+        expect(find.text(l10n.text('rgcDecision')), findsNothing);
         expect(find.text('Semester 2'), findsOneWidget);
         expect(find.text('Semester 1'), findsOneWidget);
         expect(find.textContaining(l10n.number(2026)), findsWidgets);
@@ -207,18 +190,11 @@ void main() {
   }
 
   testWidgets(
-    'CDC progress filter sends API query and keeps plenary tab correct',
+    'CDC progress filter sends its query only to the reports API',
     (tester) async {
       final queries = <Map<String, String>>[];
       final api = ApiClient(
         client: MockClient((request) async {
-          if (request.url.path == '/api/v1/plenaries') {
-            expect(request.url.queryParameters['year'], isNull);
-            return ok({
-              'items': [],
-              'meta': {'totalPages': 0},
-            });
-          }
           expect(request.url.path, '/api/v1/progress-reports');
           queries.add(request.url.queryParameters);
           return ok([
@@ -251,10 +227,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(queries.last['year'], '2027');
       expect(find.text('Filter (1)'), findsOneWidget);
-      await tester.ensureVisible(find.text('Plenaries'));
-      await tester.tap(find.text('Plenaries'));
-      await tester.pumpAndSettle();
-      expect(find.text('No plenaries found.'), findsOneWidget);
+      expect(find.text('Plenaries'), findsNothing);
+      expect(find.text('Filtered report'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

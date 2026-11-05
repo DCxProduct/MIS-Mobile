@@ -17,14 +17,23 @@ import '../reports/rgc_decision_card.dart';
 import '../../private_sector/issues/issue_detail_screen.dart';
 
 class CdcSecretariatIssuesScreenView extends StatefulWidget {
-  const CdcSecretariatIssuesScreenView({super.key});
+  const CdcSecretariatIssuesScreenView({
+    super.key,
+    this.initialTab = 0,
+    this.showTabs = true,
+    this.embedded = false,
+  }) : assert(initialTab >= 0 && initialTab < 2);
+
+  final int initialTab;
+  final bool showTabs;
+  final bool embedded;
 
   @override
   State<CdcSecretariatIssuesScreenView> createState() => _CdcIssuesState();
 }
 
 class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
-  int _tab = 0;
+  late int _tab = widget.initialTab;
   final _filters = [FilterSelection(), FilterSelection()];
   Future<void> _openFilters() async {
     final tab = _tab;
@@ -37,7 +46,11 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
           initial: _filters[tab],
           load: tab == 0
               ? () => catalogs.rgc(cdcGpsf: true)
-              : () => catalogs.issues(matrix: true, cdcDesign: true),
+              : () => catalogs.issues(
+                  matrix: true,
+                  cdcDesign: true,
+                  includeMinistries: true,
+                ),
         ),
       ),
     );
@@ -66,7 +79,9 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
               color: AppColors.cardBackground(context),
               padding: EdgeInsets.fromLTRB(
                 16,
-                MediaQuery.of(context).viewPadding.top + 20,
+                widget.embedded
+                    ? 12
+                    : MediaQuery.of(context).viewPadding.top + 20,
                 16,
                 14,
               ),
@@ -76,7 +91,7 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
                     children: [
                       Expanded(
                         child: Text(
-                          l10n.text('wgIssues'),
+                          l10n.text(_tab == 0 ? 'rgcDecision' : 'issuesMatrix'),
                           style: TextStyle(
                             color: AppColors.primaryText(context),
                             fontSize: 20,
@@ -109,11 +124,13 @@ class _CdcIssuesState extends State<CdcSecretariatIssuesScreenView> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  _IssueTabs(
-                    selectedIndex: _tab,
-                    onSelected: (value) => setState(() => _tab = value),
-                  ),
+                  if (widget.showTabs) ...[
+                    const SizedBox(height: 10),
+                    _IssueTabs(
+                      selectedIndex: _tab,
+                      onSelected: (value) => setState(() => _tab = value),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -172,11 +189,22 @@ class _IssueTabs extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final tabs = [
-      l10n.api(
-        'issue_matrix_rgc_decision.rgc.page.title',
-        fallback: l10n.text('rgcDecision'),
+      (
+        index: 1,
+        key: 'matrix',
+        label: l10n.api(
+          'issue_matrix.title',
+          fallback: l10n.text('issuesMatrix'),
+        ),
       ),
-      l10n.api('issue_matrix.title', fallback: l10n.text('issuesMatrix')),
+      (
+        index: 0,
+        key: 'rgc',
+        label: l10n.api(
+          'issue_matrix_rgc_decision.rgc.page.title',
+          fallback: l10n.text('rgcDecision'),
+        ),
+      ),
     ];
 
     return Container(
@@ -194,12 +222,13 @@ class _IssueTabs extends StatelessWidget {
           tabs.length,
           (index) => Expanded(
             child: InkWell(
-              onTap: () => onSelected(index),
+              key: ValueKey('cdc-issues-tab-${tabs[index].key}'),
+              onTap: () => onSelected(tabs[index].index),
               borderRadius: BorderRadius.circular(6),
               child: Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: selectedIndex == index
+                  color: selectedIndex == tabs[index].index
                       ? AppColors.accent(context)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(6),
@@ -208,10 +237,10 @@ class _IssueTabs extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      index == 0
+                      tabs[index].index == 0
                           ? Icons.calendar_month_outlined
                           : Icons.event_note_outlined,
-                      color: selectedIndex == index
+                      color: selectedIndex == tabs[index].index
                           ? Colors.white
                           : AppColors.mutedText,
                       size: 15,
@@ -219,15 +248,15 @@ class _IssueTabs extends StatelessWidget {
                     const SizedBox(width: 5),
                     Flexible(
                       child: Text(
-                        tabs[index],
+                        tabs[index].label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: selectedIndex == index
+                          color: selectedIndex == tabs[index].index
                               ? Colors.white
                               : AppColors.mutedText,
                           fontSize: 12,
-                          fontWeight: selectedIndex == index
+                          fontWeight: selectedIndex == tabs[index].index
                               ? FontWeight.w700
                               : FontWeight.w600,
                         ),

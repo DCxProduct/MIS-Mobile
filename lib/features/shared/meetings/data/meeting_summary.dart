@@ -64,6 +64,7 @@ class MeetingSummary {
       issues = _issues(json);
 
   Map<String, Iterable<String>> get filterValues => {
+    'local.primaryAgency': [governmentAgency],
     'local.status': [status],
     'local.year': [
       if (date != null) FilterSelection.dateValue(date).substring(0, 4),

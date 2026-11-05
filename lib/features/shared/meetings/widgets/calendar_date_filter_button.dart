@@ -8,6 +8,7 @@ import '../../../../core/widgets/filters/app_filter_sheet.dart';
 import '../../../../core/widgets/filters/filter_sheet_header.dart';
 import '../../../../translations/app_localizations.dart';
 import '../../../../translations/app_language.dart';
+import '../data/calendar_meeting.dart';
 
 String _monthKey(DateTime date) =>
     '${date.year}-${date.month.toString().padLeft(2, '0')}';
@@ -42,12 +43,18 @@ class CalendarDateFilterButton extends StatefulWidget {
     required this.onSelected,
     this.selectedMonths,
     this.onMonthsSelected,
+    this.showMinistryFilter = false,
+    this.selectedMinistries = const {},
+    this.onMinistriesSelected,
   });
 
   final DateTime selectedDate;
   final ValueChanged<DateTime> onSelected;
   final Set<String>? selectedMonths;
   final ValueChanged<Set<String>>? onMonthsSelected;
+  final bool showMinistryFilter;
+  final Set<String> selectedMinistries;
+  final ValueChanged<Set<String>>? onMinistriesSelected;
 
   @override
   State<CalendarDateFilterButton> createState() =>
@@ -61,39 +68,46 @@ class _CalendarDateFilterButtonState extends State<CalendarDateFilterButton> {
   Future<void> _openFilter(BuildContext context) async {
     final repository = AppSettings.of(context).meetings;
     final query = ApiFilterScope.query(context, 'meetings');
-    var dates = <DateTime>[];
+    var meetings = <CalendarMeeting>[];
     final result = await Navigator.of(context).push<FilterSelection>(
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => _CalendarMonthFilterSheet(
           initialMonths: _applied,
+          showMinistryFilter: widget.showMinistryFilter,
+          initialMinistries: widget.selectedMinistries,
           load: () async {
-            final meetings = await repository.getMeetings(filters: query);
-            dates =
-                meetings
-                    .where((meeting) => meeting.date != null)
-                    .map(
-                      (meeting) => DateUtils.dateOnly(meeting.date!.toLocal()),
-                    )
-                    .toSet()
-                    .toList()
-                  ..sort();
-            return dates;
+            meetings = await repository.getMeetings(filters: query);
+            return meetings;
           },
         ),
       ),
     );
     if (!context.mounted || result == null) return;
     final months = Set<String>.of(result['local.month']);
+    final ministries = Set<String>.of(result['local.primaryAgency']);
     setState(() => _months = months);
     widget.onMonthsSelected?.call(months);
-    if (months.isEmpty) {
+    if (widget.showMinistryFilter) {
+      widget.onMinistriesSelected?.call(ministries);
+    }
+    if (months.isEmpty && ministries.isEmpty) {
       widget.onSelected(DateUtils.dateOnly(DateTime.now()));
       return;
     }
-    final matches = dates
-        .where((date) => months.contains(_monthKey(date)))
-        .toList();
+    final selection = FilterSelection({'local.primaryAgency': ministries});
+    final matches =
+        meetings
+            .where(
+              (meeting) =>
+                  meeting.date != null &&
+                  selection.matchesLocal(meeting.details.filterValues),
+            )
+            .map((meeting) => DateUtils.dateOnly(meeting.date!.toLocal()))
+            .where((date) => months.isEmpty || months.contains(_monthKey(date)))
+            .toSet()
+            .toList()
+          ..sort();
     if (matches.isEmpty) return;
     // Keep the selected day if it has meetings; otherwise open the first
     // meeting in the chosen month so applying the filter shows actual data.
@@ -108,7 +122,9 @@ class _CalendarDateFilterButtonState extends State<CalendarDateFilterButton> {
   @override
   Widget build(BuildContext context) => AppFilterButton(
     key: const ValueKey('calendar-date-filter'),
-    activeCount: _applied.length,
+    activeCount:
+        _applied.length +
+        (widget.showMinistryFilter ? widget.selectedMinistries.length : 0),
     onTap: () => _openFilter(context),
   );
 }
@@ -117,10 +133,14 @@ class _CalendarMonthFilterSheet extends StatefulWidget {
   const _CalendarMonthFilterSheet({
     required this.load,
     required this.initialMonths,
+    required this.showMinistryFilter,
+    required this.initialMinistries,
   });
 
-  final Future<List<DateTime>> Function() load;
+  final Future<List<CalendarMeeting>> Function() load;
   final Set<String> initialMonths;
+  final bool showMinistryFilter;
+  final Set<String> initialMinistries;
 
   @override
   State<_CalendarMonthFilterSheet> createState() =>
@@ -128,18 +148,30 @@ class _CalendarMonthFilterSheet extends StatefulWidget {
 }
 
 class _CalendarMonthFilterSheetState extends State<_CalendarMonthFilterSheet> {
-  late Future<List<DateTime>> _request = widget.load();
+  late Future<List<CalendarMeeting>> _request = widget.load();
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<List<DateTime>>(
+  Widget build(BuildContext context) => FutureBuilder<List<CalendarMeeting>>(
     future: _request,
     builder: (context, snapshot) {
       final l10n = AppLocalizations.of(context, page: 'meeting_calendar');
+      final dates = (snapshot.data ?? const <CalendarMeeting>[])
+          .where((meeting) => meeting.date != null)
+          .map((meeting) => meeting.date!.toLocal())
+          .toList();
+      final ministries =
+          (snapshot.data ?? const <CalendarMeeting>[])
+              .expand((meeting) => meeting.details.agencyNames)
+              .where((name) => name.trim().isNotEmpty)
+              .toSet()
+              .toList()
+            ..sort();
       if (snapshot.connectionState == ConnectionState.done &&
           snapshot.hasData &&
-          snapshot.data!.isNotEmpty) {
+          (dates.isNotEmpty ||
+              (widget.showMinistryFilter && ministries.isNotEmpty))) {
         final months =
-            snapshot.data!
+            dates
                 .map((date) => DateTime(date.year, date.month))
                 .toSet()
                 .toList()
@@ -147,10 +179,25 @@ class _CalendarMonthFilterSheetState extends State<_CalendarMonthFilterSheet> {
         return AppFilterSheet(
           key: const ValueKey('calendar-month-filter-sheet'),
           compact: true,
-          initial: FilterSelection({'local.month': widget.initialMonths}),
+          initial: FilterSelection({
+            'local.month': widget.initialMonths,
+            if (widget.showMinistryFilter)
+              'local.primaryAgency': widget.initialMinistries,
+          }),
           // Closing discards the draft. Only Apply changes the calendar.
           onClose: () => Navigator.pop(context),
           sections: [
+            if (widget.showMinistryFilter)
+              FilterSection(
+                id: 'local.primaryAgency',
+                title: l10n.text('ministry'),
+                columns: 3,
+                collapsedItemCount: 9,
+                options: [
+                  for (final ministry in ministries)
+                    FilterOption(value: ministry, label: ministry),
+                ],
+              ),
             FilterSection(
               id: 'local.month',
               title: l10n.text('meetingDate'),

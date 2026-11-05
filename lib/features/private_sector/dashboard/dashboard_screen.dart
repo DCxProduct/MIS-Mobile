@@ -16,9 +16,9 @@ import '../../../translations/translation_sync.dart';
 import '../../../widgets/app_bottom_nav_bar.dart';
 import '../../../widgets/app_header.dart';
 
-import '../../cdc_secretariat/dashboard/dashboard_screen.dart';
+import '../../cdc_secretariat/working_group/working_group_screen.dart';
+import '../../cdc_secretariat/plenary/plenary_screen.dart';
 import '../../cdc_secretariat/issues/issues_screen.dart';
-import '../../cdc_secretariat/meetings/meeting_screen.dart';
 import '../../cdc_secretariat/profile/profile_screen.dart';
 import '../../cdc_secretariat/reports/reports_screen.dart';
 
@@ -95,9 +95,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _ => const CefpProfileScreenView(),
       },
       AppModuleType.cdcSecretariat => switch (index) {
-        0 => const CdcSecretariatDashboardScreenView(),
-        1 => const CdcSecretariatMeetingScreenView(),
-        2 => const CdcSecretariatIssuesScreenView(),
+        0 => const CdcWorkingGroupScreen(),
+        1 => const CdcPlenaryScreen(),
+        2 => const CdcSecretariatIssuesScreenView(initialTab: 1),
         3 => const CdcSecretariatReportsScreenView(),
         _ => const CdcSecretariatProfileScreenView(),
       },
@@ -151,8 +151,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key, this.initialScopeTab = 0});
+  const DashboardPage({
+    super.key,
+    this.initialScopeTab = 0,
+    this.showAppHeader = true,
+  });
   final int initialScopeTab;
+  final bool showAppHeader;
 
   @override
   State<DashboardPage> createState() => DashboardPageState();
@@ -214,7 +219,7 @@ class DashboardPageState extends State<DashboardPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const AppHeader(),
+        if (widget.showAppHeader) const AppHeader(),
         Expanded(
           child: ColoredBox(
             color: isDark ? AppColors.darkBackground : const Color(0xFFF5F7FB),
@@ -256,15 +261,17 @@ class DashboardPageState extends State<DashboardPage> {
                     else if (moduleType == AppModuleType.cdcSecretariat)
                       Row(
                         children: [
-                          Text(
-                            l10n.text('dashboard'),
-                            style: TextStyle(
-                              color: colors.onSurface,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
+                          Expanded(
+                            child: Text(
+                              l10n.text('dashboard'),
+                              style: TextStyle(
+                                color: colors.onSurface,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                          const Spacer(),
+                          const SizedBox(width: 8),
                           _FilterBar(
                             onTap: () => _openFilterSheet(context),
                             activeCount: _dashboardFilters[_filterTab].count,

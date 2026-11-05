@@ -14,14 +14,23 @@ import '../../shared/meetings/widgets/calendar_date_filter_button.dart';
 import 'tabs/meeting_request_tab.dart';
 
 class MeetingScreen extends StatefulWidget {
-  const MeetingScreen({super.key});
+  const MeetingScreen({
+    super.key,
+    this.initialTab = 0,
+    this.showTabs = true,
+    this.embedded = false,
+  }) : assert(initialTab >= 0 && initialTab < 3);
+
+  final int initialTab;
+  final bool showTabs;
+  final bool embedded;
 
   @override
   State<MeetingScreen> createState() => _MeetingScreenState();
 }
 
 class _MeetingScreenState extends State<MeetingScreen> {
-  int _selectedTab = 0;
+  late int _selectedTab = widget.initialTab;
   DateTime? _calendarDate;
   Set<String> _calendarMonths = {};
   bool _showCalendarMonthResults = false;
@@ -38,7 +47,11 @@ class _MeetingScreenState extends State<MeetingScreen> {
           initial: _filters[tab],
           load: tab == 0
               ? () => catalogs.meetingRequests()
-              : catalogs.meetingSummaries,
+              : () => catalogs.meetingSummaries(
+                  includeMinistries:
+                      AppSettings.of(context).moduleType ==
+                      AppModuleType.cdcSecretariat,
+                ),
         ),
       ),
     );
@@ -85,6 +98,7 @@ class _MeetingScreenState extends State<MeetingScreen> {
         'meeting-summaries': _filters[2].toQuery(),
       },
       selections: {
+        'meetings': _filters[1],
         'meeting-requests': _filters[0],
         'meeting-summaries': _filters[2],
       },
@@ -96,7 +110,7 @@ class _MeetingScreenState extends State<MeetingScreen> {
               color: headerBackground,
               padding: EdgeInsets.fromLTRB(
                 14,
-                topPadding > 0 ? topPadding + 12 : 34,
+                widget.embedded ? 12 : (topPadding > 0 ? topPadding + 12 : 34),
                 14,
                 12,
               ),
@@ -117,6 +131,16 @@ class _MeetingScreenState extends State<MeetingScreen> {
                       ),
                       if (_selectedTab == 1)
                         CalendarDateFilterButton(
+                          showMinistryFilter:
+                              AppSettings.of(context).moduleType ==
+                              AppModuleType.cdcSecretariat,
+                          selectedMinistries:
+                              _filters[1]['local.primaryAgency'],
+                          onMinistriesSelected: (ministries) => setState(() {
+                            _filters[1] = FilterSelection({
+                              'local.primaryAgency': ministries,
+                            });
+                          }),
                           selectedMonths: _calendarMonths,
                           onMonthsSelected: (months) => setState(() {
                             _calendarMonths = months;
@@ -141,11 +165,14 @@ class _MeetingScreenState extends State<MeetingScreen> {
                         ),
                     ],
                   ),
-                  const SizedBox(height: 14),
-                  _MeetingTabs(
-                    selectedIndex: _selectedTab,
-                    onSelected: (index) => setState(() => _selectedTab = index),
-                  ),
+                  if (widget.showTabs) ...[
+                    const SizedBox(height: 14),
+                    _MeetingTabs(
+                      selectedIndex: _selectedTab,
+                      onSelected: (index) =>
+                          setState(() => _selectedTab = index),
+                    ),
+                  ],
                 ],
               ),
             ),

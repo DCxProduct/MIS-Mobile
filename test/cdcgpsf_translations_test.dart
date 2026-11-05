@@ -10,7 +10,7 @@ import 'package:gpsf_app/core/widgets/filters/api_filter_sheet.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/auth/data/auth_user.dart';
 import 'package:gpsf_app/features/cdc_secretariat/issues/issues_screen.dart';
-import 'package:gpsf_app/features/cdc_secretariat/reports/reports_screen.dart';
+import 'package:gpsf_app/features/cdc_secretariat/plenary/plenary_screen.dart';
 import 'package:gpsf_app/features/private_sector/issues/issue_detail_screen.dart';
 import 'package:gpsf_app/features/cdc_secretariat/meetings/meeting_screen.dart';
 import 'package:gpsf_app/features/cdc_secretariat/meetings/summary_issue_details.dart';
@@ -168,9 +168,7 @@ void main() {
       await tester.pumpWidget(
         AppSettings(
           controller: settings,
-          child: const MaterialApp(
-            home: Scaffold(body: CdcSecretariatReportsScreenView()),
-          ),
+          child: const MaterialApp(home: Scaffold(body: CdcPlenaryScreen())),
         ),
       );
       await tester.pumpAndSettle();
