@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_colors.dart';
+import '../../../core/text/html_text.dart';
 import '../../../translations/app_localizations.dart';
 import '../../shared/issues/data/issue_progress_report.dart';
+import '../../shared/issues/data/working_group_issue.dart';
 import '../../shared/issues/widgets/issue_display.dart';
 import 'progress_report_detail_screen.dart';
 import 'progress_report_data_detail_screen.dart';
@@ -13,6 +15,7 @@ class CdcIssueProgressReportCard extends StatelessWidget {
     this.report,
     this.issueTitle = '',
     this.issueStatus = '',
+    this.issue,
     this.meetingDocumentPath = '',
     this.meetingDocumentName = '',
   });
@@ -20,12 +23,22 @@ class CdcIssueProgressReportCard extends StatelessWidget {
   final IssueProgressReport? report;
   final String issueTitle;
   final String issueStatus;
+  final WorkingGroupIssue? issue;
   final String meetingDocumentPath;
   final String meetingDocumentName;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context, page: 'issue_report');
+    final reference = report == null
+        ? ''
+        : htmlToPlainText(
+            report!.localizedText(
+              'referenceName',
+              l10n.language,
+              fallback: report!.referenceName,
+            ),
+          );
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -39,8 +52,6 @@ class CdcIssueProgressReportCard extends StatelessWidget {
           Text(
             report == null
                 ? l10n.number('Report S1 2025')
-                : report!.title.isEmpty
-                ? l10n.text('progressReport')
                 : issueProgressReportTitle(context, report!),
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
@@ -56,9 +67,9 @@ class CdcIssueProgressReportCard extends StatelessWidget {
             label: l10n.text('referenceName'),
             value: report == null
                 ? 'របាយការណ៍'
-                : report!.referenceName.isEmpty
+                : reference.isEmpty
                 ? '—'
-                : report!.referenceName,
+                : reference,
             maxLines: 1,
           ),
           if (report == null || report!.attachmentPaths.isNotEmpty) ...[
@@ -93,6 +104,7 @@ class CdcIssueProgressReportCard extends StatelessWidget {
                       ? CdcIssueProgressReportDetailScreen(title: issueTitle)
                       : CdcIssueProgressReportDataDetailScreen(
                           report: report!,
+                          issue: issue,
                           issueTitle: issueTitle,
                           issueStatus: issueStatus,
                           meetingDocumentPath: meetingDocumentPath,

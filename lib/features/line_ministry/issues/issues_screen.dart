@@ -1,5 +1,6 @@
 import 'package:gpsf_app/core/status_colors.dart';
 import '../../../core/app_settings.dart';
+import '../../../core/text/html_text.dart';
 import '../../../core/config/module_config.dart';
 import '../../../core/widgets/filters/api_filter_sheet.dart';
 import '../../shared/issues/data/working_group_issue.dart';
@@ -134,6 +135,11 @@ class _LineMinistryIssuesScreenViewState
 
   Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    String value(WorkingGroupIssue issue, String field) {
+      final text = issue.localizedText(field, l10n.language);
+      return text.isEmpty ? '—' : text;
+    }
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final contentBackground = isDark
         ? AppColors.darkBackground
@@ -222,16 +228,14 @@ class _LineMinistryIssuesScreenViewState
                           apiFilters: _apiSelections[0].toQuery(),
                           selection: _apiSelections[0],
                           itemBuilder: (issue) => _LineMinistryIssueListCard(
-                            title: issue.title,
-                            category: issue.category.isEmpty
-                                ? '—'
-                                : issue.category,
+                            title: issue.localizedText('title', l10n.language),
+                            category: value(issue, 'category'),
                             status: issueStatusLabel(context, issue),
                             submissionDate: issueDate(context, issue.createdAt),
-                            submittedBy: issue.submittedBy.isEmpty
-                                ? '—'
-                                : issue.submittedBy,
-                            description: issue.description,
+                            submittedBy: value(issue, 'submittedBy'),
+                            description: htmlToPlainText(
+                              issue.localizedText('description', l10n.language),
+                            ),
                             attachmentCount:
                                 '${AppLocalizations.of(context).number(issue.attachmentCount)} ${l10n.text('attachmentsLabel')}',
                             issue: issue,
@@ -244,16 +248,14 @@ class _LineMinistryIssuesScreenViewState
                           apiFilters: _apiSelections[1].toQuery(),
                           selection: _apiSelections[1],
                           itemBuilder: (issue) => _LineMinistryIssueListCard(
-                            title: issue.title,
-                            category: issue.category.isEmpty
-                                ? '—'
-                                : issue.category,
+                            title: issue.localizedText('title', l10n.language),
+                            category: value(issue, 'category'),
                             status: issueStatusLabel(context, issue),
                             submissionDate: issueDate(context, issue.createdAt),
-                            submittedBy: issue.submittedBy.isEmpty
-                                ? '—'
-                                : issue.submittedBy,
-                            description: issue.description,
+                            submittedBy: value(issue, 'submittedBy'),
+                            description: htmlToPlainText(
+                              issue.localizedText('description', l10n.language),
+                            ),
                             attachmentCount:
                                 '${AppLocalizations.of(context).number(issue.attachmentCount)} ${l10n.text('attachmentsLabel')}',
                             issue: issue,

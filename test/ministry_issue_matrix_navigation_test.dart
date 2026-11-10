@@ -70,7 +70,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text(l10n.text('wgIssues')), findsNothing);
         expect(find.text(l10n.text('issuesMatrix')), findsOneWidget);
-        expect(find.text('12'), findsOneWidget);
+        expect(find.text(l10n.number(12)), findsOneWidget);
         expect(paths.toSet(), {
           '/api/v1/working-group-issues/issue-matrix',
           '/api/v1/working-group-issues/issue-matrix/summary',

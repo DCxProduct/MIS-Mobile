@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'detail_widgets.dart';
 
 import '../../../core/app_colors.dart';
+import '../../../core/widgets/editor_content.dart';
 import '../../../core/widgets/pdf_attachment_preview.dart';
 import '../../../translations/app_localizations.dart';
 import '../../shared/issues/data/working_group_issue.dart';
@@ -48,6 +49,18 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
 
   Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final progress = issue?.issueProgress;
+    String progressValue(String key) {
+      final field = switch (key) {
+        'progressSolution' => 'description',
+        'request' => 'requests',
+        _ => key,
+      };
+      return field == 'linkToVerificationSource'
+          ? progress?.verificationLink ?? ''
+          : progress?.localizedText(field, l10n.language) ?? '';
+    }
+
     final reports = issue?.reportsIncluded == true
         ? issue!.progressReports
         : progressReportsFallback ?? const <IssueProgressReport>[];
@@ -98,9 +111,10 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                generalIssue
-                    ? issue?.title ?? 'Climate Issue'
-                    : l10n.text('submitDetail'),
+                issue?.localizedText('title', l10n.language) ??
+                    (generalIssue
+                        ? 'Climate Issue'
+                        : l10n.text('submitDetail')),
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -114,7 +128,9 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                     flex: 3,
                     child: CdcDetailInfoValue(
                       label: '${l10n.text('governmentPrimaryAgency')}:',
-                      value: issue == null ? 'MAFF' : issue!.agency,
+                      value:
+                          issue?.localizedText('agency', l10n.language) ??
+                          'MAFF',
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -198,7 +214,10 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                     flex: 2,
                     child: CdcDetailInfoValue(
                       label: l10n.text('issueCategory'),
-                      value: l10n.category(category),
+                      value: l10n.category(
+                        issue?.localizedText('category', l10n.language) ??
+                            category,
+                      ),
                     ),
                   ),
                 ],
@@ -229,8 +248,7 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
               CdcDetailTextPanel(
                 label: l10n.text('issuesDescriptions'),
                 body:
-                    issue?.descriptionHtml ??
-                    issue?.description ??
+                    issue?.localizedText('description', l10n.language) ??
                     _description,
                 collapsedLines: 7,
               ),
@@ -238,8 +256,7 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
               CdcDetailTextPanel(
                 label: l10n.text('recommendations'),
                 body:
-                    issue?.recommendationHtml ??
-                    issue?.recommendation ??
+                    issue?.localizedText('recommendation', l10n.language) ??
                     (generalIssue
                         ? 'The private sector, through the Ministry of Agriculture, Forestry and Fisheries, has requested the Ministry of Water Resources and Meteorology to consider establishing meteorological stations in every province and city to provide farmers with accurate weather information.'
                         : _recommendation),
@@ -257,6 +274,7 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                           for (final report in reports) ...[
                             CdcIssueProgressReportCard(
                               report: report,
+                              issue: issue,
                               issueTitle: issue!.title,
                               issueStatus: issue!.statusName,
                               meetingDocumentPath:
@@ -271,7 +289,9 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
               else ...[
                 CdcDetailTextPanel(
                   label: l10n.text('rgcDecision'),
-                  body: issue == null ? _decision : '',
+                  body: issue == null
+                      ? _decision
+                      : progressValue('rgcDecision'),
                   collapsedLines: 3,
                 ),
                 for (final key in [
@@ -289,7 +309,8 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                   Container(
                     key: ValueKey('cdc-detail-$key'),
                     width: double.infinity,
-                    height: 52,
+                    constraints: const BoxConstraints(minHeight: 52),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: AppColors.pageBackground(context),
                       borderRadius: BorderRadius.circular(7),
@@ -299,6 +320,7 @@ class CdcSectionIssueDetailScreen extends StatelessWidget {
                         ),
                       ),
                     ),
+                    child: EditorContent(progressValue(key)),
                   ),
                 ],
               ],

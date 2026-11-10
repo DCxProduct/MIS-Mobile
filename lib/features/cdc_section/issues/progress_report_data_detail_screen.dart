@@ -8,6 +8,7 @@ import '../../../core/app_colors.dart';
 import '../../../core/widgets/pdf_attachment_preview.dart';
 import '../../../translations/app_localizations.dart';
 import '../../shared/issues/data/issue_progress_report.dart';
+import '../../shared/issues/data/working_group_issue.dart';
 import '../../shared/issues/widgets/issue_display.dart';
 import 'detail_widgets.dart';
 
@@ -18,6 +19,7 @@ class CdcIssueProgressReportDataDetailScreen extends StatelessWidget {
     required this.report,
     required this.issueTitle,
     this.issueStatus = '',
+    this.issue,
     this.meetingDocumentPath = '',
     this.meetingDocumentName = '',
   });
@@ -25,6 +27,7 @@ class CdcIssueProgressReportDataDetailScreen extends StatelessWidget {
   final IssueProgressReport report;
   final String issueTitle;
   final String issueStatus;
+  final WorkingGroupIssue? issue;
   final String meetingDocumentPath;
   final String meetingDocumentName;
 
@@ -40,6 +43,8 @@ class CdcIssueProgressReportDataDetailScreen extends StatelessWidget {
 
   Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    String value(String field, String fallback) =>
+        report.localizedText(field, l10n.language, fallback: fallback);
     final hasMeetingDocument = meetingDocumentPath.isNotEmpty;
     final documentPath = hasMeetingDocument
         ? meetingDocumentPath
@@ -89,7 +94,7 @@ class CdcIssueProgressReportDataDetailScreen extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
           children: [
             Text(
-              issueTitle,
+              issue?.localizedText('title', l10n.language) ?? issueTitle,
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
@@ -187,48 +192,39 @@ class CdcIssueProgressReportDataDetailScreen extends StatelessWidget {
                   flex: 2,
                   child: _ExpandableReferenceName(
                     label: l10n.text('referenceName'),
-                    value:
-                        report.richText['referenceName'] ??
-                        report.referenceName,
+                    value: value('referenceName', report.referenceName),
                   ),
                 ),
               ],
             ),
-            if (report.description.isNotEmpty) ...[
+            if (value('description', report.description).isNotEmpty) ...[
               const SizedBox(height: 18),
               _ExpandableProgressText(
-                text: report.richText['description'] ?? report.description,
+                text: value('description', report.description),
               ),
             ],
-            if (report.indicators.isNotEmpty)
-              section(
-                'indicators',
-                report.richText['indicators'] ?? report.indicators,
-                3,
-              ),
-            if (report.implementationChallenges.isNotEmpty)
+            if (value('indicators', report.indicators).isNotEmpty)
+              section('indicators', value('indicators', report.indicators), 3),
+            if (value(
+              'implementationChallenges',
+              report.implementationChallenges,
+            ).isNotEmpty)
               section(
                 'implementationChallenges',
-                report.richText['implementationChallenges'] ??
-                    report.implementationChallenges,
+                value(
+                  'implementationChallenges',
+                  report.implementationChallenges,
+                ),
                 3,
               ),
-            if (report.requests.isNotEmpty)
-              section(
-                'request',
-                report.richText['requests'] ?? report.requests,
-                3,
-              ),
-            if (report.nextStep.isNotEmpty)
-              section(
-                'nextStep',
-                report.richText['nextStep'] ?? report.nextStep,
-                3,
-              ),
-            if (report.rgcDecision.isNotEmpty)
+            if (value('requests', report.requests).isNotEmpty)
+              section('request', value('requests', report.requests), 3),
+            if (value('nextStep', report.nextStep).isNotEmpty)
+              section('nextStep', value('nextStep', report.nextStep), 3),
+            if (value('rgcDecision', report.rgcDecision).isNotEmpty)
               section(
                 'rgcDecision',
-                report.richText['rgcDecision'] ?? report.rgcDecision,
+                value('rgcDecision', report.rgcDecision),
                 3,
               ),
             for (final path in report.attachmentPaths)

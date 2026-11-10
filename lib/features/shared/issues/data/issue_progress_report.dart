@@ -77,14 +77,7 @@ class IssueProgressReport {
       'sourceOfVerification',
       'linkToVerificationSource',
     ];
-    const progressKeys = [
-      'progressSolution',
-      'indicators',
-      'implementationChallenges',
-      'dateOfIssueSolution',
-      'sourceOfVerification',
-      'linkToVerificationSource',
-    ];
+    const progressKeys = [...contentKeys, 'dateOfIssueSolution'];
     if (![...progressKeys, ...progressKeys.map((key) => '${key}Kh')].any((key) {
       final value = issue[key];
       return value is String && value.trim().isNotEmpty;
@@ -128,6 +121,9 @@ class IssueProgressReport {
         ? value(json['title'])
         : value(report['title']).isNotEmpty
         ? value(report['title'])
+        : value(json['titleKh']).isNotEmpty ||
+              value(report['titleKh']).isNotEmpty
+        ? ''
         : generatedTitle;
     final dateText = value(json['dateOfIssueSolution']).isNotEmpty
         ? value(json['dateOfIssueSolution'])
@@ -231,7 +227,9 @@ class IssueProgressReport {
       semester: semester,
       year: year is int ? year : null,
       hasGeneratedTitle:
-          value(json['title']).isEmpty && value(report['title']).isEmpty,
+          value(json['title']).isEmpty &&
+          value(report['title']).isEmpty &&
+          khmer('title').isEmpty,
       progressReportId: json['progressReportId'] is int
           ? json['progressReportId'] as int
           : report['id'] is int

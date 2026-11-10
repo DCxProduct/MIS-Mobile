@@ -67,7 +67,8 @@ class _CdcIssueDetailLoaderState extends State<CdcIssueDetailLoader> {
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              widget.initialIssue?.title ?? l10n.text('issueDetails'),
+              widget.initialIssue?.localizedText('title', l10n.language) ??
+                  l10n.text('issueDetails'),
             ),
           ),
           body: Center(

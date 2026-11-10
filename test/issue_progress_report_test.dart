@@ -8,6 +8,25 @@ import 'package:gpsf_app/features/shared/issues/data/issue_progress_report.dart'
 import 'package:gpsf_app/translations/app_language.dart';
 
 void main() {
+  test('legacy decision-only and Khmer-only answers are retained', () {
+    for (final field in ['rgcDecision', 'requests', 'nextStep']) {
+      final report = IssueProgressReport.fromIssueFields({
+        '${field}Kh': 'ខ្មែរ $field',
+      });
+      expect(report, isNotNull);
+      for (final language in AppLanguage.values) {
+        expect(report!.localizedText(field, language), 'ខ្មែរ $field');
+      }
+    }
+    final report = IssueProgressReport.fromJson({
+      'titleKh': 'ចំណងជើងខ្មែរ',
+      'semester': 'S1',
+      'year': 2026,
+    });
+    expect(report.hasGeneratedTitle, isFalse);
+    expect(report.localizedText('title', AppLanguage.english), 'ចំណងជើងខ្មែរ');
+  });
+
   WorkingGroupIssue issueWithReports() => WorkingGroupIssue.fromJson({
     'id': 14,
     'title': 'Issue with actual report',

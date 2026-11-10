@@ -1,5 +1,6 @@
 import 'package:gpsf_app/core/status_colors.dart';
 import '../../../core/app_settings.dart';
+import '../../../core/text/html_text.dart';
 import '../../../core/widgets/filters/api_filter_sheet.dart';
 import '../../../core/widgets/filters/api_filter_scope.dart';
 import '../../shared/issues/data/working_group_issue.dart';
@@ -426,6 +427,12 @@ class _IssueCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
+    String value(String field) {
+      final text = htmlToPlainText(issue.localizedText(field, l10n.language));
+      return text.isEmpty ? '—' : text;
+    }
+
     final status = switch (issue.statusCode.toUpperCase()) {
       'SOLVED' => _IssueCardStatus.solved,
       'IN_PROGRESS' => _IssueCardStatus.inProgress,
@@ -476,7 +483,7 @@ class _IssueCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        issue.title,
+                        value('title'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -487,9 +494,9 @@ class _IssueCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        AppLocalizations.of(context).category(
-                          issue.category.isEmpty ? '—' : issue.category,
-                        ),
+                        AppLocalizations.of(
+                          context,
+                        ).category(value('category')),
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontSize: 12,
@@ -524,11 +531,7 @@ class _IssueCard extends StatelessWidget {
                   child: _IssueMeta(
                     icon: Icons.person_outline,
                     label: AppLocalizations.of(context).text('submittedBy'),
-                    value: issue.submittedBy.isEmpty
-                        ? '—'
-                        : AppLocalizations.of(
-                            context,
-                          ).workingGroup(issue.submittedBy),
+                    value: l10n.workingGroup(value('submittedBy')),
                     iconColor: const Color(0xFFB642FF),
                     iconBackground: const Color(0xFFF2DDFF),
                   ),
@@ -537,7 +540,7 @@ class _IssueCard extends StatelessWidget {
             ),
             const Divider(height: 18),
             Text(
-              issue.description.isEmpty ? '—' : issue.description,
+              value('description'),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
