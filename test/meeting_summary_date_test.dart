@@ -9,6 +9,7 @@ import 'package:gpsf_app/core/network/api_client.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/screens/report/tabs/meeting_summary_tab.dart';
 import 'package:gpsf_app/translations/app_language.dart';
+import 'package:gpsf_app/translations/app_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
@@ -77,9 +78,7 @@ void main() {
         settings.setLanguage(language);
         await tester.pumpAndSettle();
         final context = tester.element(find.byType(MeetingSummaryTab));
-        final year = MaterialLocalizations.of(
-          context,
-        ).formatYear(DateTime(2026));
+        final year = AppLocalizations.of(context).number(2026);
         final date = find.textContaining(year);
         expect(date, findsOneWidget);
         expect(
@@ -98,7 +97,7 @@ void main() {
       settings.setLanguage(AppLanguage.khmer);
       await tester.pumpAndSettle();
       final context = tester.element(find.text('Summary title'));
-      final year = MaterialLocalizations.of(context).formatYear(DateTime(2026));
+      final year = AppLocalizations.of(context).number(2026);
       expect(find.textContaining(year), findsOneWidget);
       expect(calls.where((path) => path.endsWith('/26')), hasLength(1));
       expect(tester.takeException(), isNull);

@@ -224,6 +224,10 @@ class RgcDecisionDetail {
                  ? (json['indicator'] as Map<String, dynamic>)['name']
                  : null),
        ),
+       indicatorDescription = _string(
+         json['indicatorDescription'] ??
+             _object(json['indicator'])['description'],
+       ),
        verificationSource = _string(json['verificationSource']),
        verificationLink = _string(json['verificationLink']),
        issues = List.unmodifiable(_issueList(json)),
@@ -247,6 +251,7 @@ class RgcDecisionDetail {
   final String approvalReport;
   final String decisionContent,
       indicatorName,
+      indicatorDescription,
       verificationSource,
       verificationLink;
   final List<RgcDecisionIssue> issues;

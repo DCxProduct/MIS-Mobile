@@ -9,6 +9,7 @@ import '../../core/text/html_text.dart';
 import '../../core/widgets/filters/api_filter_scope.dart';
 import '../../core/widgets/pdf_attachment_preview.dart';
 import '../../features/cdc_section/reports/rgc_decision_details.dart';
+import '../../features/cdc_section/issues/issue_detail_loader.dart';
 import '../../features/cdc_secretariat/reports/progress_report_ministries_screen.dart';
 import '../../features/line_ministry/issues/issues_screen.dart';
 import '../../features/private_sector/issues/issue_detail_screen.dart' as ps;
@@ -35,6 +36,9 @@ class NotificationDestinationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return switch (destination.kind) {
+      NotificationDestinationKind.cdcIssue => CdcIssueDetailLoader(
+        issueId: destination.id!,
+      ),
       NotificationDestinationKind.progressReport => ProgressReportDetailLoader(
         id: destination.id!,
         scope: ProgressReportDetailScope.ministry,

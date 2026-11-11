@@ -15,6 +15,7 @@ enum NotificationDestinationKind {
   rgcDecisions,
   issueMatrix,
   issue,
+  cdcIssue,
 }
 
 class NotificationDestination {
@@ -44,6 +45,7 @@ class NotificationDestination {
     NotificationDestinationKind.meetingSummary ||
     NotificationDestinationKind.editMeetingSummary => 'meeting-summaries/$id',
     NotificationDestinationKind.issue => 'working-group-issues/$id',
+    NotificationDestinationKind.cdcIssue => 'issues/$id',
     NotificationDestinationKind.rgcDecision => 'rgc-decisions/$id',
     _ => null,
   };
@@ -54,7 +56,6 @@ class NotificationDestination {
     SystemNotification notification,
     AppModuleType module,
   ) {
-    if (notification.type == 'ISSUE_ESCALATED') return null;
     final url = notification.url;
     if (url != null) return _fromUrl(notification, url);
     final ministry = module == AppModuleType.lineMinistry;
@@ -63,6 +64,9 @@ class NotificationDestination {
     int? id;
     String? route;
     switch (notification.type) {
+      case 'ISSUE_ESCALATED' when module == AppModuleType.cefp:
+        id = notification.resourceId('issueId');
+        if (id != null) route = '/cefp/issues/$id';
       case 'MEETING_REQUEST' when ministry:
         id =
             notification.resourceId('meetingRequestId') ??
@@ -218,8 +222,34 @@ class NotificationDestination {
                 NotificationDestinationKind.issue,
               ),
       'MEETING_SCHEDULED' => _scheduledMeeting(n, uri, url),
+      'ISSUE_ESCALATED' => _escalatedIssue(n, uri, url),
       _ => null,
     };
+  }
+
+  static NotificationDestination? _escalatedIssue(
+    SystemNotification n,
+    Uri uri,
+    String url,
+  ) {
+    final match = RegExp(
+      r'^/cefp/(?:issues|issue-matrix)/(\d+)$',
+    ).firstMatch(uri.path);
+    final int? id;
+    if (match != null) {
+      id = int.tryParse(match.group(1)!);
+    } else if (uri.path == '/cefp/issues' || uri.path == '/cefp/issue-matrix') {
+      id = n.resourceId('issueId');
+    } else {
+      return null;
+    }
+    return id != null && id > 0
+        ? NotificationDestination(
+            NotificationDestinationKind.cdcIssue,
+            url,
+            id: id,
+          )
+        : null;
   }
 
   static NotificationDestination? _rgcDecision(

@@ -12,6 +12,7 @@ import '../../core/widgets/pdf_attachment_preview.dart';
 import '../../features/shared/issues/widgets/issue_agency_logo.dart';
 import '../../features/shared/issues/widgets/issue_display.dart';
 import '../../features/shared/meetings/data/rgc_decision.dart';
+import '../../features/line_ministry/reports/ministry_rgc_detail_widgets.dart';
 import '../../translations/app_localizations.dart';
 
 class RgcDecisionDetailScreen extends StatefulWidget {
@@ -261,10 +262,20 @@ class RgcDecisionProgressReports extends StatefulWidget {
 class RgcDecisionProgressReportsState
     extends State<RgcDecisionProgressReports> {
   int _selected = 0;
+
+  @override
+  void didUpdateWidget(covariant RgcDecisionProgressReports oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.detail.decision.id != widget.detail.decision.id ||
+        _selected >= widget.detail.progressReports.length) {
+      _selected = 0;
+    }
+  }
+
   @override
   Widget build(BuildContext context) => TranslationPageScope(
     page: AppSettings.of(context).moduleType == AppModuleType.lineMinistry
-        ? 'plenary_rgc_decisions'
+        ? 'ministry_rgc_report'
         : 'cdc_rgc_report',
     child: Builder(builder: _buildContent),
   );
@@ -275,8 +286,26 @@ class RgcDecisionProgressReportsState
     if (reports.isEmpty) return Text(l10n.text('noProgressReports'));
     final update = reports[_selected];
     final report = update.report;
+    final ministry =
+        AppSettings.of(context).moduleType == AppModuleType.lineMinistry;
+    Widget reportContent(String value) => _content(
+      ministry && value.trim().isEmpty
+          ? l10n.text('rgcReportNoReference')
+          : value,
+    );
     String title(int index) {
       final item = reports[index].report;
+      if (ministry && (item.semester.isNotEmpty || item.year != null)) {
+        // The web report tab preserves API period tokens (S1 and 2026).
+        return l10n
+            .api(
+              'issue_matrix.report_tab',
+              fallback: '${l10n.text('report')} {semester} {year}',
+            )
+            .replaceAll('{semester}', item.semester)
+            .replaceAll('{year}', item.year?.toString() ?? '')
+            .trim();
+      }
       if (const {
             AppModuleType.cdcSecretariat,
             AppModuleType.cdcSection,
@@ -307,27 +336,46 @@ class RgcDecisionProgressReportsState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              for (var index = 0; index < reports.length; index++)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(title(index)),
-                    selected: index == _selected,
-                    onSelected: (_) => setState(() => _selected = index),
-                  ),
-                ),
+        if (ministry)
+          MinistryRgcReportTabs(
+            labels: [
+              for (var index = 0; index < reports.length; index++) title(index),
             ],
+            selected: _selected,
+            onSelected: (index) => setState(() => _selected = index),
+          )
+        else
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (var index = 0; index < reports.length; index++)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(title(index)),
+                      selected: index == _selected,
+                      onSelected: (_) => setState(() => _selected = index),
+                    ),
+                  ),
+              ],
+            ),
           ),
-        ),
         const SizedBox(height: 14),
-        _Metadata(
-          label: l10n.text('implementationDate'),
-          value: issueDate(context, report.implementationDate),
-        ),
+        if (ministry)
+          MinistryRgcMetadata(
+            icon: Icons.calendar_month_outlined,
+            label: l10n.text('implementationDate'),
+            child: Text(
+              issueDate(context, report.implementationDate),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+          )
+        else
+          _Metadata(
+            label: l10n.text('implementationDate'),
+            value: issueDate(context, report.implementationDate),
+          ),
         _section(
           context,
           'rgcReportReferenceName',
@@ -337,12 +385,36 @@ class RgcDecisionProgressReportsState
                 : report.richText['referenceName'] ?? report.referenceName,
           ),
         ),
-        if (report.attachmentPaths.isNotEmpty) ...[
+        if (report.attachmentPaths.isNotEmpty || ministry) ...[
           const SizedBox(height: 16),
-          Text(
-            l10n.text('rgcReportReferenceAttachment'),
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          Row(
+            children: [
+              if (ministry) ...[
+                Icon(
+                  Icons.link,
+                  size: 18,
+                  color: AppColors.secondaryText(context),
+                ),
+                const SizedBox(width: 9),
+              ],
+              Expanded(
+                child: Text(
+                  l10n.text('rgcReportReferenceAttachment'),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
+          if (report.attachmentPaths.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: MinistryRgcEmptyAttachment(
+                label: l10n.text('rgcReportNoReference'),
+              ),
+            ),
           for (final path in report.attachmentPaths)
             Padding(
               padding: const EdgeInsets.only(top: 8),
@@ -384,17 +456,17 @@ class RgcDecisionProgressReportsState
         _section(
           context,
           'progressSolution',
-          _content(report.richText['description'] ?? report.description),
+          reportContent(report.richText['description'] ?? report.description),
         ),
         _section(
           context,
           'rgcReportSolutionIndicators',
-          _content(report.richText['indicators'] ?? report.indicators),
+          reportContent(report.richText['indicators'] ?? report.indicators),
         ),
         _section(
           context,
           'rgcReportChallenges',
-          _content(
+          reportContent(
             report.richText['implementationChallenges'] ??
                 report.implementationChallenges,
           ),
@@ -402,7 +474,7 @@ class RgcDecisionProgressReportsState
         _section(
           context,
           'requests',
-          _content(report.richText['requests'] ?? report.requests),
+          reportContent(report.richText['requests'] ?? report.requests),
         ),
         _section(
           context,
@@ -419,7 +491,7 @@ class RgcDecisionProgressReportsState
             'nextStep',
             _content(report.richText['nextStep'] ?? report.nextStep),
           ),
-        if (report.sourceOfVerification.isNotEmpty)
+        if (!ministry && report.sourceOfVerification.isNotEmpty)
           _section(
             context,
             'sourceOfVerification',
@@ -428,7 +500,7 @@ class RgcDecisionProgressReportsState
                   report.sourceOfVerification,
             ),
           ),
-        if (report.verificationLink.isNotEmpty)
+        if (!ministry && report.verificationLink.isNotEmpty)
           _section(
             context,
             'linkToVerificationSource',
@@ -513,29 +585,36 @@ Widget _verificationLink(String value) {
   return _content('<a href="$escaped">$escaped</a>');
 }
 
-Widget _section(BuildContext context, String labelKey, Widget child) => Padding(
-  padding: const EdgeInsets.only(top: 20),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        AppLocalizations.of(context).text(labelKey),
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-      ),
-      const SizedBox(height: 9),
-      Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(13),
-        decoration: BoxDecoration(
-          color: AppColors.subtleBackground(context),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: AppColors.border(context).withValues(alpha: 0.6),
-            width: 0.8,
-          ),
-        ),
+Widget _section(BuildContext context, String labelKey, Widget child) =>
+    AppSettings.of(context).moduleType == AppModuleType.lineMinistry
+    ? MinistryRgcSection(
+        label: AppLocalizations.of(context).text(labelKey),
+        outlined: labelKey == 'rgcReportReferenceName',
         child: child,
-      ),
-    ],
-  ),
-);
+      )
+    : Padding(
+        padding: const EdgeInsets.only(top: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context).text(labelKey),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 9),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(13),
+              decoration: BoxDecoration(
+                color: AppColors.subtleBackground(context),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppColors.border(context).withValues(alpha: 0.6),
+                  width: 0.8,
+                ),
+              ),
+              child: child,
+            ),
+          ],
+        ),
+      );

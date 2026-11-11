@@ -61,6 +61,105 @@ Map<String, dynamic> preferences({bool markRead = false, bool badge = true}) =>
     {'unreadBadge': badge, 'markReadOnDetail': markRead, 'systemEnabled': true};
 
 void main() {
+  test('CEFP escalation resolves the issue from its URL or payload', () {
+    for (final data in <Map<String, dynamic>>[
+      {'issueId': 17},
+      {'url': '/cefp/issues/17'},
+      {'url': '/cefp/issue-matrix/17'},
+      {'url': '/cefp/issues', 'issueId': 17},
+      {'url': '/cefp/issue-matrix', 'issueId': 17},
+    ]) {
+      final destination = NotificationDestination.resolve(
+        SystemNotification.fromJson(
+          notification(type: 'ISSUE_ESCALATED', data: data),
+        ),
+        AppModuleType.cefp,
+      );
+      expect(destination?.kind, NotificationDestinationKind.cdcIssue);
+      expect(destination?.id, 17);
+      expect(destination?.endpoint, 'issues/17');
+    }
+    for (final data in <Map<String, dynamic>>[
+      {},
+      {'issueId': 0},
+      {'url': '/cefp/issues/0', 'issueId': 17},
+      {'url': 'https://example.com/cefp/issues/17', 'issueId': 17},
+      {'url': '/pswg/wg-issues/17', 'issueId': 17},
+    ]) {
+      expect(
+        NotificationDestination.resolve(
+          SystemNotification.fromJson(
+            notification(type: 'ISSUE_ESCALATED', data: data),
+          ),
+          AppModuleType.cefp,
+        ),
+        isNull,
+      );
+    }
+  });
+
+  for (final tapDetailButton in [true, false]) {
+    testWidgets('CEFP escalation opens issue detail; button=$tapDetailButton', (
+      tester,
+    ) async {
+      final calls = <String>[];
+      final item = notification(type: 'ISSUE_ESCALATED', data: {'issueId': 17});
+      final settings =
+          AppSettingsController(
+              authRepository: AuthRepository(
+                ApiClient(
+                  client: MockClient((request) async {
+                    calls.add(request.url.path);
+                    switch (request.url.path) {
+                      case '/api/v1/mobile/system-notifications':
+                        return response([item], meta: meta());
+                      case '/api/v1/mobile/system-notifications/91':
+                        return response(item);
+                      case '/api/v1/notification-settings/me':
+                        return response(preferences());
+                      case '/api/v1/issues/17':
+                        return response({
+                          'issueId': 17,
+                          'title': 'Aquaculture production',
+                          'description': 'Escalated issue detail from API',
+                        });
+                      default:
+                        fail('Unexpected notification request ${request.url}');
+                    }
+                  }),
+                ),
+              ),
+            )
+            ..setModuleType(AppModuleType.cefp)
+            ..setLanguage(AppLanguage.english);
+      addTearDown(settings.dispose);
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: const MaterialApp(home: NotificationScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('notification-detail-91')),
+        findsOneWidget,
+      );
+      await tester.tap(
+        tapDetailButton
+            ? find.byKey(const ValueKey('notification-detail-91'))
+            : find.text('A real notification'),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(NotificationDestinationScreen), findsOneWidget);
+      expect(find.text('Aquaculture production'), findsWidgets);
+      expect(find.text('Escalated issue detail from API'), findsOneWidget);
+      expect(calls, contains('/api/v1/issues/17'));
+      expect(calls, isNot(contains('/api/v1/issues/91')));
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
+
   for (final type in [
     'PROGRESS_REPORT_COMPLETED',
     'PROGRESS_REPORT_PSWG_REVIEWED',
@@ -361,7 +460,7 @@ void main() {
   );
 
   test(
-    'escalation, unknown types and unsupported URLs never open another page',
+    'unsupported escalation routes, unknown types and URLs never open another page',
     () {
       for (final row in [
         notification(

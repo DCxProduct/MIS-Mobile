@@ -297,13 +297,13 @@ void main() {
     await tester.tap(find.text('Selected decision 4'));
     await tester.pumpAndSettle();
     expect(calls, contains('/api/v1/rgc-decisions/4'));
-    final firstTab = find.widgetWithText(ChoiceChip, 'Report S1 2028');
+    final firstTab = find.byKey(const ValueKey('ministry-rgc-report-tab-0'));
     await tester.scrollUntilVisible(
       firstTab,
       300,
       scrollable: find
           .descendant(
-            of: find.byType(DraggableScrollableSheet),
+            of: find.byKey(const ValueKey('ministry-rgc-detail-scroll')),
             matching: find.byType(Scrollable),
           )
           .first,

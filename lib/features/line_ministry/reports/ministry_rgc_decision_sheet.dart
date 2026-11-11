@@ -1,27 +1,25 @@
-import 'package:gpsf_app/core/status_colors.dart';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import '../../../screens/report/rgc_decision_detail_screen.dart';
 
 import '../../../core/app_colors.dart';
 import '../../../core/app_settings.dart';
+import '../../../core/status_colors.dart';
 import '../../../core/widgets/editor_content.dart';
-import '../../../core/widgets/pdf_attachment_preview.dart';
+import '../../../screens/report/rgc_decision_detail_screen.dart';
 import '../../../translations/app_localizations.dart';
 import '../../shared/meetings/data/rgc_decision.dart';
+import '../../shared/issues/widgets/issue_agency_logo.dart';
+import 'ministry_rgc_detail_widgets.dart';
 
 Future<void> showMinistryRgcDecisionSheet(
   BuildContext context, {
   required int decisionId,
   RgcDecisionDetail? detail,
-}) => showModalBottomSheet<void>(
-  context: context,
-  isScrollControlled: true,
-  useSafeArea: true,
-  backgroundColor: Colors.transparent,
-  builder: (_) =>
-      MinistryRgcDecisionSheet(decisionId: decisionId, detail: detail),
+}) => Navigator.of(context).push<void>(
+  MaterialPageRoute<void>(
+    builder: (_) =>
+        MinistryRgcDecisionSheet(decisionId: decisionId, detail: detail),
+  ),
 );
 
 class MinistryRgcDecisionSheet extends StatefulWidget {
@@ -32,7 +30,6 @@ class MinistryRgcDecisionSheet extends StatefulWidget {
   });
   final int decisionId;
   final RgcDecisionDetail? detail;
-
   @override
   State<MinistryRgcDecisionSheet> createState() =>
       _MinistryRgcDecisionSheetState();
@@ -40,10 +37,9 @@ class MinistryRgcDecisionSheet extends StatefulWidget {
 
 class _MinistryRgcDecisionSheetState extends State<MinistryRgcDecisionSheet> {
   Future<RgcDecisionDetail>? _future;
-
-  Future<RgcDecisionDetail> _load() =>
-      AppSettings.of(context).rgcDecisions.getDecision(widget.decisionId);
-
+  Future<RgcDecisionDetail> _load() => AppSettings.of(
+    context,
+  ).rgcDecisions.getDecision(widget.decisionId, includeDeadline: false);
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -51,92 +47,92 @@ class _MinistryRgcDecisionSheetState extends State<MinistryRgcDecisionSheet> {
   }
 
   @override
+  void didUpdateWidget(covariant MinistryRgcDecisionSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.decisionId != widget.decisionId ||
+        oldWidget.detail != widget.detail) {
+      _future = widget.detail == null ? _load() : Future.value(widget.detail!);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) => TranslationPageScope(
     page: 'plenary_rgc_decisions',
     child: Builder(builder: _buildContent),
   );
-
   Widget _buildContent(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return DraggableScrollableSheet(
-      initialChildSize: .72,
-      minChildSize: .45,
-      maxChildSize: .94,
-      expand: false,
-      builder: (context, controller) => Material(
-        color: AppColors.isDark(context)
-            ? AppColors.darkBackground
-            : const Color(0xFFF8F9FA),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-        clipBehavior: Clip.antiAlias,
-        child: SafeArea(
+    final background = AppColors.isDark(context)
+        ? const Color(0xFF101828)
+        : Colors.white;
+    return Theme(
+      data: Theme.of(context).copyWith(
+        textTheme: Theme.of(context).textTheme.apply(
+          fontFamily: 'Roboto',
+          fontFamilyFallback: const ['KhBattambang'],
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: background,
+        appBar: AppBar(
+          backgroundColor: background,
+          surfaceTintColor: Colors.transparent,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, size: 22),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: Text(
+            l10n.text('rgcDecisionDetails'),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          titleSpacing: 0,
+        ),
+        body: SafeArea(
           top: false,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(4, 6, 48, 6),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, size: 22),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                    Expanded(
-                      child: Text(
-                        l10n.text('rgcDecisionDetails'),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: FutureBuilder<RgcDecisionDetail>(
-                  future: _future,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState != ConnectionState.done) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError || !snapshot.hasData) {
-                      return ListView(
-                        controller: controller,
-                        padding: const EdgeInsets.all(20),
-                        children: [
-                          Text(
-                            l10n.text('rgcDecisionsLoadError'),
-                            textAlign: TextAlign.center,
-                          ),
-                          TextButton(
-                            onPressed: () => setState(() {
-                              _future = _load();
-                            }),
-                            child: Text(l10n.text('retry')),
-                          ),
-                        ],
-                      );
-                    }
-                    final detail = snapshot.data!;
-                    final issues = detail.issues;
-                    return ListView(
-                      controller: controller,
-                      padding: const EdgeInsets.fromLTRB(16, 18, 16, 28),
+          child: DefaultTextStyle.merge(
+            style: const TextStyle(
+              fontFamily: 'Roboto',
+              fontFamilyFallback: ['KhBattambang'],
+              fontSize: 14,
+              height: 1.6,
+            ),
+            child: FutureBuilder<RgcDecisionDetail>(
+              future: _future,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError || !snapshot.hasData) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        _DecisionPanel(detail: detail, issues: issues),
-                        const SizedBox(height: 20),
-                        RgcDecisionProgressReports(
-                          key: ValueKey(detail.decision.id),
-                          detail: detail,
+                        Text(l10n.text('rgcDecisionsLoadError')),
+                        TextButton(
+                          onPressed: () => setState(() {
+                            _future = _load();
+                          }),
+                          child: Text(l10n.text('retry')),
                         ),
                       ],
-                    );
-                  },
-                ),
-              ),
-            ],
+                    ),
+                  );
+                }
+                final detail = snapshot.data!;
+                return ListView(
+                  key: const ValueKey('ministry-rgc-detail-scroll'),
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+                  children: [
+                    _DecisionPanel(detail: detail),
+                    const SizedBox(height: 28),
+                    RgcDecisionProgressReports(
+                      key: ValueKey(detail.decision.id),
+                      detail: detail,
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -145,60 +141,17 @@ class _MinistryRgcDecisionSheetState extends State<MinistryRgcDecisionSheet> {
 }
 
 class _DecisionPanel extends StatelessWidget {
-  const _DecisionPanel({required this.detail, required this.issues});
+  const _DecisionPanel({required this.detail});
   final RgcDecisionDetail detail;
-  final List<RgcDecisionIssue> issues;
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final decision = detail.decision;
-    final statusColor = StatusColors.workflow(context, decision.status);
-    Widget field(String label, String value, {Color? color}) => Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.text(label),
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.secondaryText(context),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          value.isEmpty ? '—' : value,
-          style: TextStyle(
-            fontSize: 12,
-            color: color ?? AppColors.primaryText(context),
-          ),
-        ),
-      ],
-    );
-    Widget section(String label, Widget child) => Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.text(label),
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 10),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.border(context)),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: child,
-          ),
-        ],
-      ),
-    );
-    // The ministry, category and date belong to the RGC decision. Linked
-    // private-sector issues have independent submitters and classifications.
-    final legacyIssue = issues.firstOrNull;
+    final statusCode = decision.statusCode.isEmpty
+        ? decision.status
+        : decision.statusCode;
+    final statusColor = StatusColors.workflow(context, statusCode);
+    final legacyIssue = detail.issues.firstOrNull;
     final content = detail.decisionContent.isNotEmpty
         ? detail.decisionContent
         : legacyIssue?.richText['rgcDecision'] ??
@@ -208,150 +161,170 @@ class _DecisionPanel extends StatelessWidget {
         ? detail.verificationLink
         : legacyIssue?.verificationLink ?? '';
     final uri = Uri.tryParse(link);
-    final clickable = uri != null && ['http', 'https'].contains(uri.scheme);
+    final clickable =
+        uri != null &&
+        ['http', 'https'].contains(uri.scheme) &&
+        uri.host.isNotEmpty;
     final escapedLink = const HtmlEscape().convert(link);
+    Widget value(String text) => Text(
+      text.isEmpty ? '—' : text,
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+        height: 1.5,
+      ),
+    );
+    Widget metadata(IconData icon, String key, Widget child) =>
+        MinistryRgcMetadata(icon: icon, label: l10n.text(key), child: child);
+    Widget rich(String text) =>
+        EditorContent(text, style: const TextStyle(fontSize: 14, height: 1.65));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (decision.plenaryName.isNotEmpty) ...[
           Text(
             decision.plenaryName,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              fontSize: 21,
+              fontWeight: FontWeight.w700,
+              height: 1.5,
+            ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 20),
         ],
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.text('primaryAgency'),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.secondaryText(context),
-                    ),
+            Icon(
+              Icons.account_balance_outlined,
+              size: 19,
+              color: AppColors.secondaryText(context),
+            ),
+            const SizedBox(width: 9),
+            Flexible(
+              child: Text(
+                l10n.text('primaryAgency'),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.secondaryText(context),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            IssueAgencyLogo(path: decision.agencyLogo, size: 24, iconSize: 16),
+            const SizedBox(width: 8),
+            Flexible(child: value(decision.agencyName)),
+          ],
+        ),
+        const SizedBox(height: 22),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final columns = constraints.maxWidth >= 700 ? 3 : 2;
+            return Wrap(
+              spacing: 18,
+              runSpacing: 20,
+              children: [
+                for (final field in [
+                  metadata(
+                    Icons.calendar_month_outlined,
+                    'meetingDate',
+                    value(l10n.date(decision.meetingDate)),
                   ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      if (decision.agencyLogo.isNotEmpty) ...[
-                        ClipOval(
-                          child: Image.network(
-                            pdfAttachmentUrl(decision.agencyLogo),
-                            width: 22,
-                            height: 22,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => const Icon(
-                              Icons.account_balance_outlined,
-                              size: 22,
+                  metadata(
+                    Icons.label_outline,
+                    'categories',
+                    value(l10n.category(decision.category)),
+                  ),
+                  metadata(
+                    Icons.toggle_on_outlined,
+                    'status',
+                    statusCode.isEmpty
+                        ? value('')
+                        : Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: statusColor.withValues(alpha: .12),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: statusColor.withValues(alpha: .3),
+                              ),
+                            ),
+                            child: Text(
+                              l10n.status(statusCode),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: statusColor,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 6),
-                      ],
-                      Expanded(
-                        child: Text(
-                          decision.agencyName.isEmpty
-                              ? '—'
-                              : decision.agencyName,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
-                    ],
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 18),
-            Expanded(
-              child: field(
-                'status',
-                decision.status.isEmpty
-                    ? ''
-                    : '• ${l10n.status(decision.status)}',
-                color: statusColor,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 18),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: field('categories', l10n.category(decision.category)),
-            ),
-            const SizedBox(width: 18),
-            Expanded(child: field('focalPersonHE', decision.focalPerson)),
-          ],
-        ),
-        const SizedBox(height: 18),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: field(
-                'meetingDate',
-                AppLocalizations.of(context).date(decision.meetingDate),
-              ),
-            ),
-            const SizedBox(width: 18),
-            Expanded(child: field('indicators', detail.indicatorName)),
-          ],
+                  metadata(
+                    Icons.bar_chart_outlined,
+                    'indicators',
+                    value(detail.indicatorName),
+                  ),
+                  metadata(
+                    Icons.person_outline,
+                    'focalPersonHE',
+                    value(decision.focalPerson),
+                  ),
+                ])
+                  SizedBox(
+                    width:
+                        (constraints.maxWidth - 18 * (columns - 1)) / columns,
+                    child: field,
+                  ),
+              ],
+            );
+          },
         ),
         const SizedBox(height: 24),
         Divider(height: 1, color: AppColors.border(context)),
-        if (issues.any((issue) => issue.title.isNotEmpty))
-          section(
-            'linkedIssues',
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (final issue in issues)
-                  if (issue.title.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Text(
-                        issue.title,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-              ],
-            ),
-          ),
-        section(
-          'rgcDecision',
-          EditorContent(
-            content,
-            style: const TextStyle(fontSize: 12, height: 1.4),
+        MinistryRgcSection(
+          label: l10n.text('linkedIssues'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final issue in detail.issues)
+                if (issue.title.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: value(issue.title),
+                  ),
+            ],
           ),
         ),
-        if (detail.indicatorName.isNotEmpty)
-          section(
-            'indicators',
-            Text(detail.indicatorName, style: const TextStyle(fontSize: 12)),
-          ),
-        if (detail.verificationSource.isNotEmpty)
-          section(
-            'sourceOfVerification',
-            EditorContent(
-              detail.verificationSource,
-              style: const TextStyle(fontSize: 12, height: 1.4),
-            ),
-          ),
-        if (link.isNotEmpty)
-          section(
-            'linkToVerificationSource',
-            clickable
-                ? EditorContent(
-                    '<a href="$escapedLink">$escapedLink</a>',
-                    style: const TextStyle(fontSize: 12),
-                  )
-                : SelectableText(link, style: const TextStyle(fontSize: 12)),
-          ),
+        MinistryRgcSection(
+          label: l10n.text('rgcDecision'),
+          child: rich(content),
+        ),
+        MinistryRgcSection(
+          label: l10n.text('indicators'),
+          child: rich(detail.indicatorDescription),
+        ),
+        MinistryRgcSection(
+          label: l10n.text('sourceOfVerification'),
+          child: rich(detail.verificationSource),
+        ),
+        MinistryRgcSection(
+          label: l10n.text('linkToVerificationSource'),
+          child: clickable
+              ? EditorContent(
+                  '<a href="$escapedLink">$escapedLink</a>',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.accent(context),
+                    height: 1.6,
+                  ),
+                )
+              : SelectableText(
+                  link,
+                  style: const TextStyle(fontSize: 13, height: 1.6),
+                ),
+        ),
       ],
     );
   }

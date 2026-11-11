@@ -82,6 +82,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Selected ministry issue'), 250);
     await tester.tap(find.text('Selected ministry issue'));
     await tester.pumpAndSettle();
     expect(find.byType(CdcSummaryIssueDetails), findsOneWidget);
@@ -158,8 +159,15 @@ void main() {
           ),
         );
         expect(summaryAttachment.path, summary.summaryDocumentPath);
-        expect(find.text('1.9 MB'), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byWidget(summaryAttachment),
+            matching: find.text('1.9 MB'),
+          ),
+          findsOneWidget,
+        );
         await tester.scrollUntilVisible(find.text(issue.title), 250);
+        await tester.pumpAndSettle();
         await tester.tap(find.text(issue.title));
         await tester.pumpAndSettle();
         expect(find.byType(CdcSummaryIssueDetails), findsOneWidget);

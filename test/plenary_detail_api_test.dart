@@ -17,9 +17,26 @@ void main() {
       (tester) async {
         final paths = <String>[];
         var failed = false;
+        Map<String, dynamic> decision(int id) => {
+          'id': id,
+          'plenaryId': 22,
+          'meetingDate': '2026-10-19T00:00:00Z',
+          'category': 'Category $id',
+          'focalPerson': 'Person $id',
+          'stakeholder': {'name': 'Agency $id'},
+          'decision': '<p>Decision $id from API</p>',
+          'status': id == 1 ? 'In Progress' : 'Solved',
+          'verificationLink': 'https://example.com/decision-$id',
+        };
         final api = ApiClient(
           client: MockClient((request) async {
             paths.add(request.url.path);
+            if (request.url.path == '/api/v1/rgc-decisions/2') {
+              return http.Response(
+                jsonEncode({'success': true, 'data': decision(2)}),
+                200,
+              );
+            }
             if (request.url.path == '/api/v1/plenaries/22') {
               if (failFirst && !failed) {
                 failed = true;
@@ -52,19 +69,7 @@ void main() {
               jsonEncode({
                 'success': true,
                 'data': {
-                  'items': [
-                    {
-                      'id': page,
-                      'plenaryId': 22,
-                      'meetingDate': '2026-10-19T00:00:00Z',
-                      'category': 'Category $page',
-                      'focalPerson': 'Person $page',
-                      'stakeholder': {'name': 'Agency $page'},
-                      'decision': '<p>Decision $page from API</p>',
-                      'status': page == 1 ? 'In Progress' : 'Solved',
-                      'verificationLink': 'https://example.com/decision-$page',
-                    },
-                  ],
+                  'items': [decision(page)],
                   'meta': {'totalPages': 2},
                 },
               }),
@@ -101,11 +106,18 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Agency 2'), findsOneWidget);
         await tester.scrollUntilVisible(
-          find.text('https://example.com/decision-2'),
+          find.text('https://example.com/decision-2', findRichText: true),
           180,
           scrollable: find.byType(Scrollable).last,
         );
-        expect(find.text('https://example.com/decision-2'), findsOneWidget);
+        expect(
+          find.text('https://example.com/decision-2', findRichText: true),
+          findsOneWidget,
+        );
+        expect(
+          paths.where((path) => path == '/api/v1/rgc-decisions/2'),
+          hasLength(1),
+        );
         expect(
           paths.where((path) => path == '/api/v1/rgc-decisions').length,
           failFirst ? 4 : 2,

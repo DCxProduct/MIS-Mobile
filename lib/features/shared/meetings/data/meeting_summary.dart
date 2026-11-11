@@ -23,6 +23,18 @@ class MeetingSummary {
           _string(json['pswg']) ??
           _string(_object(json['meetingRequest'])['pswg']) ??
           '',
+      pswgKhName = _string(_object(json['meetingRequest'])['pswgKhName']) ?? '',
+      participants = List.unmodifiable([
+        for (final prefix in ['pswg', 'ministry'])
+          MeetingSummaryParticipant(
+            group: prefix,
+            reporter: _string(json['${prefix}Reporter']) ?? '',
+            reporterPosition: _string(json['${prefix}ReporterPosition']) ?? '',
+            representative: _string(json['${prefix}Representative']) ?? '',
+            representativePosition:
+                _string(json['${prefix}RepresentativePosition']) ?? '',
+          ),
+      ]),
       requestedDate = _date(_object(json['meetingRequest'])['requestedDate']),
       sentBy = _string(_object(_object(json['meeting'])['user'])['name']) ?? '',
       status = json['status'] as String? ?? '',
@@ -60,6 +72,16 @@ class MeetingSummary {
       requestDocumentName = documentOriginalName(
         _object(json['meetingRequest'])['meetingRequestLetter'],
       ),
+      meetingDocumentSize =
+          (_object(_object(json['meeting'])['documentReference'])['size']
+                  as num?)
+              ?.toInt(),
+      requestDocumentSize =
+          (_object(
+                    _object(json['meetingRequest'])['meetingRequestLetter'],
+                  )['size']
+                  as num?)
+              ?.toInt(),
       attachmentNames = _attachmentNames(json),
       issues = _issues(json);
 
@@ -73,6 +95,8 @@ class MeetingSummary {
   };
   final int id;
   final String title, governmentAgency, agencyLogo, pswg, status, meetingPswg;
+  final String pswgKhName;
+  final List<MeetingSummaryParticipant> participants;
   final DateTime? date;
   final int issueCount, meetingRequestCount, attachmentCount;
   final List<String> attachmentPaths;
@@ -85,6 +109,7 @@ class MeetingSummary {
   final String summaryDocumentName;
   final int? summaryDocumentSize;
   final String? meetingDocumentName, requestDocumentName;
+  final int? meetingDocumentSize, requestDocumentSize;
   final Map<String, String> attachmentNames;
   final List<MeetingSummaryIssue> issues;
 
@@ -140,6 +165,19 @@ class MeetingSummary {
       );
 }
 
+class MeetingSummaryParticipant {
+  const MeetingSummaryParticipant({
+    required this.group,
+    required this.reporter,
+    required this.reporterPosition,
+    required this.representative,
+    required this.representativePosition,
+  });
+
+  final String group, reporter, reporterPosition;
+  final String representative, representativePosition;
+}
+
 class MeetingSummaryIssue {
   factory MeetingSummaryIssue(
     Map<String, dynamic> json, {
@@ -171,6 +209,9 @@ class MeetingSummaryIssue {
           : source['governmentAgencies'],
     );
     return MeetingSummaryIssue._(
+      number: _firstText([source['numberIssue']]),
+      workingGroup: _firstText([source['wgName']]),
+      workingGroupKhName: _firstText([source['wgKhName']]),
       title: _firstText([
         source['issue'] is String ? source['issue'] : null,
         source['title'],
@@ -219,6 +260,9 @@ class MeetingSummaryIssue {
   }
 
   MeetingSummaryIssue._({
+    required this.number,
+    required this.workingGroup,
+    required this.workingGroupKhName,
     required this.title,
     required this.category,
     required this.status,
@@ -241,6 +285,7 @@ class MeetingSummaryIssue {
   });
 
   final String title, category, status, submittedBy;
+  final String number, workingGroup, workingGroupKhName;
   final String descriptionHtml, recommendationHtml;
   String get description => htmlToPlainText(descriptionHtml);
   String get recommendation => htmlToPlainText(recommendationHtml);

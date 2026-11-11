@@ -1,0 +1,356 @@
+{
+    "success": true,
+    "statusCode": 200,
+    "message": "OK",
+    "data": {
+        "id": 14,
+        "documentReference": {
+            "path": "/uploads/meeting-summaries/1794277535095-Meeting_summary_ reference.pdf",
+            "name": "Meeting_summary_ reference.pdf",
+            "size": 1947246,
+            "mimeType": "application/pdf"
+        },
+        "status": "SUBMITTED",
+        "share": true,
+        "pswgReporter": null,
+        "pswgReporterPosition": null,
+        "pswgRepresentative": null,
+        "pswgRepresentativePosition": null,
+        "ministryReporter": null,
+        "ministryReporterPosition": null,
+        "ministryRepresentative": null,
+        "ministryRepresentativePosition": null,
+        "createdAt": "2026-11-10T02:15:40.485Z",
+        "updatedAt": "2026-11-10T02:28:48.556Z",
+        "createdBy": {
+            "id": 21,
+            "name": "MAFF"
+        },
+        "meeting": {
+            "id": 15,
+            "title": "សំណើសុំរៀបចំកិច្ចប្រជុំ WG A",
+            "description": "<p>សូមស្នើសុំរៀបចំកិច្ចប្រជុំរវាងក្រុមការងារ ក ផ្នែកកសិកម្ម កសិ-ឧស្សាហកម្ម និង MAFF ដើម្បីពិភាក្សា និងដោះស្រាយបញ្ហាប្រឈមរបស់វិស័យឯកជន។</p>",
+            "meetingDate": "2026-11-10T00:00:00.000Z",
+            "startTime": "1970-01-01T14:00:00.000Z",
+            "location": "CDC",
+            "documentReference": {
+                "path": "/uploads/meetings/1794276884384-meeting_request_latter.pdf",
+                "name": "meeting_request_latter.pdf",
+                "size": 1947246,
+                "mimeType": "application/pdf"
+            },
+            "status": "COMPLETED",
+            "user": {
+                "id": 21,
+                "name": "MAFF"
+            },
+            "linkedMeetingRequests": [
+                {
+                    "meetingId": 15,
+                    "meetingRequestId": 15,
+                    "createdAt": "2026-11-10T02:14:44.524Z",
+                    "meetingRequest": {
+                        "id": 15,
+                        "title": "សំណើសុំរៀបចំកិច្ចប្រជុំ WG A",
+                        "description": "<p>សូមស្នើសុំរៀបចំកិច្ចប្រជុំរវាងក្រុមការងារ ក ផ្នែកកសិកម្ម កសិ-ឧស្សាហកម្ម និង MAFF ដើម្បីពិភាក្សា និងដោះស្រាយបញ្ហាប្រឈមរបស់វិស័យឯកជន។</p>",
+                        "meetingRequestLetter": "/uploads/meeting-requests/1794276614449-meeting_document_reference.pdf",
+                        "status": "COMPLETED",
+                        "submittedAt": "2026-11-10T02:10:14.943Z",
+                        "userId": 5,
+                        "createdAt": "2026-11-10T02:10:14.460Z",
+                        "updatedAt": "2026-11-10T02:28:48.551Z",
+                        "deletedAt": null,
+                        "user": {
+                            "id": 5,
+                            "name": "PSWG Secretariat A",
+                            "email": "privatesector1@gmail.com",
+                            "stakeholders": [
+                                {
+                                    "stakeholder": {
+                                        "id": 16,
+                                        "name": "Agriculture & Agro-Industry",
+                                        "khName": "ក្រុមការងារ ក៖ ផ្នែកកសិកម្ម កសិ-ឧស្សាហកម្ម",
+                                        "stakeholderTypeId": 2,
+                                        "logo": null
+                                    }
+                                }
+                            ]
+                        },
+                        "governmentAgencies": [
+                            {
+                                "stakeholderId": 3,
+                                "stakeholder": {
+                                    "id": 3,
+                                    "name": "MAFF",
+                                    "logo": "/uploads/stakeholders/1793454274421-MAFF.jpg",
+                                    "stakeholderTypeId": 1,
+                                    "khName": null,
+                                    "relatedStakeholderId": 16,
+                                    "stakeholderType": {
+                                        "name": "Ministry"
+                                    }
+                                }
+                            }
+                        ],
+                        "issues": [
+                            {
+                                "id": 217,
+                                "numberIssue": "WG01_0018",
+                                "title": "Aquaculture production (encouragement of aquaculture, establishment of hatchery, rehabilitation of breeding plants, collection and import).",
+                                "description": "<p>1. Domestic aquaculture products are increasing steadily, so there is a need to reduce imports to allow domestic aquaculture products to enter the market. Surplus supply causes the price of aquaculture products to fall, resulting in low profits for the domestic aquaculturists.<br>2. Imports of fish from neighboring countries are in large quantities and of poor quality, affecting domestic prices and the well-being of citizens.</p>",
+                                "recommendation": "<p>1. Request RGC intervention to buy fish from domestic aquaculture at a reasonable price that aquaculturists can profit from.<br>2. Request for measures on fish imports, with the whole value chain monitoring of the quantity and type of fishery products imports.</p>",
+                                "attachment": "/uploads/issues/1794276520391-Issue_reference.pdf",
+                                "issueStatus": {
+                                    "id": 6,
+                                    "code": "NOT_ADDRESSED",
+                                    "name": "Not Addressed"
+                                },
+                                "category": {
+                                    "id": 1,
+                                    "name": "General"
+                                },
+                                "governmentAgencies": [
+                                    {
+                                        "agencyOrder": 1,
+                                        "stakeholderId": 3,
+                                        "stakeholder": {
+                                            "id": 3,
+                                            "name": "MAFF",
+                                            "logo": "/uploads/stakeholders/1793454274421-MAFF.jpg"
+                                        }
+                                    },
+                                    {
+                                        "agencyOrder": 2,
+                                        "stakeholderId": 1,
+                                        "stakeholder": {
+                                            "id": 1,
+                                            "name": "GDCE",
+                                            "logo": "/uploads/stakeholders/1793454302073-GDCE.png"
+                                        }
+                                    },
+                                    {
+                                        "agencyOrder": 3,
+                                        "stakeholderId": 2,
+                                        "stakeholder": {
+                                            "id": 2,
+                                            "name": "GDT",
+                                            "logo": "/uploads/stakeholders/1793454292498-GDT.webp"
+                                        }
+                                    },
+                                    {
+                                        "agencyOrder": 4,
+                                        "stakeholderId": 6,
+                                        "stakeholder": {
+                                            "id": 6,
+                                            "name": "MEF",
+                                            "logo": "/uploads/stakeholders/1793454234134-MEF.png"
+                                        }
+                                    },
+                                    {
+                                        "agencyOrder": 5,
+                                        "stakeholderId": 5,
+                                        "stakeholder": {
+                                            "id": 5,
+                                            "name": "MISTI",
+                                            "logo": "/uploads/stakeholders/1793454251493-misti-logo.png"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "linkedIssues": [
+                            {
+                                "issue": {
+                                    "id": 217,
+                                    "numberIssue": "WG01_0018",
+                                    "title": "Aquaculture production (encouragement of aquaculture, establishment of hatchery, rehabilitation of breeding plants, collection and import).",
+                                    "description": "<p>1. Domestic aquaculture products are increasing steadily, so there is a need to reduce imports to allow domestic aquaculture products to enter the market. Surplus supply causes the price of aquaculture products to fall, resulting in low profits for the domestic aquaculturists.<br>2. Imports of fish from neighboring countries are in large quantities and of poor quality, affecting domestic prices and the well-being of citizens.</p>",
+                                    "recommendation": "<p>1. Request RGC intervention to buy fish from domestic aquaculture at a reasonable price that aquaculturists can profit from.<br>2. Request for measures on fish imports, with the whole value chain monitoring of the quantity and type of fishery products imports.</p>",
+                                    "attachment": "/uploads/issues/1794276520391-Issue_reference.pdf",
+                                    "issueStatus": {
+                                        "id": 6,
+                                        "code": "NOT_ADDRESSED",
+                                        "name": "Not Addressed"
+                                    },
+                                    "category": {
+                                        "id": 1,
+                                        "name": "General"
+                                    },
+                                    "governmentAgencies": [
+                                        {
+                                            "agencyOrder": 1,
+                                            "stakeholderId": 3,
+                                            "stakeholder": {
+                                                "id": 3,
+                                                "name": "MAFF",
+                                                "logo": "/uploads/stakeholders/1793454274421-MAFF.jpg"
+                                            }
+                                        },
+                                        {
+                                            "agencyOrder": 2,
+                                            "stakeholderId": 1,
+                                            "stakeholder": {
+                                                "id": 1,
+                                                "name": "GDCE",
+                                                "logo": "/uploads/stakeholders/1793454302073-GDCE.png"
+                                            }
+                                        },
+                                        {
+                                            "agencyOrder": 3,
+                                            "stakeholderId": 2,
+                                            "stakeholder": {
+                                                "id": 2,
+                                                "name": "GDT",
+                                                "logo": "/uploads/stakeholders/1793454292498-GDT.webp"
+                                            }
+                                        },
+                                        {
+                                            "agencyOrder": 4,
+                                            "stakeholderId": 6,
+                                            "stakeholder": {
+                                                "id": 6,
+                                                "name": "MEF",
+                                                "logo": "/uploads/stakeholders/1793454234134-MEF.png"
+                                            }
+                                        },
+                                        {
+                                            "agencyOrder": 5,
+                                            "stakeholderId": 5,
+                                            "stakeholder": {
+                                                "id": 5,
+                                                "name": "MISTI",
+                                                "logo": "/uploads/stakeholders/1793454251493-misti-logo.png"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "meetingRequest": {
+            "id": 15,
+            "title": "សំណើសុំរៀបចំកិច្ចប្រជុំ WG A",
+            "status": "COMPLETED",
+            "meetingRequestLetter": {
+                "path": "/uploads/meeting-requests/1794276614449-meeting_document_reference.pdf",
+                "name": "meeting_document_reference.pdf",
+                "size": 1947246,
+                "mimeType": "application/pdf"
+            },
+            "submittedBy": "PSWG Secretariat A",
+            "requestedDate": "2026-11-10T02:10:14.943Z",
+            "governmentAgency": "MAFF",
+            "governmentAgencyLogo": "/uploads/stakeholders/1793454274421-MAFF.jpg",
+            "pswg": "Agriculture & Agro-Industry",
+            "pswgKhName": "ក្រុមការងារ ក៖ ផ្នែកកសិកម្ម កសិ-ឧស្សាហកម្ម"
+        },
+        "meetings": [
+            {
+                "meeting": {
+                    "id": 15,
+                    "title": "សំណើសុំរៀបចំកិច្ចប្រជុំ WG A",
+                    "description": "<p>សូមស្នើសុំរៀបចំកិច្ចប្រជុំរវាងក្រុមការងារ ក ផ្នែកកសិកម្ម កសិ-ឧស្សាហកម្ម និង MAFF ដើម្បីពិភាក្សា និងដោះស្រាយបញ្ហាប្រឈមរបស់វិស័យឯកជន។</p>",
+                    "meetingDate": "2026-11-10T00:00:00.000Z",
+                    "startTime": "1970-01-01T14:00:00.000Z",
+                    "location": "CDC",
+                    "status": "COMPLETED",
+                    "documentReference": {
+                        "path": "/uploads/meetings/1794276884384-meeting_request_latter.pdf",
+                        "name": "meeting_request_latter.pdf",
+                        "size": 1947246,
+                        "mimeType": "application/pdf"
+                    },
+                    "user": {
+                        "id": 21,
+                        "name": "MAFF"
+                    }
+                },
+                "meetingRequest": {
+                    "id": 15,
+                    "title": "សំណើសុំរៀបចំកិច្ចប្រជុំ WG A",
+                    "status": "COMPLETED",
+                    "meetingRequestLetter": {
+                        "path": "/uploads/meeting-requests/1794276614449-meeting_document_reference.pdf",
+                        "name": "meeting_document_reference.pdf",
+                        "size": 1947246,
+                        "mimeType": "application/pdf"
+                    },
+                    "submittedBy": "PSWG Secretariat A",
+                    "requestedDate": "2026-11-10T02:10:14.943Z",
+                    "governmentAgency": "MAFF",
+                    "governmentAgencyLogo": "/uploads/stakeholders/1793454274421-MAFF.jpg",
+                    "pswg": "Agriculture & Agro-Industry",
+                    "pswgKhName": "ក្រុមការងារ ក៖ ផ្នែកកសិកម្ម កសិ-ឧស្សាហកម្ម"
+                }
+            }
+        ],
+        "issues": [
+            {
+                "id": 217,
+                "issue": "Aquaculture production (encouragement of aquaculture, establishment of hatchery, rehabilitation of breeding plants, collection and import).",
+                "numberIssue": "WG01_0018",
+                "category": "General",
+                "issueDescription": "<p>1. Domestic aquaculture products are increasing steadily, so there is a need to reduce imports to allow domestic aquaculture products to enter the market. Surplus supply causes the price of aquaculture products to fall, resulting in low profits for the domestic aquaculturists.<br>2. Imports of fish from neighboring countries are in large quantities and of poor quality, affecting domestic prices and the well-being of citizens.</p>",
+                "recommendation": "<p>1. Request RGC intervention to buy fish from domestic aquaculture at a reasonable price that aquaculturists can profit from.<br>2. Request for measures on fish imports, with the whole value chain monitoring of the quantity and type of fishery products imports.</p>",
+                "issueReference": {
+                    "path": "/uploads/issues/1794276520391-Issue_reference.pdf",
+                    "name": "Issue_reference.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                },
+                "resolveId": 215,
+                "status": "NOT_ADDRESSED",
+                "escalation": "CEFP",
+                "rgcDecision": "<p><strong>សេចក្តីសម្រេចរបស់រាជរដ្ឋាភិបាល</strong></p>",
+                "nextStep": "<p><strong>ជំហានបន្ទាប់</strong></p>",
+                "remark": "<p><strong>កំណត់សម្គាល់</strong></p>",
+                "referenceDocument": {
+                    "path": "/uploads/meeting-summaries/1794276941334-Meeting_summary_ reference.pdf",
+                    "name": "Meeting_summary_ reference.pdf",
+                    "size": 1947246,
+                    "mimeType": "application/pdf"
+                },
+                "agencies": [
+                    {
+                        "order": 1,
+                        "id": 3,
+                        "name": "MAFF",
+                        "logo": "/uploads/stakeholders/1793454274421-MAFF.jpg"
+                    },
+                    {
+                        "order": 2,
+                        "id": 1,
+                        "name": "GDCE",
+                        "logo": "/uploads/stakeholders/1793454302073-GDCE.png"
+                    },
+                    {
+                        "order": 3,
+                        "id": 2,
+                        "name": "GDT",
+                        "logo": "/uploads/stakeholders/1793454292498-GDT.webp"
+                    },
+                    {
+                        "order": 4,
+                        "id": 6,
+                        "name": "MEF",
+                        "logo": "/uploads/stakeholders/1793454234134-MEF.png"
+                    },
+                    {
+                        "order": 5,
+                        "id": 5,
+                        "name": "MISTI",
+                        "logo": "/uploads/stakeholders/1793454251493-misti-logo.png"
+                    }
+                ],
+                "pswgComment": null,
+                "wgName": "Agriculture & Agro-Industry",
+                "wgKhName": "ក្រុមការងារ ក៖ ផ្នែកកសិកម្ម កសិ-ឧស្សាហកម្ម"
+            }
+        ]
+    },
+    "timestamp": "2026-11-10T08:00:19.158Z",
+    "path": "/api/v1/meeting-summaries/14"
+}

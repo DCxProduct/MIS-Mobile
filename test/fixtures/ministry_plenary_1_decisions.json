@@ -1,0 +1,113 @@
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "OK",
+  "data": {
+    "items": [
+      {
+        "id": 157,
+        "plenaryId": 1,
+        "plenary": {
+          "id": 1,
+          "name": "វេទិកាទី១៩"
+        },
+        "stakeholderId": 7,
+        "stakeholder": {
+          "id": 7,
+          "name": "NBC",
+          "logo": "/uploads/stakeholders/1793454218490-NBC.png",
+          "description": "National Bank of Cambodia"
+        },
+        "categoryId": 13,
+        "category": "Governance",
+        "categoryInfo": {
+          "id": 13,
+          "name": "Governance",
+          "khName": "អភិបាលកិច្ច"
+        },
+        "indicatorId": null,
+        "indicator": null,
+        "indicatorName": "",
+        "indicatorDescription": "",
+        "meetingDate": "2023-11-13T00:00:00Z",
+        "status": "Solved",
+        "statusCode": "SOLVED",
+        "focalPerson": "Chea Serey",
+        "focalPersonKh": "ជា សិរី",
+        "decision": "8.4. Encourage banking and financial institutions to reorganize/restructure loans for the real estate sector for clients/customers who experience temporary financial difficulties by strictly complying with the regulations of the National Bank of Cambodia. The institution must conduct a precise study and analysis of the client’s situation and the impact of the client’s credit on the system as a whole, as well as request a consultation with the National Bank of Cambodia to consider further favorable measures on case-by-case basis.",
+        "decisionKh": "8.4. លើកទឹកចិត្តឱ្យគ្រឹះស្ថានធនាគារ និង ហិរញ្ញវត្ថុ រៀបចំឥណទានឡើងវិញ ចំពោះ វិស័យអចលនទ្រព្យ ជូនអតិថិជនដែលជួបប្រទះការលំបាកផ្នែកហិរញ្ញវត្ថុបណ្តោះអាសន្ន ដោយត្រូវអនុវត្តម៉ឹងម៉ាត់តាមបទប្បញ្ញត្តិរបស់ធនាគារជាតិនៃកម្ពុជា។  គ្រឹះស្ថានត្រូវធ្វើការសិក្សា និង វិភាគច្បាស់លាស់អំពីស្ថានភាពរបស់អតិថិជន និងផលប៉ះពាល់នៃឥណទានរបស់អតិថិជននោះ ចំពោះប្រព័ន្ធទាំងមូល ព្រមទាំងអាចស្នើសុំការពិភាក្សាជាមួយធនាគារជាតិនៃកម្ពុជា ដើម្បីពិចារណាអំពីវិធានការអនុគ្រោះតាម ករណីជាក់ស្ដែងបន្ថែមទៀត។",
+        "verificationSource": "Letter_NBC_ឆ7.023.2621_CMA-CCB-RR-Restructure_23Nov2023",
+        "verificationSourceKh": "លិខិត_ធនាគារជាតិនៃកម្ពុជា_ឆ7.023.2621_CMA-CCB-RR-ការរៀបចំឥណទានឡើងវិញ_ថ្ងៃទី២៣ ខែវិច្ឆិកា ឆ្នាំ២០២៣",
+        "verificationLink": "https://drive.google.com/file/d/1ZX3ZnOccr_jACo5sI4YszpoA_E92rjQf/view?usp=drive_link",
+        "submittedToCdcAt": "2026-11-06T08:02:23.502Z",
+        "revisionOpen": false,
+        "saveAsDraft": false,
+        "isDraft": false,
+        "createdBy": {
+          "id": 2,
+          "name": "CDC G-PSF Secretariat",
+          "email": "cdcgpsf@gmail.com"
+        },
+        "issues": [],
+        "createdAt": "2026-11-06T08:02:23.541Z",
+        "updatedAt": "2026-11-06T08:02:23.541Z"
+      },
+      {
+        "id": 156,
+        "plenaryId": 1,
+        "plenary": {
+          "id": 1,
+          "name": "វេទិកាទី១៩"
+        },
+        "stakeholderId": 7,
+        "stakeholder": {
+          "id": 7,
+          "name": "NBC",
+          "logo": "/uploads/stakeholders/1793454218490-NBC.png",
+          "description": "National Bank of Cambodia"
+        },
+        "categoryId": 13,
+        "category": "Governance",
+        "categoryInfo": {
+          "id": 13,
+          "name": "Governance",
+          "khName": "អភិបាលកិច្ច"
+        },
+        "indicatorId": null,
+        "indicator": null,
+        "indicatorName": "",
+        "indicatorDescription": "",
+        "meetingDate": "2023-11-13T00:00:00Z",
+        "status": "Solved",
+        "statusCode": "SOLVED",
+        "focalPerson": "Chea Serey",
+        "focalPersonKh": "ជា សិរី",
+        "decision": "8.3. Allow banking and financial institutions to reorganize/restructure tourism loans in Siem Reap province for clients/customers experiencing temporary financial difficulties without the need for a 12-month provision; and",
+        "decisionKh": "8.3. អនុញ្ញាតឱ្យគ្រឹះស្ថានធនាគារ និង ហិរញ្ញវត្ថុ រៀបចំឥណទានឡើងវិញ ចំពោះវិស័យទេសចរណ៍នៅខេត្តសៀមរាប ជូនអតិថិជនដែលជួបប្រទះការលំបាកផ្នែកហិរញ្ញវត្ថុ បណ្តោះអាសន្ន ដោយមិនចាំបាច់ធ្វើសំវិធានធន រយៈពេល ១២ខែ។  ​",
+        "verificationSource": "Circular_NBC_ឆ7.023.001_Loan Restructure_23Nov2023",
+        "verificationSourceKh": "សារាចរណែនាំ_ធនាគារជាតិនៃកម្ពុជា_ឆ7.023.001_ការរៀបចំឥណទានឡើងវិញ_ថ្ងៃទី២៣ ខែវិច្ឆិកា ឆ្នាំ២០២៣",
+        "verificationLink": "https://drive.google.com/file/d/1z83OL-Iberm_fL_hdf0Pw_q9FDX81Qr9/view?usp=drive_link",
+        "submittedToCdcAt": "2026-11-06T08:02:23.501Z",
+        "revisionOpen": false,
+        "saveAsDraft": false,
+        "isDraft": false,
+        "createdBy": {
+          "id": 2,
+          "name": "CDC G-PSF Secretariat",
+          "email": "cdcgpsf@gmail.com"
+        },
+        "issues": [],
+        "createdAt": "2026-11-06T08:02:23.533Z",
+        "updatedAt": "2026-11-06T08:02:23.533Z"
+      }
+    ],
+    "meta": {
+      "total": 157,
+      "page": 1,
+      "limit": 100,
+      "totalPages": 2
+    }
+  },
+  "timestamp": "2026-11-10T08:23:01.761Z",
+  "path": "/api/v1/rgc-decisions?plenaryId=1&page=1&limit=100"
+}

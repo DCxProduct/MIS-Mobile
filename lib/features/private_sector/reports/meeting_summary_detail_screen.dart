@@ -12,6 +12,7 @@ import '../../cdc_secretariat/meetings/summary_issue_details.dart';
 import '../../../../core/widgets/pdf_attachment_preview.dart';
 import '../../shared/meetings/data/meeting_summary.dart';
 import '../../../../translations/app_localizations.dart';
+import '../../../../translations/app_language.dart';
 
 class MeetingSummaryDetailScreen extends StatefulWidget {
   const MeetingSummaryDetailScreen({
@@ -155,6 +156,7 @@ class _MeetingSummaryDetailScreenState
             const {
               AppModuleType.cdcSecretariat,
               AppModuleType.privateSector,
+              AppModuleType.lineMinistry,
             }.contains(AppSettings.of(context).moduleType)
             ? ListView(
                 padding: const EdgeInsets.fromLTRB(14, 16, 14, 28),
@@ -240,6 +242,11 @@ class _MeetingSummaryDetailScreenState
                       onTap: () => _showIssueDetails(context, issue),
                     ),
                     const SizedBox(height: 14),
+                  ],
+                  if (AppSettings.of(context).moduleType ==
+                      AppModuleType.lineMinistry) ...[
+                    const SizedBox(height: 12),
+                    _SummaryParticipants(summary: summary),
                   ],
                 ],
               )
@@ -350,12 +357,15 @@ class _CdcSummaryInfo extends StatelessWidget {
         grid([
           field(
             'workingGroup',
-            AppLocalizations.of(context).workingGroup(summary.pswg),
+            l10n.language == AppLanguage.khmer && summary.pswgKhName.isNotEmpty
+                ? summary.pswgKhName
+                : l10n.workingGroup(summary.pswg),
           ),
           _DocumentBlock(
             label: l10n.text('meetingRequestDocument'),
             path: summary.requestDocumentPath,
             name: summary.requestDocumentName,
+            size: summary.requestDocumentSize,
           ),
           field(
             'submittedDate',
@@ -373,13 +383,19 @@ class _CdcSummaryInfo extends StatelessWidget {
           field(
             'workingGroup',
             AppLocalizations.of(context).workingGroup(
-              summary.meetingPswg.isEmpty ? summary.pswg : summary.meetingPswg,
+              summary.meetingPswg.isNotEmpty
+                  ? summary.meetingPswg
+                  : l10n.language == AppLanguage.khmer &&
+                        summary.pswgKhName.isNotEmpty
+                  ? summary.pswgKhName
+                  : summary.pswg,
             ),
           ),
           _DocumentBlock(
             label: l10n.text('meetingDocument'),
             path: summary.meetingDocumentPath,
             name: summary.meetingDocumentName,
+            size: summary.meetingDocumentSize,
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,6 +441,76 @@ class _CdcSummaryInfo extends StatelessWidget {
           ),
           field('location', summary.location),
         ]),
+      ],
+    );
+  }
+}
+
+class _SummaryParticipants extends StatelessWidget {
+  const _SummaryParticipants({required this.summary});
+  final MeetingSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context, page: 'meeting_summary');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.text('meetingParticipants'),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+        ),
+        for (final participant in summary.participants)
+          Container(
+            key: ValueKey('summary-participant-${participant.group}'),
+            width: double.infinity,
+            margin: const EdgeInsets.only(top: 12),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.border(context)),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.text(
+                    participant.group == 'pswg'
+                        ? 'summaryPswgGroup'
+                        : 'summaryMinistryGroup',
+                  ),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                LayoutBuilder(
+                  builder: (context, constraints) => Wrap(
+                    spacing: 16,
+                    runSpacing: 14,
+                    children: [
+                      for (final field in <String, String>{
+                        'summaryReporter': participant.reporter,
+                        'notificationReporterPosition':
+                            participant.reporterPosition,
+                        'summaryRepresentative': participant.representative,
+                        'notificationRepresentativePosition':
+                            participant.representativePosition,
+                      }.entries)
+                        SizedBox(
+                          width: (constraints.maxWidth - 16) / 2,
+                          child: _InfoBlock(
+                            label: l10n.text(field.key),
+                            value: field.value.isEmpty ? '—' : field.value,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }
@@ -540,8 +626,6 @@ class _InfoBlock extends StatelessWidget {
         const SizedBox(height: 7),
         Text(
           value,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: valueColor ?? AppColors.primaryText(context),
             fontSize: 12,
@@ -555,11 +639,12 @@ class _InfoBlock extends StatelessWidget {
 }
 
 class _DocumentBlock extends StatelessWidget {
-  const _DocumentBlock({required this.label, this.path, this.name});
+  const _DocumentBlock({required this.label, this.path, this.name, this.size});
 
   final String label;
   final String? path;
   final String? name;
+  final int? size;
 
   @override
   Widget build(BuildContext context) {
@@ -599,6 +684,14 @@ class _DocumentBlock extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 1),
+                    if (size != null)
+                      Text(
+                        '${AppLocalizations.of(context).number(size! / (1024 * 1024), decimalPlaces: 1)} MB',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: AppColors.mutedText,
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -662,6 +755,16 @@ class _ClimateIssueCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (issue?.number.isNotEmpty == true) ...[
+              Text(
+                issue!.number,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: AppColors.secondaryText(context),
+                ),
+              ),
+              const SizedBox(height: 6),
+            ],
             Row(
               children: [
                 Expanded(
@@ -704,6 +807,19 @@ class _ClimateIssueCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
+            if (issue?.workingGroup.isNotEmpty == true ||
+                issue?.workingGroupKhName.isNotEmpty == true) ...[
+              Text(
+                AppLocalizations.of(context).language == AppLanguage.khmer &&
+                        issue!.workingGroupKhName.isNotEmpty
+                    ? issue!.workingGroupKhName
+                    : AppLocalizations.of(
+                        context,
+                      ).workingGroup(issue!.workingGroup),
+                style: const TextStyle(fontSize: 12),
+              ),
+              const SizedBox(height: 4),
+            ],
             Text(
               AppLocalizations.of(context).category(
                 issue?.category.isNotEmpty == true ? issue!.category : '—',
@@ -724,6 +840,13 @@ class _ClimateIssueCard extends StatelessWidget {
                 fontSize: 12,
                 height: 1.45,
                 fontWeight: FontWeight.w500,
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: onTap,
+                child: Text(AppLocalizations.of(context).text('viewDetail')),
               ),
             ),
           ],

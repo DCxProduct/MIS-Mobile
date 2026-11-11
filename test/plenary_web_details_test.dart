@@ -9,6 +9,7 @@ import 'package:gpsf_app/core/app_settings.dart';
 import 'package:gpsf_app/core/network/api_client.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/shared/meetings/data/rgc_decision.dart';
+import 'package:gpsf_app/features/line_ministry/reports/ministry_rgc_decision_sheet.dart';
 import 'package:gpsf_app/core/widgets/editor_content.dart';
 import 'package:gpsf_app/screens/report/plenary_detail_screen.dart';
 import 'package:gpsf_app/translations/app_language.dart';
@@ -44,6 +45,12 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       final api = ApiClient(
         client: MockClient((request) async {
+          if (request.url.path == '/api/v1/rgc-decisions/4') {
+            return http.Response.bytes(
+              utf8.encode(jsonEncode({'success': true, 'data': raw})),
+              200,
+            );
+          }
           if (request.url.path == '/api/v1/plenaries/6') {
             return http.Response(
               jsonEncode({
@@ -82,14 +89,14 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Taxation'));
       await tester.pumpAndSettle();
-      final sheet = find.byType(DraggableScrollableSheet);
+      final sheet = find.byType(MinistryRgcDecisionSheet);
       final context = tester.element(sheet);
       final l10n = AppLocalizations.of(context);
       expect(find.text(raw['plenary']['name']), findsOneWidget);
       expect(find.text('MoT'), findsOneWidget);
-      expect(find.text('• ${l10n.status('Not Addressed')}'), findsOneWidget);
+      expect(find.text(l10n.status('Not Addressed')), findsOneWidget);
       final status = tester.widget<Text>(
-        find.text('• ${l10n.status('Not Addressed')}'),
+        find.text(l10n.status('Not Addressed')),
       );
       expect(status.style?.color, const Color(0xFFF04438));
       expect(find.text('Milestone 1'), findsOneWidget);
@@ -111,11 +118,14 @@ void main() {
         findsOneWidget,
       );
       await tester.scrollUntilVisible(
-        find.text(raw['verificationLink']),
+        find.text(raw['verificationLink'], findRichText: true),
         180,
         scrollable: find.byType(Scrollable).last,
       );
-      expect(find.text(raw['verificationLink']), findsOneWidget);
+      expect(
+        find.text(raw['verificationLink'], findRichText: true),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
     });
   }

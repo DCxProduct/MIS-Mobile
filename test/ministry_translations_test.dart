@@ -339,12 +339,14 @@ void main() {
       (tester) async {
         var revision = 'initial';
         final reportLabels = {
-          'plenary_rgc_decisions.rgc.date_of_issue_solution': 'solution date',
-          'plenary_rgc_decisions.rgc.indicators': 'indicators',
-          'plenary_rgc_decisions.rgc.implementation_challenges': 'challenges',
-          'plenary_rgc_decisions.rgc.request': 'requests',
-          'plenary_rgc_decisions.rgc.progress_solution': 'progress',
-          'plenary_rgc_decisions.rgc.rgc_decision': 'decision',
+          'issue_matrix.report_labels.implementation_date': 'solution date',
+          'issue_matrix.report_labels.reference_link': 'reference attachment',
+          'issue_matrix.report_labels.reference_name': 'reference name',
+          'issue_matrix.report_labels.solution_indicators': 'indicators',
+          'issue_matrix.report_labels.challenges': 'challenges',
+          'issue_matrix.report_labels.requests': 'requests',
+          'issue_matrix.report_labels.progress_solution': 'progress',
+          'issue_matrix.report_labels.rgc_decision': 'decision',
         };
         final settings = controller((request) async {
           expect(request.url.queryParameters['module'], 'ministry');
@@ -354,6 +356,12 @@ void main() {
               entry.key: '$revision $code ${entry.value}',
             'issue_matrix_rgc_decision.rgc.report.progressSolution':
                 'Wrong CDC',
+            'plenary_rgc_decisions.rgc.attachment': 'Wrong decision attachment',
+            'plenary_rgc_decisions.rgc.indicators': 'Wrong decision indicators',
+            'plenary_rgc_decisions.rgc.implementation_challenges':
+                'Wrong decision challenges',
+            'plenary_rgc_decisions.rgc.request': 'Wrong decision requests',
+            'issue_matrix.report_tab': '$revision $code {semester} {year}',
           });
         })..setLanguage(language);
         addTearDown(settings.dispose);
@@ -397,9 +405,12 @@ void main() {
           );
         }
         expect(find.text('Wrong CDC'), findsNothing);
+        expect(find.textContaining('Wrong decision'), findsNothing);
+        expect(find.text('$revision $code S1 2028'), findsOneWidget);
         revision = 'updated';
         await settings.loadTranslations(refresh: true);
         await tester.pumpAndSettle();
+        expect(find.text('$revision $code S1 2028'), findsOneWidget);
         for (final label in reportLabels.values) {
           expect(
             find.textContaining('$revision $code $label', findRichText: true),
@@ -607,7 +618,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text(title), findsOneWidget);
-      expect(find.text('• Web ministry status'), findsOneWidget);
+      expect(find.text('Web ministry status'), findsOneWidget);
       expect(find.text('Web focal person'), findsOneWidget);
       title = 'Edited ministry label';
       await tester.pump(TranslationSync.refreshInterval);

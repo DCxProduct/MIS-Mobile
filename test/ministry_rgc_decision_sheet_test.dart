@@ -9,11 +9,13 @@ import 'package:gpsf_app/core/app_settings.dart';
 import 'package:gpsf_app/core/config/module_config.dart';
 import 'package:gpsf_app/core/network/api_client.dart';
 import 'package:gpsf_app/core/widgets/editor_content.dart';
+import 'package:gpsf_app/core/widgets/pdf_attachment_preview.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/line_ministry/reports/ministry_rgc_decision_sheet.dart';
 import 'package:gpsf_app/features/shared/meetings/data/rgc_decision.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 import 'package:gpsf_app/translations/app_localizations.dart';
+import 'package:gpsf_app/screens/report/rgc_decision_detail_screen.dart';
 
 void main() {
   final fixture =
@@ -22,6 +24,180 @@ void main() {
           )
           as Map<String, dynamic>;
   final data = fixture['data'] as Map<String, dynamic>;
+
+  final suppliedList =
+      jsonDecode(
+            File(
+              'test/fixtures/ministry_plenary_1_decisions.json',
+            ).readAsStringSync(),
+          )
+          as Map<String, dynamic>;
+  final suppliedDecision =
+      (suppliedList['data']['items'] as List).first as Map<String, dynamic>;
+
+  test(
+    'supplied NBC decision retains empty indicators and independent identity',
+    () {
+      final detail = RgcDecisionDetail.fromJson(suppliedDecision);
+      expect(detail.decision.id, 157);
+      expect(detail.decision.plenaryId, 1);
+      expect(detail.decision.plenaryName, 'វេទិកាទី១៩');
+      expect(detail.decision.agencyName, 'NBC');
+      expect(
+        detail.decision.agencyLogo,
+        suppliedDecision['stakeholder']['logo'],
+      );
+      expect(detail.decision.category, 'Governance');
+      expect(detail.decision.statusCode, 'SOLVED');
+      expect(detail.decision.focalPerson, 'Chea Serey');
+      expect(detail.decision.meetingDate, DateTime.utc(2023, 11, 13));
+      expect(detail.decisionContent, suppliedDecision['decision']);
+      expect(detail.verificationSource, suppliedDecision['verificationSource']);
+      expect(detail.verificationLink, suppliedDecision['verificationLink']);
+      expect(detail.indicatorName, isEmpty);
+      expect(detail.indicatorDescription, isEmpty);
+      expect(detail.issues.where((issue) => issue.title.isNotEmpty), isEmpty);
+      expect(detail.progressReports, isEmpty);
+    },
+  );
+
+  for (final language in [AppLanguage.english, AppLanguage.khmer]) {
+    testWidgets(
+      '$language NBC decision shows web sections and report periods',
+      (tester) async {
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final calls = <String>[];
+        // The supplied list omits reports. These distinct updates verify the
+        // detail endpoint contract without treating list rows as report data.
+        final detailData = <String, dynamic>{
+          ...suppliedDecision,
+          'indicatorName': 'API indicator name',
+          'indicatorDescription': '<p>API indicator description</p>',
+          'progressReports': [
+            for (final period in ['S1', 'S2'])
+              {
+                'semester': period,
+                'year': 2026,
+                'dateOfIssueSolution': '2024-11-23T00:00:00Z',
+                'referenceName': '$period reference',
+                'progressSolution': '<p>$period implementation progress</p>',
+                'indicators': '',
+                'implementationChallenges': '',
+                'requests': '',
+                if (period == 'S2')
+                  'attachment': {
+                    'path': '/uploads/S2-reference.pdf',
+                    'name': 'S2-reference.pdf',
+                  },
+              },
+          ],
+        };
+        final settings =
+            AppSettingsController(
+                authRepository: AuthRepository(
+                  ApiClient(
+                    client: MockClient((request) async {
+                      calls.add(request.url.path);
+                      expect(request.url.path, '/api/v1/rgc-decisions/157');
+                      return http.Response.bytes(
+                        utf8.encode(
+                          jsonEncode({'success': true, 'data': detailData}),
+                        ),
+                        200,
+                      );
+                    }),
+                  ),
+                ),
+              )
+              ..setLanguage(language)
+              ..setModuleType(AppModuleType.lineMinistry);
+        addTearDown(settings.dispose);
+        await tester.pumpWidget(
+          AppSettings(
+            controller: settings,
+            child: MaterialApp(
+              home: Scaffold(body: MinistryRgcDecisionSheet(decisionId: 157)),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final context = tester.element(find.byType(MinistryRgcDecisionSheet));
+        final l10n = AppLocalizations.of(
+          context,
+          page: 'plenary_rgc_decisions',
+        );
+        expect(find.text('NBC'), findsOneWidget);
+        expect(find.byType(BottomSheet), findsNothing);
+        expect(
+          find.descendant(
+            of: find.byType(MinistryRgcDecisionSheet),
+            matching: find.byType(Scaffold),
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('Chea Serey'), findsOneWidget);
+        expect(find.text('API indicator name'), findsOneWidget);
+        expect(find.text(l10n.text('linkedIssues')), findsOneWidget);
+        expect(find.text(l10n.text('indicators')), findsNWidgets(2));
+        final scroll = find.byType(Scrollable).first;
+        final description = find.byWidgetPredicate(
+          (w) =>
+              w is EditorContent &&
+              w.data == '<p>API indicator description</p>',
+        );
+        await tester.scrollUntilVisible(description, 180, scrollable: scroll);
+        expect(description, findsOneWidget);
+        await tester.scrollUntilVisible(
+          find.byType(RgcDecisionProgressReports),
+          180,
+          scrollable: scroll,
+        );
+        await tester.pumpAndSettle();
+        final reports = find.byType(RgcDecisionProgressReports);
+        expect(
+          find.descendant(
+            of: reports,
+            matching: find.byType(PdfAttachmentPreview),
+          ),
+          findsNothing,
+        );
+        expect(
+          find.descendant(
+            of: reports,
+            matching: find.text(l10n.text('rgcReportReferenceAttachment')),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: reports,
+            matching: find.text(l10n.text('rgcReportNoReference')),
+          ),
+          findsNWidgets(4),
+        );
+        final s2 = find.byKey(const ValueKey('ministry-rgc-report-tab-1'));
+        await tester.ensureVisible(s2);
+        await tester.pumpAndSettle();
+        await tester.tap(s2);
+        await tester.pumpAndSettle();
+        expect(find.text('S2 reference'), findsOneWidget);
+        expect(find.text('S1 reference'), findsNothing);
+        expect(find.text('S2 implementation progress'), findsOneWidget);
+        final attachment = tester.widget<PdfAttachmentPreview>(
+          find.descendant(
+            of: reports,
+            matching: find.byType(PdfAttachmentPreview),
+          ),
+        );
+        expect(attachment.path, '/uploads/S2-reference.pdf');
+        expect(calls, ['/api/v1/rgc-decisions/157']);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets('ministry decision shows each report period and its document', (
     tester,
@@ -169,7 +345,7 @@ void main() {
           findsOneWidget,
         );
         expect(
-          find.text('• ${AppLocalizations(language).status('Not Addressed')}'),
+          find.text(AppLocalizations(language).status('Not Addressed')),
           findsOneWidget,
         );
         expect(find.text('H.E. Mr. DITH TINA'), findsOneWidget);
