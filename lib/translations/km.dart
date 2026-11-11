@@ -177,6 +177,7 @@ const Map<String, String> kmTranslations = {
   'viewDetails': 'មើលព័ត៌មានលម្អិត',
   'submissionDate': 'កាលបរិច្ឆេទដាក់ស្នើ',
   'report': 'របាយការណ៍',
+  'rgcDecisionMenu': 'សេចក្តីសម្រេច RGC',
   'account': 'គណនី',
   'setting': 'ការកំណត់',
   'darkMode': 'របៀបងងឹត',

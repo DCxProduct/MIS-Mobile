@@ -176,6 +176,7 @@ const Map<String, String> enTranslations = {
   'viewDetails': 'View Details',
   'submissionDate': 'Submission Date',
   'report': 'Report',
+  'rgcDecisionMenu': 'RGC Decision',
   'account': 'Account',
   'setting': 'Setting',
   'darkMode': 'Dark Mode',

@@ -49,7 +49,10 @@ class AppBottomNavBar extends StatelessWidget {
               : l10n.text('meeting'),
         ),
       (icon: Icons.assignment_outlined, label: l10n.text('issues')),
-      (icon: Icons.folder_outlined, label: l10n.text('report')),
+      (
+        icon: isCdcSection ? Icons.gavel_outlined : Icons.folder_outlined,
+        label: l10n.text(isCdcSection ? 'rgcDecisionMenu' : 'report'),
+      ),
       (icon: Icons.person_outline_rounded, label: l10n.text('account')),
     ];
 
