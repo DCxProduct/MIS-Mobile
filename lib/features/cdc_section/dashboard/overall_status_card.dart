@@ -240,7 +240,7 @@ class _Badge extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     decoration: BoxDecoration(
       color: Theme.of(context).brightness == Brightness.dark
-          ? AppColors.darkCard
+          ? AppColors.darkElevated
           : Colors.white,
       borderRadius: BorderRadius.circular(5),
       boxShadow: [
@@ -372,9 +372,11 @@ class PlenaryProgressStatusCard extends StatelessWidget {
     final total = mid + early;
     return _PlenaryRingCard(
       centerKey: 'inProgress',
-      value: total,
+      value: cards['midProgress'] == null || cards['earlyProgress'] == null
+          ? null
+          : total,
       labels: const ['midProgress', 'earlyProgress'],
-      counts: [mid, early],
+      counts: [cards['midProgress'], cards['earlyProgress']],
       shares: [total == 0 ? 0 : mid / total, total == 0 ? 0 : early / total],
       colors: const [Color(0xFFF9A15D), Color(0xFFF5DBA9)],
       progressStyle: true,
@@ -393,7 +395,7 @@ class _PlenaryRingCard extends StatelessWidget {
     this.progressStyle = false,
   });
   final String centerKey;
-  final int value;
+  final int? value;
   final List<String> labels;
   final List<int?> counts;
   final List<double> shares;
@@ -432,7 +434,7 @@ class _PlenaryRingCard extends StatelessWidget {
                     alignment: Alignment.center,
                     clipBehavior: Clip.none,
                     children: [
-                      if (!progressStyle || value > 0)
+                      if (!progressStyle || (value ?? 0) > 0)
                         CustomPaint(
                           size: Size.square(
                             donutChartRadius(constraints.biggest) * 2,
@@ -456,8 +458,10 @@ class _PlenaryRingCard extends StatelessWidget {
                           width: donutChartRadius(constraints.biggest) * 2 - 60,
                           height:
                               donutChartRadius(constraints.biggest) * 2 - 60,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFBAD9F2),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.darkPrimaryContainer
+                                : const Color(0xFFBAD9F2),
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -466,14 +470,17 @@ class _PlenaryRingCard extends StatelessWidget {
                         children: [
                           Text(
                             l10n.text(centerKey),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
-                              color: AppColors.mutedText,
+                              color: isDark
+                                  ? const Color(0xFFB8C0CC)
+                                  : const Color(0xFF6C7480),
                             ),
                           ),
                           Text(
-                            AppLocalizations.of(context).number(value),
-                            style: const TextStyle(
+                            AppLocalizations.of(context).number(value ?? '—'),
+                            style: TextStyle(
+                              color: isDark ? Colors.white : AppColors.text,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),

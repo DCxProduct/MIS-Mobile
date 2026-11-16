@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gpsf_app/core/app_settings.dart';
 import 'package:gpsf_app/core/config/module_config.dart';
@@ -16,6 +17,10 @@ void main() {
     testWidgets(
       '$module status colors fill every nonempty row to the right edge',
       (tester) async {
+        tester.view.physicalSize = const Size(320, 700);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
         final settings = AppSettingsController()
           ..setLanguage(AppLanguage.khmer)
           ..setModuleType(module);
@@ -49,6 +54,14 @@ void main() {
                       total: 0,
                       solved: 0,
                       inProgress: 0,
+                      notAddressed: 0,
+                    ),
+                    WorkingGroupSummary(
+                      id: 4,
+                      name: 'Narrow',
+                      total: 14,
+                      solved: 13,
+                      inProgress: 1,
                       notAddressed: 0,
                     ),
                   ],
@@ -101,8 +114,66 @@ void main() {
           );
         }
         expect(find.byKey(const ValueKey('group-track-3')), findsOneWidget);
+        expect(find.byKey(const ValueKey('working-group-3')), findsOneWidget);
         expect(find.byKey(const ValueKey('group-3-solved')), findsNothing);
         expect(find.text('២'), findsNWidgets(2));
+        expect(find.text('(៤)'), findsOneWidget);
+        expect(find.text('(០)'), findsOneWidget);
+        final narrow = find.byKey(const ValueKey('group-4-inProgress'));
+        final narrowSolved = find.byKey(const ValueKey('group-4-solved'));
+        final narrowCount = find.descendant(
+          of: narrow,
+          matching: find.text('១'),
+        );
+        expect(narrowCount, findsOneWidget);
+        expect(tester.getSize(narrow).width, greaterThanOrEqualTo(18));
+        expect(tester.getSize(narrow).height, 20);
+        expect(tester.getCenter(narrow).dy, tester.getCenter(narrowSolved).dy);
+        expect(
+          tester.getRect(narrow).contains(tester.getCenter(narrowCount)),
+          isTrue,
+        );
+        expect(
+          tester.widget<Text>(narrowCount).style!.color,
+          const Color(0xFF342600),
+        );
+        final fittedLabel = find.descendant(
+          of: narrow,
+          matching: find.byType(FittedBox),
+        );
+        expect(tester.getSize(fittedLabel).width, greaterThanOrEqualTo(10));
+        expect(
+          tester.getSize(narrow).width + tester.getSize(narrowSolved).width,
+          closeTo(track, 0.01),
+        );
+        await tester.tap(narrow);
+        await tester.pumpAndSettle();
+        expect(find.textContaining('១ (៧.១៤%)'), findsOneWidget);
+        Tooltip.dismissAllToolTips();
+        await tester.pumpAndSettle();
+        final solved = find.byKey(const ValueKey('group-1-solved'));
+        final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+        await mouse.addPointer(location: const Offset(319, 699));
+        await mouse.moveTo(tester.getCenter(solved));
+        await tester.pump(const Duration(milliseconds: 500));
+        await tester.pumpAndSettle();
+        expect(find.textContaining('២ (៥០.០០%)'), findsOneWidget);
+        await mouse.moveTo(const Offset(319, 699));
+        await tester.pumpAndSettle();
+        await mouse.removePointer();
+        await tester.tap(find.byKey(const ValueKey('group-1-inProgress')));
+        await tester.pumpAndSettle();
+        expect(find.textContaining('១ (២៥.០០%)'), findsOneWidget);
+        Tooltip.dismissAllToolTips();
+        await tester.pumpAndSettle();
+        settings.setLanguage(AppLanguage.english);
+        await tester.pumpAndSettle();
+        expect(find.text('(4)'), findsOneWidget);
+        await tester.tap(solved);
+        await tester.pumpAndSettle();
+        expect(find.text('Mixed · Solved\n2 (50.00%)'), findsOneWidget);
+        Tooltip.dismissAllToolTips();
+        await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
       },
     );

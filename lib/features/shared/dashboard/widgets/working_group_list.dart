@@ -5,6 +5,7 @@ import '../../../../core/config/module_config.dart';
 import '../../../../translations/app_localizations.dart';
 import '../data/working_group_summary.dart';
 import '../data/working_group_order.dart';
+import 'status_bar_layout.dart';
 
 const _solvedColor = Color(0xFF0DA365);
 const _inProgressColor = Color(0xFFF5B324);
@@ -132,15 +133,33 @@ class _WorkingGroupRow extends StatelessWidget {
         children: [
           Expanded(
             flex: 5,
-            child: Text(
-              label,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: AppColors.primaryText(context),
-                fontSize: 12,
-                height: 1.5,
-              ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: AppColors.primaryText(context),
+                      fontSize: 12,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '(${l10n.number(group.total)})',
+                  key: ValueKey('group-${group.id}-total'),
+                  semanticsLabel:
+                      '${l10n.text('totalIssues')}: ${l10n.number(group.total)}',
+                  style: TextStyle(
+                    color: AppColors.primaryText(context),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 8),
@@ -168,39 +187,65 @@ class _WorkingGroupRow extends StatelessWidget {
                       : const Color(0xFFEBF2F7),
                   child: total == 0
                       ? null
-                      : Row(
-                          children: [
-                            for (var i = 0; i < counts.length; i++)
-                              if (counts[i] > 0)
-                                Expanded(
-                                  flex: counts[i],
-                                  child: ColoredBox(
-                                    key: ValueKey(
-                                      'group-${group.id}-${statuses[i]}',
-                                    ),
-                                    color: colors[i],
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 4,
-                                      ),
-                                      child: SizedBox.expand(
-                                        child: FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          alignment: Alignment.centerRight,
-                                          child: Text(
-                                            l10n.number(counts[i]),
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w700,
+                      : LayoutBuilder(
+                          builder: (context, constraints) {
+                            final widths = statusBarWidths(
+                              counts,
+                              constraints.maxWidth,
+                            );
+                            return Row(
+                              children: [
+                                for (var i = 0; i < counts.length; i++)
+                                  if (counts[i] > 0)
+                                    SizedBox(
+                                      width: widths[i],
+                                      child: Tooltip(
+                                        message:
+                                            '$label · ${l10n.text(statuses[i])}\n'
+                                            '${l10n.number(counts[i])} (${l10n.number(100 * counts[i] / total, decimalPlaces: 2)}%)',
+                                        triggerMode: TooltipTriggerMode.tap,
+                                        waitDuration: const Duration(
+                                          milliseconds: 250,
+                                        ),
+                                        showDuration: const Duration(
+                                          seconds: 3,
+                                        ),
+                                        excludeFromSemantics: true,
+                                        child: ColoredBox(
+                                          key: ValueKey(
+                                            'group-${group.id}-${statuses[i]}',
+                                          ),
+                                          color: colors[i],
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 4,
+                                            ),
+                                            child: SizedBox.expand(
+                                              child: FittedBox(
+                                                fit: BoxFit.scaleDown,
+                                                alignment:
+                                                    Alignment.centerRight,
+                                                child: Text(
+                                                  l10n.number(counts[i]),
+                                                  style: TextStyle(
+                                                    color: i == 1
+                                                        ? const Color(
+                                                            0xFF342600,
+                                                          )
+                                                        : Colors.white,
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ),
-                          ],
+                              ],
+                            );
+                          },
                         ),
                 ),
               ),

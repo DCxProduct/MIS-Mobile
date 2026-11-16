@@ -61,6 +61,7 @@ void main() {
                         isIn([
                           '/api/v1/dashboards/pswg/live',
                           '/api/v1/dashboards/plenary/live',
+                          '/api/v1/dashboards/overview/live',
                         ]),
                       );
                       return http.Response(
@@ -93,6 +94,15 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        if (hasPlenary) {
+          expect(requests, ['/api/v1/dashboards/overview/live']);
+          requests.clear();
+          await tester.ensureVisible(
+            find.byKey(const ValueKey('dashboard-scope-0')),
+          );
+          await tester.tap(find.byKey(const ValueKey('dashboard-scope-0')));
+          await tester.pumpAndSettle();
+        }
         expect(find.byType(OverallTab), findsOneWidget);
         expect(
           tester.widget<OverallTab>(find.byType(OverallTab)).plenary,
@@ -118,8 +128,10 @@ void main() {
           );
           expect(tester.takeException(), isNull);
         }
-        await tester.ensureVisible(find.text('Working Group').first);
-        await tester.tap(find.text('Working Group').first);
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('dashboard-scope-1')),
+        );
+        await tester.tap(find.byKey(const ValueKey('dashboard-scope-1')));
         await tester.pumpAndSettle();
         expect(find.byType(PswgDataScope), findsOneWidget);
         expect(find.byType(PlenaryProgressStatusCard), findsNothing);

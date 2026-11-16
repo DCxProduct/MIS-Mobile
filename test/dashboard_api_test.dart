@@ -126,6 +126,10 @@ void main() {
       await tester.tap(find.text('Retry'));
       await tester.pumpAndSettle();
       expect(find.text('Agriculture & Agro-Industry'), findsOneWidget);
+      // The dashboard initially previews eight groups; expand for later rows.
+      await tester.ensureVisible(find.text('Show more'));
+      await tester.tap(find.text('Show more'));
+      await tester.pumpAndSettle();
       expect(find.text('Rice and Paddy'), findsOneWidget);
       expect(find.byType(Card), findsNothing);
       settings.setThemeMode(ThemeMode.dark);

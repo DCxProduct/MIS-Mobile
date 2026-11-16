@@ -63,6 +63,8 @@ void main() {
                     }
                     calls.add(request.url);
                     final fixture = switch (path) {
+                      '/api/v1/dashboards/overview/live' =>
+                        'overview_live.json',
                       '/api/v1/dashboards/pswg/live' => 'working_groups.json',
                       '/api/v1/dashboards/plenary/live' =>
                         'plenary_live_report.json',
@@ -120,10 +122,15 @@ void main() {
       );
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
+      expect(calls.map((uri) => uri.path), [
+        '/api/v1/dashboards/overview/live',
+      ]);
+      await tester.tap(find.byKey(const ValueKey('bottom-nav-0')));
+      await tester.pumpAndSettle();
       final nav = find.byType(AppBottomNavBar);
       expect(
         find.descendant(of: nav, matching: find.byType(InkWell)),
-        findsNWidgets(5),
+        findsNWidgets(6),
       );
       expect(
         find.descendant(
@@ -132,8 +139,39 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(calls.map((uri) => uri.path), ['/api/v1/dashboards/pswg/live']);
+      expect(calls.map((uri) => uri.path), [
+        '/api/v1/dashboards/overview/live',
+        '/api/v1/dashboards/pswg/live',
+      ]);
       expect(find.byType(AppHeader), findsOneWidget);
+
+      final dashboardFilter = find.byType(DashboardFilterButton);
+      expect(dashboardFilter, findsOneWidget);
+      expect(
+        tester.getBottomRight(dashboardFilter).dy,
+        lessThan(
+          tester
+              .getTopLeft(find.byKey(const ValueKey('cdc-working-group-tab-0')))
+              .dy,
+        ),
+      );
+      await tester.tap(dashboardFilter);
+      await tester.pumpAndSettle();
+      final dashboardSheet = find.byType(ApiFilterSheet);
+      expect(
+        tester.widget<ApiFilterSheet>(dashboardSheet).translationPage,
+        'dashboard_working_group',
+      );
+      Navigator.of(tester.element(dashboardSheet)).pop(
+        FilterSelection({
+          'local.status': {'SOLVED'},
+        }),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<DashboardFilterButton>(dashboardFilter).activeCount,
+        1,
+      );
 
       for (final (index, key, endpoint) in [
         (1, 'meeting_requests.title', '/api/v1/meeting-requests'),
@@ -185,9 +223,7 @@ void main() {
       );
 
       // The new Plenary destination owns the three former report tabs.
-      await tester.tap(
-        find.descendant(of: nav, matching: find.byType(InkWell)).at(1),
-      );
+      await tester.tap(find.byKey(const ValueKey('bottom-nav-1')));
       await tester.pumpAndSettle();
       expect(tester.widget<AppBottomNavBar>(nav).selectedIndex, 1);
       expect(
@@ -243,9 +279,7 @@ void main() {
       );
 
       // Reports has just progress reports and its original filter context.
-      await tester.tap(
-        find.descendant(of: nav, matching: find.byType(InkWell)).at(3),
-      );
+      await tester.tap(find.byKey(const ValueKey('bottom-nav-3')));
       await tester.pumpAndSettle();
       expect(tester.widget<AppBottomNavBar>(nav).selectedIndex, 3);
       expect(find.byKey(const ValueKey('cdc-plenary-tabs')), findsNothing);
@@ -265,9 +299,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Issues follows Web: Issue Matrix first, then RGC Decision.
-      await tester.tap(
-        find.descendant(of: nav, matching: find.byType(InkWell)).at(2),
-      );
+      await tester.tap(find.byKey(const ValueKey('bottom-nav-2')));
       await tester.pumpAndSettle();
       expect(
         find.byKey(const ValueKey('cdc-working-group-tab-0')),

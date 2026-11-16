@@ -8,6 +8,7 @@ import 'package:gpsf_app/core/network/api_client.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/cdc_section/reports/reports_screen.dart';
 import 'package:gpsf_app/features/cefp/reports/reports_screen.dart';
+import 'package:gpsf_app/features/cefp/profile/profile_screen.dart';
 import 'package:gpsf_app/features/cdc_section/dashboard/dashboard_screen.dart';
 import 'package:gpsf_app/features/cdc_section/issues/cdc_issues_matrix_screen.dart';
 import 'package:gpsf_app/features/cdc_section/issues/issues_screen.dart';
@@ -58,7 +59,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(CdcSectionDashboardScreenView), findsOneWidget);
       expect(find.byType(DashboardPage), findsOneWidget);
-      expect(find.text('Retry'), findsOneWidget);
+      expect(find.text('Retry'), findsNothing);
       expect(
         tester.getRect(find.byType(DashboardPage)).bottom,
         lessThanOrEqualTo(tester.getRect(find.byType(AppBottomNavBar)).top),
@@ -78,11 +79,26 @@ void main() {
       await tester.tap(find.text('Issues'));
       await tester.pumpAndSettle();
       expect(find.byType(CdcSectionIssuesScreenView), findsOneWidget);
-      await tester.tap(find.text('Report'));
+      expect(find.byIcon(Icons.gavel_outlined), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.gavel_outlined));
       await tester.pumpAndSettle();
+      expect(find.byType(CefpReportsScreenView), findsOneWidget);
       expect(find.byType(CdcSectionReportsScreenView), findsOneWidget);
+      expect(
+        tester
+            .widget<AppBottomNavBar>(find.byType(AppBottomNavBar))
+            .selectedIndex,
+        3,
+      );
       await tester.tap(find.text('Account'));
       await tester.pumpAndSettle();
+      expect(find.byType(CefpProfileScreenView), findsOneWidget);
+      expect(
+        tester
+            .widget<AppBottomNavBar>(find.byType(AppBottomNavBar))
+            .selectedIndex,
+        4,
+      );
       expect(settings.moduleType, AppModuleType.cefp);
       expect(tester.takeException(), isNull);
     },

@@ -18,12 +18,19 @@ class CdcWorkingGroupScreen extends StatefulWidget {
 class _CdcWorkingGroupScreenState extends State<CdcWorkingGroupScreen> {
   int _selectedTab = 0;
   final _visited = <int>{0};
-  static const _pages = <Widget>[
-    DashboardPage(initialScopeTab: 1, showAppHeader: false),
-    MeetingScreen(initialTab: 0, showTabs: false, embedded: true),
-    MeetingScreen(initialTab: 1, showTabs: false, embedded: true),
-    MeetingScreen(initialTab: 2, showTabs: false, embedded: true),
-    CdcSecretariatIssuesScreenView(
+  final _dashboardKey = GlobalKey<DashboardPageState>();
+  late final _pages = <Widget>[
+    DashboardPage(
+      key: _dashboardKey,
+      initialScopeTab: 1,
+      showAppHeader: false,
+      showScopeSelector: false,
+      showFilterButton: false,
+    ),
+    const MeetingScreen(initialTab: 0, showTabs: false, embedded: true),
+    const MeetingScreen(initialTab: 1, showTabs: false, embedded: true),
+    const MeetingScreen(initialTab: 2, showTabs: false, embedded: true),
+    const CdcSecretariatIssuesScreenView(
       initialTab: 1,
       showTabs: false,
       embedded: true,
@@ -49,13 +56,30 @@ class _CdcWorkingGroupScreenState extends State<CdcWorkingGroupScreen> {
         const AppHeader(),
         Padding(
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
-          child: Text(
-            labels[_selectedTab],
-            style: TextStyle(
-              color: AppColors.primaryText(context),
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  labels[_selectedTab],
+                  style: TextStyle(
+                    color: AppColors.primaryText(context),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              if (_selectedTab == 0) ...[
+                const SizedBox(width: 12),
+                DashboardFilterButton(
+                  activeCount:
+                      _dashboardKey.currentState?.activeFilterCount ?? 0,
+                  onTap: () async {
+                    await _dashboardKey.currentState?.openFilters();
+                    if (mounted) setState(() {});
+                  },
+                ),
+              ],
+            ],
           ),
         ),
         Padding(

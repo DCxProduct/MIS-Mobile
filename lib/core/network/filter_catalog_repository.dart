@@ -19,11 +19,14 @@ class FilterCatalogRepository {
     String? year,
   }) async {
     final dashboardScope = DashboardScope.values.byName(scope);
-    final rows = await _api.getList(
-      'dashboards/$scope/saved',
-      query: const {'finalOnly': 'true'},
-    );
-    if (progressReportId == null && year != null) {
+    final liveOnly = dashboardScope == DashboardScope.overview;
+    final rows = liveOnly
+        ? const <dynamic>[]
+        : await _api.getList(
+            'dashboards/$scope/saved',
+            query: const {'finalOnly': 'true'},
+          );
+    if (!liveOnly && progressReportId == null && year != null) {
       final reports =
           rows
               .whereType<Map>()
@@ -41,7 +44,7 @@ class FilterCatalogRepository {
       progressReportId = reports.first['progressReportId'] as int;
     }
     final snapshot = await _api.get(
-      progressReportId == null
+      liveOnly || progressReportId == null
           ? 'dashboards/${dashboardScope.name}/live'
           : 'progress-reports/$progressReportId/dashboards/${dashboardScope.name}/final',
     );
@@ -85,34 +88,36 @@ class FilterCatalogRepository {
         collapsedItemCount: 5,
         options: breakdown('byCategory', 'categoryName'),
       ),
-      _strings(
-        'local.year',
-        'year',
-        rows
-            .whereType<Map>()
-            .where((row) => row['year'] != null)
-            .map((row) => '${row['year']}'),
-        columns: 4,
-        single: true,
-      ),
-      FilterSection(
-        id: 'progressReportId',
-        title: 'progressReport',
-        singleSelection: true,
-        columns: 2,
-        options: [
-          for (final row in rows)
-            if (row is Map &&
-                row['progressReportId'] is int &&
-                row['year'] is int &&
-                row['semester'] is String)
-              FilterOption(
-                value: '${row['progressReportId']}',
-                label: '${row['semester']} ${row['year']}',
-                year: '${row['year']}',
-              ),
-        ],
-      ),
+      if (!liveOnly)
+        _strings(
+          'local.year',
+          'year',
+          rows
+              .whereType<Map>()
+              .where((row) => row['year'] != null)
+              .map((row) => '${row['year']}'),
+          columns: 4,
+          single: true,
+        ),
+      if (!liveOnly)
+        FilterSection(
+          id: 'progressReportId',
+          title: 'progressReport',
+          singleSelection: true,
+          columns: 2,
+          options: [
+            for (final row in rows)
+              if (row is Map &&
+                  row['progressReportId'] is int &&
+                  row['year'] is int &&
+                  row['semester'] is String)
+                FilterOption(
+                  value: '${row['progressReportId']}',
+                  label: '${row['semester']} ${row['year']}',
+                  year: '${row['year']}',
+                ),
+          ],
+        ),
     ];
   }
 
@@ -396,9 +401,16 @@ class FilterCatalogRepository {
     ];
   }
 
-  Future<List<FilterSection>> rgc({bool cdcGpsf = false}) async {
+  Future<List<FilterSection>> rgc({
+    bool cdcGpsf = false,
+    bool issueMatrix = false,
+  }) async {
     final rows = await _api.getAllPages(
-      cdcGpsf ? 'rgc-decisions/cdc-gpsf' : 'rgc-decisions',
+      issueMatrix
+          ? 'rgc-decisions/issue-matrix'
+          : cdcGpsf
+          ? 'rgc-decisions/cdc-gpsf'
+          : 'rgc-decisions',
       objectItems: true,
     );
     List<FilterOption> relatedOptions(String idKey, String relationKey) {

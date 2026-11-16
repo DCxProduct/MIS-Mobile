@@ -2,7 +2,7 @@ import '../../../../core/network/api_client.dart';
 import 'working_group_summary.dart';
 import 'pswg_dashboard.dart';
 
-enum DashboardScope { pswg, plenary }
+enum DashboardScope { pswg, plenary, overview }
 
 class DashboardRepository {
   DashboardRepository(this._api);
@@ -14,11 +14,13 @@ class DashboardRepository {
     int? progressReportId,
     String? year,
   }) async {
-    if (progressReportId == null && year != null) {
+    if (scope != DashboardScope.overview &&
+        progressReportId == null &&
+        year != null) {
       progressReportId = await resolveReportId(scope: scope, year: year);
     }
     final data = await _api.get(
-      progressReportId == null
+      scope == DashboardScope.overview || progressReportId == null
           ? 'dashboards/${scope.name}/live'
           : 'progress-reports/$progressReportId/dashboards/${scope.name}/final',
     );

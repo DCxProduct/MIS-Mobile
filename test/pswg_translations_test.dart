@@ -756,7 +756,9 @@ void main() {
       await tester.pumpWidget(
         AppSettings(
           controller: settings,
-          child: const MaterialApp(home: Scaffold(body: DashboardPage())),
+          child: const MaterialApp(
+            home: Scaffold(body: DashboardPage(initialScopeTab: 0)),
+          ),
         ),
       );
       await tester.pumpAndSettle();

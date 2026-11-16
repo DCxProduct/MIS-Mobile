@@ -44,6 +44,10 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
     });
     try {
       final decisions = await _repository!.getDecisions(
+        issueMatrix: const {
+          AppModuleType.cdcSection,
+          AppModuleType.cefp,
+        }.contains(AppSettings.of(context).moduleType),
         includePlenaryDetails: !const {
           AppModuleType.cdcSection,
           AppModuleType.cefp,
@@ -66,14 +70,19 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
   }
 
   Future<void> _openFilters() async {
-    final catalogs = AppSettings.of(context).filters;
+    final settings = AppSettings.of(context);
+    final catalogs = settings.filters;
+    final issueMatrix = const {
+      AppModuleType.cdcSection,
+      AppModuleType.cefp,
+    }.contains(settings.moduleType);
     final result = await Navigator.of(context).push<FilterSelection>(
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
           translationPage: 'cdc_rgc',
           initial: _filters,
-          load: catalogs.rgc,
+          load: () => catalogs.rgc(issueMatrix: issueMatrix),
         ),
       ),
     );

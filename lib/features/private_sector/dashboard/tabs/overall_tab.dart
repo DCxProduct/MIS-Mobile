@@ -9,9 +9,14 @@ import '../../../../core/app_colors.dart';
 import '../../../../translations/app_localizations.dart';
 
 class OverallTab extends StatelessWidget {
-  const OverallTab({super.key, this.plenary = false});
+  const OverallTab({
+    super.key,
+    this.plenary = false,
+    this.percentageDecimalPlaces = 2,
+  });
 
   final bool plenary;
+  final int percentageDecimalPlaces;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +29,7 @@ class OverallTab extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(18, 5, 18, 16),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.darkBackground : Colors.white,
+            color: isDark ? AppColors.darkCard : Colors.white,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isDark ? AppColors.darkBorder : const Color(0xFFE9EDF2),
@@ -41,6 +46,7 @@ class OverallTab extends StatelessWidget {
                     l10n: l10n,
                     cards: cards,
                     totalLabel: l10n.text('totalIssues'),
+                    percentageDecimalPlaces: percentageDecimalPlaces,
                   ),
                 ),
               ),
@@ -48,22 +54,22 @@ class OverallTab extends StatelessWidget {
               _ChartLegendRow(
                 color: isDark ? AppColors.darkPrimary : const Color(0xFF2D7DBF),
                 label: l10n.text('totalIssues'),
-                value: '(${cards?['totalIssues'] ?? 20})',
+                value: '(${cards?['totalIssues'] ?? '—'})',
               ),
               _ChartLegendRow(
                 color: const Color(0xFF009F5C),
                 label: l10n.text('solved'),
-                value: '(${cards?['solved'] ?? 15})',
+                value: '(${cards?['solved'] ?? '—'})',
               ),
               _ChartLegendRow(
                 color: const Color(0xFFF7B51D),
                 label: l10n.text('inProgress'),
-                value: '(${cards?['inProgress'] ?? 4})',
+                value: '(${cards?['inProgress'] ?? '—'})',
               ),
               _ChartLegendRow(
                 color: const Color(0xFFFF3B30),
                 label: l10n.text('notAddressed'),
-                value: '(${cards?['notAddressed'] ?? 1})',
+                value: '(${cards?['notAddressed'] ?? '—'})',
               ),
             ],
           ),
@@ -83,6 +89,7 @@ class _DonutChartPainter extends CustomPainter {
     required this.l10n,
     this.cards,
     required this.totalLabel,
+    required this.percentageDecimalPlaces,
   });
 
   final Map<String, int?>? cards;
@@ -90,6 +97,7 @@ class _DonutChartPainter extends CustomPainter {
   final bool isDark;
   final AppLocalizations l10n;
   final String totalLabel;
+  final int percentageDecimalPlaces;
 
   static const double _cornerRadius = 6;
 
@@ -127,9 +135,17 @@ class _DonutChartPainter extends CustomPainter {
                   percent: cards![item.key]! / total,
                   color: item.color,
                   label:
-                      '${(100 * cards![item.key]! / total).toStringAsFixed(2)}%',
+                      '${(100 * cards![item.key]! / total).toStringAsFixed(percentageDecimalPlaces)}%',
                 ),
           ];
+    canvas.drawCircle(
+      center,
+      innerRadius,
+      Paint()
+        ..color = isDark
+            ? AppColors.darkPrimaryContainer
+            : const Color(0xFFBAD9F2),
+    );
     for (final segment in segments) {
       final sweep = segment.percent * math.pi * 2;
       final segmentGap = math.min(gapAngle, sweep / 4);
@@ -279,8 +295,8 @@ class _DonutChartPainter extends CustomPainter {
     final painter = TextPainter(
       text: TextSpan(
         text: l10n.number(text),
-        style: const TextStyle(
-          color: AppColors.text,
+        style: TextStyle(
+          color: isDark ? Colors.white : AppColors.text,
           fontSize: 11,
           fontFamily: 'KhBattambang',
           fontWeight: FontWeight.w700,
@@ -304,7 +320,10 @@ class _DonutChartPainter extends CustomPainter {
       true,
     );
 
-    canvas.drawRRect(rrect, Paint()..color = Colors.white);
+    canvas.drawRRect(
+      rrect,
+      Paint()..color = isDark ? AppColors.darkElevated : Colors.white,
+    );
 
     canvas.drawCircle(
       Offset(chipRect.left + 9, center.dy),
@@ -334,7 +353,7 @@ class _DonutChartPainter extends CustomPainter {
             ),
           ),
           TextSpan(
-            text: l10n.number(cards?['totalIssues'] ?? 20),
+            text: l10n.number(cards?['totalIssues'] ?? '—'),
             style: TextStyle(
               color: isDark ? Colors.white : AppColors.text,
               fontSize: 16,
@@ -355,6 +374,7 @@ class _DonutChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DonutChartPainter oldDelegate) =>
+      oldDelegate.percentageDecimalPlaces != percentageDecimalPlaces ||
       oldDelegate.l10n.language != l10n.language ||
       oldDelegate.isDark != isDark ||
       oldDelegate.cards != cards ||

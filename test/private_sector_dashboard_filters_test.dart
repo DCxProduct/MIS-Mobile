@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 void main() {
-  for (final scope in DashboardScope.values) {
+  for (final scope in [DashboardScope.pswg, DashboardScope.plenary]) {
     test('${scope.name} uses finalized periods and filters locally', () async {
       final requests = <Uri>[];
       final payload =

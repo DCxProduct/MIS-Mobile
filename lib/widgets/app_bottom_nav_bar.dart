@@ -26,7 +26,14 @@ class AppBottomNavBar extends StatelessWidget {
         moduleType == AppModuleType.cefp;
 
     final items = [
+      if (isCdcGpsf)
+        (
+          destination: 5,
+          icon: Icons.dashboard_outlined,
+          label: l10n.text('gpsfOverviewCdc'),
+        ),
       (
+        destination: 0,
         icon: Icons.grid_view_rounded,
         label: isCdcGpsf
             ? l10n.api(
@@ -36,9 +43,14 @@ class AppBottomNavBar extends StatelessWidget {
             : l10n.text('dashboard'),
       ),
       if (isCdcGpsf)
-        (icon: Icons.groups_outlined, label: l10n.text('plenaryMenu'))
+        (
+          destination: 1,
+          icon: Icons.groups_outlined,
+          label: l10n.text('plenaryMenu'),
+        )
       else
         (
+          destination: 1,
           icon: isCdcSection
               ? Icons.description_outlined
               : Icons.calendar_month_outlined,
@@ -48,12 +60,21 @@ class AppBottomNavBar extends StatelessWidget {
                 )
               : l10n.text('meeting'),
         ),
-      (icon: Icons.assignment_outlined, label: l10n.text('issues')),
       (
+        destination: 2,
+        icon: Icons.assignment_outlined,
+        label: l10n.text('issues'),
+      ),
+      (
+        destination: 3,
         icon: isCdcSection ? Icons.gavel_outlined : Icons.folder_outlined,
         label: l10n.text(isCdcSection ? 'rgcDecisionMenu' : 'report'),
       ),
-      (icon: Icons.person_outline_rounded, label: l10n.text('account')),
+      (
+        destination: 4,
+        icon: Icons.person_outline_rounded,
+        label: l10n.text('account'),
+      ),
     ];
 
     return Container(
@@ -74,10 +95,11 @@ class AppBottomNavBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(items.length, (index) {
-          final destination = index;
+          final destination = items[index].destination;
           final isSelected = selectedIndex == destination;
           return Expanded(
             child: InkWell(
+              key: ValueKey('bottom-nav-$destination'),
               onTap: () => onSelected(destination),
               borderRadius: BorderRadius.circular(10),
               child: Column(

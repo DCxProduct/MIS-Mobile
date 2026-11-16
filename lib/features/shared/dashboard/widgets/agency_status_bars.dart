@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../../core/app_colors.dart';
 import '../../../../translations/app_localizations.dart';
 import '../data/working_group_summary.dart';
+import 'status_bar_layout.dart';
 
-/// Status proportions fill each agency row; labels retain API counts.
+/// Totals sit beside each agency, with status counts inside each colored bar.
 class AgencyStatusBars extends StatelessWidget {
   const AgencyStatusBars({super.key, required this.agencies});
 
@@ -19,6 +20,9 @@ class AgencyStatusBars extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
+    final visibleAgencies = agencies
+        .where((agency) => agency.total > 0)
+        .toList();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -27,24 +31,45 @@ class AgencyStatusBars extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColors.border(context)),
       ),
-      child: agencies.isEmpty
+      child: visibleAgencies.isEmpty
           ? Text(l10n.text('noIssuesFound'))
           : LayoutBuilder(
               builder: (context, constraints) {
-                const labelWidth = 54.0;
+                const labelWidth = 84.0;
                 final barWidth = constraints.maxWidth - labelWidth;
                 return Column(
                   children: [
-                    for (final agency in agencies)
+                    for (final agency in visibleAgencies)
                       Row(
                         children: [
                           SizedBox(
                             width: labelWidth,
-                            child: Text(
-                              agency.name,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: colors.onSurface,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      agency.name,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: colors.onSurface,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '(${l10n.number(agency.total)})',
+                                    key: ValueKey('agency-${agency.id}-total'),
+                                    semanticsLabel:
+                                        '${l10n.text('totalIssues')}: ${l10n.number(agency.total)}',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: colors.onSurface,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -78,33 +103,26 @@ class AgencyStatusBars extends StatelessWidget {
                                           key: ValueKey(
                                             'agency-${agency.id}-${_statuses[index].$1}',
                                           ),
-                                          width:
-                                              (barWidth - 1) *
-                                              count /
-                                              (agency.solved +
-                                                  agency.inProgress +
-                                                  agency.notAddressed),
-                                          height: 14,
-                                          child: ColoredBox(
-                                            color: _statuses[index].$2,
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 3,
-                                                  ),
-                                              child: FittedBox(
-                                                fit: BoxFit.scaleDown,
-                                                alignment:
-                                                    Alignment.centerRight,
-                                                child: Text(
-                                                  l10n.number(count),
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ),
+                                          width: _segmentWidths(
+                                            agency,
+                                            barWidth - 1,
+                                          )[index],
+                                          height: 22,
+                                          child: Tooltip(
+                                            message:
+                                                '${agency.name} · ${l10n.text(_statuses[index].$1)}\n'
+                                                '${l10n.number(count)} (${l10n.number(100 * count / (agency.solved + agency.inProgress + agency.notAddressed), decimalPlaces: 2)}%)',
+                                            triggerMode: TooltipTriggerMode.tap,
+                                            waitDuration: const Duration(
+                                              milliseconds: 250,
+                                            ),
+                                            showDuration: const Duration(
+                                              seconds: 3,
+                                            ),
+                                            excludeFromSemantics: true,
+                                            child: _segmentContent(
+                                              l10n.number(count),
+                                              index,
                                             ),
                                           ),
                                         ),
@@ -172,6 +190,46 @@ class AgencyStatusBars extends StatelessWidget {
                 );
               },
             ),
+    );
+  }
+
+  // Reserve enough space for counts in small segments. The tooltip retains
+  // exact percentages; the remaining segments share the available width.
+  List<double> _segmentWidths(WorkingGroupSummary agency, double width) {
+    return statusBarWidths([
+      agency.solved,
+      agency.inProgress,
+      agency.notAddressed,
+    ], width);
+  }
+
+  Widget _segmentContent(String count, int index) {
+    final color = _statuses[index].$2;
+    final label = Text(
+      count,
+      maxLines: 1,
+      style: TextStyle(
+        color: index == 1 ? const Color(0xFF342600) : Colors.white,
+        fontSize: 10,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+    return Center(
+      child: SizedBox(
+        width: double.infinity,
+        height: 14,
+        child: ColoredBox(
+          color: color,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: label,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

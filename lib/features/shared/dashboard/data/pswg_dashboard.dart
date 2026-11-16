@@ -9,6 +9,13 @@ class PswgDashboard {
     required this.categories,
   });
 
+  /// Keeps the layout available without presenting failed requests as zeroes.
+  PswgDashboard.unavailable()
+    : cards = const {},
+      workingGroups = const [],
+      agencies = const [],
+      categories = const [];
+
   final Map<String, int?> cards;
   final List<WorkingGroupSummary> workingGroups;
   final List<WorkingGroupSummary> agencies;
@@ -93,7 +100,10 @@ class PswgDashboard {
       'earlyProgress',
     ]) {
       final value = rawCards[key];
-      if (value == null && (key == 'midProgress' || key == 'earlyProgress')) {
+      if (value == null &&
+          (key == 'totalMinistries' ||
+              key == 'midProgress' ||
+              key == 'earlyProgress')) {
         cards[key] = null;
       } else if (value is int && value >= 0) {
         cards[key] = value;

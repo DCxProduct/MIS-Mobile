@@ -89,11 +89,16 @@ class RgcDecisionsRepository {
   Future<List<RgcDecision>> getDecisions({
     Map<String, String> filters = const {},
     bool cdcGpsf = false,
+    bool issueMatrix = false,
     bool includePlenaryDetails = false,
     Map<String, String> headers = const {},
   }) async {
     final items = await _api.getAllPages(
-      cdcGpsf ? 'rgc-decisions/cdc-gpsf' : 'rgc-decisions',
+      issueMatrix
+          ? 'rgc-decisions/issue-matrix'
+          : cdcGpsf
+          ? 'rgc-decisions/cdc-gpsf'
+          : 'rgc-decisions',
       limit: cdcGpsf ? 10 : 100,
       query: filters,
       objectItems: true,

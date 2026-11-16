@@ -73,7 +73,9 @@ void main() {
             client: MockClient(
               (request) async => http.Response(
                 request.url.path.startsWith('/api/v1/dashboards/')
-                    ? File('test/fixtures/plenary.json').readAsStringSync()
+                    ? File(
+                        'test/fixtures/overview_live.json',
+                      ).readAsStringSync()
                     : jsonEncode({
                         'success': true,
                         'data': {
@@ -90,6 +92,7 @@ void main() {
                         },
                       }),
                 200,
+                headers: {'content-type': 'application/json; charset=utf-8'},
               ),
             ),
           ),
@@ -116,6 +119,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(settings.moduleType, AppModuleType.privateSector);
       expect(find.byType(DashboardPage), findsOneWidget);
+      expect(find.text('G-PSF Overview'), findsNWidgets(2));
+      expect(find.text('391/424'), findsOneWidget);
     },
   );
 

@@ -1,4 +1,6 @@
 const Map<String, String> enTranslations = {
+  'gpsfOverview': 'G-PSF Overview',
+  'gpsfOverviewCdc': 'G-PSF Overview',
   'monthJan': 'January',
   'monthFeb': 'February',
   'monthMar': 'March',

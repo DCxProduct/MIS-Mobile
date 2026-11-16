@@ -1,4 +1,6 @@
 const Map<String, String> kmTranslations = {
+  'gpsfOverview': 'ផ្ទាំងគ្រប់គ្រងរួម',
+  'gpsfOverviewCdc': 'ផ្ទាំងគ្រប់គ្រង',
   'monthJan': 'មករា',
   'monthFeb': 'កុម្ភៈ',
   'monthMar': 'មីនា',

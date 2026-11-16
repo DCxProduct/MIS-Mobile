@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/app_colors.dart';
 import '../../../../translations/app_localizations.dart';
+import '../data/category_order.dart';
 import '../data/working_group_summary.dart';
 
 /// Category totals share one scale, so bar lengths can be compared across rows.
@@ -15,29 +16,24 @@ class CategoryTotalsChart extends StatefulWidget {
 }
 
 class _CategoryTotalsChartState extends State<CategoryTotalsChart> {
-  static const _previewCount = 14;
+  static const _previewCount = 16;
   bool _expanded = false;
 
   @override
   Widget build(BuildContext context) {
-    final categories = widget.categories;
+    final categories = widget.categories
+        .where((category) => category.total > 0)
+        .toList();
     final l10n = AppLocalizations.of(context);
     final isDark = AppColors.isDark(context);
-    final ordered = categories.indexed.toList()
-      ..sort((a, b) {
-        final byTotal = b.$2.total.compareTo(a.$2.total);
-        return byTotal == 0 ? a.$1.compareTo(b.$1) : byTotal;
-      });
-    final maximum = ordered.isEmpty ? 0 : ordered.first.$2.total;
-    // Three equal intervals with rounded integer ticks (e.g. 0, 2, 4, 6).
-    var magnitude = 1;
-    while (maximum > 30 * magnitude) {
-      magnitude *= 10;
-    }
-    final step = [1, 2, 5, 10]
-        .map((value) => value * magnitude)
-        .firstWhere((value) => value * 3 >= maximum);
-    final axisMaximum = step * 3;
+    final ordered = sortCategoriesForDashboard(categories);
+    // Match the Web scale: the largest total fills the track (105 => 0/35/70/105).
+    final axisMaximum = categories.fold<int>(
+      1,
+      (maximum, category) =>
+          category.total > maximum ? category.total : maximum,
+    );
+    final tickCount = axisMaximum < 3 ? axisMaximum : 3;
     final barColor = isDark ? const Color(0xFF70A9DC) : const Color(0xFF193F68);
     final trackColor = isDark
         ? AppColors.darkElevated
@@ -59,7 +55,7 @@ class _CategoryTotalsChartState extends State<CategoryTotalsChart> {
                 final barWidth = constraints.maxWidth - labelWidth - 12;
                 return Column(
                   children: [
-                    for (final entry
+                    for (final category
                         in _expanded ? ordered : ordered.take(_previewCount))
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 5),
@@ -70,7 +66,7 @@ class _CategoryTotalsChartState extends State<CategoryTotalsChart> {
                               width: labelWidth,
                               child: Text(
                                 l10n.category(
-                                  entry.$2.displayName(l10n.language),
+                                  category.displayName(l10n.language),
                                 ),
                                 style: TextStyle(
                                   color: AppColors.primaryText(context),
@@ -82,64 +78,15 @@ class _CategoryTotalsChartState extends State<CategoryTotalsChart> {
                             const SizedBox(width: 12),
                             Semantics(
                               label: l10n.category(
-                                entry.$2.displayName(l10n.language),
+                                category.displayName(l10n.language),
                               ),
-                              value: l10n.number(entry.$2.total),
-                              child: SizedBox(
+                              value: l10n.number(category.total),
+                              child: _CategoryBar(
+                                category: category,
                                 width: barWidth,
-                                height: 20,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
-                                  child: ColoredBox(
-                                    key: ValueKey(
-                                      'category-track-${entry.$2.id}',
-                                    ),
-                                    color: trackColor,
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: SizedBox(
-                                        key: ValueKey(
-                                          'category-bar-${entry.$2.id}',
-                                        ),
-                                        width:
-                                            barWidth *
-                                            entry.$2.total /
-                                            axisMaximum,
-                                        height: 20,
-                                        child: ColoredBox(
-                                          color: barColor,
-                                          child: entry.$2.total == 0
-                                              ? null
-                                              : Padding(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 4,
-                                                      ),
-                                                  child: FittedBox(
-                                                    fit: BoxFit.scaleDown,
-                                                    alignment:
-                                                        Alignment.centerRight,
-                                                    child: Text(
-                                                      l10n.number(
-                                                        entry.$2.total,
-                                                      ),
-                                                      style: TextStyle(
-                                                        color: isDark
-                                                            ? AppColors
-                                                                  .darkBackground
-                                                            : Colors.white,
-                                                        fontSize: 11,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                                axisMaximum: axisMaximum,
+                                barColor: barColor,
+                                trackColor: trackColor,
                               ),
                             ),
                           ],
@@ -151,9 +98,16 @@ class _CategoryTotalsChartState extends State<CategoryTotalsChart> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          for (var index = 0; index <= 3; index++)
+                          for (var index = 0; index <= tickCount; index++)
                             Text(
-                              l10n.number(index * step),
+                              l10n.number(
+                                axisMaximum * index / tickCount,
+                                decimalPlaces:
+                                    (axisMaximum * index) % tickCount == 0
+                                    ? 0
+                                    : 1,
+                              ),
+                              key: ValueKey('category-axis-$index'),
                               style: const TextStyle(
                                 fontSize: 11,
                                 color: AppColors.mutedText,
@@ -202,6 +156,87 @@ class _CategoryTotalsChartState extends State<CategoryTotalsChart> {
                 );
               },
             ),
+    );
+  }
+}
+
+/// Give small bars enough colored space to keep their counts readable inside.
+class _CategoryBar extends StatelessWidget {
+  const _CategoryBar({
+    required this.category,
+    required this.width,
+    required this.axisMaximum,
+    required this.barColor,
+    required this.trackColor,
+  });
+
+  final WorkingGroupSummary category;
+  final double width;
+  final int axisMaximum;
+  final Color barColor;
+  final Color trackColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final count = AppLocalizations.of(context).number(category.total);
+    final style = DefaultTextStyle.of(context).style.merge(
+      const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, height: 1.2),
+    );
+    final measurement = TextPainter(
+      text: TextSpan(text: count, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    final minimumWidth = (measurement.width + 8).clamp(0.0, width);
+    final barWidth = (width * category.total / axisMaximum).clamp(
+      minimumWidth,
+      width,
+    );
+    final height = (measurement.height + 4).clamp(20.0, double.infinity);
+    measurement.dispose();
+    final label = Text(
+      count,
+      key: ValueKey('category-value-${category.id}'),
+      maxLines: 1,
+      style: style.copyWith(
+        color: AppColors.isDark(context)
+            ? AppColors.darkBackground
+            : Colors.white,
+      ),
+    );
+
+    return SizedBox(
+      width: width,
+      height: height,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: ColoredBox(
+          key: ValueKey('category-track-${category.id}'),
+          color: trackColor,
+          child: Stack(
+            children: [
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: barWidth,
+                child: ColoredBox(
+                  key: ValueKey('category-bar-${category.id}'),
+                  color: barColor,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: label,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

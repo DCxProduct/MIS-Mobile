@@ -163,7 +163,9 @@ void main() {
       addTearDown(settings.dispose);
       Widget dashboard() => AppSettings(
         controller: settings,
-        child: const MaterialApp(home: Scaffold(body: DashboardPage())),
+        child: const MaterialApp(
+          home: Scaffold(body: DashboardPage(initialScopeTab: 0)),
+        ),
       );
       await tester.pumpWidget(dashboard());
       await tester.pumpAndSettle();

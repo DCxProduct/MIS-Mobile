@@ -90,33 +90,11 @@ class _PswgDataLoaderState extends State<PswgDataLoader> {
   Widget build(BuildContext context) => FutureBuilder<PswgDashboard>(
     future: _request,
     builder: (context, snapshot) {
-      if (snapshot.connectionState != ConnectionState.done) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      if (snapshot.hasError) {
-        final l10n = AppLocalizations.of(
-          context,
-          page: widget.scope == DashboardScope.plenary
-              ? 'dashboard_plenary'
-              : 'dashboard_working_group',
-        );
-        return Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(l10n.text('dashboardLoadError')),
-              TextButton(
-                onPressed: () => setState(() {
-                  _request = _load();
-                }),
-                child: Text(l10n.text('retry')),
-              ),
-            ],
-          ),
-        );
-      }
+      final loading = snapshot.connectionState != ConnectionState.done;
       return PswgDataScope(
-        data: snapshot.data!.filtered(_selection),
+        data: !loading && snapshot.hasData && !snapshot.hasError
+            ? snapshot.data!.filtered(_selection)
+            : PswgDashboard.unavailable(),
         child: TranslationPageScope(
           page: widget.scope == DashboardScope.plenary
               ? 'dashboard_plenary'

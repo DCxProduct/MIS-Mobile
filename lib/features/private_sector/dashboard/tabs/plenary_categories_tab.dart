@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/app_colors.dart';
 import '../../../../translations/app_localizations.dart';
 import '../../../shared/dashboard/widgets/pswg_live_dashboard.dart';
+import '../../../shared/dashboard/widgets/status_bar_layout.dart';
 
 class PlenaryCategoriesTab extends StatefulWidget {
   const PlenaryCategoriesTab({super.key});
@@ -23,12 +24,9 @@ class _PlenaryCategoriesTabState extends State<PlenaryCategoriesTab> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context, page: 'dashboard_plenary');
-    final rows = PswgDataScope.maybeOf(context)?.categories ?? const [];
-    // Scale against every category, including rows hidden by View All.
-    final maximum = rows.fold<int>(
-      1,
-      (max, row) => row.total > max ? row.total : max,
-    );
+    final rows = (PswgDataScope.maybeOf(context)?.categories ?? const [])
+        .where((category) => category.total > 0)
+        .toList();
     final visible = _expanded ? rows : rows.take(_collapsedCount);
     final isDark = AppColors.isDark(context);
     return Container(
@@ -55,13 +53,35 @@ class _PlenaryCategoriesTabState extends State<PlenaryCategoriesTab> {
                           children: [
                             SizedBox(
                               width: labelWidth,
-                              child: Text(
-                                l10n.category(row.displayName(l10n.language)),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  height: 1.5,
-                                  color: AppColors.primaryText(context),
-                                ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      l10n.category(
+                                        row.displayName(l10n.language),
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        height: 1.5,
+                                        color: AppColors.primaryText(context),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '(${l10n.number(row.total)})',
+                                    key: ValueKey(
+                                      'plenary-category-${row.id}-total',
+                                    ),
+                                    semanticsLabel:
+                                        '${l10n.text('totalIssues')}: ${l10n.number(row.total)}',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.primaryText(context),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -103,26 +123,48 @@ class _PlenaryCategoriesTabState extends State<PlenaryCategoriesTab> {
                                               key: ValueKey(
                                                 'plenary-category-${row.id}-${_statuses[index].$1}',
                                               ),
-                                              width: barWidth * count / maximum,
+                                              width: statusBarWidths([
+                                                row.solved,
+                                                row.inProgress,
+                                                row.notAddressed,
+                                              ], barWidth)[index],
                                               height: 20,
-                                              child: ColoredBox(
-                                                color: _statuses[index].$2,
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 4,
-                                                      ),
-                                                  child: FittedBox(
-                                                    fit: BoxFit.scaleDown,
-                                                    alignment:
-                                                        Alignment.centerRight,
-                                                    child: Text(
-                                                      l10n.number(count),
-                                                      style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 11,
-                                                        fontWeight:
-                                                            FontWeight.w700,
+                                              child: Tooltip(
+                                                message:
+                                                    '${l10n.category(row.displayName(l10n.language))} · ${l10n.text(_statuses[index].$1)}\n'
+                                                    '${l10n.number(count)} (${l10n.number(100 * count / (row.solved + row.inProgress + row.notAddressed), decimalPlaces: 2)}%)',
+                                                triggerMode:
+                                                    TooltipTriggerMode.tap,
+                                                waitDuration: const Duration(
+                                                  milliseconds: 250,
+                                                ),
+                                                showDuration: const Duration(
+                                                  seconds: 3,
+                                                ),
+                                                excludeFromSemantics: true,
+                                                child: ColoredBox(
+                                                  color: _statuses[index].$2,
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: 4,
+                                                        ),
+                                                    child: FittedBox(
+                                                      fit: BoxFit.scaleDown,
+                                                      alignment:
+                                                          Alignment.centerRight,
+                                                      child: Text(
+                                                        l10n.number(count),
+                                                        style: TextStyle(
+                                                          color: index == 1
+                                                              ? const Color(
+                                                                  0xFF342600,
+                                                                )
+                                                              : Colors.white,
+                                                          fontSize: 11,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                        ),
                                                       ),
                                                     ),
                                                   ),

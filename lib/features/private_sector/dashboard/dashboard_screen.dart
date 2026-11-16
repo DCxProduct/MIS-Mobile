@@ -58,7 +58,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   bool isLoading = true;
-  int _selectedIndex = 0;
+  int? _selectedIndex;
 
   @override
   void initState() {
@@ -95,6 +95,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _ => const CefpProfileScreenView(),
       },
       AppModuleType.cdcSecretariat => switch (index) {
+        5 => const DashboardPage(
+          key: ValueKey('cdc-overview-dashboard'),
+          initialScopeTab: 2,
+          showScopeSelector: false,
+        ),
         0 => const CdcWorkingGroupScreen(),
         1 => const CdcPlenaryScreen(),
         2 => const CdcSecretariatIssuesScreenView(initialTab: 1),
@@ -118,11 +123,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     final moduleType = AppSettings.of(context).moduleType;
+    final selectedIndex =
+        _selectedIndex ?? (moduleType == AppModuleType.cdcSecretariat ? 5 : 0);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark
         ? AppColors.darkBackground
         : const Color(0xFFF5F7FB);
-    final body = _buildBodyForModule(moduleType, _selectedIndex);
+    final body = _buildBodyForModule(moduleType, selectedIndex);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
@@ -137,12 +144,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Scaffold(
         backgroundColor: background,
         extendBody:
-            !(_selectedIndex == 0 &&
+            !(selectedIndex == 0 &&
                 (moduleType == AppModuleType.cdcSection ||
                     moduleType == AppModuleType.cefp)),
         body: body,
         bottomNavigationBar: AppBottomNavBar(
-          selectedIndex: _selectedIndex,
+          selectedIndex: selectedIndex,
           onSelected: (index) => setState(() => _selectedIndex = index),
         ),
       ),
@@ -153,11 +160,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
 class DashboardPage extends StatefulWidget {
   const DashboardPage({
     super.key,
-    this.initialScopeTab = 0,
+    this.initialScopeTab = 2,
     this.showAppHeader = true,
+    this.showScopeSelector = true,
+    this.showFilterButton = true,
   });
   final int initialScopeTab;
   final bool showAppHeader;
+  final bool showScopeSelector;
+  final bool showFilterButton;
 
   @override
   State<DashboardPage> createState() => DashboardPageState();
@@ -166,9 +177,20 @@ class DashboardPage extends StatefulWidget {
 class DashboardPageState extends State<DashboardPage> {
   late int _selectedScopeTab = widget.initialScopeTab;
 
-  final _dashboardFilters = [FilterSelection(), FilterSelection()];
+  static const _scopes = [
+    DashboardScope.plenary,
+    DashboardScope.pswg,
+    DashboardScope.overview,
+  ];
+  DashboardScope get _scope => _scopes[_selectedScopeTab];
+  final _dashboardFilters = List.generate(
+    _scopes.length,
+    (_) => FilterSelection(),
+  );
   int get _filterTab => _selectedScopeTab;
-  Future<void> _openFilterSheet(BuildContext context) async {
+  int get activeFilterCount => _dashboardFilters[_filterTab].count;
+
+  Future<void> openFilters() async {
     final tab = _filterTab;
     final catalogs = AppSettings.of(context).filters;
     final result = await Navigator.of(context).push<FilterSelection>(
@@ -180,7 +202,7 @@ class DashboardPageState extends State<DashboardPage> {
               : 'dashboard_working_group',
           initial: _dashboardFilters[tab],
           load: () => catalogs.dashboard(
-            tab == 0 ? 'plenary' : 'pswg',
+            _scopes[tab].name,
             progressReportId: _reportId,
             year: _dashboardFilters[tab]['local.year'].firstOrNull,
           ),
@@ -202,19 +224,19 @@ class DashboardPageState extends State<DashboardPage> {
     return PswgDataLoader(
       selection: _dashboardFilters[_filterTab],
       progressReportId: _reportId,
-      scope: _selectedScopeTab == 0
-          ? DashboardScope.plenary
-          : DashboardScope.pswg,
+      scope: _scope,
       builder: _buildContent,
     );
   }
 
   Widget _buildContent(BuildContext context) {
     final moduleType = AppSettings.of(context).moduleType;
-
-    final l10n = AppLocalizations.of(context);
-    final colors = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final showTitle =
+        moduleType != AppModuleType.cdcSecretariat ||
+        _scope == DashboardScope.overview;
+    final filterInTitle =
+        showTitle && !widget.showScopeSelector && widget.showFilterButton;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,74 +252,58 @@ class DashboardPageState extends State<DashboardPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (moduleType != AppModuleType.cdcSecretariat)
-                      _ScopeTitle(selectedIndex: _selectedScopeTab),
-                    const SizedBox(height: 10),
-                    if (const {
-                      AppModuleType.privateSector,
-                      AppModuleType.lineMinistry,
-                      AppModuleType.cdcSection,
-                      AppModuleType.cefp,
-                    }.contains(moduleType))
+                    if (filterInTitle) ...[
                       Row(
                         children: [
                           Expanded(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: _ScopeSelector(
-                                selectedIndex: _selectedScopeTab,
-                                onSelected: (index) {
-                                  setState(() => _selectedScopeTab = index);
-                                },
-                              ),
+                            child: _ScopeTitle(
+                              selectedIndex: _selectedScopeTab,
                             ),
                           ),
-                          _FilterBar(
-                            onTap: () => _openFilterSheet(context),
-                            activeCount: _dashboardFilters[_filterTab].count,
-                          ),
-                        ],
-                      )
-                    else if (moduleType == AppModuleType.cdcSecretariat)
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              l10n.text('dashboard'),
-                              style: TextStyle(
-                                color: colors.onSurface,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          _FilterBar(
-                            onTap: () => _openFilterSheet(context),
-                            activeCount: _dashboardFilters[_filterTab].count,
-                          ),
-                        ],
-                      )
-                    else
-                      Wrap(
-                        alignment: WrapAlignment.spaceBetween,
-                        runSpacing: 8,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          _ScopeSelector(
-                            selectedIndex: _selectedScopeTab,
-                            onSelected: (index) {
-                              setState(() => _selectedScopeTab = index);
-                            },
-                          ),
-                          _FilterBar(
-                            onTap: () => _openFilterSheet(context),
-                            activeCount: _dashboardFilters[_filterTab].count,
+                          const SizedBox(width: 12),
+                          DashboardFilterButton(
+                            onTap: openFilters,
+                            activeCount: activeFilterCount,
                           ),
                         ],
                       ),
-                    const SizedBox(height: 14),
-                    SharedDashboardCharts(plenary: _selectedScopeTab == 0),
+                      const SizedBox(height: 14),
+                    ] else if (showTitle)
+                      _ScopeTitle(selectedIndex: _selectedScopeTab),
+                    if (widget.showScopeSelector ||
+                        (widget.showFilterButton && !filterInTitle)) ...[
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          if (widget.showScopeSelector)
+                            Expanded(
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: _ScopeSelector(
+                                  selectedIndex: _selectedScopeTab,
+                                  onSelected: (index) {
+                                    setState(() => _selectedScopeTab = index);
+                                  },
+                                ),
+                              ),
+                            )
+                          else
+                            const Spacer(),
+                          if (widget.showFilterButton)
+                            DashboardFilterButton(
+                              onTap: openFilters,
+                              activeCount: activeFilterCount,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                    ],
+                    SharedDashboardCharts(
+                      plenary: _scope == DashboardScope.plenary,
+                      percentageDecimalPlaces: _scope == DashboardScope.overview
+                          ? 0
+                          : 2,
+                    ),
                   ],
                 ),
               ),
@@ -518,6 +524,12 @@ List<String> _dashboardScopeLabels(AppLocalizations l10n) => [
         : 'dashboard_working_group.title',
     fallback: l10n.text('workingGroup'),
   ),
+  l10n.language == AppLanguage.khmer
+      ? l10n.text('gpsfOverview')
+      : l10n.api(
+          'dashboard_overview.title',
+          fallback: l10n.text('gpsfOverview'),
+        ),
 ];
 
 class _ScopeTitle extends StatelessWidget {
@@ -643,7 +655,7 @@ class _ScopeSelectorState extends State<_ScopeSelector>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    // Only these two pills share PSWG labels; the page keeps its role dictionary.
+    // Ministry scope pills share PSWG labels; the page keeps its role dictionary.
     final labels = _dashboardScopeLabels(
       l10n.module == AppModuleType.lineMinistry
           ? AppLocalizations(l10n.language, dictionary: _privateSectorLabels)
@@ -662,14 +674,18 @@ class _ScopeSelectorState extends State<_ScopeSelector>
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: List.generate(
-          labels.length,
-          (index) => _ScopePill(
-            label: labels[index],
-            selected: widget.selectedIndex == index,
-            onTap: () => widget.onSelected(index),
-          ),
-        ),
+        children: [
+          for (final index
+              in l10n.module == AppModuleType.cdcSecretariat
+                  ? const [2, 1]
+                  : const [2, 0, 1])
+            _ScopePill(
+              key: ValueKey('dashboard-scope-$index'),
+              label: labels[index],
+              selected: widget.selectedIndex == index,
+              onTap: () => widget.onSelected(index),
+            ),
+        ],
       ),
     );
   }
@@ -677,6 +693,7 @@ class _ScopeSelectorState extends State<_ScopeSelector>
 
 class _ScopePill extends StatelessWidget {
   const _ScopePill({
+    super.key,
     required this.label,
     required this.selected,
     required this.onTap,
@@ -717,8 +734,12 @@ class _ScopePill extends StatelessWidget {
   }
 }
 
-class _FilterBar extends StatelessWidget {
-  const _FilterBar({required this.onTap, required this.activeCount});
+class DashboardFilterButton extends StatelessWidget {
+  const DashboardFilterButton({
+    super.key,
+    required this.onTap,
+    required this.activeCount,
+  });
 
   final VoidCallback onTap;
   final int activeCount;
@@ -796,10 +817,14 @@ class _MetricGrid extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final cards =
         PswgDataScope.maybeOf(context)?.cards ?? const <String, int?>{};
-    final totalIssues = '${cards['totalIssues'] ?? 0}';
-    final solved = '${cards['solved'] ?? 0}/$totalIssues';
-    final inProgress = '${cards['inProgress'] ?? 0}/$totalIssues';
-    final notAddressed = '${cards['notAddressed'] ?? 0}/$totalIssues';
+    final totalIssues = '${cards['totalIssues'] ?? '—'}';
+    String fraction(String key) =>
+        cards[key] == null || cards['totalIssues'] == null
+        ? '—'
+        : '${cards[key]}/$totalIssues';
+    final solved = fraction('solved');
+    final inProgress = fraction('inProgress');
+    final notAddressed = fraction('notAddressed');
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -957,7 +982,7 @@ class _WideMetricCard extends StatelessWidget {
                     PswgDataScope.maybeOf(
                           context,
                         )?.cards['totalPrimaryAgencies'] ??
-                        0,
+                        '—',
                   ),
                   style: TextStyle(
                     color: isDark ? Colors.white : const Color(0xFF27364A),
@@ -1054,10 +1079,15 @@ class _DashboardTabs extends StatelessWidget {
 }
 
 class _StatusTabContent extends StatelessWidget {
-  const _StatusTabContent({required this.selectedIndex, required this.plenary});
+  const _StatusTabContent({
+    required this.selectedIndex,
+    required this.plenary,
+    required this.percentageDecimalPlaces,
+  });
 
   final int selectedIndex;
   final bool plenary;
+  final int percentageDecimalPlaces;
 
   @override
   Widget build(BuildContext context) {
@@ -1065,14 +1095,22 @@ class _StatusTabContent extends StatelessWidget {
       1 => const AgenciesTab(showStatusBreakdown: true),
       2 => const WorkingGroupTab(),
       3 => plenary ? const PlenaryCategoriesTab() : const CategoriesTab(),
-      _ => OverallTab(plenary: plenary),
+      _ => OverallTab(
+        plenary: plenary,
+        percentageDecimalPlaces: percentageDecimalPlaces,
+      ),
     };
   }
 }
 
 class SharedDashboardCharts extends StatefulWidget {
-  const SharedDashboardCharts({super.key, required this.plenary});
+  const SharedDashboardCharts({
+    super.key,
+    required this.plenary,
+    this.percentageDecimalPlaces = 2,
+  });
   final bool plenary;
+  final int percentageDecimalPlaces;
   @override
   State<SharedDashboardCharts> createState() => _SharedDashboardChartsState();
 }
@@ -1117,6 +1155,7 @@ class _SharedDashboardChartsState extends State<SharedDashboardCharts> {
         _StatusTabContent(
           selectedIndex: _selectedStatusTab,
           plenary: widget.plenary,
+          percentageDecimalPlaces: widget.percentageDecimalPlaces,
         ),
       ],
     );

@@ -68,7 +68,7 @@ void main() {
                   client: MockClient((request) async {
                     paths.add(request.url.path);
                     switch (request.url.path) {
-                      case '/api/v1/rgc-decisions':
+                      case '/api/v1/rgc-decisions/issue-matrix':
                         expect(request.url.queryParameters, {
                           'page': '1',
                           'limit': '100',
@@ -113,7 +113,7 @@ void main() {
       expect(find.text('MAFF'), findsOneWidget);
       expect(find.text('Sent'), findsNothing);
       expect(find.text('Not Addressed'), findsNWidgets(2));
-      expect(paths, ['/api/v1/rgc-decisions']);
+      expect(paths, ['/api/v1/rgc-decisions/issue-matrix']);
       await tester.tap(find.text('View Details').first);
       await tester.pumpAndSettle();
       expect(find.byType(RgcDecisionDetailScreen), findsOneWidget);
@@ -129,7 +129,10 @@ void main() {
         detail.issues.single.recommendations,
         'MEF linked issue recommendation',
       );
-      expect(paths, ['/api/v1/rgc-decisions', '/api/v1/rgc-decisions/2']);
+      expect(paths, [
+        '/api/v1/rgc-decisions/issue-matrix',
+        '/api/v1/rgc-decisions/2',
+      ]);
       expect(tester.takeException(), isNull);
     });
   }
@@ -143,7 +146,10 @@ void main() {
               authRepository: AuthRepository(
                 ApiClient(
                   client: MockClient((request) async {
-                    expect(request.url.path, '/api/v1/rgc-decisions');
+                    expect(
+                      request.url.path,
+                      '/api/v1/rgc-decisions/issue-matrix',
+                    );
                     expect(
                       request.url.queryParameters.containsKey('stakeholderId'),
                       isFalse,
@@ -290,7 +296,7 @@ void main() {
           ],
         });
       }
-      if (path.endsWith('/rgc-decisions')) {
+      if (path.endsWith('/rgc-decisions/issue-matrix')) {
         final ministry = request.url.queryParameters['stakeholderId'];
         final page = request.url.queryParameters['page'];
         final filtered = const [
@@ -445,7 +451,7 @@ void main() {
 
       await toggleSelection();
       final listRequest = requested.lastWhere(
-        (uri) => uri.path.endsWith('/rgc-decisions'),
+        (uri) => uri.path.endsWith('/rgc-decisions/issue-matrix'),
       );
       expect(listRequest.queryParameters[selection.$1], selection.$2);
       expect(listRequest.queryParameters['page'], '1');
@@ -453,7 +459,9 @@ void main() {
       await toggleSelection();
       expect(
         requested
-            .lastWhere((uri) => uri.path.endsWith('/rgc-decisions'))
+            .lastWhere(
+              (uri) => uri.path.endsWith('/rgc-decisions/issue-matrix'),
+            )
             .queryParameters
             .containsKey(selection.$1),
         isFalse,
@@ -483,7 +491,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       requested
-          .lastWhere((uri) => uri.path.endsWith('/rgc-decisions'))
+          .lastWhere((uri) => uri.path.endsWith('/rgc-decisions/issue-matrix'))
           .queryParameters
           .containsKey('stakeholderId'),
       isFalse,
