@@ -1,0 +1,1137 @@
+{
+    "success": true,
+    "statusCode": 200,
+    "message": "OK",
+    "data": {
+        "type": "PSWG",
+        "crossFilterData": {
+            "version": 1,
+            "rows": [
+                {
+                    "workingGroupId": 19,
+                    "agencyId": 6,
+                    "categoryId": 6,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 19,
+                    "agencyId": 6,
+                    "categoryId": 13,
+                    "statusCode": "SOLVED",
+                    "count": 3
+                },
+                {
+                    "workingGroupId": 19,
+                    "agencyId": 6,
+                    "categoryId": 2,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 19,
+                    "agencyId": 6,
+                    "categoryId": 4,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 19,
+                    "agencyId": 6,
+                    "categoryId": 3,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 19,
+                    "agencyId": 6,
+                    "categoryId": 7,
+                    "statusCode": "SOLVED",
+                    "count": 3
+                },
+                {
+                    "workingGroupId": 19,
+                    "agencyId": 6,
+                    "categoryId": 9,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 19,
+                    "agencyId": 6,
+                    "categoryId": 11,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 19,
+                    "agencyId": 6,
+                    "categoryId": 18,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 27,
+                    "agencyId": 6,
+                    "categoryId": 7,
+                    "statusCode": "SOLVED",
+                    "count": 3
+                },
+                {
+                    "workingGroupId": 27,
+                    "agencyId": 6,
+                    "categoryId": 18,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 27,
+                    "agencyId": 6,
+                    "categoryId": 11,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 27,
+                    "agencyId": 6,
+                    "categoryId": 4,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 20,
+                    "agencyId": 7,
+                    "categoryId": 3,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 20,
+                    "agencyId": 7,
+                    "categoryId": 14,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 20,
+                    "agencyId": 7,
+                    "categoryId": 7,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 20,
+                    "agencyId": 7,
+                    "categoryId": 4,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 20,
+                    "agencyId": 7,
+                    "categoryId": 18,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 20,
+                    "agencyId": 7,
+                    "categoryId": 19,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 20,
+                    "agencyId": 7,
+                    "categoryId": 13,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 21,
+                    "agencyId": 8,
+                    "categoryId": 6,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 21,
+                    "agencyId": 8,
+                    "categoryId": 11,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 21,
+                    "agencyId": 8,
+                    "categoryId": 13,
+                    "statusCode": "SOLVED",
+                    "count": 5
+                },
+                {
+                    "workingGroupId": 21,
+                    "agencyId": 8,
+                    "categoryId": 18,
+                    "statusCode": "SOLVED",
+                    "count": 4
+                },
+                {
+                    "workingGroupId": 21,
+                    "agencyId": 8,
+                    "categoryId": 3,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 21,
+                    "agencyId": 8,
+                    "categoryId": 7,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 21,
+                    "agencyId": 8,
+                    "categoryId": 14,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 21,
+                    "agencyId": 8,
+                    "categoryId": 15,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 21,
+                    "agencyId": 8,
+                    "categoryId": 2,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 26,
+                    "agencyId": 13,
+                    "categoryId": 18,
+                    "statusCode": "SOLVED",
+                    "count": 13
+                },
+                {
+                    "workingGroupId": 30,
+                    "agencyId": 16,
+                    "categoryId": 16,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 26,
+                    "agencyId": 13,
+                    "categoryId": 16,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 29,
+                    "agencyId": 15,
+                    "categoryId": 17,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 29,
+                    "agencyId": 15,
+                    "categoryId": 17,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 29,
+                    "agencyId": 15,
+                    "categoryId": 6,
+                    "statusCode": "SOLVED",
+                    "count": 4
+                },
+                {
+                    "workingGroupId": 26,
+                    "agencyId": 13,
+                    "categoryId": 6,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 26,
+                    "agencyId": 13,
+                    "categoryId": 3,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 26,
+                    "agencyId": 13,
+                    "categoryId": 10,
+                    "statusCode": "SOLVED",
+                    "count": 3
+                },
+                {
+                    "workingGroupId": 26,
+                    "agencyId": 13,
+                    "categoryId": 14,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 26,
+                    "agencyId": 13,
+                    "categoryId": 13,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 26,
+                    "agencyId": 13,
+                    "categoryId": 11,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 26,
+                    "agencyId": 13,
+                    "categoryId": 17,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 26,
+                    "agencyId": 13,
+                    "categoryId": 4,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 22,
+                    "agencyId": 9,
+                    "categoryId": 4,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 22,
+                    "agencyId": 9,
+                    "categoryId": 3,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 22,
+                    "agencyId": 9,
+                    "categoryId": 4,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 5
+                },
+                {
+                    "workingGroupId": 22,
+                    "agencyId": 9,
+                    "categoryId": 13,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 22,
+                    "agencyId": 9,
+                    "categoryId": 18,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 25,
+                    "agencyId": 12,
+                    "categoryId": 13,
+                    "statusCode": "SOLVED",
+                    "count": 4
+                },
+                {
+                    "workingGroupId": 25,
+                    "agencyId": 12,
+                    "categoryId": 6,
+                    "statusCode": "SOLVED",
+                    "count": 9
+                },
+                {
+                    "workingGroupId": 25,
+                    "agencyId": 12,
+                    "categoryId": 18,
+                    "statusCode": "SOLVED",
+                    "count": 9
+                },
+                {
+                    "workingGroupId": 25,
+                    "agencyId": 12,
+                    "categoryId": 17,
+                    "statusCode": "SOLVED",
+                    "count": 4
+                },
+                {
+                    "workingGroupId": 25,
+                    "agencyId": 12,
+                    "categoryId": 7,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 25,
+                    "agencyId": 12,
+                    "categoryId": 16,
+                    "statusCode": "SOLVED",
+                    "count": 14
+                },
+                {
+                    "workingGroupId": 25,
+                    "agencyId": 12,
+                    "categoryId": 4,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 25,
+                    "agencyId": 12,
+                    "categoryId": 14,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 24,
+                    "agencyId": 11,
+                    "categoryId": 13,
+                    "statusCode": "SOLVED",
+                    "count": 3
+                },
+                {
+                    "workingGroupId": 24,
+                    "agencyId": 11,
+                    "categoryId": 16,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 24,
+                    "agencyId": 11,
+                    "categoryId": 18,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 30,
+                    "agencyId": 16,
+                    "categoryId": 6,
+                    "statusCode": "SOLVED",
+                    "count": 14
+                },
+                {
+                    "workingGroupId": 30,
+                    "agencyId": 16,
+                    "categoryId": 18,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 30,
+                    "agencyId": 16,
+                    "categoryId": 18,
+                    "statusCode": "SOLVED",
+                    "count": 4
+                },
+                {
+                    "workingGroupId": 30,
+                    "agencyId": 16,
+                    "categoryId": 3,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 30,
+                    "agencyId": 16,
+                    "categoryId": 6,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 30,
+                    "agencyId": 16,
+                    "categoryId": 17,
+                    "statusCode": "SOLVED",
+                    "count": 3
+                },
+                {
+                    "workingGroupId": 30,
+                    "agencyId": 16,
+                    "categoryId": 13,
+                    "statusCode": "SOLVED",
+                    "count": 4
+                },
+                {
+                    "workingGroupId": 30,
+                    "agencyId": 16,
+                    "categoryId": 4,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 30,
+                    "agencyId": 16,
+                    "categoryId": 16,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 30,
+                    "agencyId": 16,
+                    "categoryId": 17,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 33,
+                    "agencyId": 35,
+                    "categoryId": 13,
+                    "statusCode": "SOLVED",
+                    "count": 18
+                },
+                {
+                    "workingGroupId": 29,
+                    "agencyId": 15,
+                    "categoryId": 18,
+                    "statusCode": "SOLVED",
+                    "count": 3
+                },
+                {
+                    "workingGroupId": 29,
+                    "agencyId": 15,
+                    "categoryId": 18,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 34,
+                    "agencyId": 36,
+                    "categoryId": 13,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 34,
+                    "agencyId": 36,
+                    "categoryId": 18,
+                    "statusCode": "SOLVED",
+                    "count": 4
+                },
+                {
+                    "workingGroupId": 34,
+                    "agencyId": 36,
+                    "categoryId": 18,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 23,
+                    "agencyId": 10,
+                    "categoryId": 11,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 23,
+                    "agencyId": 10,
+                    "categoryId": 13,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 23,
+                    "agencyId": 10,
+                    "categoryId": 18,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 23,
+                    "agencyId": 10,
+                    "categoryId": 13,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 33,
+                    "agencyId": 35,
+                    "categoryId": 13,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 33,
+                    "agencyId": 35,
+                    "categoryId": 6,
+                    "statusCode": "SOLVED",
+                    "count": 3
+                },
+                {
+                    "workingGroupId": 33,
+                    "agencyId": 35,
+                    "categoryId": 14,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 33,
+                    "agencyId": 35,
+                    "categoryId": 18,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 3
+                },
+                {
+                    "workingGroupId": 33,
+                    "agencyId": 35,
+                    "categoryId": 17,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 33,
+                    "agencyId": 35,
+                    "categoryId": 6,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 31,
+                    "agencyId": 17,
+                    "categoryId": 4,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 31,
+                    "agencyId": 17,
+                    "categoryId": 13,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 28,
+                    "agencyId": 14,
+                    "categoryId": 4,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 3
+                },
+                {
+                    "workingGroupId": 28,
+                    "agencyId": 14,
+                    "categoryId": 18,
+                    "statusCode": "SOLVED",
+                    "count": 5
+                },
+                {
+                    "workingGroupId": 28,
+                    "agencyId": 14,
+                    "categoryId": 13,
+                    "statusCode": "SOLVED",
+                    "count": 4
+                },
+                {
+                    "workingGroupId": 28,
+                    "agencyId": 14,
+                    "categoryId": 4,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 28,
+                    "agencyId": 14,
+                    "categoryId": 17,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 28,
+                    "agencyId": 14,
+                    "categoryId": 3,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 28,
+                    "agencyId": 14,
+                    "categoryId": 11,
+                    "statusCode": "SOLVED",
+                    "count": 2
+                },
+                {
+                    "workingGroupId": 28,
+                    "agencyId": 14,
+                    "categoryId": 18,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 28,
+                    "agencyId": 14,
+                    "categoryId": 13,
+                    "statusCode": "IN_PROGRESS",
+                    "count": 1
+                },
+                {
+                    "workingGroupId": 28,
+                    "agencyId": 14,
+                    "categoryId": 6,
+                    "statusCode": "SOLVED",
+                    "count": 1
+                }
+            ]
+        },
+        "status": "LIVE",
+        "generatedAt": "2026-11-13T04:24:13.057Z",
+        "cards": {
+            "totalIssues": 245,
+            "solved": 218,
+            "inProgress": 27,
+            "notAddressed": 0,
+            "totalPrimaryAgencies": 14,
+            "totalMinistries": 21,
+            "midProgress": null,
+            "earlyProgress": null
+        },
+        "byWorkingGroup": [
+            {
+                "workingGroupId": 25,
+                "workingGroupName": "Export Processing and Trade Facilitation",
+                "workingGroupKhName": "ក្រុមការងារ ឆ៖ ផ្នែកផលិតកម្មកែច្នៃសម្រាប់នាំចេញ និងកិច្ចសម្រួលពាណិជ្ជកម្ម",
+                "total": 44,
+                "solved": 44,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 30,
+                "workingGroupName": "Health",
+                "workingGroupKhName": "ក្រុមការងារ ឋ៖ ផ្នែកសុខាភិបាល",
+                "total": 32,
+                "solved": 28,
+                "inProgress": 4,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 33,
+                "workingGroupName": "Digital Economy, Society & Telecommunications",
+                "workingGroupKhName": "ក្រុមការងារ ណ៖ ផ្នែកសេដ្ឋកិច្ច សង្គមឌីជីថល និងទូរគមនាគមន៍",
+                "total": 28,
+                "solved": 23,
+                "inProgress": 5,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 26,
+                "workingGroupName": "Industrial Relations",
+                "workingGroupKhName": "ក្រុមការងារ ជ៖ ផ្នែកទំនាក់ទំនងវិជ្ជាជីវៈ",
+                "total": 26,
+                "solved": 26,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 28,
+                "workingGroupName": "Energy and Mineral Resources",
+                "workingGroupKhName": "ក្រុមការងារ ញ៖ ផ្នែកថាមពល និងធនធានរ៉ែ",
+                "total": 22,
+                "solved": 17,
+                "inProgress": 5,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 21,
+                "workingGroupName": "Manufacturing & SMEs",
+                "workingGroupKhName": "ក្រុមការងារ គ៖ ផ្នែកកម្មន្តសាល សហគ្រាសទុនតូច និងមធ្យម និងសេវា",
+                "total": 19,
+                "solved": 19,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 19,
+                "workingGroupName": "Agriculture & Agro-Industry",
+                "workingGroupKhName": "ក្រុមការងារ ក៖ ផ្នែកកសិកម្ម កសិ-ឧស្សាហកម្ម",
+                "total": 15,
+                "solved": 15,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 29,
+                "workingGroupName": "Education",
+                "workingGroupKhName": "ក្រុមការងារ ដ៖ ផ្នែកអប់រំ",
+                "total": 11,
+                "solved": 8,
+                "inProgress": 3,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 22,
+                "workingGroupName": "Law, Tax, and Governance",
+                "workingGroupKhName": "ក្រុមការងារ ឃ៖ ផ្នែកនីតិកម្ម ពន្ធដារ និងអភិបាលកិច្ច",
+                "total": 10,
+                "solved": 3,
+                "inProgress": 7,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 27,
+                "workingGroupName": "Rice and Paddy",
+                "workingGroupKhName": "ក្រុមការងារ ឈ៖ ផ្នែកស្រូវ-អង្ករ",
+                "total": 8,
+                "solved": 8,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 20,
+                "workingGroupName": "Tourism",
+                "workingGroupKhName": "ក្រុមការងារ ខ៖ ផ្នែកទេសចរណ៍",
+                "total": 8,
+                "solved": 8,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 34,
+                "workingGroupName": "Land Administration, Security & Public Order",
+                "workingGroupKhName": "ក្រុមការងារ ត៖ ផ្នែករដ្ឋបាលដែនដី សន្តិសុខ និងសណ្ដាប់ធ្នាប់សាធារណៈ",
+                "total": 7,
+                "solved": 6,
+                "inProgress": 1,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 23,
+                "workingGroupName": "Banking and Financial Services",
+                "workingGroupKhName": "ក្រុមការងារ ង៖ ផ្នែកសេវាធនាគារ និងហិវញ្ញវត្ថុ",
+                "total": 6,
+                "solved": 4,
+                "inProgress": 2,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 24,
+                "workingGroupName": "Transport and Infrastructure",
+                "workingGroupKhName": "ក្រុមការងារ ច៖ ផ្នែកដឹកជញ្ជូន និងហេដ្ឋារចនាសម្ព័ន្ធ",
+                "total": 6,
+                "solved": 6,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 31,
+                "workingGroupName": "Construction and Real Estate",
+                "workingGroupKhName": "ក្រុមការងារ ឌ៖ ផ្នែកសំណង់ និងអចលនទ្រព្យ",
+                "total": 3,
+                "solved": 3,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "workingGroupId": 32,
+                "workingGroupName": "Non-Bank Financial Services",
+                "workingGroupKhName": "ក្រុមការងារ ឍ៖ ផ្នែកសេវាហិរញ្ញវត្ថុមិនមែនធនាគារ",
+                "total": 0,
+                "solved": 0,
+                "inProgress": 0,
+                "notAddressed": 0
+            }
+        ],
+        "byPrimaryAgency": [
+            {
+                "agencyId": 12,
+                "agencyName": "MoC",
+                "agencyKhName": "ក្រសួងពាណិជ្ជកម្ម",
+                "agencyKhAbbreviation": null,
+                "total": 44,
+                "solved": 44,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 16,
+                "agencyName": "MoH",
+                "agencyKhName": "ក្រសួងសុខាភិបាល",
+                "agencyKhAbbreviation": null,
+                "total": 32,
+                "solved": 28,
+                "inProgress": 4,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 35,
+                "agencyName": "MPTC",
+                "agencyKhName": "ក្រសួងប្រៃសណីយ៍ និងទូរគមនាគមន៍",
+                "agencyKhAbbreviation": null,
+                "total": 28,
+                "solved": 23,
+                "inProgress": 5,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 13,
+                "agencyName": "MoLVT",
+                "agencyKhName": "ក្រសួងការងារនិងបណ្ដុះបណ្ដាលវិជ្ជាជីវៈ",
+                "agencyKhAbbreviation": "ក.ក.ប.",
+                "total": 26,
+                "solved": 26,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 6,
+                "agencyName": "MAFF",
+                "agencyKhName": "ក្រសួងកសិកម្ម រុក្ខាប្រមាញ់ និងនេសាទ",
+                "agencyKhAbbreviation": "ក.ស.ក.",
+                "total": 23,
+                "solved": 23,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 14,
+                "agencyName": "MME",
+                "agencyKhName": "ក្រសួងរ៉ែនិងថាមពល",
+                "agencyKhAbbreviation": "ក.រ.ថ.",
+                "total": 22,
+                "solved": 17,
+                "inProgress": 5,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 8,
+                "agencyName": "MISTI",
+                "agencyKhName": "ក្រសួងឧស្សាហកម្ម វិទ្យាសាស្ត្រ បច្ចេកវិទ្យា និងនវានុវត្តន៍",
+                "agencyKhAbbreviation": "ក.ឧ.វ.ប.ន.",
+                "total": 19,
+                "solved": 19,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 15,
+                "agencyName": "MoEYS",
+                "agencyKhName": "ក្រសួងអប់រំ យុវជន និងកីឡា",
+                "agencyKhAbbreviation": null,
+                "total": 11,
+                "solved": 8,
+                "inProgress": 3,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 9,
+                "agencyName": "MEF",
+                "agencyKhName": "ក្រសួងសេដ្ឋកិច្ចនិងហិរញ្ញវត្ថុ",
+                "agencyKhAbbreviation": "ក.ស.ហ.វ.",
+                "total": 10,
+                "solved": 3,
+                "inProgress": 7,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 7,
+                "agencyName": "MoT",
+                "agencyKhName": "ក្រសួងទេសចរណ៍",
+                "agencyKhAbbreviation": "ក.ទ.ច.",
+                "total": 8,
+                "solved": 8,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 36,
+                "agencyName": "MoI",
+                "agencyKhName": "ក្រសួងមហាផ្ទៃ",
+                "agencyKhAbbreviation": "ក.ម.ផ.",
+                "total": 7,
+                "solved": 6,
+                "inProgress": 1,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 11,
+                "agencyName": "MPWT",
+                "agencyKhName": "ក្រសួងសាធារណការនិងដឹកជញ្ជូន",
+                "agencyKhAbbreviation": "ក.ស.ក.ដ.",
+                "total": 6,
+                "solved": 6,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 10,
+                "agencyName": "NBC",
+                "agencyKhName": "ធនាគារជាតិនៃកម្ពុជា",
+                "agencyKhAbbreviation": "ធ.ក.",
+                "total": 6,
+                "solved": 4,
+                "inProgress": 2,
+                "notAddressed": 0
+            },
+            {
+                "agencyId": 17,
+                "agencyName": "MLMUPC",
+                "agencyKhName": "ក្រសួងរៀបចំដែនដី នគរូបនីយកម្ម និងសំណង់",
+                "agencyKhAbbreviation": "ក.ដ.ន.ស.",
+                "total": 3,
+                "solved": 3,
+                "inProgress": 0,
+                "notAddressed": 0
+            }
+        ],
+        "byCategory": [
+            {
+                "categoryId": 18,
+                "categoryName": "Regulation",
+                "categoryKhName": "បទប្បញ្ញត្តិ",
+                "total": 57,
+                "solved": 48,
+                "inProgress": 9,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 13,
+                "categoryName": "Governance",
+                "categoryKhName": "អភិបាលកិច្ច",
+                "total": 54,
+                "solved": 49,
+                "inProgress": 5,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 6,
+                "categoryName": "Procedure",
+                "categoryKhName": "នីតិវិធី",
+                "total": 38,
+                "solved": 36,
+                "inProgress": 2,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 4,
+                "categoryName": "Taxation",
+                "categoryKhName": "ពន្ធដារ",
+                "total": 21,
+                "solved": 13,
+                "inProgress": 8,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 16,
+                "categoryName": "Legislation",
+                "categoryKhName": "ច្បាប់",
+                "total": 20,
+                "solved": 19,
+                "inProgress": 1,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 17,
+                "categoryName": "Licensing",
+                "categoryKhName": "ការផ្តល់អាជ្ញាបណ្ណ",
+                "total": 14,
+                "solved": 12,
+                "inProgress": 2,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 7,
+                "categoryName": "Market Access",
+                "categoryKhName": "ការចូលទៅកាន់ទីផ្សារ",
+                "total": 10,
+                "solved": 10,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 11,
+                "categoryName": "Finance",
+                "categoryKhName": "ហិរញ្ញវត្ថុ",
+                "total": 9,
+                "solved": 9,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 3,
+                "categoryName": "Policy",
+                "categoryKhName": "គោលនយោបាយ",
+                "total": 8,
+                "solved": 8,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 14,
+                "categoryName": "Human Resources",
+                "categoryKhName": "ធនធានមនុស្ស",
+                "total": 5,
+                "solved": 5,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 10,
+                "categoryName": "Digital / IT",
+                "categoryKhName": "ឌីជីថល និងបច្ចេកវិទ្យាព័ត៌មាន",
+                "total": 3,
+                "solved": 3,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 15,
+                "categoryName": "Infrastructure",
+                "categoryKhName": "ហេដ្ឋារចនាសម្ព័ន្ធ",
+                "total": 2,
+                "solved": 2,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 2,
+                "categoryName": "Trade",
+                "categoryKhName": "ពាណិជ្ជកម្ម",
+                "total": 2,
+                "solved": 2,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 9,
+                "categoryName": "Customs",
+                "categoryKhName": "គយ",
+                "total": 1,
+                "solved": 1,
+                "inProgress": 0,
+                "notAddressed": 0
+            },
+            {
+                "categoryId": 19,
+                "categoryName": "Security",
+                "categoryKhName": "សន្តិសុខ",
+                "total": 1,
+                "solved": 1,
+                "inProgress": 0,
+                "notAddressed": 0
+            }
+        ],
+        "report": {
+            "id": 1,
+            "title": "របាយការណ៍វឌ្ឍនភាព ឆមាសទី១ ឆ្នាំ២០២៦",
+            "year": 2026,
+            "semester": "S1"
+        }
+    },
+    "timestamp": "2026-11-16T10:00:33.059Z",
+    "path": "/api/v1/dashboards/pswg/live"
+}

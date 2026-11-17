@@ -50,7 +50,11 @@ class AgencyStatusBars extends StatelessWidget {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      agency.name,
+                                      agency.displayShortName(l10n.language),
+                                      key: ValueKey('agency-${agency.id}-name'),
+                                      semanticsLabel: agency.displayName(
+                                        l10n.language,
+                                      ),
                                       style: TextStyle(
                                         fontSize: 10,
                                         color: colors.onSurface,
@@ -74,7 +78,7 @@ class AgencyStatusBars extends StatelessWidget {
                             ),
                           ),
                           Semantics(
-                            label: agency.name,
+                            label: agency.displayName(l10n.language),
                             value:
                                 '${l10n.text('solved')}: ${l10n.number(agency.solved)}, ${l10n.text('inProgress')}: ${l10n.number(agency.inProgress)}, ${l10n.text('notAddressed')}: ${l10n.number(agency.notAddressed)}',
                             child: Container(
@@ -110,7 +114,7 @@ class AgencyStatusBars extends StatelessWidget {
                                           height: 22,
                                           child: Tooltip(
                                             message:
-                                                '${agency.name} · ${l10n.text(_statuses[index].$1)}\n'
+                                                '${agency.displayName(l10n.language)} · ${l10n.text(_statuses[index].$1)}\n'
                                                 '${l10n.number(count)} (${l10n.number(100 * count / (agency.solved + agency.inProgress + agency.notAddressed), decimalPlaces: 2)}%)',
                                             triggerMode: TooltipTriggerMode.tap,
                                             waitDuration: const Duration(

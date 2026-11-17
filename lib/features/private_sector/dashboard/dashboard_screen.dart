@@ -1128,9 +1128,34 @@ class _SharedDashboardChartsState extends State<SharedDashboardCharts> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
+    final dashboard = PswgDataScope.stateOf(context);
+    final hasData = dashboard?.data.cards.isNotEmpty ?? false;
+    if (!hasData && dashboard?.loading == true) {
+      return const SizedBox(
+        height: 280,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    final error = Column(
+      children: [
+        Text(l10n.text('dashboardLoadError'), textAlign: TextAlign.center),
+        const SizedBox(height: 8),
+        TextButton(
+          onPressed: dashboard?.onRetry,
+          child: Text(l10n.text('retry')),
+        ),
+      ],
+    );
+    if (!hasData) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32),
+        child: Center(child: error),
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (dashboard?.failed == true) error,
         const _MetricGrid(),
         const SizedBox(height: 8),
         const _WideMetricCard(),

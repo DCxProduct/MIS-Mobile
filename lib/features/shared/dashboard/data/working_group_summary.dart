@@ -5,6 +5,7 @@ class WorkingGroupSummary {
     required this.id,
     required this.name,
     this.khmerName = '',
+    this.khmerAbbreviation = '',
     required this.total,
     required this.solved,
     required this.inProgress,
@@ -14,11 +15,17 @@ class WorkingGroupSummary {
   final int id;
   final String name;
   final String khmerName;
+  final String khmerAbbreviation;
 
   // Keep the English name as the filter value; localize only the display.
   String displayName(AppLanguage language) =>
       language == AppLanguage.khmer && khmerName.trim().isNotEmpty
       ? khmerName.trim()
+      : name;
+
+  String displayShortName(AppLanguage language) =>
+      language == AppLanguage.khmer && khmerAbbreviation.trim().isNotEmpty
+      ? khmerAbbreviation.trim()
       : name;
   final int total;
   final int solved;
@@ -40,6 +47,7 @@ class WorkingGroupSummary {
       id: count('workingGroupId'),
       name: name,
       khmerName: json['workingGroupKhName'] as String? ?? '',
+      khmerAbbreviation: json['workingGroupKhAbbreviation'] as String? ?? '',
       total: count('total'),
       solved: count('solved'),
       inProgress: count('inProgress'),

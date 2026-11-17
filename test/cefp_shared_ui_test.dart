@@ -59,7 +59,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(CdcSectionDashboardScreenView), findsOneWidget);
       expect(find.byType(DashboardPage), findsOneWidget);
-      expect(find.text('Retry'), findsNothing);
+      expect(find.text('Retry'), findsOneWidget);
       expect(
         tester.getRect(find.byType(DashboardPage)).bottom,
         lessThanOrEqualTo(tester.getRect(find.byType(AppBottomNavBar)).top),

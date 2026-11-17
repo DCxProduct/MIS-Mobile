@@ -1,12 +1,199 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gpsf_app/core/app_settings.dart';
+import 'package:gpsf_app/core/widgets/filters/filter_models.dart';
+import 'package:gpsf_app/features/shared/dashboard/data/dashboard_repository.dart';
+import 'package:gpsf_app/features/shared/dashboard/data/dashboard_snapshot.dart';
+import 'package:gpsf_app/features/shared/dashboard/data/pswg_dashboard.dart';
 import 'package:gpsf_app/features/shared/dashboard/data/working_group_summary.dart';
 import 'package:gpsf_app/features/shared/dashboard/widgets/agency_status_bars.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 
 void main() {
+  testWidgets(
+    'PSWG agencies use English abbreviations when Khmer abbreviations are null or blank',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 1100);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await (FontLoader(
+        'KhBattambang',
+      )..addFont(rootBundle.load('assets/fonts/KhBattambang.ttf'))).load();
+      final json =
+          jsonDecode(
+                File(
+                  'test/fixtures/pswg_khmer_agencies.json',
+                ).readAsStringSync(),
+              )['data']
+              as Map<String, dynamic>;
+      final sourceAgencies = json['byPrimaryAgency'] as List;
+      sourceAgencies.first['agencyKhAbbreviation'] = '  ';
+      final dashboard = PswgDashboard.fromJson(
+        json,
+      ).filtered(FilterSelection());
+      expect(dashboard.cards['totalIssues'], 245);
+      expect(dashboard.cards['solved'], 218);
+      expect(dashboard.cards['inProgress'], 27);
+      final settings = AppSettingsController()..setLanguage(AppLanguage.khmer);
+      addTearDown(settings.dispose);
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: MaterialApp(
+            theme: ThemeData(fontFamily: 'KhBattambang'),
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: AgencyStatusBars(agencies: dashboard.agencies),
+              ),
+            ),
+          ),
+        ),
+      );
+      for (final language in [
+        AppLanguage.khmer,
+        AppLanguage.english,
+        AppLanguage.khmer,
+      ]) {
+        settings.setLanguage(language);
+        await tester.pumpAndSettle();
+        for (final source in sourceAgencies) {
+          final labelFinder = find.byKey(
+            ValueKey('agency-${source['agencyId']}-name'),
+          );
+          final label = tester.widget<Text>(labelFinder);
+          final abbreviation =
+              (source['agencyKhAbbreviation'] as String?)?.trim() ?? '';
+          expect(
+            label.data,
+            language == AppLanguage.khmer && abbreviation.isNotEmpty
+                ? abbreviation
+                : source['agencyName'],
+          );
+          final totalFinder = find.byKey(
+            ValueKey('agency-${source['agencyId']}-total'),
+          );
+          final barFinder = find.byKey(
+            ValueKey('agency-${source['agencyId']}-solved'),
+          );
+          expect(
+            tester.getRect(labelFinder).right,
+            lessThan(tester.getRect(totalFinder).left),
+          );
+          expect(
+            tester.getRect(totalFinder).right,
+            lessThan(tester.getRect(barFinder).left),
+          );
+        }
+        expect(tester.takeException(), isNull);
+      }
+      expect(find.text('MoC'), findsOneWidget);
+      expect(find.text('MoH'), findsOneWidget);
+      expect(find.text('MPTC'), findsOneWidget);
+      expect(find.text('MoEYS'), findsOneWidget);
+      expect(find.text('ក.ស.ក.'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'API Khmer agency abbreviations survive filtering and language changes',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await (FontLoader(
+        'KhBattambang',
+      )..addFont(rootBundle.load('assets/fonts/KhBattambang.ttf'))).load();
+      final json =
+          jsonDecode(
+                File(
+                  'test/fixtures/plenary_khmer_agencies.json',
+                ).readAsStringSync(),
+              )['data']
+              as Map<String, dynamic>;
+      final dashboard = PswgDashboard.fromJson(json);
+      final snapshot = DashboardSnapshot.fromJson(
+        json,
+        scope: DashboardScope.plenary,
+      );
+      final sourceAgencies = json['byPrimaryAgency'] as List;
+      expect(dashboard.cards['totalIssues'], 179);
+      final filtered = dashboard.filtered(
+        FilterSelection({
+          'local.status': {'SOLVED'},
+        }),
+      );
+      for (final source in sourceAgencies) {
+        final id = source['agencyId'];
+        for (final agencies in [
+          dashboard.agencies,
+          snapshot.agencies,
+          filtered.agencies,
+        ]) {
+          final agency = agencies.singleWhere((agency) => agency.id == id);
+          expect(agency.name, source['agencyName']);
+          expect(agency.khmerName, source['agencyKhName']);
+          expect(agency.khmerAbbreviation, source['agencyKhAbbreviation']);
+        }
+      }
+      final settings = AppSettingsController()..setLanguage(AppLanguage.khmer);
+      addTearDown(settings.dispose);
+      await tester.pumpWidget(
+        AppSettings(
+          controller: settings,
+          child: MaterialApp(
+            theme: ThemeData(fontFamily: 'KhBattambang'),
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: AgencyStatusBars(agencies: filtered.agencies),
+              ),
+            ),
+          ),
+        ),
+      );
+      for (final language in [
+        AppLanguage.khmer,
+        AppLanguage.english,
+        AppLanguage.khmer,
+      ]) {
+        settings.setLanguage(language);
+        await tester.pumpAndSettle();
+        for (final source in sourceAgencies) {
+          final label = tester.widget<Text>(
+            find.byKey(ValueKey('agency-${source['agencyId']}-name')),
+          );
+          expect(
+            label.data,
+            source[language == AppLanguage.khmer
+                ? 'agencyKhAbbreviation'
+                : 'agencyName'],
+          );
+          expect(
+            label.semanticsLabel,
+            source[language == AppLanguage.khmer
+                ? 'agencyKhName'
+                : 'agencyName'],
+          );
+        }
+        expect(tester.takeException(), isNull);
+      }
+      await tester.tap(find.byKey(const ValueKey('agency-37-solved')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('ក្រុមប្រឹក្សាអភិវឌ្ឍន៍កម្ពុជា ·'),
+        findsOneWidget,
+      );
+      Tooltip.dismissAllToolTips();
+      await tester.pumpAndSettle();
+    },
+  );
+
   testWidgets(
     'agency totals and segment counts stay visible with hover and tap percentages',
     (tester) async {

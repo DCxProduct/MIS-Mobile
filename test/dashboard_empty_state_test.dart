@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:gpsf_app/core/app_settings.dart';
+import 'package:gpsf_app/core/config/module_config.dart';
 import 'package:gpsf_app/core/network/api_client.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
 import 'package:gpsf_app/features/private_sector/dashboard/dashboard_screen.dart';
@@ -16,7 +17,7 @@ import 'package:gpsf_app/translations/app_language.dart';
 void main() {
   final fixture = File('test/fixtures/plenary.json').readAsStringSync();
 
-  Future<void> mount(
+  Future<AppSettingsController> mount(
     WidgetTester tester,
     Future<http.Response> Function(http.Request) handler,
   ) async {
@@ -44,6 +45,7 @@ void main() {
         ),
       ),
     );
+    return settings;
   }
 
   for (final response in [
@@ -51,7 +53,7 @@ void main() {
     ('empty object', '{"success":true,"data":{}}', 200),
     ('null data', '{"success":true,"data":null}', 200),
   ]) {
-    testWidgets('${response.$1} keeps dashboard without a reload notice', (
+    testWidgets('${response.$1} shows retry without placeholder numbers', (
       tester,
     ) async {
       var calls = 0;
@@ -63,26 +65,24 @@ void main() {
       });
       await tester.pumpAndSettle();
       expect(find.byType(SharedDashboardCharts), findsOneWidget);
-      expect(find.byType(OverallTab), findsOneWidget);
+      expect(find.byType(OverallTab), findsNothing);
       expect(find.text('Filter'), findsOneWidget);
       expect(find.text('Plenary'), findsWidgets);
       expect(find.text('Working Group'), findsWidgets);
-      expect(find.text('Retry'), findsNothing);
+      expect(find.text('Retry'), findsOneWidget);
       expect(
         find.text('Unable to load dashboard. Please try again.'),
-        findsNothing,
+        findsOneWidget,
       );
-      expect(find.text('—'), findsWidgets);
+      expect(find.textContaining('—'), findsNothing);
       expect(find.text('0/0'), findsNothing);
       expect(tester.takeException(), isNull);
 
-      await tester.ensureVisible(
-        find.byKey(const ValueKey('dashboard-scope-1')),
-      );
-      await tester.tap(find.byKey(const ValueKey('dashboard-scope-1')));
+      await tester.tap(find.text('Retry'));
       await tester.pump();
       expect(find.byType(SharedDashboardCharts), findsOneWidget);
-      expect(find.byType(LinearProgressIndicator), findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.textContaining('—'), findsNothing);
       nextScope.complete(http.Response(fixture, 200));
       await tester.pumpAndSettle();
       expect(calls, 2);
@@ -115,6 +115,79 @@ void main() {
     expect(find.text('No issues found.'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'reload retains only matching dashboard data and ignores late responses',
+    (tester) async {
+      final requests = <String, List<Completer<http.Response>>>{};
+      final settings = await mount(tester, (request) {
+        final pending = Completer<http.Response>();
+        requests.putIfAbsent(request.url.path, () => []).add(pending);
+        return pending.future;
+      });
+      const plenaryPath = '/api/v1/dashboards/plenary/live';
+      const workingGroupPath = '/api/v1/dashboards/pswg/live';
+      final workingGroups = File(
+        'test/fixtures/working_groups.json',
+      ).readAsStringSync();
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.textContaining('—'), findsNothing);
+      requests[plenaryPath]!.single.complete(http.Response(fixture, 200));
+      await tester.pumpAndSettle();
+      expect(find.text('0/1'), findsNWidgets(2));
+
+      Future<void> select(int scope) async {
+        final tab = find.byKey(ValueKey('dashboard-scope-$scope'));
+        await tester.ensureVisible(tab);
+        await tester.tap(tab);
+        await tester.pump();
+      }
+
+      await select(1);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text('0/1'), findsNothing);
+      requests[workingGroupPath]!.single.complete(
+        http.Response(workingGroups, 200),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('1/2'), findsNWidgets(2));
+
+      await select(0);
+      expect(find.text('0/1'), findsNWidgets(2));
+      expect(find.text('1/2'), findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      await select(1);
+      expect(find.text('1/2'), findsNWidgets(2));
+      requests[plenaryPath]!.last.complete(http.Response('', 503));
+      await tester.pump();
+      expect(find.text('Retry'), findsNothing);
+      expect(find.text('1/2'), findsNWidgets(2));
+      requests[workingGroupPath]!.last.complete(http.Response('', 503));
+      await tester.pumpAndSettle();
+      expect(find.text('1/2'), findsNWidgets(2));
+      expect(find.textContaining('—'), findsNothing);
+      await tester.tap(find.text('Retry'));
+      await tester.pump();
+      expect(find.text('1/2'), findsNWidgets(2));
+      requests[workingGroupPath]!.last.complete(
+        http.Response(workingGroups, 200),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Retry'), findsNothing);
+
+      settings.setModuleType(AppModuleType.cefp);
+      await tester.pump();
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text('1/2'), findsNothing);
+      requests[workingGroupPath]!.last.complete(
+        http.Response(workingGroups, 200),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('1/2'), findsNWidgets(2));
+      expect(find.textContaining('—'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('failed scope does not prevent switching to another dashboard', (
     tester,

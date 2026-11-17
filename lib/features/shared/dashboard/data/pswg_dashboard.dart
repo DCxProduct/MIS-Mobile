@@ -33,6 +33,7 @@ class PswgDashboard {
             id: row.id,
             name: row.name,
             khmerName: row.khmerName,
+            khmerAbbreviation: row.khmerAbbreviation,
             total: statuses.isEmpty
                 ? row.total
                 : (statuses.contains('SOLVED') ? row.solved : 0) +
@@ -122,6 +123,8 @@ class PswgDashboard {
             'workingGroupId': value[idKey],
             'workingGroupName': value[nameKey],
             'workingGroupKhName': value[nameKey.replaceFirst('Name', 'KhName')],
+            'workingGroupKhAbbreviation':
+                value[nameKey.replaceFirst('Name', 'KhAbbreviation')],
           });
         }),
       );
