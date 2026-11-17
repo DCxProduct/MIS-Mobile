@@ -1,0 +1,253 @@
+{
+    "success": true,
+    "statusCode": 200,
+    "message": "OK",
+    "data": {
+        "items": [
+            {
+                "id": 179,
+                "plenaryId": 1,
+                "plenary": {
+                    "id": 1,
+                    "name": "វេទិកាទី១៩"
+                },
+                "stakeholderId": 37,
+                "stakeholder": {
+                    "id": 37,
+                    "name": "CDC",
+                    "logo": null,
+                    "description": "Council for the Development of Cambodia"
+                },
+                "categoryId": 20,
+                "category": "Strategy",
+                "categoryInfo": {
+                    "id": 20,
+                    "name": "Strategy",
+                    "khName": "យុទ្ធសាស្ត្រ"
+                },
+                "indicatorId": null,
+                "indicator": null,
+                "indicatorName": "",
+                "indicatorDescription": "",
+                "meetingDate": "2023-11-13T00:00:00.000Z",
+                "status": "In Progress",
+                "statusCode": "IN_PROGRESS",
+                "focalPerson": "Sun Chanthol",
+                "focalPersonKh": "Sun Chanthol",
+                "decision": "11.6. Entrust His Excellency Sun Chanthol, Deputy Prime Minister and the Vice Chairman of The Council for the Development of Cambodia, to organize Government-Private Sector Forum (G-PSF) at least twice in each mandate of the Royal Government.",
+                "decisionKh": "11.6. ប្រគល់ភារកិច្ចជូនឯកឧត្តម ស៊ុន ចាន់ថុល ឧបនាយករដ្ឋមន្ត្រី និងជាអនុប្រធានទី១ ក្រុមប្រឹក្សាអភិវឌ្ឍន៍កម្ពុជា  ការរៀបចំអង្គប្រជុំវេទិការាជរដ្ឋាភិបាល-ផ្នែកឯកជនឲ្យបានយ៉ាងហោច២លើកនៅក្នុងអាណត្តិនីមួយៗរបស់រាជរដ្ឋាភិបាល។",
+                "verificationSource": "Decision_1272_CDC_22Nov2023\n\n\nវឌ្ឍនភាពឆមាសទី២ ឆ្នាំ២០២៥\n១). ស្មារតីអង្គប្រជុំនៃលេខាធិការដ្ឋាន គ.ស.រ.ជ. នាថ្ងៃទី១២ ខែធ្នូ ឆ្នាំ២០២៥\n២) លិខិតលេខ២៥/២៦ ក.អ.ក. ចុះថ្ងៃទី៨ ខែមករា ឆ្នាំ២០២៦ ស្តីពីសំណើសុំពិនិត្យធ្វើបច្ចុប្បន្នភាពសមាសភាពចូលរួមក្នុងក្រុមការងារតាមវិស័យ សម្រាប់ធ្វើជាដៃគូពិភាក្សាការងារជាមួយវិស័យឯកជន។",
+                "verificationSourceKh": "សេចក្តីសម្រេចលេខ ១២៧២ ក.អ.ក. ចុះថ្ងៃទី២២ ខែវិច្ឆិកា ឆ្នាំ២០២៣។ របាយការណ៍វឌ្ឍនភាពឆមាសទី២ ឆ្នាំ២០២៥។\n១). ស្មារតីអង្គប្រជុំនៃលេខាធិការដ្ឋាន គ.ស.រ.ជ. នាថ្ងៃទី១២ ខែធ្នូ ឆ្នាំ២០២៥។\n២) លិខិតលេខ២៥/២៦ ក.អ.ក. ចុះថ្ងៃទី៨ ខែមករា ឆ្នាំ២០២៦ ស្តីពីសំណើសុំពិនិត្យធ្វើបច្ចុប្បន្នភាពសមាសភាពចូលរួមក្នុងក្រុមការងារតាមវិស័យ សម្រាប់ធ្វើជាដៃគូពិភាក្សាការងារជាមួយវិស័យឯកជន។",
+                "verificationLink": "https://drive.google.com/drive/folders/1zvAXJ9_L-RGeRCF91sm0DO37tSehUBH8?usp=drive_link",
+                "submittedToCdcAt": "2026-11-13T04:13:10.469Z",
+                "revisionOpen": false,
+                "saveAsDraft": false,
+                "isDraft": false,
+                "createdBy": {
+                    "id": 2,
+                    "name": "CDC G-PSF Secretariat",
+                    "email": "cdcgpsf@gmail.com"
+                },
+                "issues": [],
+                "createdAt": "2026-11-13T04:13:10.503Z",
+                "updatedAt": "2026-11-13T04:13:10.503Z",
+                "progressUpdate": {
+                    "id": 424,
+                    "indicators": null,
+                    "progressSolution": null,
+                    "implementationChallenges": null,
+                    "requests": null,
+                    "nextStep": null,
+                    "dateOfIssueSolution": null,
+                    "attachment": null,
+                    "updatedAt": "2026-11-13T04:13:10.630Z"
+                }
+            },
+            {
+                "id": 178,
+                "plenaryId": 1,
+                "plenary": {
+                    "id": 1,
+                    "name": "វេទិកាទី១៩"
+                },
+                "stakeholderId": 37,
+                "stakeholder": {
+                    "id": 37,
+                    "name": "CDC",
+                    "logo": null,
+                    "description": "Council for the Development of Cambodia"
+                },
+                "categoryId": 10,
+                "category": "Digital / IT",
+                "categoryInfo": {
+                    "id": 10,
+                    "name": "Digital / IT",
+                    "khName": "ឌីជីថល និងបច្ចេកវិទ្យាព័ត៌មាន"
+                },
+                "indicatorId": null,
+                "indicator": null,
+                "indicatorName": "",
+                "indicatorDescription": "",
+                "meetingDate": "2023-11-13T00:00:00.000Z",
+                "status": "Solved",
+                "statusCode": "SOLVED",
+                "focalPerson": "Sun Chanthol",
+                "focalPersonKh": "Sun Chanthol",
+                "decision": "11.4. Entrust His Excellency Sun Chanthol, Deputy Prime Minister and the Vice Chairman of The Council for the Development of Cambodia, to speed up establishment of compositions of the new working group on Digital Economy & Society and Telecommunications (Group “O”).",
+                "decisionKh": "11.4. ប្រគល់ភារកិច្ចជូនឯកឧត្តម ស៊ុន ចាន់ថុល ឧបនាយករដ្ឋមន្ត្រី និងជាអនុប្រធានទី១ ក្រុមប្រឹក្សាអភិវឌ្ឍន៍កម្ពុជា  ពន្លឿនការៀបចំសមាសភាព ក្រុមការងារ សេដ្ឋកិច្ចនិងសង្គមឌីជីថល និង ទូរគមនាគមន៍ (ក្រុម“ណ”) ឲ្យបានឆាប់ ហើយចាប់ផ្តើមប្រជុំដើម្បីស្តាប់និងដោះស្រាយនូវបញ្ហាប្រឈមជូនវិស័យឯកជន។",
+                "verificationSource": "Decision_242_RGC_25Dec2023/Decision_96ssr_RGC_21May2024",
+                "verificationSourceKh": "សេចក្តីសម្រេចរបស់រាជរដ្ឋាភិបាលលេខ ២៤២ ចុះថ្ងៃទី២៥ ខែធ្នូ ឆ្នាំ២០២៣/សេចក្តីសម្រេចរបស់រាជរដ្ឋាភិបាលលេខ ៩៦ សសរ ចុះថ្ងៃទី២១ ខែឧសភា ឆ្នាំ២០២៤",
+                "verificationLink": "https://drive.google.com/file/d/1q-kQ2w71T0VmBhDeV28MgxGRHrveo59Y/view?usp=drive_link",
+                "submittedToCdcAt": "2026-11-13T04:13:10.463Z",
+                "revisionOpen": false,
+                "saveAsDraft": false,
+                "isDraft": false,
+                "createdBy": {
+                    "id": 2,
+                    "name": "CDC G-PSF Secretariat",
+                    "email": "cdcgpsf@gmail.com"
+                },
+                "issues": [],
+                "createdAt": "2026-11-13T04:13:10.496Z",
+                "updatedAt": "2026-11-13T04:13:10.496Z",
+                "progressUpdate": {
+                    "id": 423,
+                    "indicators": null,
+                    "progressSolution": null,
+                    "implementationChallenges": null,
+                    "requests": null,
+                    "nextStep": null,
+                    "dateOfIssueSolution": null,
+                    "attachment": null,
+                    "updatedAt": "2026-11-13T04:13:10.605Z"
+                }
+            },
+            {
+                "id": 177,
+                "plenaryId": 1,
+                "plenary": {
+                    "id": 1,
+                    "name": "វេទិកាទី១៩"
+                },
+                "stakeholderId": 37,
+                "stakeholder": {
+                    "id": 37,
+                    "name": "CDC",
+                    "logo": null,
+                    "description": "Council for the Development of Cambodia"
+                },
+                "categoryId": 20,
+                "category": "Strategy",
+                "categoryInfo": {
+                    "id": 20,
+                    "name": "Strategy",
+                    "khName": "យុទ្ធសាស្ត្រ"
+                },
+                "indicatorId": null,
+                "indicator": null,
+                "indicatorName": "",
+                "indicatorDescription": "",
+                "meetingDate": "2023-11-13T00:00:00.000Z",
+                "status": "Solved",
+                "statusCode": "SOLVED",
+                "focalPerson": "Sun Chanthol",
+                "focalPersonKh": "Sun Chanthol",
+                "decision": "11.2. Entrust His Excellency Sun Chanthol, Deputy Prime Minister and the Vice Chairman of the Council for the Development of Cambodia, to monitor and evaluate the progress of implementation of the above measures and report to the Royal Government every six months.",
+                "decisionKh": "11.2.​ ប្រគល់ភារកិច្ចជូនឯកឧត្តម ស៊ុន ចាន់ថុល ឧបនាយករដ្ឋមន្ត្រី និងជាអនុប្រធានទី១ ក្រុមប្រឹក្សាអភិវឌ្ឍន៍កម្ពុជា  តាមដាននិងវាយតម្លៃលើវឌ្ឍនភាពនៃការអនុវត្តវិធានការដែលមានក្នុងសេចក្តីសម្រេច និង រាយការណ៍មករាជរដ្ឋាភិបាលជាប់ជាប្រចាំរៀងរាល់៦ខែម្ដង។",
+                "verificationSource": "Decision_576/24_CDC_19Mar2024/ Letter_Task-Division_765/24_CDC_11Apr2024",
+                "verificationSourceKh": "សេចក្តីសម្រេចលេខ ៥៧៦/២៤ ក.អ.ក. ចុះថ្ងៃទី១៩ ខែមីនា ឆ្នាំ២០២៤/ លិខិតបែងចែកភារកិច្ចលេខ ៧៦៥/២៤ ក.អ.ក. ចុះថ្ងៃទី១១ ខែមេសា ឆ្នាំ២០២៤",
+                "verificationLink": "https://drive.google.com/drive/folders/1D-MzIAII6bcb8C36jzhbG4GWDppAmCDQ?usp=drive_link",
+                "submittedToCdcAt": "2026-11-13T04:13:10.459Z",
+                "revisionOpen": false,
+                "saveAsDraft": false,
+                "isDraft": false,
+                "createdBy": {
+                    "id": 2,
+                    "name": "CDC G-PSF Secretariat",
+                    "email": "cdcgpsf@gmail.com"
+                },
+                "issues": [],
+                "createdAt": "2026-11-13T04:13:10.489Z",
+                "updatedAt": "2026-11-13T04:13:10.489Z",
+                "progressUpdate": {
+                    "id": 422,
+                    "indicators": null,
+                    "progressSolution": null,
+                    "implementationChallenges": null,
+                    "requests": null,
+                    "nextStep": null,
+                    "dateOfIssueSolution": null,
+                    "attachment": null,
+                    "updatedAt": "2026-11-13T04:13:10.580Z"
+                }
+            },
+            {
+                "id": 176,
+                "plenaryId": 1,
+                "plenary": {
+                    "id": 1,
+                    "name": "វេទិកាទី១៩"
+                },
+                "stakeholderId": 37,
+                "stakeholder": {
+                    "id": 37,
+                    "name": "CDC",
+                    "logo": null,
+                    "description": "Council for the Development of Cambodia"
+                },
+                "categoryId": 10,
+                "category": "Digital / IT",
+                "categoryInfo": {
+                    "id": 10,
+                    "name": "Digital / IT",
+                    "khName": "ឌីជីថល និងបច្ចេកវិទ្យាព័ត៌មាន"
+                },
+                "indicatorId": null,
+                "indicator": null,
+                "indicatorName": "",
+                "indicatorDescription": "",
+                "meetingDate": "2023-11-13T00:00:00.000Z",
+                "status": "Solved",
+                "statusCode": "SOLVED",
+                "focalPerson": "Sun Chanthol",
+                "focalPersonKh": "Sun Chanthol",
+                "decision": "(11.4.1) Entrust His Excellency Sun Chanthol, Deputy Prime Minister and the Vice Chairman of The Council for the Development of Cambodia, to monitor the number of meetings to hear and address the challenges for the private sector of the 16 working groups.",
+                "decisionKh": "(11.4.1) ប្រគល់ភារកិច្ចជូន ឯកឧត្តម ស៊ុន ចាន់ថុល ឧបនាយករដ្ឋមន្ត្រី និងជាអនុប្រធានទី១ នៃក្រុមប្រឹក្សាអភិវឌ្ឍន៍កម្ពុជា ដើម្បីតាមដានកិច្ចប្រជុំក្រុមការងាតាមវិស័យសម្រាប់ស្តាប់ និងដោះស្រាយបញ្ហាប្រឈមរបស់វិស័យឯកជន ក្នុងក្របខណ្ឌក្រុមការងារតាមវិស័យទាំង ១៦។",
+                "verificationSource": "Progress Reoprt on the Implementation of Resolute Reform Measures Introduced at the 19th Government-Private Sector Forum First and second Semester 2024",
+                "verificationSourceKh": "របាយការណ៍វឌ្ឍនភាពនៃការអនុវត្តវិធានការកែទម្រង់មុតស្រួចដែលបានដាក់ចេញក្នុងវេទិការាជរដ្ឋាភិបាល-ផ្នែកឯកជន លើកទី១៩ សម្រាប់ឆមាសទី១ និងទី២ ឆ្នាំ២០២៤",
+                "verificationLink": "https://drive.google.com/drive/folders/17pyajOhtlVmVlarOY7XXBtcbjYqENQCb?usp=drive_link",
+                "submittedToCdcAt": "2026-11-13T04:13:10.455Z",
+                "revisionOpen": false,
+                "saveAsDraft": false,
+                "isDraft": false,
+                "createdBy": {
+                    "id": 2,
+                    "name": "CDC G-PSF Secretariat",
+                    "email": "cdcgpsf@gmail.com"
+                },
+                "issues": [],
+                "createdAt": "2026-11-13T04:13:10.478Z",
+                "updatedAt": "2026-11-13T04:13:10.478Z",
+                "progressUpdate": {
+                    "id": 421,
+                    "indicators": null,
+                    "progressSolution": null,
+                    "implementationChallenges": null,
+                    "requests": null,
+                    "nextStep": null,
+                    "dateOfIssueSolution": null,
+                    "attachment": null,
+                    "updatedAt": "2026-11-13T04:13:10.552Z"
+                }
+            }
+        ],
+        "meta": {
+            "total": 4,
+            "page": 1,
+            "limit": 10,
+            "totalPages": 1
+        }
+    },
+    "timestamp": "2026-11-17T06:22:35.641Z",
+    "path": "/api/v1/rgc-decisions"
+}

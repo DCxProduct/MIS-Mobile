@@ -135,7 +135,7 @@ void main() {
                   ],
                 });
               case '/api/v1/rgc-decisions/cdc-gpsf':
-              case '/api/v1/rgc-decisions/issue-matrix':
+              case '/api/v1/rgc-decisions':
                 return ok({
                   'items': [decision(3), decision(4)],
                   'meta': {'totalPages': 1},
@@ -160,11 +160,11 @@ void main() {
         await tester.pumpAndSettle();
         expect(
           calls,
-          contains(
-            module != AppModuleType.cdcSecretariat
-                ? '/api/v1/rgc-decisions/issue-matrix'
-                : '/api/v1/rgc-decisions/cdc-gpsf',
-          ),
+          contains(switch (module) {
+            AppModuleType.cefp => '/api/v1/rgc-decisions',
+            AppModuleType.cdcSection => '/api/v1/rgc-decisions',
+            _ => '/api/v1/rgc-decisions/cdc-gpsf',
+          }),
         );
         expect(calls.any((path) => path.contains('/plenaries/')), isFalse);
         expect(

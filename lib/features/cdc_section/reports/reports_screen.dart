@@ -44,10 +44,6 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
     });
     try {
       final decisions = await _repository!.getDecisions(
-        issueMatrix: const {
-          AppModuleType.cdcSection,
-          AppModuleType.cefp,
-        }.contains(AppSettings.of(context).moduleType),
         includePlenaryDetails: !const {
           AppModuleType.cdcSection,
           AppModuleType.cefp,
@@ -72,17 +68,13 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
   Future<void> _openFilters() async {
     final settings = AppSettings.of(context);
     final catalogs = settings.filters;
-    final issueMatrix = const {
-      AppModuleType.cdcSection,
-      AppModuleType.cefp,
-    }.contains(settings.moduleType);
     final result = await Navigator.of(context).push<FilterSelection>(
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => ApiFilterSheet(
           translationPage: 'cdc_rgc',
           initial: _filters,
-          load: () => catalogs.rgc(issueMatrix: issueMatrix),
+          load: () => catalogs.rgc(),
         ),
       ),
     );
@@ -128,30 +120,31 @@ class _ReportsState extends State<CdcSectionReportsScreenView> {
                       child: Text(l10n.text('retry')),
                     ),
                   )
+                : filtered.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Text(
+                        l10n.text('noRgcDecisions'),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  )
                 : ListView.separated(
                     key: const ValueKey('cdc-rgc-reports'),
                     padding: const EdgeInsets.fromLTRB(14, 12, 14, 96),
-                    itemCount:
-                        (individualDecisions
-                            ? filtered.length
-                            : reports.length) +
-                        1,
+                    itemCount: individualDecisions
+                        ? filtered.length
+                        : reports.length,
                     separatorBuilder: (_, _) =>
                         SizedBox(height: individualDecisions ? 0 : 16),
                     itemBuilder: (context, index) {
                       if (individualDecisions) {
-                        return index < filtered.length
-                            ? CdcGpsfRgcDecisionCard(decision: filtered[index])
-                            : filtered.isEmpty
-                            ? Center(child: Text(l10n.text('noRgcDecisions')))
-                            : const SizedBox.shrink();
+                        return CdcGpsfRgcDecisionCard(
+                          decision: filtered[index],
+                        );
                       }
-                      if (index < reports.length) {
-                        return _ReportCard(decision: reports[index]);
-                      }
-                      return reports.isEmpty
-                          ? Center(child: Text(l10n.text('noRgcDecisions')))
-                          : const SizedBox.shrink();
+                      return _ReportCard(decision: reports[index]);
                     },
                   ),
           ),

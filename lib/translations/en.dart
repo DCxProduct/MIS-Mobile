@@ -1,4 +1,10 @@
 const Map<String, String> enTranslations = {
+  'meetingSummaryPrintPreview': 'Print preview',
+  'meetingSummaryPrintAction': 'Print',
+  'meetingSummaryPortrait': 'Portrait',
+  'meetingSummaryPreviewZoom': 'Pinch to zoom in on the document',
+  'printMeetingSummary': 'Print meeting summary',
+  'meetingSummaryPrintError': 'Could not open print preview. Please try again.',
   'gpsfOverview': 'G-PSF Overview',
   'gpsfOverviewCdc': 'G-PSF Overview',
   'monthJan': 'January',

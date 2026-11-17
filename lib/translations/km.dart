@@ -1,4 +1,10 @@
 const Map<String, String> kmTranslations = {
+  'meetingSummaryPrintPreview': 'មើលមុនបោះពុម្ព',
+  'meetingSummaryPrintAction': 'បោះពុម្ព',
+  'meetingSummaryPortrait': 'បញ្ឈរ',
+  'meetingSummaryPreviewZoom': 'ប្រើម្រាមដៃពីរដើម្បីពង្រីកឯកសារ',
+  'printMeetingSummary': 'បោះពុម្ពសេចក្តីសង្ខេបកិច្ចប្រជុំ',
+  'meetingSummaryPrintError': 'មិនអាចបើកការបោះពុម្ពបានទេ។ សូមព្យាយាមម្ដងទៀត។',
   'gpsfOverview': 'ផ្ទាំងគ្រប់គ្រងរួម',
   'gpsfOverviewCdc': 'ផ្ទាំងគ្រប់គ្រង',
   'monthJan': 'មករា',

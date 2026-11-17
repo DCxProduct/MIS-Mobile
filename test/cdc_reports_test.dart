@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:gpsf_app/screens/report/rgc_decision_detail_screen.dart';
 
 import 'package:flutter/material.dart';
@@ -9,13 +10,107 @@ import 'package:gpsf_app/core/app_settings.dart';
 import 'package:gpsf_app/core/config/module_config.dart';
 import 'package:gpsf_app/core/network/api_client.dart';
 import 'package:gpsf_app/features/auth/data/auth_repository.dart';
+import 'package:gpsf_app/features/cdc_secretariat/reports/rgc_decision_card.dart';
 
 import 'package:gpsf_app/screens/report/report_screen.dart';
 import 'package:gpsf_app/translations/app_language.dart';
 
 void main() {
-  http.Response ok(Object data) =>
-      http.Response(jsonEncode({'success': true, 'data': data}), 200);
+  http.Response ok(Object data) => http.Response(
+    jsonEncode({'success': true, 'data': data}),
+    200,
+    headers: {'content-type': 'application/json; charset=utf-8'},
+  );
+
+  testWidgets('CDC displays all supplied decisions, filters and opens detail', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final fixture =
+        jsonDecode(
+              File('test/fixtures/cdc_rgc_decisions.json').readAsStringSync(),
+            )
+            as Map<String, dynamic>;
+    final data = fixture['data'] as Map<String, dynamic>;
+    final items = data['items'] as List<dynamic>;
+    final paths = <String>[];
+    final api = ApiClient(
+      client: MockClient((request) async {
+        paths.add(request.url.path);
+        if (request.url.path == '/api/v1/rgc-decisions') {
+          expect(request.url.queryParameters['page'], '1');
+          expect(
+            request.url.queryParameters.containsKey('stakeholderId'),
+            isFalse,
+          );
+          return ok(data);
+        }
+        if (request.url.path == '/api/v1/rgc-decisions/179') {
+          return ok(items.first);
+        }
+        throw StateError('Unexpected request ${request.url}');
+      }),
+    );
+    addTearDown(api.close);
+    final settings = AppSettingsController(authRepository: AuthRepository(api))
+      ..setModuleType(AppModuleType.cdcSection)
+      ..setLanguage(AppLanguage.english);
+    addTearDown(settings.dispose);
+    await tester.pumpWidget(
+      AppSettings(
+        controller: settings,
+        child: const MaterialApp(home: Scaffold(body: ReportScreen())),
+      ),
+    );
+    await tester.pumpAndSettle();
+    for (final item in items) {
+      final card = find.byKey(ValueKey('cdc-gpsf-rgc-${item['id']}'));
+      await tester.scrollUntilVisible(card, 150);
+      expect(
+        tester
+            .widget<CdcGpsfRgcDecisionCard>(
+              find.ancestor(
+                of: card,
+                matching: find.byType(CdcGpsfRgcDecisionCard),
+              ),
+            )
+            .decision
+            .content,
+        item['decision'],
+      );
+    }
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('cdc-gpsf-rgc-179')),
+      -200,
+    );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('View Details').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('View Details').first);
+    await tester.pumpAndSettle();
+    final detail = tester
+        .widget<CdcGpsfRgcDecisionDetail>(find.byType(CdcGpsfRgcDecisionDetail))
+        .detail;
+    expect(detail.decision.id, 179);
+    expect(detail.decision.agencyName, 'CDC');
+    expect(detail.issues.single.rgcDecision, items.first['decision']);
+    expect(detail.decisionContent, items.first['decision']);
+    expect(detail.verificationLink, items.first['verificationLink']);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Filter'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('filter-plenaryId-1')), findsOneWidget);
+    expect(paths, [
+      '/api/v1/rgc-decisions',
+      '/api/v1/rgc-decisions/179',
+      '/api/v1/rgc-decisions',
+    ]);
+    expect(tester.takeException(), isNull);
+  });
 
   for (final module in [AppModuleType.cefp]) {
     testWidgets('$module shows both MEF and MAFF from the supplied API shape', (
@@ -68,7 +163,7 @@ void main() {
                   client: MockClient((request) async {
                     paths.add(request.url.path);
                     switch (request.url.path) {
-                      case '/api/v1/rgc-decisions/issue-matrix':
+                      case '/api/v1/rgc-decisions':
                         expect(request.url.queryParameters, {
                           'page': '1',
                           'limit': '100',
@@ -113,7 +208,7 @@ void main() {
       expect(find.text('MAFF'), findsOneWidget);
       expect(find.text('Sent'), findsNothing);
       expect(find.text('Not Addressed'), findsNWidgets(2));
-      expect(paths, ['/api/v1/rgc-decisions/issue-matrix']);
+      expect(paths, ['/api/v1/rgc-decisions']);
       await tester.tap(find.text('View Details').first);
       await tester.pumpAndSettle();
       expect(find.byType(RgcDecisionDetailScreen), findsOneWidget);
@@ -129,65 +224,64 @@ void main() {
         detail.issues.single.recommendations,
         'MEF linked issue recommendation',
       );
-      expect(paths, [
-        '/api/v1/rgc-decisions/issue-matrix',
-        '/api/v1/rgc-decisions/2',
-      ]);
+      expect(paths, ['/api/v1/rgc-decisions', '/api/v1/rgc-decisions/2']);
       expect(tester.takeException(), isNull);
     });
   }
 
-  testWidgets(
-    'RGC list retries its own endpoint and displays a real empty response',
-    (tester) async {
-      var calls = 0;
-      final settings =
-          AppSettingsController(
-              authRepository: AuthRepository(
-                ApiClient(
-                  client: MockClient((request) async {
-                    expect(
-                      request.url.path,
-                      '/api/v1/rgc-decisions/issue-matrix',
-                    );
-                    expect(
-                      request.url.queryParameters.containsKey('stakeholderId'),
-                      isFalse,
-                    );
-                    if (++calls == 1) {
-                      return http.Response('{"success":false}', 503);
-                    }
-                    return ok({
-                      'items': [],
-                      'meta': {
-                        'total': 0,
-                        'page': 1,
-                        'limit': 20,
-                        'totalPages': 0,
-                      },
-                    });
-                  }),
+  for (final module in [AppModuleType.cdcSection, AppModuleType.cefp]) {
+    testWidgets(
+      '$module retries its own endpoint and displays a real empty response',
+      (tester) async {
+        var calls = 0;
+        final settings =
+            AppSettingsController(
+                authRepository: AuthRepository(
+                  ApiClient(
+                    client: MockClient((request) async {
+                      expect(request.url.path, '/api/v1/rgc-decisions');
+                      expect(
+                        request.url.queryParameters.containsKey(
+                          'stakeholderId',
+                        ),
+                        isFalse,
+                      );
+                      if (++calls == 1) {
+                        return http.Response('{"success":false}', 503);
+                      }
+                      return ok({
+                        'items': [],
+                        'meta': {
+                          'total': 0,
+                          'page': 1,
+                          'limit': 20,
+                          'totalPages': module == AppModuleType.cefp ? 1 : 0,
+                        },
+                      });
+                    }),
+                  ),
                 ),
-              ),
-            )
-            ..setModuleType(AppModuleType.cdcSection)
-            ..setLanguage(AppLanguage.english);
-      addTearDown(settings.dispose);
-      await tester.pumpWidget(
-        AppSettings(
-          controller: settings,
-          child: const MaterialApp(home: Scaffold(body: ReportScreen())),
-        ),
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Retry'));
-      await tester.pumpAndSettle();
-      expect(calls, 2);
-      expect(find.text('No RGC decisions found.'), findsOneWidget);
-      expect(find.text('View Details'), findsNothing);
-      expect(tester.takeException(), isNull);
-    },
-  );
+              )
+              ..setModuleType(module)
+              ..setLanguage(AppLanguage.english);
+        addTearDown(settings.dispose);
+        await tester.pumpWidget(
+          AppSettings(
+            controller: settings,
+            child: const MaterialApp(home: Scaffold(body: ReportScreen())),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Retry'));
+        await tester.pumpAndSettle();
+        expect(calls, 2);
+        expect(find.text('No RGC decisions found.'), findsOneWidget);
+        expect(find.text('View Details'), findsNothing);
+        expect(find.text('Retry'), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets('CEFP decision pagination, filters and selected detail', (
     tester,
@@ -296,7 +390,7 @@ void main() {
           ],
         });
       }
-      if (path.endsWith('/rgc-decisions/issue-matrix')) {
+      if (path.endsWith('/rgc-decisions')) {
         final ministry = request.url.queryParameters['stakeholderId'];
         final page = request.url.queryParameters['page'];
         final filtered = const [
@@ -451,7 +545,7 @@ void main() {
 
       await toggleSelection();
       final listRequest = requested.lastWhere(
-        (uri) => uri.path.endsWith('/rgc-decisions/issue-matrix'),
+        (uri) => uri.path.endsWith('/rgc-decisions'),
       );
       expect(listRequest.queryParameters[selection.$1], selection.$2);
       expect(listRequest.queryParameters['page'], '1');
@@ -459,9 +553,7 @@ void main() {
       await toggleSelection();
       expect(
         requested
-            .lastWhere(
-              (uri) => uri.path.endsWith('/rgc-decisions/issue-matrix'),
-            )
+            .lastWhere((uri) => uri.path.endsWith('/rgc-decisions'))
             .queryParameters
             .containsKey(selection.$1),
         isFalse,
@@ -491,7 +583,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       requested
-          .lastWhere((uri) => uri.path.endsWith('/rgc-decisions/issue-matrix'))
+          .lastWhere((uri) => uri.path.endsWith('/rgc-decisions'))
           .queryParameters
           .containsKey('stakeholderId'),
       isFalse,

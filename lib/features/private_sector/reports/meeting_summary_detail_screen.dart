@@ -11,6 +11,8 @@ import '../../../../core/config/module_config.dart';
 import '../../cdc_secretariat/meetings/summary_issue_details.dart';
 import '../../../../core/widgets/pdf_attachment_preview.dart';
 import '../../shared/meetings/data/meeting_summary.dart';
+import '../../shared/meetings/printing/meeting_summary_printer.dart';
+import '../../shared/meetings/printing/meeting_summary_print_preview.dart';
 import '../../../../translations/app_localizations.dart';
 import '../../../../translations/app_language.dart';
 
@@ -35,6 +37,41 @@ class MeetingSummaryDetailScreen extends StatefulWidget {
 class _MeetingSummaryDetailScreenState
     extends State<MeetingSummaryDetailScreen> {
   Future<MeetingSummary>? _future;
+  bool _printing = false;
+
+  Future<void> _print(MeetingSummary summary) async {
+    if (_printing) return;
+    setState(() => _printing = true);
+    try {
+      final document = await MeetingSummaryPrinter.buildDocument(summary);
+      if (!mounted) return;
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => MeetingSummaryPrintPreview(
+            document: document,
+            name: 'Meeting-Summary-${summary.id}',
+            title: [
+              summary.title,
+              widget.summaryTitle,
+              summary.detailTitle,
+            ].firstWhere((value) => value.trim().isNotEmpty, orElse: () => ''),
+          ),
+        ),
+      );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).text('meetingSummaryPrintError'),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _printing = false);
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -137,12 +174,20 @@ class _MeetingSummaryDetailScreenState
         ),
         actions: [
           IconButton(
-            icon: Icon(
-              Icons.more_horiz,
-              color: AppColors.primaryText(context),
-              size: 22,
-            ),
-            onPressed: () {},
+            key: const ValueKey('meeting-summary-print'),
+            tooltip: AppLocalizations.of(context).text('printMeetingSummary'),
+            icon: _printing
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Icon(
+                    Icons.print_outlined,
+                    color: AppColors.primaryText(context),
+                    size: 22,
+                  ),
+            onPressed: _printing ? null : () => _print(summary),
           ),
         ],
         bottom: PreferredSize(
